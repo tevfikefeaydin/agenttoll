@@ -3,6 +3,7 @@ import express from "express";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { paymentMiddleware, type Network } from "x402-express";
+import { facilitator as cdpFacilitator } from "@coinbase/x402";
 import { getPrice } from "./services/prices.js";
 import { getGas } from "./services/gas.js";
 import { getTrending } from "./services/trending.js";
@@ -23,6 +24,12 @@ const PAY_TO = (process.env.ADDRESS ??
 export const NETWORK = (process.env.NETWORK ?? "base-sepolia") as Network;
 const FACILITATOR_URL = (process.env.FACILITATOR_URL ??
   "https://x402.org/facilitator") as `${string}://${string}`;
+
+// Mainnet settles through the CDP facilitator (needs CDP_API_KEY_ID and
+// CDP_API_KEY_SECRET in the environment); testnet uses the public one.
+const FACILITATOR = (
+  NETWORK === "base" ? cdpFacilitator : { url: FACILITATOR_URL }
+) as Parameters<typeof paymentMiddleware>[2];
 
 const app = express();
 app.set("trust proxy", true); // behind Vercel's proxy, keep https in quoted resource URLs
@@ -138,7 +145,7 @@ app.use(
         config: { description: "Turkish lira premium: implied vs official USD/TRY via BTC cross-rate" },
       },
     },
-    { url: FACILITATOR_URL },
+    FACILITATOR,
   ),
 );
 

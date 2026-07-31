@@ -39,6 +39,8 @@ if (receipt) {
   const decoded = JSON.parse(Buffer.from(receipt, "base64").toString("utf8"));
   console.log("Payment receipt:", decoded);
   if (decoded.transaction) {
-    console.log(`BaseScan: https://sepolia.basescan.org/tx/${decoded.transaction}`);
+    const explorer =
+      decoded.network === "base" ? "https://basescan.org" : "https://sepolia.basescan.org";
+    console.log(`BaseScan: ${explorer}/tx/${decoded.transaction}`);
   }
 }
