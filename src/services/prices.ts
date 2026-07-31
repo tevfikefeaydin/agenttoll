@@ -17,7 +17,7 @@ const SYMBOL_MAP: Record<string, string> = {
   degen: "degen-base",
 };
 
-import { cached } from "./cache.js";
+import { cached, fetchWithTimeout } from "./cache.js";
 
 export async function getPrice(symbol: string) {
   const id = SYMBOL_MAP[symbol.toLowerCase()] ?? symbol.toLowerCase();
@@ -28,7 +28,7 @@ async function fetchPrice(symbol: string, id: string) {
   const url = `https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(
     id,
   )}&vs_currencies=usd&include_24hr_change=true`;
-  const res = await fetch(url);
+  const res = await fetchWithTimeout(url);
   if (!res.ok) throw new Error(`Upstream price source returned ${res.status}`);
   const data = (await res.json()) as Record<
     string,

@@ -1,9 +1,9 @@
-import { cached } from "./cache.js";
+import { cached, fetchWithTimeout } from "./cache.js";
 
 // Crypto Fear & Greed index (alternative.me, free & keyless).
 export async function getFearGreed() {
   return cached("feargreed", 300_000, async () => {
-    const res = await fetch("https://api.alternative.me/fng/?limit=2");
+    const res = await fetchWithTimeout("https://api.alternative.me/fng/?limit=2");
     if (!res.ok) throw new Error(`Upstream index source returned ${res.status}`);
     const json = (await res.json()) as {
       data: { value: string; value_classification: string; timestamp: string }[];

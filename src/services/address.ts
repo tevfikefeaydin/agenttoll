@@ -1,9 +1,9 @@
-import { cached } from "./cache.js";
+import { cached, fetchWithTimeout } from "./cache.js";
 
 const BASE_RPC = "https://mainnet.base.org";
 
 async function rpc<T>(method: string, params: unknown[]): Promise<T> {
-  const res = await fetch(BASE_RPC, {
+  const res = await fetchWithTimeout(BASE_RPC, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),

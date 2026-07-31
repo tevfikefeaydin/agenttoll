@@ -23,7 +23,49 @@ const FACILITATOR_URL = (process.env.FACILITATOR_URL ??
 
 const app = express();
 app.set("trust proxy", true); // behind Vercel's proxy, keep https in quoted resource URLs
-app.use(express.json());
+app.disable("x-powered-by");
+app.use(express.json({ limit: "10kb" }));
+
+// Structured request log: one JSON line per API call (path, status, latency).
+// This is the audit trail — query it via Vercel runtime logs.
+app.use((req, res, next) => {
+  if (!req.path.startsWith("/api/")) return next();
+  const t0 = Date.now();
+  res.on("finish", () => {
+    console.log(
+      JSON.stringify({
+        t: new Date().toISOString(),
+        method: req.method,
+        path: req.path,
+        status: res.statusCode,
+        ms: Date.now() - t0,
+        ip: req.ip,
+        ua: req.get("user-agent")?.slice(0, 80) ?? null,
+      }),
+    );
+  });
+  next();
+});
+
+// Light per-IP rate limit for the free endpoints (paid ones are gated by payment
+// itself). Per-instance only — Vercel's platform DDoS protection sits in front.
+const freeHits = new Map<string, { n: number; reset: number }>();
+app.use((req, res, next) => {
+  if (!["/api/health", "/api/catalog", "/api/demo"].includes(req.path)) return next();
+  const ip = req.ip ?? "?";
+  const now = Date.now();
+  const slot = freeHits.get(ip);
+  if (!slot || slot.reset < now) {
+    if (freeHits.size > 5000) freeHits.clear();
+    freeHits.set(ip, { n: 1, reset: now + 60_000 });
+    return next();
+  }
+  if (++slot.n > 60) {
+    res.status(429).json({ error: "Rate limited. Paid endpoints are not rate limited." });
+    return;
+  }
+  next();
+});
 
 // CORS: browser-based agents must be able to read 402 quotes and send payments.
 app.use((req, res, next) => {
@@ -91,6 +133,22 @@ app.get("/api/health", (_req, res) => {
   res.json({ ok: true, service: "agenttoll", network: NETWORK });
 });
 
+// Free sample responses so people can see data shapes without a wallet.
+app.get("/api/demo", (_req, res) => {
+  res.json({
+    note: "Sample shapes with static values. Pay per call for live data - see /api/catalog.",
+    samples: {
+      "/api/price/eth": { symbol: "eth", id: "ethereum", usd: 1902.36, change24h: 0.25, at: "2026-07-31T06:55:14.465Z" },
+      "/api/gas": { chain: "base", gasPriceWei: "6000000", gasPriceGwei: 0.006, latestBlock: 49345179, at: "2026-07-31T06:35:04.787Z" },
+      "/api/base/token/{address}": { chain: "base", token: "0x9401...8631", usd: 0.424, at: "2026-07-31T08:52:06.109Z" },
+      "/api/base/address/{address}": { chain: "base", address: "0xe553...56f8", ethBalance: 0, txCount: 1, isContract: true, at: "2026-07-31T08:52:05.955Z" },
+      "/api/feargreed": { value: 25, classification: "Extreme Fear", yesterday: 28, at: "2026-07-31T08:52:06.318Z" },
+      "/api/base/trending": { chain: "base", pools: [{ name: "msUSD / USDC 0.05%", priceUsd: 1.0, volume24hUsd: 6029571, change24hPct: 0.01, liquidityUsd: 2100000 }], at: "2026-07-31T09:10:00.000Z" },
+      "/api/brief": { majors: { eth: { usd: 1880.43 }, btc: { usd: 63654 }, sol: { usd: 98.2 } }, baseGas: { gasPriceGwei: 0.006 }, sentiment: { value: 25 }, at: "2026-07-31T09:10:00.000Z" },
+    },
+  });
+});
+
 // Free machine-readable catalog so agents can discover what is for sale.
 app.get("/api/catalog", (_req, res) => {
   res.json({
@@ -107,6 +165,7 @@ app.get("/api/catalog", (_req, res) => {
       { path: "/api/base/trending", method: "GET", price: "$0.002", description: "Trending DEX pools on Base: price, volume, liquidity" },
       { path: "/api/feargreed", method: "GET", price: "$0.001", description: "Crypto Fear & Greed index with yesterday comparison" },
       { path: "/api/brief", method: "GET", price: "$0.005", description: "One-call market brief: BTC/ETH/SOL, Base gas, sentiment" },
+      { path: "/api/demo", method: "GET", price: "free", description: "Sample response shapes for every paid endpoint" },
       { path: "/api/health", method: "GET", price: "free", description: "Service status" },
       { path: "/api/catalog", method: "GET", price: "free", description: "This catalog" },
     ],

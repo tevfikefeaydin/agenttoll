@@ -1,4 +1,4 @@
-import { cached } from "./cache.js";
+import { cached, fetchWithTimeout } from "./cache.js";
 
 interface TrendingPool {
   attributes: {
@@ -14,7 +14,7 @@ interface TrendingPool {
 // Trending DEX pools on Base right now, via GeckoTerminal.
 export async function getBaseTrending() {
   return cached("basetrending", 60_000, async () => {
-    const res = await fetch(
+    const res = await fetchWithTimeout(
       "https://api.geckoterminal.com/api/v2/networks/base/trending_pools",
       { headers: { Accept: "application/json" } },
     );

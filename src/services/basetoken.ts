@@ -1,4 +1,4 @@
-import { cached } from "./cache.js";
+import { cached, fetchWithTimeout } from "./cache.js";
 
 // Onchain spot price for any Base token by contract address, via GeckoTerminal.
 export async function getBaseTokenPrice(address: string) {
@@ -7,7 +7,7 @@ export async function getBaseTokenPrice(address: string) {
   }
   const addr = address.toLowerCase();
   return cached(`basetoken:${addr}`, 30_000, async () => {
-    const res = await fetch(
+    const res = await fetchWithTimeout(
       `https://api.geckoterminal.com/api/v2/simple/networks/base/token_price/${addr}`,
       { headers: { Accept: "application/json" } },
     );
