@@ -1,0 +1,26 @@
+name: Publish MCP to npm
+
+# Push a tag like mcp-v0.4.0 (after bumping mcp/package.json) and the package
+# ships itself. Requires the NPM_TOKEN repository secret (npm automation token).
+on:
+  push:
+    tags: ["mcp-v*"]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm provenance attestation
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: "https://registry.npmjs.org"
+      - run: npm ci
+        working-directory: mcp
+      - run: npm publish --access public --provenance
+        working-directory: mcp
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
