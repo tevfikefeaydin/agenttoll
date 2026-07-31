@@ -200,9 +200,9 @@ curl -i https://agenttoll-pi.vercel.app/api/price/eth
 <span class="c"># HTTP/1.1 402 Payment Required</span>
 <span class="c"># {"x402Version":1,"accepts":[{"maxAmountRequired":"1000","asset":"USDC","payTo":"0x..."}]}</span></pre>
     <p style="color: var(--muted); margin-top: 14px;">That 402 response is the whole product:
-    a price quote any agent can pay programmatically. To actually pay on testnet, grab free
-    USDC on Base Sepolia from <a href="https://faucet.circle.com">faucet.circle.com</a>
-    and use either path below.</p>
+    a price quote any agent can pay programmatically. Payments settle in real USDC on Base
+    mainnet. (Self-hosting the open-source repo defaults to Base Sepolia testnet — free test
+    USDC at <a href="https://faucet.circle.com">faucet.circle.com</a>.)</p>
   </section>
 
   <section>

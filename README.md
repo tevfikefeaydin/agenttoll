@@ -100,18 +100,17 @@ Tools exposed: `get_price`, `get_base_gas`, `get_trending`, `get_base_token_pric
 `get_base_address_info`, `get_fear_greed`, `get_base_trending_pools`, `get_market_brief`,
 `get_new_token_radar`, `get_try_premium`.
 
- The wallet behind `AGENT_PRIVATE_KEY`
-needs USDC on Base Sepolia (testnet) — grab some at [faucet.circle.com](https://faucet.circle.com).
+The wallet behind `AGENT_PRIVATE_KEY` needs USDC on Base — the hosted service
+settles on mainnet. (Against a self-hosted testnet instance it needs Base Sepolia
+USDC — free at [faucet.circle.com](https://faucet.circle.com).)
 
-## Going to mainnet
+## Mainnet vs testnet
 
-Switch `NETWORK=base` in `.env` and use the Coinbase CDP facilitator (the public
-x402.org facilitator is testnet-only):
-
-```ts
-import { facilitator } from "@coinbase/x402"; // needs CDP API keys
-app.use(paymentMiddleware(payTo, routes, facilitator));
-```
+The hosted service runs on **Base mainnet** and settles real USDC. A fresh clone
+defaults to **Base Sepolia** with the free public facilitator, so you can develop
+without real funds. To run your own instance on mainnet, set `NETWORK=base` plus
+`CDP_API_KEY_ID` / `CDP_API_KEY_SECRET` (Coinbase Developer Platform keys) — the
+server picks the CDP facilitator automatically.
 
 ## Roadmap
 
