@@ -32,3 +32,13 @@ console.log(`Calling ${BASE_URL}/api/price/eth (price: $0.001) ...`);
 const res = await fetchWithPay(`${BASE_URL}/api/price/eth`, { method: "GET" });
 console.log(`HTTP ${res.status}`);
 console.log(await res.json());
+
+// The settlement receipt comes back base64-encoded in X-PAYMENT-RESPONSE.
+const receipt = res.headers.get("x-payment-response");
+if (receipt) {
+  const decoded = JSON.parse(Buffer.from(receipt, "base64").toString("utf8"));
+  console.log("Payment receipt:", decoded);
+  if (decoded.transaction) {
+    console.log(`BaseScan: https://sepolia.basescan.org/tx/${decoded.transaction}`);
+  }
+}
