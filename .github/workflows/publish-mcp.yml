@@ -20,6 +20,12 @@ jobs:
           registry-url: "https://registry.npmjs.org"
       - run: npm ci
         working-directory: mcp
+      - name: Debug token shape (never prints the token)
+        run: |
+          echo "token length: ${#NODE_AUTH_TOKEN}"
+          echo "starts with npm_: $([[ $NODE_AUTH_TOKEN == npm_* ]] && echo yes || echo no)"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Verify npm auth
         run: npm whoami
         env:
