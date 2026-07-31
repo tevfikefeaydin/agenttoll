@@ -1,0 +1,37 @@
+# AgentToll
+
+> Pay-per-call data APIs for AI agents. Every endpoint costs $0.001-$0.005, paid in
+> USDC on Base mainnet via the x402 protocol (HTTP 402). No API keys, no accounts,
+> no subscriptions - an agent sends one HTTP request, pays inline, gets the data.
+
+Onchain identity: agenttoll.base.eth. Open source (MIT): https://github.com/tevfikefeaydin/agenttoll
+
+## How to pay
+
+Any x402 client works. JavaScript: `npm i x402-fetch viem`, wrap fetch with
+`wrapFetchWithPayment(fetch, account)` and call the endpoint - the 402 quote is
+paid automatically in USDC on Base. MCP: `npx agenttoll-mcp` exposes all
+endpoints as tools (env: AGENT_PRIVATE_KEY).
+
+## Endpoints
+
+- https://agenttoll-pi.vercel.app/api/catalog : machine-readable catalog of everything for sale (free)
+- https://agenttoll-pi.vercel.app/api/demo : sample response shapes for every paid endpoint (free)
+- https://agenttoll-pi.vercel.app/api/stats : onchain-derived toll counter (free)
+- https://agenttoll-pi.vercel.app/api/health : service status (free)
+- https://agenttoll-pi.vercel.app/api/price/{symbol} : spot price USD + 24h change ($0.001)
+- https://agenttoll-pi.vercel.app/api/gas : Base gas price + latest block ($0.001)
+- https://agenttoll-pi.vercel.app/api/trending : trending tokens market-wide ($0.002)
+- https://agenttoll-pi.vercel.app/api/base/token/{address} : onchain USD price of any Base token ($0.001)
+- https://agenttoll-pi.vercel.app/api/base/address/{address} : Base address snapshot ($0.001)
+- https://agenttoll-pi.vercel.app/api/base/trending : trending DEX pools on Base ($0.002)
+- https://agenttoll-pi.vercel.app/api/base/radar : new-token radar, spam-filtered ($0.003)
+- https://agenttoll-pi.vercel.app/api/feargreed : Fear & Greed index ($0.001)
+- https://agenttoll-pi.vercel.app/api/brief : one-call market brief ($0.005)
+- https://agenttoll-pi.vercel.app/api/try/premium : Turkish lira premium ($0.002)
+
+## Specs
+
+- OpenAPI: https://agenttoll-pi.vercel.app/openapi.json
+- x402 discovery: https://agenttoll-pi.vercel.app/.well-known/x402
+- MCP package: https://www.npmjs.com/package/agenttoll-mcp

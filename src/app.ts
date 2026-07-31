@@ -61,7 +61,7 @@ app.use((req, res, next) => {
 // itself). Per-instance only — Vercel's platform DDoS protection sits in front.
 const freeHits = new Map<string, { n: number; reset: number }>();
 app.use((req, res, next) => {
-  if (!["/api/health", "/api/catalog", "/api/demo", "/api/stats"].includes(req.path)) return next();
+  if (!["/api/health", "/api/catalog", "/api/demo", "/api/stats", "/.well-known/x402"].includes(req.path)) return next();
   const ip = req.ip ?? "?";
   const now = Date.now();
   const slot = freeHits.get(ip);
@@ -166,6 +166,33 @@ app.get("/api/demo", (_req, res) => {
       "/api/base/trending": { chain: "base", pools: [{ name: "msUSD / USDC 0.05%", priceUsd: 1.0, volume24hUsd: 6029571, change24hPct: 0.01, liquidityUsd: 2100000 }], at: "2026-07-31T09:10:00.000Z" },
       "/api/brief": { majors: { eth: { usd: 1880.43 }, btc: { usd: 63654 }, sol: { usd: 98.2 } }, baseGas: { gasPriceGwei: 0.006 }, sentiment: { value: 25 }, at: "2026-07-31T09:10:00.000Z" },
     },
+  });
+});
+
+// x402 discovery endpoint: the catalog in the emerging .well-known convention.
+const PUBLIC_BASE = "https://agenttoll-pi.vercel.app";
+app.get("/.well-known/x402", (_req, res) => {
+  res.json({
+    x402Version: 1,
+    name: "agenttoll",
+    identity: "agenttoll.base.eth",
+    network: NETWORK,
+    payTo: PAY_TO,
+    openapi: `${PUBLIC_BASE}/openapi.json`,
+    llms: `${PUBLIC_BASE}/llms.txt`,
+    mcp: "https://www.npmjs.com/package/agenttoll-mcp",
+    resources: [
+      { resource: `${PUBLIC_BASE}/api/price/{symbol}`, price: "$0.001", description: "Spot price (USD) + 24h change for a crypto asset" },
+      { resource: `${PUBLIC_BASE}/api/gas`, price: "$0.001", description: "Base network gas price and latest block" },
+      { resource: `${PUBLIC_BASE}/api/trending`, price: "$0.002", description: "Tokens trending across the market right now" },
+      { resource: `${PUBLIC_BASE}/api/base/token/{address}`, price: "$0.001", description: "Onchain USD price for any Base token by contract address" },
+      { resource: `${PUBLIC_BASE}/api/base/address/{address}`, price: "$0.001", description: "Base address snapshot: ETH balance, tx count, contract or EOA" },
+      { resource: `${PUBLIC_BASE}/api/base/trending`, price: "$0.002", description: "Trending DEX pools on Base: price, volume, liquidity" },
+      { resource: `${PUBLIC_BASE}/api/base/radar`, price: "$0.003", description: "New token radar: fresh Base pools with real liquidity" },
+      { resource: `${PUBLIC_BASE}/api/feargreed`, price: "$0.001", description: "Crypto Fear & Greed index with yesterday comparison" },
+      { resource: `${PUBLIC_BASE}/api/brief`, price: "$0.005", description: "One-call market brief: BTC/ETH/SOL, Base gas, sentiment" },
+      { resource: `${PUBLIC_BASE}/api/try/premium`, price: "$0.002", description: "Turkish lira premium: implied vs official USD/TRY via BTC cross-rate" },
+    ],
   });
 });
 

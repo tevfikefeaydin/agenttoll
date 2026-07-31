@@ -1,0 +1,69 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "AgentToll",
+    "version": "0.4.0",
+    "description": "Pay-per-call data APIs for AI agents. Paid endpoints return HTTP 402 with an x402 quote; pay $0.001-$0.005 in USDC on Base mainnet per call. No API keys. Onchain identity: agenttoll.base.eth.",
+    "license": { "name": "MIT", "url": "https://github.com/tevfikefeaydin/agenttoll/blob/main/LICENSE" }
+  },
+  "servers": [{ "url": "https://agenttoll-pi.vercel.app" }],
+  "paths": {
+    "/api/health": {
+      "get": { "summary": "Service status (free)", "responses": { "200": { "description": "OK" } } }
+    },
+    "/api/catalog": {
+      "get": { "summary": "Machine-readable catalog of everything for sale (free)", "responses": { "200": { "description": "Catalog" } } }
+    },
+    "/api/demo": {
+      "get": { "summary": "Sample response shapes for every paid endpoint (free)", "responses": { "200": { "description": "Samples" } } }
+    },
+    "/api/stats": {
+      "get": { "summary": "Onchain-derived toll counter: calls and USDC revenue (free)", "responses": { "200": { "description": "Stats" } } }
+    },
+    "/api/price/{symbol}": {
+      "get": {
+        "summary": "Spot price (USD) + 24h change for a crypto asset",
+        "x-price-usdc": "0.001",
+        "parameters": [{ "name": "symbol", "in": "path", "required": true, "schema": { "type": "string" }, "example": "eth" }],
+        "responses": { "200": { "description": "Price data" }, "402": { "description": "x402 payment quote" } }
+      }
+    },
+    "/api/gas": {
+      "get": { "summary": "Base network gas price and latest block", "x-price-usdc": "0.001", "responses": { "200": { "description": "Gas data" }, "402": { "description": "x402 payment quote" } } }
+    },
+    "/api/trending": {
+      "get": { "summary": "Tokens trending across the market right now", "x-price-usdc": "0.002", "responses": { "200": { "description": "Trending tokens" }, "402": { "description": "x402 payment quote" } } }
+    },
+    "/api/base/token/{address}": {
+      "get": {
+        "summary": "Onchain USD price for any Base token by contract address",
+        "x-price-usdc": "0.001",
+        "parameters": [{ "name": "address", "in": "path", "required": true, "schema": { "type": "string", "pattern": "^0x[0-9a-fA-F]{40}$" } }],
+        "responses": { "200": { "description": "Token price" }, "402": { "description": "x402 payment quote" } }
+      }
+    },
+    "/api/base/address/{address}": {
+      "get": {
+        "summary": "Base address snapshot: ETH balance, tx count, contract or EOA",
+        "x-price-usdc": "0.001",
+        "parameters": [{ "name": "address", "in": "path", "required": true, "schema": { "type": "string", "pattern": "^0x[0-9a-fA-F]{40}$" } }],
+        "responses": { "200": { "description": "Address info" }, "402": { "description": "x402 payment quote" } }
+      }
+    },
+    "/api/base/trending": {
+      "get": { "summary": "Trending DEX pools on Base: price, volume, liquidity", "x-price-usdc": "0.002", "responses": { "200": { "description": "Trending pools" }, "402": { "description": "x402 payment quote" } } }
+    },
+    "/api/base/radar": {
+      "get": { "summary": "New token radar: fresh Base pools with real liquidity (min $10k, spam filtered)", "x-price-usdc": "0.003", "responses": { "200": { "description": "New pools" }, "402": { "description": "x402 payment quote" } } }
+    },
+    "/api/feargreed": {
+      "get": { "summary": "Crypto Fear & Greed index with yesterday comparison", "x-price-usdc": "0.001", "responses": { "200": { "description": "Index" }, "402": { "description": "x402 payment quote" } } }
+    },
+    "/api/brief": {
+      "get": { "summary": "One-call market brief: BTC/ETH/SOL, Base gas, sentiment", "x-price-usdc": "0.005", "responses": { "200": { "description": "Brief" }, "402": { "description": "x402 payment quote" } } }
+    },
+    "/api/try/premium": {
+      "get": { "summary": "Turkish lira premium: implied vs official USD/TRY via BTC cross-rate", "x-price-usdc": "0.002", "responses": { "200": { "description": "Premium" }, "402": { "description": "x402 payment quote" } } }
+    }
+  }
+}
