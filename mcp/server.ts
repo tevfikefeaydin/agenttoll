@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * AgentToll MCP server — exposes the pay-per-call API as MCP tools.
  *
@@ -101,6 +102,20 @@ server.tool(
   "One-call market brief: BTC/ETH/SOL prices, Base gas, Fear & Greed. Costs $0.005 in USDC via x402.",
   {},
   async () => ({ content: [{ type: "text", text: await call("/api/brief") }] }),
+);
+
+server.tool(
+  "get_new_token_radar",
+  "New token radar: pools created on Base in the last ~24h that already have real liquidity (min $10k). Costs $0.003 in USDC via x402.",
+  {},
+  async () => ({ content: [{ type: "text", text: await call("/api/base/radar") }] }),
+);
+
+server.tool(
+  "get_try_premium",
+  "Turkish lira premium: implied vs official USD/TRY via BTC cross-rate. Costs $0.002 in USDC via x402.",
+  {},
+  async () => ({ content: [{ type: "text", text: await call("/api/try/premium") }] }),
 );
 
 const transport = new StdioServerTransport();

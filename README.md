@@ -28,6 +28,9 @@ inline, and gets the data.
 | `GET /api/feargreed` | Crypto Fear & Greed index with yesterday comparison | $0.001 |
 | `GET /api/base/trending` | Trending DEX pools on Base: price, volume, liquidity | $0.002 |
 | `GET /api/brief` | One-call market brief: BTC/ETH/SOL, Base gas, sentiment | $0.005 |
+| `GET /api/base/radar` | New token radar: fresh Base pools that already have real liquidity | $0.003 |
+| `GET /api/try/premium` | Turkish lira premium: implied vs official USD/TRY via BTC cross-rate | $0.002 |
+| `GET /api/stats` | Onchain-derived toll counter: calls collected and USDC revenue | free |
 | `GET /api/catalog` | Machine-readable catalog of everything for sale | free |
 | `GET /api/health` | Service status | free |
 
@@ -91,7 +94,11 @@ API becomes native tools — each call paid automatically in USDC via x402.
 ```
 
 Tools exposed: `get_price`, `get_base_gas`, `get_trending`, `get_base_token_price`,
-`get_base_address_info`, `get_fear_greed`, `get_base_trending_pools`, `get_market_brief`. The wallet behind `AGENT_PRIVATE_KEY`
+`get_base_address_info`, `get_fear_greed`, `get_base_trending_pools`, `get_market_brief`,
+`get_new_token_radar`, `get_try_premium`.
+
+The `mcp/` folder is also a standalone npm package (`agenttoll-mcp`) — once published,
+setup becomes `"command": "npx", "args": ["-y", "agenttoll-mcp"]` with no clone needed. The wallet behind `AGENT_PRIVATE_KEY`
 needs USDC on Base Sepolia (testnet) — grab some at [faucet.circle.com](https://faucet.circle.com).
 
 ## Going to mainnet

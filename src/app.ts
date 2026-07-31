@@ -11,6 +11,9 @@ import { getAddressInfo } from "./services/address.js";
 import { getFearGreed } from "./services/feargreed.js";
 import { getBaseTrending } from "./services/basetrending.js";
 import { getMarketBrief } from "./services/brief.js";
+import { getStats } from "./services/stats.js";
+import { getNewTokenRadar } from "./services/radar.js";
+import { getTryPremium } from "./services/trypremium.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -51,7 +54,7 @@ app.use((req, res, next) => {
 // itself). Per-instance only — Vercel's platform DDoS protection sits in front.
 const freeHits = new Map<string, { n: number; reset: number }>();
 app.use((req, res, next) => {
-  if (!["/api/health", "/api/catalog", "/api/demo"].includes(req.path)) return next();
+  if (!["/api/health", "/api/catalog", "/api/demo", "/api/stats"].includes(req.path)) return next();
   const ip = req.ip ?? "?";
   const now = Date.now();
   const slot = freeHits.get(ip);
@@ -124,6 +127,16 @@ app.use(
         network: NETWORK,
         config: { description: "One-call market brief: BTC/ETH/SOL, Base gas, sentiment" },
       },
+      "GET /api/base/radar": {
+        price: "$0.003",
+        network: NETWORK,
+        config: { description: "New token radar: fresh Base pools that already have real liquidity" },
+      },
+      "GET /api/try/premium": {
+        price: "$0.002",
+        network: NETWORK,
+        config: { description: "Turkish lira premium: implied vs official USD/TRY via BTC cross-rate" },
+      },
     },
     { url: FACILITATOR_URL },
   ),
@@ -165,6 +178,9 @@ app.get("/api/catalog", (_req, res) => {
       { path: "/api/base/trending", method: "GET", price: "$0.002", description: "Trending DEX pools on Base: price, volume, liquidity" },
       { path: "/api/feargreed", method: "GET", price: "$0.001", description: "Crypto Fear & Greed index with yesterday comparison" },
       { path: "/api/brief", method: "GET", price: "$0.005", description: "One-call market brief: BTC/ETH/SOL, Base gas, sentiment" },
+      { path: "/api/base/radar", method: "GET", price: "$0.003", description: "New token radar: fresh Base pools that already have real liquidity" },
+      { path: "/api/try/premium", method: "GET", price: "$0.002", description: "Turkish lira premium: implied vs official USD/TRY via BTC cross-rate" },
+      { path: "/api/stats", method: "GET", price: "free", description: "Onchain-derived toll counter: calls collected and USDC revenue" },
       { path: "/api/demo", method: "GET", price: "free", description: "Sample response shapes for every paid endpoint" },
       { path: "/api/health", method: "GET", price: "free", description: "Service status" },
       { path: "/api/catalog", method: "GET", price: "free", description: "This catalog" },
@@ -215,6 +231,30 @@ app.get("/api/base/address/:address", async (req, res) => {
 app.get("/api/feargreed", async (_req, res) => {
   try {
     res.json(await getFearGreed());
+  } catch (err) {
+    res.status(502).json({ error: (err as Error).message });
+  }
+});
+
+app.get("/api/stats", async (_req, res) => {
+  try {
+    res.json(await getStats(PAY_TO));
+  } catch (err) {
+    res.status(502).json({ error: (err as Error).message });
+  }
+});
+
+app.get("/api/base/radar", async (_req, res) => {
+  try {
+    res.json(await getNewTokenRadar());
+  } catch (err) {
+    res.status(502).json({ error: (err as Error).message });
+  }
+});
+
+app.get("/api/try/premium", async (_req, res) => {
+  try {
+    res.json(await getTryPremium());
   } catch (err) {
     res.status(502).json({ error: (err as Error).message });
   }
