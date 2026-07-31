@@ -20,7 +20,11 @@ jobs:
           registry-url: "https://registry.npmjs.org"
       - run: npm ci
         working-directory: mcp
-      - run: npm publish --access public --provenance
+      - name: Verify npm auth
+        run: npm whoami
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - run: npm publish --access public
         working-directory: mcp
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
