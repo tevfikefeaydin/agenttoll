@@ -1,0 +1,38 @@
+{
+  "name": "agenttoll",
+  "version": "0.1.0",
+  "description": "Pay-per-call APIs for AI agents - HTTP 402 micropayments in USDC, settled on Base via x402",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "example:client": "tsx examples/agent-client.ts",
+    "brand:png": "node brand/export-png.mjs"
+  },
+  "keywords": [
+    "x402",
+    "base",
+    "ai-agents",
+    "micropayments",
+    "usdc",
+    "http-402",
+    "agentic-payments"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "x402-express": "^1.2.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.1.2",
+    "sharp": "^0.35.3",
+    "tsx": "^4.23.1",
+    "typescript": "^5.9.3",
+    "viem": "^2.55.10",
+    "x402-fetch": "^1.2.0"
+  }
+}

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgentToll — Pay-per-call APIs for AI agents</title>
+<meta name="description" content="Pay-per-call APIs for AI agents. HTTP 402 micropayments in USDC, settled on Base via x402. No API keys, no subscriptions — just pay per request.">
+<style>
+  :root {
+    --blue: #0052FF;
+    --blue-bright: #3D7BFF;
+    --navy: #0B1220;
+    --navy-2: #101A2E;
+    --text: #E8EDF7;
+    --muted: #8A97AF;
+    --border: rgba(138, 151, 175, 0.18);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--navy);
+    color: var(--text);
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+  header { padding: 28px 0; display: flex; align-items: center; gap: 12px; }
+  .mark { width: 36px; height: 36px; border-radius: 9px; }
+  .brand { font-weight: 700; font-size: 1.15rem; letter-spacing: -0.01em; }
+  .hero { padding: 72px 0 56px; }
+  .hero h1 {
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+    max-width: 720px;
+  }
+  .hero h1 em { color: var(--blue-bright); font-style: normal; }
+  .hero p.sub { margin-top: 18px; color: var(--muted); font-size: 1.15rem; max-width: 640px; }
+  .badges { margin-top: 26px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .badge {
+    border: 1px solid var(--border); border-radius: 999px;
+    padding: 6px 14px; font-size: 0.85rem; color: var(--muted);
+  }
+  .badge.blue { border-color: var(--blue); color: var(--blue-bright); }
+  section { padding: 40px 0; border-top: 1px solid var(--border); }
+  h2 { font-size: 1.4rem; margin-bottom: 18px; letter-spacing: -0.01em; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+  th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-weight: 600; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.06em; }
+  code {
+    background: var(--navy-2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 2px 7px; font-size: 0.88em;
+    font-family: Consolas, "Cascadia Code", monospace;
+  }
+  .price { color: var(--blue-bright); font-weight: 600; white-space: nowrap; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; }
+  .step {
+    background: var(--navy-2); border: 1px solid var(--border);
+    border-radius: 14px; padding: 20px;
+  }
+  .step .n {
+    width: 28px; height: 28px; border-radius: 8px; background: var(--blue);
+    color: #fff; font-weight: 700; display: flex; align-items: center;
+    justify-content: center; margin-bottom: 12px; font-size: 0.9rem;
+  }
+  .step h3 { font-size: 1rem; margin-bottom: 6px; }
+  .step p { color: var(--muted); font-size: 0.9rem; }
+  pre {
+    background: var(--navy-2); border: 1px solid var(--border); border-radius: 14px;
+    padding: 20px; overflow-x: auto; font-size: 0.86rem; line-height: 1.55;
+    font-family: Consolas, "Cascadia Code", monospace;
+  }
+  pre .c { color: #5B6B85; } pre .k { color: var(--blue-bright); } pre .s { color: #7BD88F; }
+  footer { padding: 36px 0 48px; color: var(--muted); font-size: 0.9rem; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+  a { color: var(--blue-bright); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <svg class="mark" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect width="512" height="512" rx="112" fill="#0052FF"/>
+      <rect x="132" y="150" width="34" height="228" rx="17" fill="#fff"/>
+      <rect x="346" y="150" width="34" height="228" rx="17" fill="#fff"/>
+      <rect x="132" y="150" width="248" height="34" rx="17" fill="#fff"/>
+      <circle cx="256" cy="330" r="52" fill="#fff"/>
+      <circle cx="256" cy="330" r="34" fill="#0052FF"/>
+      <circle cx="256" cy="330" r="14" fill="#fff"/>
+    </svg>
+    <span class="brand">AgentToll</span>
+  </header>
+
+  <div class="hero">
+    <h1>Pay-per-call APIs for <em>AI agents</em>.<br>No keys. No subscriptions.</h1>
+    <p class="sub">Every endpoint costs a fraction of a cent, paid in USDC and settled
+    on Base via the x402 protocol. Your agent sends one HTTP request, pays inline,
+    and gets the data — machine to machine, fully autonomous.</p>
+    <div class="badges">
+      <span class="badge blue">Built on Base</span>
+      <span class="badge">x402 protocol</span>
+      <span class="badge">USDC micropayments</span>
+      <span class="badge">Open source (MIT)</span>
+    </div>
+  </div>
+
+  <section>
+    <h2>Endpoints</h2>
+    <table>
+      <tr><th>Endpoint</th><th>What you get</th><th>Price</th></tr>
+      <tr>
+        <td><code>GET /api/price/:symbol</code></td>
+        <td>Spot price (USD) + 24h change for any asset</td>
+        <td class="price">$0.001</td>
+      </tr>
+      <tr>
+        <td><code>GET /api/gas</code></td>
+        <td>Base network gas price + latest block</td>
+        <td class="price">$0.001</td>
+      </tr>
+      <tr>
+        <td><code>GET /api/trending</code></td>
+        <td>Tokens trending across the market right now</td>
+        <td class="price">$0.002</td>
+      </tr>
+      <tr>
+        <td><code>GET /api/health</code></td>
+        <td>Service status</td>
+        <td class="price">free</td>
+      </tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>How it works</h2>
+    <div class="steps">
+      <div class="step"><div class="n">1</div><h3>Request</h3>
+        <p>Your agent calls an endpoint. The server replies <code>402 Payment Required</code> with a price quote.</p></div>
+      <div class="step"><div class="n">2</div><h3>Pay inline</h3>
+        <p>The agent signs a USDC authorization for the quoted amount — no gas, no account, no API key.</p></div>
+      <div class="step"><div class="n">3</div><h3>Get the data</h3>
+        <p>The request retries with the payment header; settlement lands on Base, data comes back instantly.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Try it from your agent</h2>
+<pre><span class="c">// npm i x402-fetch viem</span>
+<span class="k">import</span> { wrapFetchWithPayment } <span class="k">from</span> <span class="s">"x402-fetch"</span>;
+<span class="k">import</span> { privateKeyToAccount } <span class="k">from</span> <span class="s">"viem/accounts"</span>;
+
+<span class="k">const</span> pay = wrapFetchWithPayment(fetch, privateKeyToAccount(AGENT_KEY));
+<span class="k">const</span> res = <span class="k">await</span> pay(<span class="s">"https://api.agenttoll.xyz/api/price/eth"</span>);
+console.log(<span class="k">await</span> res.json()); <span class="c">// { symbol: "eth", usd: ..., change24h: ... }</span></pre>
+  </section>
+
+  <footer>
+    <span>© 2026 AgentToll — MIT licensed, building in public.</span>
+    <span><a href="https://github.com/agenttoll">GitHub</a> · <a href="https://x402.org">x402</a> · <a href="https://base.org">Base</a></span>
+  </footer>
+</div>
+</body>
+</html>
