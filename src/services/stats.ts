@@ -11,6 +11,8 @@ const USDC = MAINNET
   ? "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
   : "0x036CbD53842c5426634e7929541eC2318f3dCF7e";
 const MAX_PAGES = 20; // 50 transfers/page; raise when the tollbooth gets busy
+// Tolls are micro-payments; anything bigger is the owner funding the wallet.
+const MAX_TOLL_UNITS = 50_000n; // $0.05
 
 interface TransferPage {
   items: { total?: { value?: string } }[];
@@ -31,8 +33,10 @@ export async function getStats(payTo: string) {
       if (!res.ok) throw new Error(`Indexer returned ${res.status}`);
       const json = (await res.json()) as TransferPage;
       for (const item of json.items) {
+        const value = BigInt(item.total?.value ?? "0");
+        if (value === 0n || value > MAX_TOLL_UNITS) continue;
         count += 1;
-        revenue += BigInt(item.total?.value ?? "0");
+        revenue += value;
       }
       if (!json.next_page_params) break;
       if (page === MAX_PAGES - 1) truncated = true;
