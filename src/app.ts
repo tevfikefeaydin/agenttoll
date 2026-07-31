@@ -6,6 +6,9 @@ import { paymentMiddleware, type Network } from "x402-express";
 import { getPrice } from "./services/prices.js";
 import { getGas } from "./services/gas.js";
 import { getTrending } from "./services/trending.js";
+import { getBaseTokenPrice } from "./services/basetoken.js";
+import { getAddressInfo } from "./services/address.js";
+import { getFearGreed } from "./services/feargreed.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -40,6 +43,21 @@ app.use(
         network: NETWORK,
         config: { description: "Tokens trending across the market right now" },
       },
+      "GET /api/base/token/*": {
+        price: "$0.001",
+        network: NETWORK,
+        config: { description: "Onchain USD price for any Base token by contract address" },
+      },
+      "GET /api/base/address/*": {
+        price: "$0.001",
+        network: NETWORK,
+        config: { description: "Base address snapshot: ETH balance, tx count, contract or EOA" },
+      },
+      "GET /api/feargreed": {
+        price: "$0.001",
+        network: NETWORK,
+        config: { description: "Crypto Fear & Greed index with yesterday comparison" },
+      },
     },
     { url: FACILITATOR_URL },
   ),
@@ -68,6 +86,30 @@ app.get("/api/gas", async (_req, res) => {
 app.get("/api/trending", async (_req, res) => {
   try {
     res.json(await getTrending());
+  } catch (err) {
+    res.status(502).json({ error: (err as Error).message });
+  }
+});
+
+app.get("/api/base/token/:address", async (req, res) => {
+  try {
+    res.json(await getBaseTokenPrice(req.params.address));
+  } catch (err) {
+    res.status(502).json({ error: (err as Error).message });
+  }
+});
+
+app.get("/api/base/address/:address", async (req, res) => {
+  try {
+    res.json(await getAddressInfo(req.params.address));
+  } catch (err) {
+    res.status(502).json({ error: (err as Error).message });
+  }
+});
+
+app.get("/api/feargreed", async (_req, res) => {
+  try {
+    res.json(await getFearGreed());
   } catch (err) {
     res.status(502).json({ error: (err as Error).message });
   }

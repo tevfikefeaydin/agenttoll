@@ -8,7 +8,13 @@ interface TrendingCoin {
   };
 }
 
+import { cached } from "./cache.js";
+
 export async function getTrending() {
+  return cached("trending", 60_000, fetchTrending);
+}
+
+async function fetchTrending() {
   const res = await fetch("https://api.coingecko.com/api/v3/search/trending");
   if (!res.ok) throw new Error(`Upstream trending source returned ${res.status}`);
   const data = (await res.json()) as { coins: TrendingCoin[] };

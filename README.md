@@ -23,7 +23,13 @@ inline, and gets the data.
 | `GET /api/price/:symbol` | Spot price (USD) + 24h change for any asset | $0.001 |
 | `GET /api/gas` | Base network gas price + latest block | $0.001 |
 | `GET /api/trending` | Tokens trending across the market right now | $0.002 |
+| `GET /api/base/token/:address` | Onchain USD price for any Base token by contract address | $0.001 |
+| `GET /api/base/address/:address` | Base address snapshot: ETH balance, tx count, contract or EOA | $0.001 |
+| `GET /api/feargreed` | Crypto Fear & Greed index with yesterday comparison | $0.001 |
 | `GET /api/health` | Service status | free |
+
+Responses are served from a short-lived cache (15-300s depending on endpoint) to
+keep upstream sources happy; every paid call still settles onchain.
 
 ## Quickstart (server)
 
@@ -64,6 +70,27 @@ at [faucet.circle.com](https://faucet.circle.com)):
 npm run example:client
 ```
 
+## Use it as an MCP server (Claude & friends)
+
+AgentToll ships an MCP wrapper: add it to any MCP-compatible agent and the whole
+API becomes native tools — each call paid automatically in USDC via x402.
+
+```json
+{
+  "mcpServers": {
+    "agenttoll": {
+      "command": "npx",
+      "args": ["-y", "tsx", "/path/to/agenttoll/mcp/server.ts"],
+      "env": { "AGENT_PRIVATE_KEY": "0x..." }
+    }
+  }
+}
+```
+
+Tools exposed: `get_price`, `get_base_gas`, `get_trending`, `get_base_token_price`,
+`get_base_address_info`, `get_fear_greed`. The wallet behind `AGENT_PRIVATE_KEY`
+needs USDC on Base Sepolia (testnet) — grab some at [faucet.circle.com](https://faucet.circle.com).
+
 ## Going to mainnet
 
 Switch `NETWORK=base` in `.env` and use the Coinbase CDP facilitator (the public
@@ -76,10 +103,11 @@ app.use(paymentMiddleware(payTo, routes, facilitator));
 
 ## Roadmap
 
-- [ ] More data endpoints (onchain analytics, token metadata, TR-market data)
-- [ ] Listing in x402 Bazaar / ecosystem discovery
+- [x] Base-native data endpoints (onchain token prices, address analytics)
+- [x] MCP server wrapper so any AI assistant can use AgentToll as a native tool
+- [ ] Mainnet + listing in x402 Bazaar / ecosystem discovery
 - [ ] Usage dashboard (calls, revenue, top agents)
-- [ ] MCP server wrapper so any AI assistant can use AgentToll as a native tool
+- [ ] More endpoints (token metadata, DEX pools, TR-market data)
 
 ## Stack
 

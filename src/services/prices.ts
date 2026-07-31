@@ -17,8 +17,14 @@ const SYMBOL_MAP: Record<string, string> = {
   degen: "degen-base",
 };
 
+import { cached } from "./cache.js";
+
 export async function getPrice(symbol: string) {
   const id = SYMBOL_MAP[symbol.toLowerCase()] ?? symbol.toLowerCase();
+  return cached(`price:${id}`, 30_000, () => fetchPrice(symbol, id));
+}
+
+async function fetchPrice(symbol: string, id: string) {
   const url = `https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(
     id,
   )}&vs_currencies=usd&include_24hr_change=true`;
