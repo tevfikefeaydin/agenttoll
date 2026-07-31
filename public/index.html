@@ -149,7 +149,7 @@
 <span class="k">import</span> { privateKeyToAccount } <span class="k">from</span> <span class="s">"viem/accounts"</span>;
 
 <span class="k">const</span> pay = wrapFetchWithPayment(fetch, privateKeyToAccount(AGENT_KEY));
-<span class="k">const</span> res = <span class="k">await</span> pay(<span class="s">"https://api.agenttoll.xyz/api/price/eth"</span>);
+<span class="k">const</span> res = <span class="k">await</span> pay(<span class="s">"https://agenttoll-pi.vercel.app/api/price/eth"</span>);
 console.log(<span class="k">await</span> res.json()); <span class="c">// { symbol: "eth", usd: ..., change24h: ... }</span></pre>
   </section>
 

@@ -17,6 +17,7 @@ const FACILITATOR_URL = (process.env.FACILITATOR_URL ??
   "https://x402.org/facilitator") as `${string}://${string}`;
 
 const app = express();
+app.set("trust proxy", true); // behind Vercel's proxy, keep https in quoted resource URLs
 app.use(express.json());
 
 // Everything under /api/* (except /api/health) requires an x402 payment.
