@@ -1,4 +1,4 @@
-name: Publish MCP to npm
+﻿name: Publish MCP to npm
 
 # Push a tag like mcp-v0.4.0 (after bumping mcp/package.json) and the package
 # ships itself. Requires the NPM_TOKEN repository secret (npm automation token).
@@ -25,12 +25,12 @@ jobs:
           echo "token length: ${#NODE_AUTH_TOKEN}"
           echo "starts with npm_: $([[ $NODE_AUTH_TOKEN == npm_* ]] && echo yes || echo no)"
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM }}
       - name: Verify npm auth
         run: npm whoami
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM }}
       - run: npm publish --access public
         working-directory: mcp
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM }}
