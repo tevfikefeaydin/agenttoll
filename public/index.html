@@ -104,6 +104,23 @@
   </div>
 
   <section>
+    <h2>What is this?</h2>
+    <p style="color: var(--muted); max-width: 720px;">AgentToll is a <strong style="color: var(--text);">data
+    vending machine for AI agents</strong>. Software can't sign up for accounts or hold credit
+    cards — so here, every piece of data is a URL with a price tag. An agent requests it,
+    gets an HTTP 402 quote, pays a fraction of a cent in USDC, and receives the data in the
+    same round trip. No accounts, no API keys, no subscriptions — pay exactly for what you use.</p>
+    <div class="steps" style="margin-top: 20px;">
+      <div class="step"><div class="n">🤖</div><h3>Who uses it</h3>
+        <p>Trading bots, portfolio monitors, DeFi watchers, and AI assistants (Claude, GPT) that need market or Base onchain data.</p></div>
+      <div class="step"><div class="n">💸</div><h3>What it costs</h3>
+        <p>$0.001–$0.005 per call. An agent polling every 5 minutes spends cents per month — and pays nothing when idle.</p></div>
+      <div class="step"><div class="n">🔍</div><h3>How agents find it</h3>
+        <p>Machine-readable catalog at <code>GET /api/catalog</code> (free) lists everything for sale with prices.</p></div>
+    </div>
+  </section>
+
+  <section>
     <h2>Endpoints</h2>
     <table>
       <tr><th>Endpoint</th><th>What you get</th><th>Price</th></tr>
@@ -136,6 +153,21 @@
         <td><code>GET /api/feargreed</code></td>
         <td>Crypto Fear &amp; Greed index with yesterday comparison</td>
         <td class="price">$0.001</td>
+      </tr>
+      <tr>
+        <td><code>GET /api/base/trending</code></td>
+        <td>Trending DEX pools on Base: price, volume, liquidity</td>
+        <td class="price">$0.002</td>
+      </tr>
+      <tr>
+        <td><code>GET /api/brief</code></td>
+        <td>One-call market brief: BTC/ETH/SOL, Base gas, sentiment</td>
+        <td class="price">$0.005</td>
+      </tr>
+      <tr>
+        <td><code>GET /api/catalog</code></td>
+        <td>Machine-readable catalog of everything for sale</td>
+        <td class="price">free</td>
       </tr>
       <tr>
         <td><code>GET /api/health</code></td>

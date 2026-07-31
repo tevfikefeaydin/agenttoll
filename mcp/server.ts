@@ -89,6 +89,20 @@ server.tool(
   async () => ({ content: [{ type: "text", text: await call("/api/feargreed") }] }),
 );
 
+server.tool(
+  "get_base_trending_pools",
+  "Trending DEX pools on Base: price, 24h volume, liquidity. Costs $0.002 in USDC via x402.",
+  {},
+  async () => ({ content: [{ type: "text", text: await call("/api/base/trending") }] }),
+);
+
+server.tool(
+  "get_market_brief",
+  "One-call market brief: BTC/ETH/SOL prices, Base gas, Fear & Greed. Costs $0.005 in USDC via x402.",
+  {},
+  async () => ({ content: [{ type: "text", text: await call("/api/brief") }] }),
+);
+
 const transport = new StdioServerTransport();
 await server.connect(transport);
 console.error(`AgentToll MCP server ready — paying wallet ${account.address}, API ${BASE_URL}`);

@@ -26,6 +26,9 @@ inline, and gets the data.
 | `GET /api/base/token/:address` | Onchain USD price for any Base token by contract address | $0.001 |
 | `GET /api/base/address/:address` | Base address snapshot: ETH balance, tx count, contract or EOA | $0.001 |
 | `GET /api/feargreed` | Crypto Fear & Greed index with yesterday comparison | $0.001 |
+| `GET /api/base/trending` | Trending DEX pools on Base: price, volume, liquidity | $0.002 |
+| `GET /api/brief` | One-call market brief: BTC/ETH/SOL, Base gas, sentiment | $0.005 |
+| `GET /api/catalog` | Machine-readable catalog of everything for sale | free |
 | `GET /api/health` | Service status | free |
 
 Responses are served from a short-lived cache (15-300s depending on endpoint) to
@@ -88,7 +91,7 @@ API becomes native tools — each call paid automatically in USDC via x402.
 ```
 
 Tools exposed: `get_price`, `get_base_gas`, `get_trending`, `get_base_token_price`,
-`get_base_address_info`, `get_fear_greed`. The wallet behind `AGENT_PRIVATE_KEY`
+`get_base_address_info`, `get_fear_greed`, `get_base_trending_pools`, `get_market_brief`. The wallet behind `AGENT_PRIVATE_KEY`
 needs USDC on Base Sepolia (testnet) — grab some at [faucet.circle.com](https://faucet.circle.com).
 
 ## Going to mainnet
