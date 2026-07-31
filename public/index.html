@@ -158,6 +158,21 @@
   </section>
 
   <section>
+    <h2>Try it in 10 seconds — no wallet needed</h2>
+<pre><span class="c"># free health check</span>
+curl https://agenttoll-pi.vercel.app/api/health
+
+<span class="c"># hit a paid endpoint without paying: you get the machine-readable 402 quote</span>
+curl -i https://agenttoll-pi.vercel.app/api/price/eth
+<span class="c"># HTTP/1.1 402 Payment Required</span>
+<span class="c"># {"x402Version":1,"accepts":[{"maxAmountRequired":"1000","asset":"USDC","payTo":"0x..."}]}</span></pre>
+    <p style="color: var(--muted); margin-top: 14px;">That 402 response is the whole product:
+    a price quote any agent can pay programmatically. To actually pay on testnet, grab free
+    USDC on Base Sepolia from <a href="https://faucet.circle.com">faucet.circle.com</a>
+    and use either path below.</p>
+  </section>
+
+  <section>
     <h2>Try it from your agent</h2>
 <pre><span class="c">// npm i x402-fetch viem</span>
 <span class="k">import</span> { wrapFetchWithPayment } <span class="k">from</span> <span class="s">"x402-fetch"</span>;
@@ -166,6 +181,26 @@
 <span class="k">const</span> pay = wrapFetchWithPayment(fetch, privateKeyToAccount(AGENT_KEY));
 <span class="k">const</span> res = <span class="k">await</span> pay(<span class="s">"https://agenttoll-pi.vercel.app/api/price/eth"</span>);
 console.log(<span class="k">await</span> res.json()); <span class="c">// { symbol: "eth", usd: ..., change24h: ... }</span></pre>
+  </section>
+
+  <section>
+    <h2>Or plug it into Claude (MCP)</h2>
+    <p style="color: var(--muted); margin-bottom: 14px;">AgentToll ships an MCP server:
+    add it to Claude Desktop / Claude Code and every endpoint becomes a native tool —
+    your agent pays per call automatically.</p>
+<pre>{
+  <span class="s">"mcpServers"</span>: {
+    <span class="s">"agenttoll"</span>: {
+      <span class="s">"command"</span>: <span class="s">"npx"</span>,
+      <span class="s">"args"</span>: [<span class="s">"-y"</span>, <span class="s">"tsx"</span>, <span class="s">"/path/to/agenttoll/mcp/server.ts"</span>],
+      <span class="s">"env"</span>: { <span class="s">"AGENT_PRIVATE_KEY"</span>: <span class="s">"0x..."</span> }
+    }
+  }
+}</pre>
+    <p style="color: var(--muted); margin-top: 14px;">Tools: <code>get_price</code>,
+    <code>get_base_gas</code>, <code>get_trending</code>, <code>get_base_token_price</code>,
+    <code>get_base_address_info</code>, <code>get_fear_greed</code>.
+    Setup details in the <a href="https://github.com/tevfikefeaydin/agenttoll#use-it-as-an-mcp-server-claude--friends">README</a>.</p>
   </section>
 
   <footer>
