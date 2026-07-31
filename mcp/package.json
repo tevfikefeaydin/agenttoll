@@ -1,6 +1,6 @@
 {
   "name": "agenttoll-mcp",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "MCP server for AgentToll - pay-per-call data APIs for AI agents, paid in USDC on Base via x402",
   "type": "module",
   "bin": { "agenttoll-mcp": "dist/server.js" },

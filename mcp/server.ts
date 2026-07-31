@@ -40,7 +40,7 @@ async function call(path: string) {
   return body;
 }
 
-const server = new McpServer({ name: "agenttoll", version: "0.2.0" });
+const server = new McpServer({ name: "agenttoll", version: "0.3.1" });
 
 server.tool(
   "get_price",
