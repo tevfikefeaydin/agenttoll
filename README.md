@@ -1,6 +1,7 @@
 # AgentToll
 
 **Live:** [agenttoll-pi.vercel.app](https://agenttoll-pi.vercel.app) — try `GET /api/price/eth` and get a real x402 quote.
+Onchain identity: **agenttoll.base.eth** (Base mainnet).
 
 **Pay-per-call APIs for AI agents.** Every endpoint costs a fraction of a cent, paid in
 USDC and settled on [Base](https://base.org) via the [x402 protocol](https://x402.org).
