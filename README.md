@@ -86,19 +86,21 @@ API becomes native tools — each call paid automatically in USDC via x402.
   "mcpServers": {
     "agenttoll": {
       "command": "npx",
-      "args": ["-y", "tsx", "/path/to/agenttoll/mcp/server.ts"],
+      "args": ["-y", "agenttoll-mcp"],
       "env": { "AGENT_PRIVATE_KEY": "0x..." }
     }
   }
 }
 ```
 
+No clone needed — the server is on npm as
+[`agenttoll-mcp`](https://www.npmjs.com/package/agenttoll-mcp).
+
 Tools exposed: `get_price`, `get_base_gas`, `get_trending`, `get_base_token_price`,
 `get_base_address_info`, `get_fear_greed`, `get_base_trending_pools`, `get_market_brief`,
 `get_new_token_radar`, `get_try_premium`.
 
-The `mcp/` folder is also a standalone npm package (`agenttoll-mcp`) — once published,
-setup becomes `"command": "npx", "args": ["-y", "agenttoll-mcp"]` with no clone needed. The wallet behind `AGENT_PRIVATE_KEY`
+ The wallet behind `AGENT_PRIVATE_KEY`
 needs USDC on Base Sepolia (testnet) — grab some at [faucet.circle.com](https://faucet.circle.com).
 
 ## Going to mainnet
