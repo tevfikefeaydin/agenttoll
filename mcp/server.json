@@ -1,0 +1,36 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.tevfikefeaydin/agenttoll",
+  "description": "Pay-per-call market and Base onchain data for AI agents - prices, gas, trending pools, new-token radar, market briefs. Each call paid automatically in USDC on Base via x402 ($0.001-$0.005). No API keys.",
+  "repository": {
+    "url": "https://github.com/tevfikefeaydin/agenttoll",
+    "source": "github"
+  },
+  "version": "0.3.2",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "agenttoll-mcp",
+      "version": "0.3.2",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "AGENT_PRIVATE_KEY",
+          "description": "EVM private key of the wallet that pays per call (needs USDC on Base)",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": true
+        },
+        {
+          "name": "AGENTTOLL_URL",
+          "description": "API base URL (default: https://agenttoll-pi.vercel.app)",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": false
+        }
+      ]
+    }
+  ]
+}
