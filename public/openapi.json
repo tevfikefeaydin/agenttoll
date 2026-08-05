@@ -100,7 +100,8 @@
           "402": {
             "description": "x402 payment quote"
           }
-        }
+        },
+        "parameters": []
       }
     },
     "/api/trending": {
@@ -114,7 +115,8 @@
           "402": {
             "description": "x402 payment quote"
           }
-        }
+        },
+        "parameters": []
       }
     },
     "/api/base/token/{address}": {
@@ -178,7 +180,8 @@
           "402": {
             "description": "x402 payment quote"
           }
-        }
+        },
+        "parameters": []
       }
     },
     "/api/base/radar": {
@@ -192,7 +195,8 @@
           "402": {
             "description": "x402 payment quote"
           }
-        }
+        },
+        "parameters": []
       }
     },
     "/api/feargreed": {
@@ -206,7 +210,8 @@
           "402": {
             "description": "x402 payment quote"
           }
-        }
+        },
+        "parameters": []
       }
     },
     "/api/brief": {
@@ -220,7 +225,8 @@
           "402": {
             "description": "x402 payment quote"
           }
-        }
+        },
+        "parameters": []
       }
     },
     "/api/try/premium": {
@@ -234,7 +240,8 @@
           "402": {
             "description": "x402 payment quote"
           }
-        }
+        },
+        "parameters": []
       }
     },
     "/api/base/name/{nameOrAddress}": {
