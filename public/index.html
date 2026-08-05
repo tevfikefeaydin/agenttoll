@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AgentToll — Pay-per-call APIs for AI agents</title>
-<meta name="description" content="Pay-per-call APIs for AI agents. HTTP 402 micropayments in USDC, settled on Base via x402. No API keys, no subscriptions — just pay per request.">
+<title>AgentToll — Base-native data for AI agents</title>
+<meta name="description" content="Base-native onchain data for AI agents — gas, token prices by contract, address analytics, DEX pools, new-token radar. From $0.001 a call in USDC via x402. No API keys. Open source.">
 
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="AgentToll">
@@ -22,273 +22,423 @@
 <style>
   :root {
     --blue: #0052FF;
-    --blue-bright: #3D7BFF;
-    --navy: #0B1220;
-    --navy-2: #101A2E;
-    --text: #E8EDF7;
+    --blue-lit: #3D7BFF;
+    --blue-soft: #7BA6FF;
+    --bg: #070B14;
+    --surface: #0E1524;
+    --surface-2: #131C2E;
+    --text: #EAF0FA;
     --muted: #8A97AF;
-    --border: rgba(138, 151, 175, 0.18);
+    --line: rgba(138, 151, 175, 0.16);
+    --mono: "Cascadia Code", Consolas, "SF Mono", ui-monospace, monospace;
+    --sans: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", sans-serif;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
   body {
-    background: var(--navy);
+    background: var(--bg);
     color: var(--text);
-    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
-    line-height: 1.6;
+    font-family: var(--sans);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
   }
-  .wrap { max-width: 960px; margin: 0 auto; padding: 0 24px; }
-  header { padding: 28px 0; display: flex; align-items: center; gap: 12px; }
-  .mark { width: 36px; height: 36px; border-radius: 9px; }
-  .brand { font-weight: 700; font-size: 1.15rem; letter-spacing: -0.01em; }
-  .hero { padding: 72px 0 56px; }
-  .hero h1 {
-    font-size: clamp(2rem, 5vw, 3.2rem);
-    line-height: 1.12;
-    letter-spacing: -0.02em;
-    max-width: 720px;
+  a { color: var(--blue-soft); text-decoration: none; transition: color .18s ease; }
+  a:hover { color: var(--text); }
+  .wrap { width: min(1120px, 100% - 44px); margin-inline: auto; }
+
+  /* ---------- nav ---------- */
+  nav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(7, 11, 20, 0.72);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid transparent;
+    transition: border-color .25s ease, background .25s ease;
   }
-  .hero h1 em { color: var(--blue-bright); font-style: normal; }
-  .hero p.sub { margin-top: 18px; color: var(--muted); font-size: 1.15rem; max-width: 640px; }
-  .badges { margin-top: 26px; display: flex; gap: 10px; flex-wrap: wrap; }
-  .badge {
-    border: 1px solid var(--border); border-radius: 999px;
-    padding: 6px 14px; font-size: 0.85rem; color: var(--muted);
+  nav.scrolled { border-bottom-color: var(--line); background: rgba(7, 11, 20, 0.92); }
+  .nav-in { display: flex; align-items: center; gap: 14px; padding: 15px 0; }
+  .logo { display: flex; align-items: center; gap: 11px; font-weight: 700; letter-spacing: -.02em; font-size: 1.06rem; color: var(--text); }
+  .logo svg { width: 30px; height: 30px; border-radius: 8px; }
+  .nav-links { margin-left: auto; display: flex; align-items: center; gap: 26px; font-size: .92rem; }
+  .nav-links a { color: var(--muted); }
+  .nav-links a:hover { color: var(--text); }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 20px; border-radius: 999px; font-weight: 600; font-size: .93rem;
+    border: 1px solid transparent; transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
   }
-  .badge.blue { border-color: var(--blue); color: var(--blue-bright); }
-  section { padding: 40px 0; border-top: 1px solid var(--border); }
-  h2 { font-size: 1.4rem; margin-bottom: 18px; letter-spacing: -0.01em; }
-  table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
-  th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--border); }
-  th { color: var(--muted); font-weight: 600; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.06em; }
-  code {
-    background: var(--navy-2); border: 1px solid var(--border);
-    border-radius: 6px; padding: 2px 7px; font-size: 0.88em;
-    font-family: Consolas, "Cascadia Code", monospace;
+  .btn-primary { background: var(--blue); color: #fff; box-shadow: 0 6px 26px rgba(0, 82, 255, .38); }
+  .btn-primary:hover { background: #1a66ff; color: #fff; transform: translateY(-1px); box-shadow: 0 10px 32px rgba(0, 82, 255, .5); }
+  .btn-ghost { border-color: var(--line); color: var(--text); background: rgba(255,255,255,.02); }
+  .btn-ghost:hover { border-color: var(--blue-lit); color: #fff; transform: translateY(-1px); }
+  @media (max-width: 720px) { .nav-links a.hide-sm { display: none; } }
+
+  /* ---------- hero ---------- */
+  .hero { position: relative; min-height: 88vh; display: flex; align-items: center; overflow: hidden; }
+  .hero-media { position: absolute; inset: 0; z-index: 0; }
+  .hero-media video, .hero-media img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%; object-fit: cover;
+    /* keep the gate on the right, text sits on the clean left */
+    object-position: 65% center;
   }
-  .price { color: var(--blue-bright); font-weight: 600; white-space: nowrap; }
-  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; }
-  .step {
-    background: var(--navy-2); border: 1px solid var(--border);
-    border-radius: 14px; padding: 20px;
+  .hero-media video { opacity: 0; transition: opacity .9s ease; }
+  .hero-media video.ready { opacity: 1; }
+  .hero-media::after {
+    content: ""; position: absolute; inset: 0;
+    background:
+      linear-gradient(90deg, var(--bg) 8%, rgba(7,11,20,.86) 38%, rgba(7,11,20,.35) 70%, rgba(7,11,20,.6) 100%),
+      linear-gradient(180deg, rgba(7,11,20,.7) 0%, transparent 22%, transparent 62%, var(--bg) 100%);
   }
-  .step .n {
-    width: 28px; height: 28px; border-radius: 8px; background: var(--blue);
-    color: #fff; font-weight: 700; display: flex; align-items: center;
-    justify-content: center; margin-bottom: 12px; font-size: 0.9rem;
+  .hero-in { position: relative; z-index: 1; padding: 92px 0 96px; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 9px;
+    padding: 7px 15px; border-radius: 999px; font-size: .82rem; font-weight: 500;
+    background: rgba(0, 82, 255, .12); border: 1px solid rgba(61, 123, 255, .32); color: var(--blue-soft);
+    margin-bottom: 26px;
   }
-  .step h3 { font-size: 1rem; margin-bottom: 6px; }
-  .step p { color: var(--muted); font-size: 0.9rem; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: #2ee07a; box-shadow: 0 0 10px #2ee07a; }
+  h1 {
+    font-size: clamp(2.3rem, 6vw, 4.1rem); line-height: 1.05; letter-spacing: -.035em;
+    font-weight: 700; max-width: 15ch;
+  }
+  h1 em {
+    font-style: normal;
+    background: linear-gradient(100deg, var(--blue-lit), #9FC0FF 60%, var(--blue-lit));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .lede { margin-top: 22px; font-size: clamp(1.02rem, 2vw, 1.16rem); color: var(--muted); max-width: 56ch; }
+  .cta { margin-top: 34px; display: flex; gap: 13px; flex-wrap: wrap; }
+  .hero-meta { margin-top: 40px; display: flex; gap: 12px; flex-wrap: wrap; font-size: .84rem; color: var(--muted); }
+  .chip { padding: 6px 14px; border: 1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,.02); }
+  .chip strong { color: var(--text); font-variant-numeric: tabular-nums; }
+
+  /* ---------- sections ---------- */
+  section.band { padding: 92px 0; border-top: 1px solid var(--line); }
+  .kicker { color: var(--blue-lit); font-size: .8rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
+  h2 { font-size: clamp(1.6rem, 3.4vw, 2.25rem); letter-spacing: -.025em; margin: 12px 0 16px; line-height: 1.2; }
+  .sub { color: var(--muted); max-width: 62ch; font-size: 1.02rem; }
+
+  .grid { display: grid; gap: 18px; margin-top: 42px; }
+  .g3 { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  .card {
+    background: linear-gradient(160deg, var(--surface) 0%, rgba(14,21,36,.55) 100%);
+    border: 1px solid var(--line); border-radius: 18px; padding: 26px;
+    transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+  }
+  .card:hover { transform: translateY(-3px); border-color: rgba(61,123,255,.42); box-shadow: 0 14px 40px rgba(0,0,0,.4); }
+  .card .ico {
+    width: 40px; height: 40px; border-radius: 11px; display: grid; place-items: center;
+    background: rgba(0,82,255,.14); border: 1px solid rgba(61,123,255,.3);
+    font-size: 1.15rem; margin-bottom: 15px;
+  }
+  .card h3 { font-size: 1.04rem; margin-bottom: 7px; letter-spacing: -.01em; }
+  .card p { color: var(--muted); font-size: .93rem; }
+
+  .steps { counter-reset: s; }
+  .step-n {
+    width: 30px; height: 30px; border-radius: 9px; background: var(--blue); color: #fff;
+    display: grid; place-items: center; font-weight: 700; font-size: .87rem; margin-bottom: 14px;
+  }
+
+  /* ---------- table ---------- */
+  .table-wrap { margin-top: 38px; border: 1px solid var(--line); border-radius: 18px; overflow: hidden; background: var(--surface); }
+  .scroll-x { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: .93rem; min-width: 560px; }
+  th, td { text-align: left; padding: 14px 20px; border-bottom: 1px solid var(--line); }
+  thead th { color: var(--muted); font-weight: 600; font-size: .74rem; letter-spacing: .1em; text-transform: uppercase; background: rgba(255,255,255,.015); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr { transition: background .15s ease; }
+  tbody tr:hover { background: rgba(61,123,255,.05); }
+  td code { font-family: var(--mono); font-size: .87em; color: var(--text); background: rgba(255,255,255,.04); border: 1px solid var(--line); border-radius: 6px; padding: 3px 8px; white-space: nowrap; }
+  .price { color: var(--blue-soft); font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .price.free { color: #2ee07a; }
+
+  /* ---------- code ---------- */
   pre {
-    background: var(--navy-2); border: 1px solid var(--border); border-radius: 14px;
-    padding: 20px; overflow-x: auto; font-size: 0.86rem; line-height: 1.55;
-    font-family: Consolas, "Cascadia Code", monospace;
+    background: #060A11; border: 1px solid var(--line); border-radius: 16px;
+    padding: 22px 24px; overflow-x: auto; font-family: var(--mono);
+    font-size: .87rem; line-height: 1.7; margin-top: 22px;
   }
-  pre .c { color: #5B6B85; } pre .k { color: var(--blue-bright); } pre .s { color: #7BD88F; }
-  footer { padding: 36px 0 48px; color: var(--muted); font-size: 0.9rem; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
-  a { color: var(--blue-bright); text-decoration: none; }
-  a:hover { text-decoration: underline; }
+  pre .c { color: #55617A; } pre .k { color: var(--blue-lit); } pre .s { color: #7BD88F; } pre .y { color: #E8C46B; }
+  .two { display: grid; gap: 22px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); align-items: start; }
+
+  /* ---------- footer ---------- */
+  footer { border-top: 1px solid var(--line); padding: 46px 0 60px; color: var(--muted); font-size: .9rem; }
+  .foot { display: flex; justify-content: space-between; gap: 18px; flex-wrap: wrap; align-items: center; }
+  .foot-links { display: flex; gap: 20px; flex-wrap: wrap; }
+
+  /* ---------- reveal ---------- */
+  .rv { opacity: 0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
+  .rv.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .rv { opacity: 1; transform: none; transition: none; }
+    html { scroll-behavior: auto; }
+  }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <svg class="mark" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <rect width="512" height="512" rx="112" fill="#0052FF"/>
-      <rect x="132" y="150" width="34" height="228" rx="17" fill="#fff"/>
-      <rect x="346" y="150" width="34" height="228" rx="17" fill="#fff"/>
-      <rect x="132" y="150" width="248" height="34" rx="17" fill="#fff"/>
-      <circle cx="256" cy="330" r="52" fill="#fff"/>
-      <circle cx="256" cy="330" r="34" fill="#0052FF"/>
-      <circle cx="256" cy="330" r="14" fill="#fff"/>
-    </svg>
-    <span class="brand">AgentToll</span>
-  </header>
 
-  <div class="hero">
-    <h1><em>Base-native</em> data for AI agents.<br>From $0.001 a call.</h1>
-    <p class="sub">The onchain data layer for the agent economy: Base gas, any token by
-    contract address, address analytics, DEX pools and a spam-filtered new-token radar —
-    plus market and Turkish-lira feeds. Paid in USDC and settled on Base via x402.
-    No API keys, no subscriptions. Open source, MIT.</p>
-    <div class="badges">
-      <span class="badge blue">Built on Base</span>
-      <span class="badge">x402 protocol</span>
-      <span class="badge">USDC micropayments</span>
-      <span class="badge">Open source (MIT)</span>
-      <span class="badge" id="toll-counter">— tolls collected</span>
-      <span class="badge">agenttoll.base.eth</span>
+<nav id="nav">
+  <div class="wrap nav-in">
+    <a class="logo" href="/">
+      <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect width="512" height="512" rx="112" fill="#0052FF"/>
+        <rect x="132" y="150" width="34" height="228" rx="17" fill="#fff"/>
+        <rect x="346" y="150" width="34" height="228" rx="17" fill="#fff"/>
+        <rect x="132" y="150" width="248" height="34" rx="17" fill="#fff"/>
+        <circle cx="256" cy="330" r="52" fill="#fff"/>
+        <circle cx="256" cy="330" r="34" fill="#0052FF"/>
+        <circle cx="256" cy="330" r="14" fill="#fff"/>
+      </svg>
+      AgentToll
+    </a>
+    <div class="nav-links">
+      <a href="#endpoints" class="hide-sm">Endpoints</a>
+      <a href="#watch" class="hide-sm">Watch</a>
+      <a href="#mcp" class="hide-sm">MCP</a>
+      <a href="https://github.com/tevfikefeaydin/agenttoll">GitHub</a>
     </div>
   </div>
+</nav>
 
-  <section>
-    <h2>What is this?</h2>
-    <p style="color: var(--muted); max-width: 720px;">AgentToll is a <strong style="color: var(--text);">data
-    vending machine for AI agents</strong>, focused on <strong style="color: var(--text);">Base onchain
-    data</strong>. Software can't sign up for accounts or hold credit cards — so here, every piece of
-    data is a URL with a price tag. An agent requests it, gets an HTTP 402 quote, pays a fraction of a
-    cent in USDC, and receives the data in the same round trip. No accounts, no API keys, no
-    subscriptions — pay exactly for what you use.</p>
-    <div class="steps" style="margin-top: 20px;">
-      <div class="step"><div class="n">🤖</div><h3>Who uses it</h3>
-        <p>Trading bots, portfolio monitors, DeFi watchers, and AI assistants (Claude, GPT) that need market or Base onchain data.</p></div>
-      <div class="step"><div class="n">💸</div><h3>What it costs</h3>
-        <p>$0.001–$0.005 per call. An agent polling every 5 minutes spends cents per month — and pays nothing when idle.</p></div>
-      <div class="step"><div class="n">🔍</div><h3>How agents find it</h3>
-        <p>Machine-readable catalog at <code>GET /api/catalog</code> (free) lists everything for sale with prices.</p></div>
+<header class="hero">
+  <div class="hero-media">
+    <img id="hero-still" src="/hero-poster.jpg" alt="" aria-hidden="true">
+    <video id="hero-video" muted loop playsinline preload="none" poster="/hero-poster.jpg"
+           aria-hidden="true" hidden>
+      <source src="/hero.mp4" type="video/mp4">
+    </video>
+  </div>
+  <div class="wrap hero-in">
+    <span class="eyebrow"><span class="dot"></span> Live on Base mainnet</span>
+    <h1>Base-native data for <em>AI agents</em></h1>
+    <p class="lede">Every endpoint is a URL with a price tag. Your agent sends one HTTP
+      request, gets a 402 quote, pays a fraction of a cent in USDC over x402, and receives
+      the data in the same round trip. No accounts. No API keys. No subscriptions.</p>
+    <div class="cta">
+      <a class="btn btn-primary" href="#try">Try it in 10 seconds</a>
+      <a class="btn btn-ghost" href="#endpoints">See the 13 endpoints</a>
     </div>
-  </section>
-
-  <section>
-    <h2>Endpoints</h2>
-    <table>
-      <tr><th>Endpoint</th><th>What you get</th><th>Price</th></tr>
-      <tr>
-        <td><code>GET /api/price/:symbol</code></td>
-        <td>Spot price (USD) + 24h change for any asset</td>
-        <td class="price">$0.001</td>
-      </tr>
-      <tr>
-        <td><code>GET /api/gas</code></td>
-        <td>Base network gas price + latest block</td>
-        <td class="price">$0.001</td>
-      </tr>
-      <tr>
-        <td><code>GET /api/trending</code></td>
-        <td>Tokens trending across the market right now</td>
-        <td class="price">$0.002</td>
-      </tr>
-      <tr>
-        <td><code>GET /api/base/token/:address</code></td>
-        <td>Onchain USD price for any Base token by contract address</td>
-        <td class="price">$0.001</td>
-      </tr>
-      <tr>
-        <td><code>GET /api/base/address/:address</code></td>
-        <td>Base address snapshot: ETH balance, tx count, contract or EOA</td>
-        <td class="price">$0.001</td>
-      </tr>
-      <tr>
-        <td><code>GET /api/feargreed</code></td>
-        <td>Crypto Fear &amp; Greed index with yesterday comparison</td>
-        <td class="price">$0.001</td>
-      </tr>
-      <tr>
-        <td><code>GET /api/base/trending</code></td>
-        <td>Trending DEX pools on Base: price, volume, liquidity</td>
-        <td class="price">$0.002</td>
-      </tr>
-      <tr>
-        <td><code>GET /api/brief</code></td>
-        <td>One-call market brief: BTC/ETH/SOL, Base gas, sentiment</td>
-        <td class="price">$0.005</td>
-      </tr>
-      <tr>
-        <td><code>GET /api/watch/address/:address</code></td>
-        <td>New activity for a Base address since your cursor</td>
-        <td class="price">$0.002</td>
-      </tr>
-      <tr>
-        <td><code>GET /api/watch/radar</code></td>
-        <td>Only the pools that appeared since your cursor</td>
-        <td class="price">$0.003</td>
-      </tr>
-      <tr>
-        <td><code>GET /api/watch/price/:symbol</code></td>
-        <td>Price alert check: triggered true/false against your threshold</td>
-        <td class="price">$0.001</td>
-      </tr>
-      <tr>
-        <td><code>GET /api/catalog</code></td>
-        <td>Machine-readable catalog of everything for sale</td>
-        <td class="price">free</td>
-      </tr>
-      <tr>
-        <td><code>GET /api/health</code></td>
-        <td>Service status</td>
-        <td class="price">free</td>
-      </tr>
-    </table>
-  </section>
-
-  <section>
-    <h2>Watch endpoints — ask only for what changed</h2>
-    <p style="color: var(--muted); max-width: 720px;">Snapshots are fine once. Agents that
-    run on a schedule want the diff. Every <code>/api/watch/*</code> reply carries a
-    <code>cursor</code> — pass it back as <code>?since=</code> and you get only the new
-    events. Your agent holds the cursor, so we still store nothing about you.</p>
-<pre style="margin-top: 16px;"><span class="c"># first call — everything recent, plus a cursor</span>
-curl <span class="s">"https://agenttoll.app/api/watch/radar"</span>
-<span class="c"># { pools: [...], cursor: "2026-08-05T08:40:01Z" }</span>
-
-<span class="c"># later — only what appeared since</span>
-curl <span class="s">"https://agenttoll.app/api/watch/radar?since=2026-08-05T08:40:01Z"</span></pre>
-  </section>
-
-  <section>
-    <h2>How it works</h2>
-    <div class="steps">
-      <div class="step"><div class="n">1</div><h3>Request</h3>
-        <p>Your agent calls an endpoint. The server replies <code>402 Payment Required</code> with a price quote.</p></div>
-      <div class="step"><div class="n">2</div><h3>Pay inline</h3>
-        <p>The agent signs a USDC authorization for the quoted amount — no gas, no account, no API key.</p></div>
-      <div class="step"><div class="n">3</div><h3>Get the data</h3>
-        <p>The request retries with the payment header; settlement lands on Base, data comes back instantly.</p></div>
+    <div class="hero-meta">
+      <span class="chip" id="toll-counter">reading the chain…</span>
+      <span class="chip">From <strong>$0.001</strong> a call</span>
+      <span class="chip">Open source · MIT</span>
+      <span class="chip">agenttoll.base.eth</span>
     </div>
-  </section>
+  </div>
+</header>
 
-  <section>
-    <h2>Try it in 10 seconds — no wallet needed</h2>
-<pre><span class="c"># free health check</span>
-curl https://agenttoll.app/api/health
+<section class="band">
+  <div class="wrap">
+    <p class="kicker rv">What is this</p>
+    <h2 class="rv">A data vending machine for software</h2>
+    <p class="sub rv">Software can't sign up for accounts or hold credit cards. So here,
+      nothing is gated behind a signup form — the price is quoted in the HTTP response and
+      paid by the agent itself, machine to machine.</p>
+    <div class="grid g3">
+      <div class="card rv"><div class="ico">🤖</div>
+        <h3>Who uses it</h3>
+        <p>Trading bots, portfolio monitors, DeFi watchers and AI assistants that need market
+          or Base onchain data on a schedule.</p></div>
+      <div class="card rv"><div class="ico">💸</div>
+        <h3>What it costs</h3>
+        <p>$0.001–$0.005 per call. An agent polling every five minutes spends cents a month —
+          and pays nothing at all while it sits idle.</p></div>
+      <div class="card rv"><div class="ico">🔍</div>
+        <h3>How agents find it</h3>
+        <p>A free machine-readable catalog at <code>/api/catalog</code>, plus x402 discovery,
+          OpenAPI and llms.txt. We're indexed in the x402 Bazaar.</p></div>
+    </div>
+  </div>
+</section>
 
-<span class="c"># hit a paid endpoint without paying: you get the machine-readable 402 quote</span>
-curl -i https://agenttoll.app/api/price/eth
-<span class="c"># HTTP/1.1 402 Payment Required</span>
-<span class="c"># {"x402Version":1,"accepts":[{"maxAmountRequired":"1000","asset":"USDC","payTo":"0x..."}]}</span></pre>
-    <p style="color: var(--muted); margin-top: 14px;">That 402 response is the whole product:
-    a price quote any agent can pay programmatically. Payments settle in real USDC on Base
-    mainnet. (Self-hosting the open-source repo defaults to Base Sepolia testnet — free test
-    USDC at <a href="https://faucet.circle.com">faucet.circle.com</a>.)</p>
-  </section>
+<section class="band" id="try">
+  <div class="wrap">
+    <p class="kicker rv">Try it</p>
+    <h2 class="rv">No wallet needed to look</h2>
+    <p class="sub rv">The 402 response <em>is</em> the product: a price quote any agent can
+      read and pay programmatically. Run this and you'll see one.</p>
+    <div class="two">
+      <div class="rv">
+<pre><span class="c"># free — service status and full catalog</span>
+curl agenttoll.app/api/health
+curl agenttoll.app/api/catalog
 
-  <section>
-    <h2>Try it from your agent</h2>
-<pre><span class="c">// npm i x402-fetch viem</span>
+<span class="c"># a paid endpoint, unpaid: you get the quote</span>
+curl -i agenttoll.app/api/price/eth
+<span class="y">HTTP/1.1 402 Payment Required</span>
+<span class="c">{"x402Version":1,"accepts":[{
+  "maxAmountRequired":"1000",
+  "asset":"USDC","network":"base" }]}</span></pre>
+      </div>
+      <div class="rv">
+<pre><span class="c">// from your agent — npm i x402-fetch viem</span>
 <span class="k">import</span> { wrapFetchWithPayment } <span class="k">from</span> <span class="s">"x402-fetch"</span>;
 <span class="k">import</span> { privateKeyToAccount } <span class="k">from</span> <span class="s">"viem/accounts"</span>;
 
-<span class="k">const</span> pay = wrapFetchWithPayment(fetch, privateKeyToAccount(AGENT_KEY));
-<span class="k">const</span> res = <span class="k">await</span> pay(<span class="s">"https://agenttoll.app/api/price/eth"</span>);
-console.log(<span class="k">await</span> res.json()); <span class="c">// { symbol: "eth", usd: ..., change24h: ... }</span></pre>
-  </section>
+<span class="k">const</span> pay = wrapFetchWithPayment(fetch,
+  privateKeyToAccount(AGENT_KEY));
 
-  <section>
-    <h2>Or plug it into Claude (MCP)</h2>
-    <p style="color: var(--muted); margin-bottom: 14px;">AgentToll ships an MCP server:
-    add it to Claude Desktop / Claude Code and every endpoint becomes a native tool —
-    your agent pays per call automatically.</p>
+<span class="k">const</span> res = <span class="k">await</span> pay(
+  <span class="s">"https://agenttoll.app/api/price/eth"</span>);
+
+console.log(<span class="k">await</span> res.json());
+<span class="c">// { symbol: "eth", usd: …, change24h: … }</span></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="endpoints">
+  <div class="wrap">
+    <p class="kicker rv">Catalog</p>
+    <h2 class="rv">Thirteen endpoints, priced per call</h2>
+    <p class="sub rv">Base onchain data first — gas, any token by contract address, address
+      analytics, DEX pools and a spam-filtered new-token radar — plus market and
+      Turkish-lira feeds.</p>
+    <div class="table-wrap rv">
+      <div class="scroll-x">
+      <table>
+        <thead><tr><th>Endpoint</th><th>What you get</th><th>Price</th></tr></thead>
+        <tbody>
+          <tr><td><code>GET /api/base/radar</code></td><td>New-token radar: fresh Base pools that already have real liquidity</td><td class="price">$0.003</td></tr>
+          <tr><td><code>GET /api/base/trending</code></td><td>Trending DEX pools on Base: price, volume, liquidity</td><td class="price">$0.002</td></tr>
+          <tr><td><code>GET /api/base/token/:address</code></td><td>Onchain USD price for any Base token by contract address</td><td class="price">$0.001</td></tr>
+          <tr><td><code>GET /api/base/address/:address</code></td><td>Base address snapshot: ETH balance, tx count, contract or EOA</td><td class="price">$0.001</td></tr>
+          <tr><td><code>GET /api/gas</code></td><td>Base network gas price and latest block</td><td class="price">$0.001</td></tr>
+          <tr><td><code>GET /api/brief</code></td><td>One-call market brief: BTC/ETH/SOL, Base gas, sentiment</td><td class="price">$0.005</td></tr>
+          <tr><td><code>GET /api/price/:symbol</code></td><td>Spot price (USD) + 24h change for any asset</td><td class="price">$0.001</td></tr>
+          <tr><td><code>GET /api/trending</code></td><td>Tokens trending across the market right now</td><td class="price">$0.002</td></tr>
+          <tr><td><code>GET /api/feargreed</code></td><td>Crypto Fear &amp; Greed index with yesterday comparison</td><td class="price">$0.001</td></tr>
+          <tr><td><code>GET /api/try/premium</code></td><td>Turkish lira premium: implied vs official USD/TRY</td><td class="price">$0.002</td></tr>
+          <tr><td><code>GET /api/watch/address/:address</code></td><td>New activity for a Base address since your cursor</td><td class="price">$0.002</td></tr>
+          <tr><td><code>GET /api/watch/radar</code></td><td>Only the pools that appeared since your cursor</td><td class="price">$0.003</td></tr>
+          <tr><td><code>GET /api/watch/price/:symbol</code></td><td>Price alert check against your reference and threshold</td><td class="price">$0.001</td></tr>
+          <tr><td><code>GET /api/catalog</code></td><td>Machine-readable catalog of everything for sale</td><td class="price free">free</td></tr>
+          <tr><td><code>GET /api/demo</code></td><td>Sample response shapes for every paid endpoint</td><td class="price free">free</td></tr>
+          <tr><td><code>GET /api/stats</code></td><td>Onchain-derived toll counter: calls and USDC revenue</td><td class="price free">free</td></tr>
+          <tr><td><code>GET /api/health</code></td><td>Service status</td><td class="price free">free</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+    <p class="sub rv" style="margin-top:20px; font-size:.9rem;">Responses come from a
+      short-lived cache (15–300s) to keep upstream sources happy. Every paid call still
+      settles onchain.</p>
+  </div>
+</section>
+
+<section class="band" id="watch">
+  <div class="wrap">
+    <p class="kicker rv">Watch endpoints</p>
+    <h2 class="rv">Ask only for what changed</h2>
+    <p class="sub rv">A snapshot is useful once. Agents that run on a schedule want the diff.
+      Every <code>/api/watch/*</code> reply carries a <strong>cursor</strong> — send it back
+      as <code>?since=</code> and you get only the new events. Your agent holds the cursor,
+      so we still store nothing about you: stateful for you, stateless for us.</p>
+    <div class="rv">
+<pre><span class="c"># first call — everything recent, plus a cursor</span>
+curl <span class="s">"https://agenttoll.app/api/watch/radar"</span>
+<span class="c">→ { "count": 9, "pools": […], "cursor": "2026-08-05T08:40:01Z" }</span>
+
+<span class="c"># ten minutes later — only what appeared since</span>
+curl <span class="s">"https://agenttoll.app/api/watch/radar?since=2026-08-05T08:40:01Z"</span>
+<span class="c">→ { "count": 0, "pools": [] }   </span><span class="y">// nothing new. cheap poll, no wasted work.</span></pre>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <p class="kicker rv">How it works</p>
+    <h2 class="rv">One request, one micropayment, one response</h2>
+    <div class="grid g3 steps">
+      <div class="card rv"><div class="step-n">1</div>
+        <h3>Request</h3>
+        <p>Your agent calls an endpoint. The server replies <code>402 Payment Required</code>
+          with a machine-readable price quote.</p></div>
+      <div class="card rv"><div class="step-n">2</div>
+        <h3>Pay inline</h3>
+        <p>The agent signs a USDC authorization for the quoted amount — no gas on the client,
+          no account, no API key.</p></div>
+      <div class="card rv"><div class="step-n">3</div>
+        <h3>Get the data</h3>
+        <p>The request retries with the payment header. Settlement lands on Base and the data
+          comes back in the same round trip.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="mcp">
+  <div class="wrap">
+    <p class="kicker rv">MCP</p>
+    <h2 class="rv">Plug it straight into Claude</h2>
+    <p class="sub rv">AgentToll ships an MCP server. Add it to Claude Desktop or Claude Code
+      and all thirteen endpoints become native tools — your agent pays per call automatically
+      from its own wallet.</p>
+    <div class="two">
+      <div class="rv">
 <pre>{
   <span class="s">"mcpServers"</span>: {
     <span class="s">"agenttoll"</span>: {
       <span class="s">"command"</span>: <span class="s">"npx"</span>,
       <span class="s">"args"</span>: [<span class="s">"-y"</span>, <span class="s">"agenttoll-mcp"</span>],
-      <span class="s">"env"</span>: { <span class="s">"AGENT_PRIVATE_KEY"</span>: <span class="s">"0x..."</span> }
+      <span class="s">"env"</span>: { <span class="s">"AGENT_PRIVATE_KEY"</span>: <span class="s">"0x…"</span> }
     }
   }
 }</pre>
-    <p style="color: var(--muted); margin-top: 14px;">10 tools: <code>get_price</code>,
-    <code>get_base_gas</code>, <code>get_trending</code>, <code>get_base_token_price</code>,
-    <code>get_base_address_info</code>, <code>get_fear_greed</code>, <code>get_base_trending_pools</code>,
-    <code>get_market_brief</code>, <code>get_new_token_radar</code>, <code>get_try_premium</code>.
-    Package: <a href="https://www.npmjs.com/package/agenttoll-mcp">agenttoll-mcp on npm</a> ·
-    <a href="https://github.com/tevfikefeaydin/agenttoll#use-it-as-an-mcp-server-claude--friends">README</a>.</p>
-  </section>
+      </div>
+      <div class="card rv">
+        <div class="ico">🧰</div>
+        <h3>13 tools, zero setup</h3>
+        <p><code>get_price</code>, <code>get_base_gas</code>, <code>get_trending</code>,
+          <code>get_base_token_price</code>, <code>get_base_address_info</code>,
+          <code>get_fear_greed</code>, <code>get_base_trending_pools</code>,
+          <code>get_market_brief</code>, <code>get_new_token_radar</code>,
+          <code>get_try_premium</code>, <code>watch_base_address</code>,
+          <code>watch_new_tokens</code>, <code>watch_price_alert</code>.</p>
+        <p style="margin-top:12px;"><a href="https://www.npmjs.com/package/agenttoll-mcp">agenttoll-mcp on npm →</a></p>
+      </div>
+    </div>
+  </div>
+</section>
 
-  <footer>
-    <span>© 2026 AgentToll · agenttoll.base.eth — MIT licensed, building in public.</span>
-    <span><a href="https://github.com/tevfikefeaydin/agenttoll">GitHub</a> · <a href="/openapi.json">OpenAPI</a> · <a href="/llms.txt">llms.txt</a> · <a href="https://x402.org">x402</a> · <a href="https://base.org">Base</a></span>
-  </footer>
-</div>
-<script src="/stats.js"></script>
+<section class="band">
+  <div class="wrap">
+    <p class="kicker rv">Transparency</p>
+    <h2 class="rv">Numbers we can't fake, data we can't leak</h2>
+    <div class="grid g3">
+      <div class="card rv"><div class="ico">⛓️</div>
+        <h3>Revenue read from the chain</h3>
+        <p><code>/api/stats</code> counts the actual USDC transfers to our address on Base.
+          Not self-reported — verify the same transactions on BaseScan.</p></div>
+      <div class="card rv"><div class="ico">🔒</div>
+        <h3>Nothing to leak</h3>
+        <p>No accounts, no API keys, no sessions. Even the watch endpoints keep the cursor on
+          your side, not ours.</p></div>
+      <div class="card rv"><div class="ico">📖</div>
+        <h3>Open source, MIT</h3>
+        <p>The whole tollbooth is on GitHub. Fork it and run your own — the payment rail is
+          the interesting part, and it's yours too.</p></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot">
+    <span>© 2026 AgentToll · agenttoll.base.eth — built in public on Base.</span>
+    <span class="foot-links">
+      <a href="https://github.com/tevfikefeaydin/agenttoll">GitHub</a>
+      <a href="/openapi.json">OpenAPI</a>
+      <a href="/llms.txt">llms.txt</a>
+      <a href="/.well-known/x402">x402 discovery</a>
+      <a href="https://x402.org">x402</a>
+      <a href="https://base.org">Base</a>
+    </span>
+  </div>
+</footer>
+
+<script src="/app.js"></script>
 </body>
 </html>
