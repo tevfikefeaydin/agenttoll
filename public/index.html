@@ -485,6 +485,11 @@ curl <span class="s">"https://agenttoll.app/api/watch/radar?since=2026-08-05T08:
         <h3>Failed requests aren't charged</h3>
         <p>Settlement happens only after the endpoint returns your data. If an upstream is
           down you get an error — and keep your USDC.</p></div>
+      <div class="card rv"><div class="ico">🔁</div>
+        <h3>Several sources per endpoint</h3>
+        <p>Prices fall through CoinGecko → Binance → Coinbase, Base tokens through
+          GeckoTerminal → DexScreener, and RPC calls across three providers. The response
+          names the source that answered.</p></div>
       <div class="card rv"><div class="ico">📖</div>
         <h3>Open source, MIT</h3>
         <p>The whole tollbooth is on GitHub. Fork it and run your own — the payment rail is

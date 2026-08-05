@@ -58,7 +58,19 @@ keep upstream sources happy; every paid call still settles onchain.
 **Failed requests are never charged.** Settlement only runs after the handler
 returns a success status — if an upstream is down you get the error and keep
 your USDC. (Verified against production: a 502 response left the caller's
-balance untouched.)
+balance untouched.) A malformed request returns `400`; a genuine upstream
+failure returns `502`. Neither is billed.
+
+**Multiple sources per endpoint.** Public data APIs rate-limit and wobble, so
+the ones that matter fall through to a backup rather than failing:
+
+| Data | Primary | Fallbacks |
+|---|---|---|
+| Asset prices | CoinGecko | Binance → Coinbase |
+| Base token price | GeckoTerminal | DexScreener |
+| Base RPC (gas, address) | mainnet.base.org | publicnode → llamarpc |
+
+Price responses carry a `source` field so you can see which one answered.
 
 ### Watch endpoints (stateless diffs)
 

@@ -7,7 +7,11 @@
 > no subscriptions - an agent sends one HTTP request, pays inline, gets the data.
 > Open source (MIT), with an MCP server on npm. Failed requests are never
 > charged: settlement only happens once the endpoint returns data, so an
-> upstream error costs the caller nothing.
+> upstream error costs the caller nothing. Malformed requests return 400,
+> upstream failures return 502; neither is billed. Key endpoints read from
+> several independent sources (CoinGecko/Binance/Coinbase for prices,
+> GeckoTerminal/DexScreener for Base tokens, three Base RPCs) and fall
+> through automatically, with the answering source named in the response.
 
 Onchain identity: agenttoll.base.eth. Open source (MIT): https://github.com/tevfikefeaydin/agenttoll
 
