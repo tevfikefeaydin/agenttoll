@@ -6,6 +6,8 @@ import { paymentMiddlewareFromConfig } from "@x402/express";
 import { HTTPFacilitatorClient } from "@x402/core/server";
 import { ExactEvmScheme } from "@x402/evm/exact/server";
 import { facilitator as cdpFacilitator } from "@coinbase/x402";
+import { declareDiscoveryExtension } from "@x402/extensions/bazaar";
+import { DISCOVERY } from "./discovery.js";
 import { getPrice } from "./services/prices.js";
 import { getGas } from "./services/gas.js";
 import { getTrending } from "./services/trending.js";
@@ -39,10 +41,21 @@ const facilitatorClient = new HTTPFacilitatorClient(
   NETWORK === "base" ? cdpFacilitator : { url: FACILITATOR_URL },
 );
 
-/** Every route is the same deal, only the price and the wording change. */
-const paid = (price: string, description: string) => ({
+/**
+ * Every route is the same deal, only the price and the wording change.
+ *
+ * `route` is the key this config is filed under, which is also how we look up
+ * the endpoint's schemas — declaring them here puts the request and response
+ * shape inside the 402 quote itself, so an indexer that never manages to fetch
+ * our OpenAPI spec still learns how to call the endpoint.
+ */
+const paid = (route: string, price: string, description: string) => ({
   accepts: { scheme: "exact", payTo: PAY_TO, price, network: CHAIN },
   description,
+  extensions: declareDiscoveryExtension({
+    ...DISCOVERY[route],
+    output: { example: DISCOVERY[route].output },
+  }),
 });
 
 const app = express();
@@ -118,60 +131,60 @@ app.use((req, res, next) => {
 app.use(
   paymentMiddlewareFromConfig(
     {
-      "GET /api/price/*": paid("$0.001", "Spot price (USD) and 24h change for a crypto asset"),
-      "GET /api/gas": paid(
+      "GET /api/price/:symbol": paid("GET /api/price/:symbol", "$0.001", "Spot price (USD) and 24h change for a crypto asset"),
+      "GET /api/gas": paid("GET /api/gas",
         "$0.001",
         "Current Base network gas price and latest block number; add ?gasLimit=150000 to also get what a transaction that size costs in ETH and USD",
       ),
-      "GET /api/trending": paid(
+      "GET /api/trending": paid("GET /api/trending",
         "$0.002",
         "Tokens trending across the crypto market right now; ?limit=N trims the list",
       ),
-      "GET /api/base/token/*": paid(
+      "GET /api/base/token/:address": paid("GET /api/base/token/:address",
         "$0.001",
         "Onchain USD price for any token on Base, looked up by contract address",
       ),
-      "GET /api/base/address/*": paid(
+      "GET /api/base/address/:address": paid("GET /api/base/address/:address",
         "$0.001",
         "Snapshot of a Base address: primary basename, ETH balance, transaction count, and whether it is a contract",
       ),
-      "GET /api/feargreed": paid(
+      "GET /api/feargreed": paid("GET /api/feargreed",
         "$0.001",
         "Crypto Fear and Greed index with yesterday's value; ?days=7 adds a daily history so you can see whether sentiment is turning",
       ),
-      "GET /api/base/trending": paid(
+      "GET /api/base/trending": paid("GET /api/base/trending",
         "$0.002",
         "Trending DEX pools on Base right now, with price, 24h volume and liquidity; ?limit=N sets how many",
       ),
-      "GET /api/brief": paid(
+      "GET /api/brief": paid("GET /api/brief",
         "$0.005",
         "One-call market brief: prices (BTC, ETH and SOL by default, or ?symbols=eth,degen), Base gas, and market sentiment",
       ),
-      "GET /api/base/radar": paid(
+      "GET /api/base/radar": paid("GET /api/base/radar",
         "$0.003",
         "New token radar for Base: pools created in the last 24 hours that already hold real liquidity; ?minLiquidity sets the spam floor in USD, default 10000",
       ),
-      "GET /api/try/premium": paid(
+      "GET /api/try/premium": paid("GET /api/try/premium",
         "$0.002",
         "Turkish lira crypto premium: implied USD/TRY from a crypto cross-rate versus the official rate; ?asset=usdt is the reading desks quote",
       ),
-      "GET /api/base/portfolio/*": paid(
+      "GET /api/base/portfolio/:address": paid("GET /api/base/portfolio/:address",
         "$0.003",
         "Everything a Base address holds, valued in USD: ETH plus its ERC-20 tokens, largest first, with a spam floor you set",
       ),
-      "GET /api/base/name/*": paid(
+      "GET /api/base/name/:nameOrAddress": paid("GET /api/base/name/:nameOrAddress",
         "$0.001",
         "Basename resolution both ways: a name returns its address and text records, an address returns its primary basename",
       ),
-      "GET /api/watch/address/*": paid(
+      "GET /api/watch/address/:address": paid("GET /api/watch/address/:address",
         "$0.002",
         "New activity for a Base address since your cursor, so a scheduled agent only fetches what changed",
       ),
-      "GET /api/watch/radar": paid(
+      "GET /api/watch/radar": paid("GET /api/watch/radar",
         "$0.003",
         "Only the Base pools that appeared since your cursor, for agents polling on a schedule",
       ),
-      "GET /api/watch/price/*": paid(
+      "GET /api/watch/price/:symbol": paid("GET /api/watch/price/:symbol",
         "$0.001",
         "Price alert check: tells you whether an asset moved past your threshold from a reference price",
       ),

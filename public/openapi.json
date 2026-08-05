@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "AgentToll",
-    "version": "0.6.0",
+    "version": "0.7.0",
     "description": "Pay-per-call data APIs for AI agents. Paid endpoints return HTTP 402 with an x402 quote; pay $0.001-$0.005 in USDC on Base mainnet per call. No API keys. Onchain identity: agenttoll.base.eth.",
     "contact": {
       "name": "AgentToll",
@@ -67,16 +67,38 @@
     "/api/price/{symbol}": {
       "get": {
         "summary": "Spot price (USD) + 24h change for a crypto asset",
-        "x-price-usdc": "0.001",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.001"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
         "parameters": [
           {
             "name": "symbol",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9-]{0,31}$",
+              "minLength": 1,
+              "maxLength": 32
             },
-            "example": "eth"
+            "example": "eth",
+            "description": "Ticker (eth, btc, sol, usdc, aero, degen...) or any CoinGecko id, e.g. degen-base"
           }
         ],
         "responses": {
@@ -95,7 +117,25 @@
     "/api/gas": {
       "get": {
         "summary": "Base network gas price and latest block, optionally costed for a transaction size",
-        "x-price-usdc": "0.001",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.001"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
         "parameters": [
           {
             "name": "gasLimit",
@@ -126,7 +166,25 @@
     "/api/trending": {
       "get": {
         "summary": "Tokens trending across the market right now",
-        "x-price-usdc": "0.002",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.002"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
         "parameters": [
           {
             "name": "limit",
@@ -157,7 +215,25 @@
     "/api/base/token/{address}": {
       "get": {
         "summary": "Onchain USD price for any Base token by contract address",
-        "x-price-usdc": "0.001",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.001"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
         "parameters": [
           {
             "name": "address",
@@ -185,7 +261,25 @@
     "/api/base/address/{address}": {
       "get": {
         "summary": "Base address snapshot: ETH balance, tx count, contract or EOA",
-        "x-price-usdc": "0.001",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.001"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
         "parameters": [
           {
             "name": "address",
@@ -213,7 +307,25 @@
     "/api/base/trending": {
       "get": {
         "summary": "Trending DEX pools on Base: price, volume, liquidity",
-        "x-price-usdc": "0.002",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.002"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
         "parameters": [
           {
             "name": "limit",
@@ -245,7 +357,25 @@
     "/api/base/radar": {
       "get": {
         "summary": "New token radar: fresh Base pools that already hold real liquidity, spam filtered",
-        "x-price-usdc": "0.003",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.003"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
         "parameters": [
           {
             "name": "minLiquidity",
@@ -290,7 +420,25 @@
     "/api/feargreed": {
       "get": {
         "summary": "Crypto Fear & Greed index with yesterday comparison and optional daily history",
-        "x-price-usdc": "0.001",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.001"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
         "parameters": [
           {
             "name": "days",
@@ -321,7 +469,25 @@
     "/api/brief": {
       "get": {
         "summary": "One-call market brief: prices, Base gas, sentiment",
-        "x-price-usdc": "0.005",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.005"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
         "parameters": [
           {
             "name": "symbols",
@@ -351,7 +517,25 @@
     "/api/try/premium": {
       "get": {
         "summary": "Turkish lira premium: implied vs official USD/TRY via a crypto cross-rate",
-        "x-price-usdc": "0.002",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.002"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
         "parameters": [
           {
             "name": "asset",
@@ -387,7 +571,25 @@
     "/api/base/portfolio/{address}": {
       "get": {
         "summary": "Everything a Base address holds, valued in USD: ETH plus its ERC-20 tokens, largest first",
-        "x-price-usdc": "0.003",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.003"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
         "parameters": [
           {
             "name": "address",
@@ -441,7 +643,25 @@
     "/api/base/name/{nameOrAddress}": {
       "get": {
         "summary": "Basename resolution both ways: a name returns its address, owner and text records; a 0x address returns its primary basename",
-        "x-price-usdc": "0.001",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.001"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
         "parameters": [
           {
             "name": "nameOrAddress",
@@ -470,7 +690,25 @@
     "/api/watch/address/{address}": {
       "get": {
         "summary": "New activity for a Base address since your cursor. The reply's `cursor` is what you pass as `since` next time.",
-        "x-price-usdc": "0.002",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.002"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
         "parameters": [
           {
             "name": "address",
@@ -508,7 +746,25 @@
     "/api/watch/radar": {
       "get": {
         "summary": "Only the Base pools that appeared since your cursor",
-        "x-price-usdc": "0.003",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.003"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
         "parameters": [
           {
             "name": "since",
@@ -537,7 +793,25 @@
     "/api/watch/price/{symbol}": {
       "get": {
         "summary": "Price alert check: has the asset moved past your threshold from your reference price?",
-        "x-price-usdc": "0.001",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.001"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
         "parameters": [
           {
             "name": "symbol",
