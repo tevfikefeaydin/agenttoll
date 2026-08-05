@@ -1,8 +1,11 @@
 # AgentToll
 
-> Pay-per-call data APIs for AI agents. Every endpoint costs $0.001-$0.005, paid in
+> Base-native onchain data for AI agents, pay-per-call. Base gas, any token price by
+> contract address, address analytics, DEX pools, a spam-filtered new-token radar,
+> plus market and Turkish-lira feeds. Every endpoint costs $0.001-$0.005, paid in
 > USDC on Base mainnet via the x402 protocol (HTTP 402). No API keys, no accounts,
 > no subscriptions - an agent sends one HTTP request, pays inline, gets the data.
+> Open source (MIT), with an MCP server on npm.
 
 Onchain identity: agenttoll.base.eth. Open source (MIT): https://github.com/tevfikefeaydin/agenttoll
 

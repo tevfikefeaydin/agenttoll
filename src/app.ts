@@ -200,7 +200,8 @@ app.get("/.well-known/x402", (_req, res) => {
 app.get("/api/catalog", (_req, res) => {
   res.json({
     service: "agenttoll",
-    description: "Pay-per-call data APIs for AI agents, paid in USDC via x402",
+    description:
+      "Base-native onchain data for AI agents, pay-per-call in USDC via x402. Open source (MIT).",
     network: NETWORK,
     payment: "x402",
     endpoints: [
