@@ -17,10 +17,14 @@ Onchain identity: agenttoll.base.eth. Open source (MIT): https://github.com/tevf
 
 ## How to pay
 
-Any x402 client works. JavaScript: `npm i x402-fetch viem`, wrap fetch with
-`wrapFetchWithPayment(fetch, account)` and call the endpoint - the 402 quote is
-paid automatically in USDC on Base. MCP: `npx agenttoll-mcp` exposes all
-endpoints as tools (env: AGENT_PRIVATE_KEY).
+Any x402 v2 client works. JavaScript: `npm i @x402/fetch @x402/evm viem`, wrap
+fetch with `wrapFetchWithPaymentFromConfig(fetch, { schemes: [{ network:
+"eip155:8453", client: new ExactEvmScheme(signer) }] })` and call the endpoint -
+the 402 quote is paid automatically in USDC on Base, and the settlement receipt
+comes back in the `payment-response` header. Every 402 quote also carries the
+endpoint's request and response schema, so no second request is needed to learn
+how to call it. MCP: `npx agenttoll-mcp` exposes all endpoints as tools
+(env: AGENT_PRIVATE_KEY).
 
 ## Endpoints
 

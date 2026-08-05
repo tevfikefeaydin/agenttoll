@@ -146,19 +146,35 @@ Calling a paid endpoint without payment returns the 402 quote:
 ```bash
 curl -i http://localhost:4021/api/price/eth
 # HTTP/1.1 402 Payment Required
-# { "x402Version": 1, "accepts": [ { "maxAmountRequired": "1000", "asset": "USDC", ... } ] }
+# PAYMENT-REQUIRED: <base64 quote — accepts[], plus the request and response schemas>
 ```
 
 ## Quickstart (paying agent)
 
-```ts
-import { wrapFetchWithPayment } from "x402-fetch";
-import { privateKeyToAccount } from "viem/accounts";
+x402 v2 takes the network in CAIP-2 form and a payment scheme registered for it:
 
-const pay = wrapFetchWithPayment(fetch, privateKeyToAccount(AGENT_KEY));
-const res = await pay("http://localhost:4021/api/price/eth");
+```ts
+import { createPublicClient, http } from "viem";
+import { base } from "viem/chains";
+import { privateKeyToAccount } from "viem/accounts";
+import { wrapFetchWithPaymentFromConfig } from "@x402/fetch";
+import { ExactEvmScheme, toClientEvmSigner } from "@x402/evm";
+
+const account = privateKeyToAccount(AGENT_KEY);
+const publicClient = createPublicClient({ chain: base, transport: http() });
+
+const pay = wrapFetchWithPaymentFromConfig(fetch, {
+  schemes: [
+    { network: "eip155:8453", client: new ExactEvmScheme(toClientEvmSigner(account, publicClient)) },
+  ],
+});
+
+const res = await pay("https://agenttoll.app/api/price/eth");
 console.log(await res.json()); // { symbol: "eth", usd: ..., change24h: ... }
 ```
+
+The settlement receipt comes back in the `payment-response` header. `src/pay.ts`
+wraps this for our own scripts if you want it in one call.
 
 Or run the bundled example (needs a funded Base Sepolia test wallet — get testnet USDC
 at [faucet.circle.com](https://faucet.circle.com)):
@@ -217,18 +233,20 @@ Shipped:
 - [x] Agent-native discovery: `/api/catalog`, `/.well-known/x402`, `openapi.json`, `llms.txt`
 - [x] Onchain toll counter, with the operator's own test wallet reported separately
 - [x] Backup data sources per endpoint, so one provider rate-limiting us is not an outage
+- [x] Wallet portfolio: every token an address holds on Base, with USD value
+- [x] Schemas inside the 402 quote, so discovery never depends on a second request
 
 Next:
 
-- [ ] Wallet portfolio: every token an address holds on Base, with USD value
 - [ ] Token safety checks for the radar's output (honeypot, liquidity lock, holder concentration)
 - [ ] Turkish market data beyond the lira premium (local exchange spreads)
 - [ ] A directory of x402 services agents can call, served over x402 itself
 
 ## Stack
 
-TypeScript · Express · [`x402-express`](https://www.npmjs.com/package/x402-express) ·
-[`x402-fetch`](https://www.npmjs.com/package/x402-fetch) · viem · Base
+TypeScript · Express · [`@x402/express`](https://www.npmjs.com/package/@x402/express) ·
+[`@x402/fetch`](https://www.npmjs.com/package/@x402/fetch) ·
+[`@x402/extensions`](https://www.npmjs.com/package/@x402/extensions) · viem · Base
 
 ## Development
 
