@@ -175,6 +175,28 @@ server.tool(
 );
 
 server.tool(
+  "get_base_portfolio",
+  "Everything a Base address holds, valued in USD: ETH plus its ERC-20 tokens, largest first. The reply carries totals and says how many holdings fell below the floor or could not be priced. Costs $0.003 in USDC via x402.",
+  {
+    address: z.string().describe("Address on Base (0x...)"),
+    minValue: z
+      .number()
+      .min(0)
+      .optional()
+      .describe("USD floor per holding, which keeps airdropped spam out (default 1)"),
+    limit: z.number().int().min(1).max(50).optional().describe("How many holdings to list (default 20)"),
+  },
+  async ({ address, minValue, limit }) => ({
+    content: [
+      {
+        type: "text",
+        text: await call(`/api/base/portfolio/${encodeURIComponent(address)}`, { minValue, limit }),
+      },
+    ],
+  }),
+);
+
+server.tool(
   "resolve_basename",
   "Resolve a Basename both ways: pass a name (agenttoll.base.eth, or just agenttoll) to get its address and text records, or pass a 0x address to get its primary basename. Costs $0.001 in USDC via x402.",
   { query: z.string().describe("A basename or a 0x address") },

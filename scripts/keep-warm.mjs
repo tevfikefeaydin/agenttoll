@@ -31,6 +31,7 @@ const ENDPOINTS = [
   "/api/base/radar",
   "/api/base/token/0x940181a94a35a4569e4529a3cdfb74e38fd98631",
   "/api/base/address/0xe55359021a6a22d8385b827405991c56075f56f8",
+  "/api/base/portfolio/0x1985ea6e9c68e1c272d8209f3b478ac2fdb25c87?minValue=1000&limit=5",
   "/api/base/name/agenttoll.base.eth",
   "/api/watch/radar",
   "/api/watch/price/eth?ref=1900&pct=2",

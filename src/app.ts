@@ -19,6 +19,7 @@ import { getAddressActivity, getRadarSince, getPriceAlert } from "./services/wat
 import { BadRequestError } from "./services/errors.js";
 import { resolveBasename } from "./services/basename.js";
 import { getNewTokenRadar } from "./services/radar.js";
+import { getPortfolio } from "./services/portfolio.js";
 import { getTryPremium } from "./services/trypremium.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -154,6 +155,10 @@ app.use(
         "$0.002",
         "Turkish lira crypto premium: implied USD/TRY from a crypto cross-rate versus the official rate; ?asset=usdt is the reading desks quote",
       ),
+      "GET /api/base/portfolio/*": paid(
+        "$0.003",
+        "Everything a Base address holds, valued in USD: ETH plus its ERC-20 tokens, largest first, with a spam floor you set",
+      ),
       "GET /api/base/name/*": paid(
         "$0.001",
         "Basename resolution both ways: a name returns its address and text records, an address returns its primary basename",
@@ -214,6 +219,7 @@ app.get("/api/demo", (_req, res) => {
       "/api/brief": { majors: { eth: { usd: 1880.43 }, btc: { usd: 63654 }, sol: { usd: 98.2 } }, baseGas: { gasPriceGwei: 0.006 }, sentiment: { value: 25 }, at: "2026-07-31T09:10:00.000Z" },
       "/api/base/radar": { chain: "base", minLiquidityUsd: 10000, count: 1, pools: [{ name: "BASED / ETH 1%", pool: "0x2acb...cac0", createdAt: "2026-08-05T13:01:33Z", priceUsd: 0.0000156, volume24hUsd: 19071.46, liquidityUsd: 14246.1 }], at: "2026-08-05T13:31:00.000Z" },
       "/api/try/premium": { asset: "usdt", assetUsd: 0.999318, assetTry: 47.53, impliedUsdTry: 47.5624, officialUsdTry: 47.2891, premiumPct: 0.578, at: "2026-08-05T13:31:00.000Z" },
+      "/api/base/portfolio/{address}": { chain: "base", address: "0x1985...5c87", basename: null, native: { symbol: "ETH", balance: 194.68, priceUsd: 1868.57, valueUsd: 363774.32 }, tokens: [{ symbol: "CBBTC", name: "Coinbase Wrapped BTC", address: "0xcbb7...33bf", balance: 5.673857, priceUsd: 64198, valueUsd: 364250.29 }], totalUsd: 7143109.27, tokenCount: 52, shown: 1, hiddenBelowFloor: 48, unpriced: 0, minValueUsd: 10000, source: "blockscout", at: "2026-08-05T13:31:00.000Z" },
     },
   });
 });
@@ -237,6 +243,7 @@ app.get("/.well-known/x402", (_req, res) => {
       { resource: `${PUBLIC_BASE}/api/trending`, price: "$0.002", description: "Tokens trending across the market right now; ?limit=N" },
       { resource: `${PUBLIC_BASE}/api/base/token/{address}`, price: "$0.001", description: "Onchain USD price for any Base token by contract address" },
       { resource: `${PUBLIC_BASE}/api/base/address/{address}`, price: "$0.001", description: "Base address snapshot: primary basename, ETH balance, tx count, contract or EOA" },
+      { resource: `${PUBLIC_BASE}/api/base/portfolio/{address}`, price: "$0.003", description: "Everything a Base address holds, valued in USD: ETH plus ERC-20 tokens; ?minValue=USD&limit=N" },
       { resource: `${PUBLIC_BASE}/api/base/name/{nameOrAddress}`, price: "$0.001", description: "Basename resolution both ways: name to address, or address to primary name" },
       { resource: `${PUBLIC_BASE}/api/base/trending`, price: "$0.002", description: "Trending DEX pools on Base: price, volume, liquidity; ?limit=N" },
       { resource: `${PUBLIC_BASE}/api/base/radar`, price: "$0.003", description: "New token radar: fresh Base pools above your liquidity floor; ?minLiquidity=USD&limit=N" },
@@ -264,6 +271,7 @@ app.get("/api/catalog", (_req, res) => {
       { path: "/api/trending?limit={n}", method: "GET", price: "$0.002", description: "Tokens trending across the market right now" },
       { path: "/api/base/token/{address}", method: "GET", price: "$0.001", description: "Onchain USD price for any Base token by contract address" },
       { path: "/api/base/address/{address}", method: "GET", price: "$0.001", description: "Base address snapshot: primary basename, ETH balance, tx count, contract or EOA" },
+      { path: "/api/base/portfolio/{address}?minValue={usd}&limit={n}", method: "GET", price: "$0.003", description: "Everything a Base address holds, valued in USD: ETH plus ERC-20 tokens, largest first, spam floor default $1" },
       { path: "/api/base/name/{nameOrAddress}", method: "GET", price: "$0.001", description: "Basename resolution both ways: name to address (with text records), or address to primary name" },
       { path: "/api/base/trending?limit={n}", method: "GET", price: "$0.002", description: "Trending DEX pools on Base: price, volume, liquidity" },
       { path: "/api/feargreed?days={1-30}", method: "GET", price: "$0.001", description: "Crypto Fear & Greed index with yesterday comparison, optionally with daily history" },
@@ -287,6 +295,12 @@ app.get("/api/trending", serve((req) => getTrending(opt(req.query.limit))));
 app.get("/api/base/token/:address", serve((req) => getBaseTokenPrice(one(req.params.address))));
 app.get("/api/base/address/:address", serve((req) => getAddressInfo(one(req.params.address))));
 app.get("/api/base/name/:query", serve((req) => resolveBasename(one(req.params.query))));
+app.get(
+  "/api/base/portfolio/:address",
+  serve((req) =>
+    getPortfolio(one(req.params.address), opt(req.query.minValue), opt(req.query.limit)),
+  ),
+);
 app.get(
   "/api/base/radar",
   serve((req) => getNewTokenRadar(opt(req.query.minLiquidity), opt(req.query.limit))),

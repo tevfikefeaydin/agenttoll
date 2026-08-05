@@ -39,6 +39,7 @@ inline, and gets the data.
 | `GET /api/trending?limit=` | Tokens trending across the market right now | $0.002 |
 | `GET /api/base/token/:address` | Onchain USD price for any Base token by contract address | $0.001 |
 | `GET /api/base/address/:address` | Base address snapshot: primary basename, ETH balance, tx count, contract or EOA | $0.001 |
+| `GET /api/base/portfolio/:address?minValue=&limit=` | Everything an address holds on Base, valued in USD: ETH + ERC-20s, largest first | $0.003 |
 | `GET /api/base/name/:nameOrAddress` | Basename both ways: name → address + text records, or address → primary name | $0.001 |
 | `GET /api/feargreed?days=` | Crypto Fear & Greed index, plus up to 30 days of daily history | $0.001 |
 | `GET /api/base/trending?limit=` | Trending DEX pools on Base: price, volume, liquidity | $0.002 |
@@ -70,8 +71,15 @@ the ones that matter fall through to a backup rather than failing:
 | Asset prices | CoinGecko | Binance → Coinbase |
 | Base token price | GeckoTerminal | DexScreener |
 | Base RPC (gas, address) | mainnet.base.org | publicnode → llamarpc |
+| Portfolio holdings | Blockscout | Multicall3 onchain + DefiLlama |
 
 Price responses carry a `source` field so you can see which one answered.
+
+A fallback that can only see part of the picture says so rather than quietly
+answering short: if the portfolio indexer is down, the onchain path covers major
+Base tokens only and the reply comes back with `partial: true` and a `note`
+explaining what is missing. The same flag appears when an address holds more
+tokens than one call can enumerate.
 
 ### Optional parameters
 
