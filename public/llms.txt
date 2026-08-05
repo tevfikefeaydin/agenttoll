@@ -18,23 +18,23 @@ endpoints as tools (env: AGENT_PRIVATE_KEY).
 
 ## Endpoints
 
-- https://www.agenttoll.app/api/catalog : machine-readable catalog of everything for sale (free)
-- https://www.agenttoll.app/api/demo : sample response shapes for every paid endpoint (free)
-- https://www.agenttoll.app/api/stats : onchain-derived toll counter (free)
-- https://www.agenttoll.app/api/health : service status (free)
-- https://www.agenttoll.app/api/price/{symbol} : spot price USD + 24h change ($0.001)
-- https://www.agenttoll.app/api/gas : Base gas price + latest block ($0.001)
-- https://www.agenttoll.app/api/trending : trending tokens market-wide ($0.002)
-- https://www.agenttoll.app/api/base/token/{address} : onchain USD price of any Base token ($0.001)
-- https://www.agenttoll.app/api/base/address/{address} : Base address snapshot ($0.001)
-- https://www.agenttoll.app/api/base/trending : trending DEX pools on Base ($0.002)
-- https://www.agenttoll.app/api/base/radar : new-token radar, spam-filtered ($0.003)
-- https://www.agenttoll.app/api/feargreed : Fear & Greed index ($0.001)
-- https://www.agenttoll.app/api/brief : one-call market brief ($0.005)
-- https://www.agenttoll.app/api/try/premium : Turkish lira premium ($0.002)
+- https://agenttoll.app/api/catalog : machine-readable catalog of everything for sale (free)
+- https://agenttoll.app/api/demo : sample response shapes for every paid endpoint (free)
+- https://agenttoll.app/api/stats : onchain-derived toll counter (free)
+- https://agenttoll.app/api/health : service status (free)
+- https://agenttoll.app/api/price/{symbol} : spot price USD + 24h change ($0.001)
+- https://agenttoll.app/api/gas : Base gas price + latest block ($0.001)
+- https://agenttoll.app/api/trending : trending tokens market-wide ($0.002)
+- https://agenttoll.app/api/base/token/{address} : onchain USD price of any Base token ($0.001)
+- https://agenttoll.app/api/base/address/{address} : Base address snapshot ($0.001)
+- https://agenttoll.app/api/base/trending : trending DEX pools on Base ($0.002)
+- https://agenttoll.app/api/base/radar : new-token radar, spam-filtered ($0.003)
+- https://agenttoll.app/api/feargreed : Fear & Greed index ($0.001)
+- https://agenttoll.app/api/brief : one-call market brief ($0.005)
+- https://agenttoll.app/api/try/premium : Turkish lira premium ($0.002)
 
 ## Specs
 
-- OpenAPI: https://www.agenttoll.app/openapi.json
-- x402 discovery: https://www.agenttoll.app/.well-known/x402
+- OpenAPI: https://agenttoll.app/openapi.json
+- x402 discovery: https://agenttoll.app/.well-known/x402
 - MCP package: https://www.npmjs.com/package/agenttoll-mcp

@@ -15,7 +15,7 @@ import "dotenv/config";
 import { privateKeyToAccount } from "viem/accounts";
 import { wrapFetchWithPayment } from "x402-fetch";
 
-const BASE_URL = process.env.AGENTTOLL_URL ?? "http://localhost:4021"; // hosted: https://www.agenttoll.app
+const BASE_URL = process.env.AGENTTOLL_URL ?? "http://localhost:4021"; // hosted: https://agenttoll.app
 const pk = process.env.AGENT_PRIVATE_KEY;
 
 if (!pk) {

@@ -8,7 +8,7 @@
  *
  * Env:
  *   AGENT_PRIVATE_KEY  wallet that pays per call (required)
- *   AGENTTOLL_URL      API base URL (default: https://www.agenttoll.app)
+ *   AGENTTOLL_URL      API base URL (default: https://agenttoll.app)
  *
  * Claude Desktop config example:
  *   "agenttoll": {
@@ -23,7 +23,7 @@ import { z } from "zod";
 import { privateKeyToAccount } from "viem/accounts";
 import { wrapFetchWithPayment } from "x402-fetch";
 
-const BASE_URL = process.env.AGENTTOLL_URL ?? "https://www.agenttoll.app";
+const BASE_URL = process.env.AGENTTOLL_URL ?? "https://agenttoll.app";
 const pk = process.env.AGENT_PRIVATE_KEY;
 if (!pk) {
   console.error("AGENT_PRIVATE_KEY is required (the wallet that pays per call).");
@@ -40,7 +40,7 @@ async function call(path: string) {
   return body;
 }
 
-const server = new McpServer({ name: "agenttoll", version: "0.3.3" });
+const server = new McpServer({ name: "agenttoll", version: "0.3.4" });
 
 server.tool(
   "get_price",

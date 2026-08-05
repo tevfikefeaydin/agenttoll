@@ -11,7 +11,7 @@
   <img src="https://img.shields.io/badge/license-MIT-8A97AF" alt="MIT">
 </p>
 
-**Live:** [www.agenttoll.app](https://www.agenttoll.app) — try `GET /api/price/eth` and get a real x402 quote.
+**Live:** [www.agenttoll.app](https://agenttoll.app) — try `GET /api/price/eth` and get a real x402 quote.
 Onchain identity: **agenttoll.base.eth** (Base mainnet).
 
 **Base-native onchain data for AI agents, pay-per-call.** Base gas, any token price by
@@ -58,9 +58,9 @@ Agents (and indexers) can find and understand the service without reading the si
 
 | Spec | URL |
 |---|---|
-| x402 discovery | [`/.well-known/x402`](https://www.agenttoll.app/.well-known/x402) |
-| OpenAPI | [`/openapi.json`](https://www.agenttoll.app/openapi.json) |
-| llms.txt | [`/llms.txt`](https://www.agenttoll.app/llms.txt) |
+| x402 discovery | [`/.well-known/x402`](https://agenttoll.app/.well-known/x402) |
+| OpenAPI | [`/openapi.json`](https://agenttoll.app/openapi.json) |
+| llms.txt | [`/llms.txt`](https://agenttoll.app/llms.txt) |
 
 ## Quickstart (server)
 

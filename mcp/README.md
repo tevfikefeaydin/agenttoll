@@ -1,6 +1,6 @@
 # agenttoll-mcp
 
-MCP server for [AgentToll](https://www.agenttoll.app) — pay-per-call data
+MCP server for [AgentToll](https://agenttoll.app) — pay-per-call data
 APIs for AI agents, paid in USDC on Base via the x402 protocol. Add it to any
 MCP-compatible agent (Claude Desktop, Claude Code, ...) and every endpoint
 becomes a native tool; each call is paid automatically from the configured wallet.
@@ -28,7 +28,7 @@ get some free at [faucet.circle.com](https://faucet.circle.com).
 `get_base_address_info`, `get_fear_greed`, `get_base_trending_pools`,
 `get_market_brief`, `get_new_token_radar`, `get_try_premium`
 
-Prices per call: $0.001–$0.005. Catalog: `GET https://www.agenttoll.app/api/catalog`.
+Prices per call: $0.001–$0.005. Catalog: `GET https://agenttoll.app/api/catalog`.
 
 ## Publishing
 

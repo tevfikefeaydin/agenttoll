@@ -171,7 +171,7 @@ app.get("/api/demo", (_req, res) => {
 
 // x402 discovery endpoint: the catalog in the emerging .well-known convention.
 // PUBLIC_URL lets the deployment switch domains without a code change.
-const PUBLIC_BASE = process.env.PUBLIC_URL ?? "https://www.agenttoll.app";
+const PUBLIC_BASE = process.env.PUBLIC_URL ?? "https://agenttoll.app";
 app.get("/.well-known/x402", (_req, res) => {
   res.json({
     x402Version: 1,
