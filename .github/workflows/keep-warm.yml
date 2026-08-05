@@ -1,0 +1,28 @@
+name: Keep Bazaar listing warm
+
+# CDP drops a resource from x402 Bazaar discovery after 30 days with no settled
+# payment. Until organic traffic covers that, one small paid call a day keeps
+# every endpoint indexed — the script rotates so the whole catalogue is touched
+# roughly every two weeks. Costs ~$0.002 a day.
+#
+# Requires the AGENT_WALLET_KEY secret: the private key of a throwaway wallet
+# holding a little USDC on Base. Never use a wallet that holds anything else.
+on:
+  schedule:
+    - cron: "17 6 * * *" # 06:17 UTC daily
+  workflow_dispatch: # manual run, useful for testing
+
+jobs:
+  keep-warm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - name: Pay for one endpoint
+        run: node scripts/keep-warm.mjs
+        env:
+          AGENT_PRIVATE_KEY: ${{ secrets.AGENT_WALLET_KEY }}
+          AGENTTOLL_URL: https://agenttoll.app

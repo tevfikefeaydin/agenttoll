@@ -211,6 +211,15 @@ npm run brand:png    # re-export the brand assets
 
 `mcp/` is a separate package; bump its version and push a `mcp-v*` tag to publish it.
 
+### Staying discoverable
+
+CDP's x402 Bazaar drops a resource from discovery after 30 days without a
+settled payment. `scripts/keep-warm.mjs` makes one small paid call a day,
+rotating through the catalogue so every endpoint is touched about every two
+weeks (~$0.002/day). It runs from `.github/workflows/keep-warm.yml` and needs
+an `AGENT_WALLET_KEY` secret — a throwaway wallet holding a little USDC on
+Base, nothing else.
+
 ## License
 
 MIT — open source, building in public.
