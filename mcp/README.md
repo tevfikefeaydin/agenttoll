@@ -30,4 +30,34 @@ get some free at [faucet.circle.com](https://faucet.circle.com).
 
 Prices per call: $0.001–$0.005. Catalog: `GET https://agenttoll-pi.vercel.app/api/catalog`.
 
+## Publishing
+
+npm releases are automated: bump `version` here, commit, then push a tag
+`mcp-v<version>` — the `publish-mcp.yml` workflow builds and publishes.
+
+Listing in the official [MCP Registry](https://registry.modelcontextprotocol.io)
+is a one-time manual step (needs a GitHub device-code login). From this folder:
+
+```powershell
+# 1. install the publisher CLI (official release)
+$arch = if ([System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture -eq "Arm64") { "arm64" } else { "amd64" }
+Invoke-WebRequest -Uri "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_windows_$arch.tar.gz" -OutFile "mcp-publisher.tar.gz"
+tar xf mcp-publisher.tar.gz mcp-publisher.exe
+Remove-Item mcp-publisher.tar.gz
+
+# 2. log in (opens a device code — approve at github.com/login/device)
+.\mcp-publisher.exe login github
+
+# 3. publish the metadata in server.json
+.\mcp-publisher.exe publish
+```
+
+`server.json` and the `mcpName` field in `package.json` are already filled in
+(`io.github.tevfikefeaydin/agenttoll`) and must stay in sync with the published
+npm version. Verify afterwards:
+
+```bash
+curl "https://registry.modelcontextprotocol.io/v0.1/servers?search=agenttoll"
+```
+
 MIT — [source](https://github.com/tevfikefeaydin/agenttoll).

@@ -1,4 +1,15 @@
-# AgentToll
+<p align="center">
+  <img src="public/og.png" alt="AgentToll — pay-per-call APIs for AI agents" width="100%">
+</p>
+
+<h1 align="center">AgentToll</h1>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/agenttoll-mcp"><img src="https://img.shields.io/npm/v/agenttoll-mcp?label=agenttoll-mcp&color=0052FF" alt="npm"></a>
+  <img src="https://img.shields.io/badge/network-Base%20mainnet-0052FF" alt="Base mainnet">
+  <img src="https://img.shields.io/badge/payments-x402-0052FF" alt="x402">
+  <img src="https://img.shields.io/badge/license-MIT-8A97AF" alt="MIT">
+</p>
 
 **Live:** [agenttoll-pi.vercel.app](https://agenttoll-pi.vercel.app) — try `GET /api/price/eth` and get a real x402 quote.
 Onchain identity: **agenttoll.base.eth** (Base mainnet).
@@ -33,10 +44,21 @@ inline, and gets the data.
 | `GET /api/try/premium` | Turkish lira premium: implied vs official USD/TRY via BTC cross-rate | $0.002 |
 | `GET /api/stats` | Onchain-derived toll counter: calls collected and USDC revenue | free |
 | `GET /api/catalog` | Machine-readable catalog of everything for sale | free |
+| `GET /api/demo` | Sample response shapes for every paid endpoint | free |
 | `GET /api/health` | Service status | free |
 
 Responses are served from a short-lived cache (15-300s depending on endpoint) to
 keep upstream sources happy; every paid call still settles onchain.
+
+### Agent-native discovery
+
+Agents (and indexers) can find and understand the service without reading the site:
+
+| Spec | URL |
+|---|---|
+| x402 discovery | [`/.well-known/x402`](https://agenttoll-pi.vercel.app/.well-known/x402) |
+| OpenAPI | [`/openapi.json`](https://agenttoll-pi.vercel.app/openapi.json) |
+| llms.txt | [`/llms.txt`](https://agenttoll-pi.vercel.app/llms.txt) |
 
 ## Quickstart (server)
 
