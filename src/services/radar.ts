@@ -11,7 +11,15 @@ interface NewPool {
     volume_usd: { h24: string };
     reserve_in_usd: string;
   };
+  relationships?: { base_token?: { data?: { id?: string } } };
 }
+
+/** GeckoTerminal ids look like "base_0xabc…"; callers want the bare address. */
+const tokenAddress = (pool: NewPool): string | null => {
+  const id = pool.relationships?.base_token?.data?.id;
+  const addr = id?.replace(/^base_/, "").toLowerCase();
+  return addr && /^0x[0-9a-f]{40}$/.test(addr) ? addr : null;
+};
 
 /** The provider page as we cache it: every fresh pool, no caller filters yet. */
 interface RadarData {
@@ -19,6 +27,8 @@ interface RadarData {
   pools: {
     name: string;
     pool: string;
+    /** The new token itself — pass it to /api/base/safety before touching it. */
+    token: string | null;
     createdAt: string;
     priceUsd: number;
     volume24hUsd: number;
@@ -53,13 +63,14 @@ async function fetchPools(path: string): Promise<NewPool[]> {
 function shape(data: NewPool[], source: string, freshOnly: boolean): RadarData {
   const cutoff = Date.now() - DAY_MS;
   const pools = data
-    .map(({ attributes: a }) => ({
-      name: a.name,
-      pool: a.address,
-      createdAt: a.pool_created_at,
-      priceUsd: Number(a.base_token_price_usd),
-      volume24hUsd: Number(a.volume_usd?.h24 ?? 0),
-      liquidityUsd: Number(a.reserve_in_usd ?? 0),
+    .map((p) => ({
+      name: p.attributes.name,
+      pool: p.attributes.address,
+      token: tokenAddress(p),
+      createdAt: p.attributes.pool_created_at,
+      priceUsd: Number(p.attributes.base_token_price_usd),
+      volume24hUsd: Number(p.attributes.volume_usd?.h24 ?? 0),
+      liquidityUsd: Number(p.attributes.reserve_in_usd ?? 0),
     }))
     // The volume listing spans all pools, so it needs the age filter applied.
     .filter((p) => !freshOnly || Date.parse(p.createdAt) >= cutoff)

@@ -41,7 +41,7 @@ how to call it. MCP: `npx agenttoll-mcp` exposes all endpoints as tools
 - https://agenttoll.app/api/base/safety/{address} : automated safety checks for a Base token — honeypot simulation, buy/sell tax, contract verification, owner privileges, holder concentration, whether anyone can still pull the liquidity. Verdict is clear, caution, high-risk or insufficient-data; a token too new to check is never reported as clear ($0.003)
 - https://agenttoll.app/api/base/name/{nameOrAddress} : Basename resolution both ways — name to address with text records, or address to primary name ($0.001)
 - https://agenttoll.app/api/base/trending?limit={n} : trending DEX pools on Base ($0.002)
-- https://agenttoll.app/api/base/radar?minLiquidity={usd}&limit={n} : new-token radar above your liquidity floor, default $10k ($0.003)
+- https://agenttoll.app/api/base/radar?minLiquidity={usd}&limit={n} : new-token radar above your liquidity floor, default $10k. Each pool carries its `token` address, so a candidate can go straight to the safety endpoint ($0.003)
 - https://agenttoll.app/api/feargreed?days={1-30} : Fear & Greed index, optionally with daily history ($0.001)
 - https://agenttoll.app/api/brief?symbols={a,b,c} : one-call market brief, BTC/ETH/SOL by default ($0.005)
 - https://agenttoll.app/api/try/premium?asset={btc|eth|usdt|usdc} : Turkish lira premium ($0.002)

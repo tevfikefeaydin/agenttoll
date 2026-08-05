@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "AgentToll",
-    "version": "0.8.0",
+    "version": "0.8.1",
     "description": "Pay-per-call data APIs for AI agents. Paid endpoints return HTTP 402 with an x402 quote; pay $0.001-$0.005 in USDC on Base mainnet per call. No API keys. Onchain identity: agenttoll.base.eth.",
     "contact": {
       "name": "AgentToll",
@@ -406,7 +406,7 @@
         ],
         "responses": {
           "200": {
-            "description": "New pools"
+            "description": "New pools, each carrying its token address so it can be passed straight to /api/base/safety"
           },
           "400": {
             "description": "Invalid query parameter (not charged)"

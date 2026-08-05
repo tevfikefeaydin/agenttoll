@@ -187,7 +187,7 @@ export const DISCOVERY: Record<string, Discovery> = {
     },
     output: {
       chain: "base",
-      pools: [{ name: "BASED / ETH 1%", pool: "0x2acb...cac0", createdAt: "2026-08-05T13:01:33Z", priceUsd: 0.0000156, volume24hUsd: 19071.46, liquidityUsd: 14246.1 }],
+      pools: [{ name: "BASED / ETH 1%", pool: "0x2acb...cac0", token: "0xb6bb786056c690e41b20a587573fd77aade2eb07", createdAt: "2026-08-05T13:01:33Z", priceUsd: 0.0000156, volume24hUsd: 19071.46, liquidityUsd: 14246.1 }],
       minLiquidityUsd: 10000,
       count: 1,
       source: "geckoterminal-new-pools",
@@ -267,7 +267,7 @@ export const DISCOVERY: Record<string, Discovery> = {
       chain: "base",
       since: "2026-08-05T08:40:01Z",
       count: 1,
-      pools: [{ name: "BASED / ETH 1%", pool: "0x2acb...cac0", createdAt: "2026-08-05T13:01:33Z", priceUsd: 0.0000156, volume24hUsd: 19071.46, liquidityUsd: 14246.1 }],
+      pools: [{ name: "BASED / ETH 1%", pool: "0x2acb...cac0", token: "0xb6bb786056c690e41b20a587573fd77aade2eb07", createdAt: "2026-08-05T13:01:33Z", priceUsd: 0.0000156, volume24hUsd: 19071.46, liquidityUsd: 14246.1 }],
       cursor: "2026-08-05T13:01:33Z",
       at: "2026-08-05T13:31:58.678Z",
     },

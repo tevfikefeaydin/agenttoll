@@ -109,6 +109,21 @@ curl "https://agenttoll.app/api/try/premium?asset=usdt"     # the reading desks 
 The upstream response is cached whole and filtered per caller, so a narrower or
 wider request never costs an extra upstream call.
 
+### Finding a new token and checking it
+
+The radar and the safety endpoint are deliberately separate calls. Pay-per-call
+means the agent decides which candidates are worth checking, rather than being
+billed for checks on fifteen pools it will ignore. Each radar pool carries its
+`token` address so the second call is immediate:
+
+```bash
+curl "https://agenttoll.app/api/base/radar?minLiquidity=25000&limit=5"
+# -> pools: [ { name: "…", token: "0xb6bb…eb07", liquidityUsd: 66704, … } ]
+
+curl "https://agenttoll.app/api/base/safety/0xb6bb…eb07"
+# -> verdict: "insufficient-data", checks: [ … ]
+```
+
 ### Watch endpoints (stateless diffs)
 
 The `/api/watch/*` family answers "what changed since I last asked". Each reply
