@@ -122,6 +122,12 @@ Agents (and indexers) can find and understand the service without reading the si
 | OpenAPI | [`/openapi.json`](https://agenttoll.app/openapi.json) |
 | llms.txt | [`/llms.txt`](https://agenttoll.app/llms.txt) |
 
+The 402 challenge carries its own documentation. Every paid endpoint declares
+the x402 bazaar discovery extension, so the payment quote itself contains the
+request shape, the path and query parameters, and a real response example — an
+agent that has only ever seen a 402 can already build the call, with no second
+request for a spec that might not answer.
+
 ## Quickstart (server)
 
 ```bash
