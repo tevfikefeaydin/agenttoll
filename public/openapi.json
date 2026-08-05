@@ -64,6 +64,37 @@
     },
     "/api/try/premium": {
       "get": { "summary": "Turkish lira premium: implied vs official USD/TRY via BTC cross-rate", "x-price-usdc": "0.002", "responses": { "200": { "description": "Premium" }, "402": { "description": "x402 payment quote" } } }
+    },
+    "/api/watch/address/{address}": {
+      "get": {
+        "summary": "New activity for a Base address since your cursor. The reply's `cursor` is what you pass as `since` next time.",
+        "x-price-usdc": "0.002",
+        "parameters": [
+          { "name": "address", "in": "path", "required": true, "schema": { "type": "string", "pattern": "^0x[0-9a-fA-F]{40}$" } },
+          { "name": "since", "in": "query", "required": false, "schema": { "type": "string", "format": "date-time" }, "description": "ISO timestamp cursor from the previous reply" }
+        ],
+        "responses": { "200": { "description": "Events since the cursor" }, "402": { "description": "x402 payment quote" } }
+      }
+    },
+    "/api/watch/radar": {
+      "get": {
+        "summary": "Only the Base pools that appeared since your cursor",
+        "x-price-usdc": "0.003",
+        "parameters": [{ "name": "since", "in": "query", "required": false, "schema": { "type": "string", "format": "date-time" }, "description": "ISO timestamp cursor from the previous reply" }],
+        "responses": { "200": { "description": "New pools since the cursor" }, "402": { "description": "x402 payment quote" } }
+      }
+    },
+    "/api/watch/price/{symbol}": {
+      "get": {
+        "summary": "Price alert check: has the asset moved past your threshold from your reference price?",
+        "x-price-usdc": "0.001",
+        "parameters": [
+          { "name": "symbol", "in": "path", "required": true, "schema": { "type": "string" }, "example": "eth" },
+          { "name": "ref", "in": "query", "required": true, "schema": { "type": "number" }, "description": "Reference price in USD" },
+          { "name": "pct", "in": "query", "required": false, "schema": { "type": "number", "default": 2 }, "description": "Threshold in percent" }
+        ],
+        "responses": { "200": { "description": "Alert state" }, "402": { "description": "x402 payment quote" } }
+      }
     }
   }
 }

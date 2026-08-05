@@ -13,6 +13,7 @@ import { getFearGreed } from "./services/feargreed.js";
 import { getBaseTrending } from "./services/basetrending.js";
 import { getMarketBrief } from "./services/brief.js";
 import { getStats } from "./services/stats.js";
+import { getAddressActivity, getRadarSince, getPriceAlert } from "./services/watch.js";
 import { getNewTokenRadar } from "./services/radar.js";
 import { getTryPremium } from "./services/trypremium.js";
 
@@ -144,6 +145,21 @@ app.use(
         network: NETWORK,
         config: { description: "Turkish lira premium: implied vs official USD/TRY via BTC cross-rate" },
       },
+      "GET /api/watch/address/*": {
+        price: "$0.002",
+        network: NETWORK,
+        config: { description: "New activity for a Base address since your cursor (stateless watch)" },
+      },
+      "GET /api/watch/radar": {
+        price: "$0.003",
+        network: NETWORK,
+        config: { description: "Only the Base pools that appeared since your cursor" },
+      },
+      "GET /api/watch/price/*": {
+        price: "$0.001",
+        network: NETWORK,
+        config: { description: "Price alert check: has an asset moved past your threshold?" },
+      },
     },
     FACILITATOR,
   ),
@@ -193,6 +209,9 @@ app.get("/.well-known/x402", (_req, res) => {
       { resource: `${PUBLIC_BASE}/api/feargreed`, price: "$0.001", description: "Crypto Fear & Greed index with yesterday comparison" },
       { resource: `${PUBLIC_BASE}/api/brief`, price: "$0.005", description: "One-call market brief: BTC/ETH/SOL, Base gas, sentiment" },
       { resource: `${PUBLIC_BASE}/api/try/premium`, price: "$0.002", description: "Turkish lira premium: implied vs official USD/TRY via BTC cross-rate" },
+      { resource: `${PUBLIC_BASE}/api/watch/address/{address}`, price: "$0.002", description: "New activity for a Base address since your cursor (stateless watch)" },
+      { resource: `${PUBLIC_BASE}/api/watch/radar`, price: "$0.003", description: "Only the Base pools that appeared since your cursor" },
+      { resource: `${PUBLIC_BASE}/api/watch/price/{symbol}`, price: "$0.001", description: "Price alert check against your reference and threshold" },
     ],
   });
 });
@@ -216,6 +235,9 @@ app.get("/api/catalog", (_req, res) => {
       { path: "/api/brief", method: "GET", price: "$0.005", description: "One-call market brief: BTC/ETH/SOL, Base gas, sentiment" },
       { path: "/api/base/radar", method: "GET", price: "$0.003", description: "New token radar: fresh Base pools that already have real liquidity" },
       { path: "/api/try/premium", method: "GET", price: "$0.002", description: "Turkish lira premium: implied vs official USD/TRY via BTC cross-rate" },
+      { path: "/api/watch/address/{address}?since={iso}", method: "GET", price: "$0.002", description: "New activity for a Base address since your cursor; reply carries the next cursor" },
+      { path: "/api/watch/radar?since={iso}", method: "GET", price: "$0.003", description: "Only the Base pools that appeared since your cursor" },
+      { path: "/api/watch/price/{symbol}?ref={price}&pct={threshold}", method: "GET", price: "$0.001", description: "Price alert check: triggered true/false against your reference and threshold" },
       { path: "/api/stats", method: "GET", price: "free", description: "Onchain-derived toll counter: calls collected and USDC revenue" },
       { path: "/api/demo", method: "GET", price: "free", description: "Sample response shapes for every paid endpoint" },
       { path: "/api/health", method: "GET", price: "free", description: "Service status" },
@@ -275,6 +297,36 @@ app.get("/api/feargreed", async (_req, res) => {
 app.get("/api/stats", async (_req, res) => {
   try {
     res.json(await getStats(PAY_TO));
+  } catch (err) {
+    res.status(502).json({ error: (err as Error).message });
+  }
+});
+
+app.get("/api/watch/address/:address", async (req, res) => {
+  try {
+    res.json(await getAddressActivity(req.params.address, req.query.since as string));
+  } catch (err) {
+    res.status(502).json({ error: (err as Error).message });
+  }
+});
+
+app.get("/api/watch/radar", async (req, res) => {
+  try {
+    res.json(await getRadarSince(req.query.since as string));
+  } catch (err) {
+    res.status(502).json({ error: (err as Error).message });
+  }
+});
+
+app.get("/api/watch/price/:symbol", async (req, res) => {
+  try {
+    res.json(
+      await getPriceAlert(
+        req.params.symbol,
+        req.query.ref as string,
+        req.query.pct as string,
+      ),
+    );
   } catch (err) {
     res.status(502).json({ error: (err as Error).message });
   }

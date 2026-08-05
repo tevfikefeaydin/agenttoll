@@ -32,6 +32,15 @@ endpoints as tools (env: AGENT_PRIVATE_KEY).
 - https://agenttoll.app/api/feargreed : Fear & Greed index ($0.001)
 - https://agenttoll.app/api/brief : one-call market brief ($0.005)
 - https://agenttoll.app/api/try/premium : Turkish lira premium ($0.002)
+- https://agenttoll.app/api/watch/address/{address}?since={iso} : new activity for a Base address since your cursor ($0.002)
+- https://agenttoll.app/api/watch/radar?since={iso} : only the pools that appeared since your cursor ($0.003)
+- https://agenttoll.app/api/watch/price/{symbol}?ref={price}&pct={threshold} : price alert check, triggered true/false ($0.001)
+
+## Watch endpoints (stateless diffs)
+
+Every /api/watch/* reply includes a `cursor`. Pass it back as `?since=<cursor>`
+on the next call to receive only what changed. The agent holds the cursor; the
+server keeps no state about you. Use these to poll cheaply on a schedule.
 
 ## Specs
 

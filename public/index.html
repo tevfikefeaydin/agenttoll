@@ -183,6 +183,21 @@
         <td class="price">$0.005</td>
       </tr>
       <tr>
+        <td><code>GET /api/watch/address/:address</code></td>
+        <td>New activity for a Base address since your cursor</td>
+        <td class="price">$0.002</td>
+      </tr>
+      <tr>
+        <td><code>GET /api/watch/radar</code></td>
+        <td>Only the pools that appeared since your cursor</td>
+        <td class="price">$0.003</td>
+      </tr>
+      <tr>
+        <td><code>GET /api/watch/price/:symbol</code></td>
+        <td>Price alert check: triggered true/false against your threshold</td>
+        <td class="price">$0.001</td>
+      </tr>
+      <tr>
         <td><code>GET /api/catalog</code></td>
         <td>Machine-readable catalog of everything for sale</td>
         <td class="price">free</td>
@@ -193,6 +208,20 @@
         <td class="price">free</td>
       </tr>
     </table>
+  </section>
+
+  <section>
+    <h2>Watch endpoints — ask only for what changed</h2>
+    <p style="color: var(--muted); max-width: 720px;">Snapshots are fine once. Agents that
+    run on a schedule want the diff. Every <code>/api/watch/*</code> reply carries a
+    <code>cursor</code> — pass it back as <code>?since=</code> and you get only the new
+    events. Your agent holds the cursor, so we still store nothing about you.</p>
+<pre style="margin-top: 16px;"><span class="c"># first call — everything recent, plus a cursor</span>
+curl <span class="s">"https://agenttoll.app/api/watch/radar"</span>
+<span class="c"># { pools: [...], cursor: "2026-08-05T08:40:01Z" }</span>
+
+<span class="c"># later — only what appeared since</span>
+curl <span class="s">"https://agenttoll.app/api/watch/radar?since=2026-08-05T08:40:01Z"</span></pre>
   </section>
 
   <section>

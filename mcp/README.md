@@ -26,7 +26,11 @@ get some free at [faucet.circle.com](https://faucet.circle.com).
 
 `get_price`, `get_base_gas`, `get_trending`, `get_base_token_price`,
 `get_base_address_info`, `get_fear_greed`, `get_base_trending_pools`,
-`get_market_brief`, `get_new_token_radar`, `get_try_premium`
+`get_market_brief`, `get_new_token_radar`, `get_try_premium`,
+`watch_base_address`, `watch_new_tokens`, `watch_price_alert`
+
+The `watch_*` tools return a `cursor`; pass it back as `since` on the next call
+to get only what changed — ideal for agents that poll on a schedule.
 
 Prices per call: $0.001–$0.005. Catalog: `GET https://agenttoll.app/api/catalog`.
 

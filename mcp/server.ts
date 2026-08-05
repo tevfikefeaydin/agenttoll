@@ -40,7 +40,7 @@ async function call(path: string) {
   return body;
 }
 
-const server = new McpServer({ name: "agenttoll", version: "0.3.4" });
+const server = new McpServer({ name: "agenttoll", version: "0.4.0" });
 
 server.tool(
   "get_price",
@@ -116,6 +116,61 @@ server.tool(
   "Turkish lira premium: implied vs official USD/TRY via BTC cross-rate. Costs $0.002 in USDC via x402.",
   {},
   async () => ({ content: [{ type: "text", text: await call("/api/try/premium") }] }),
+);
+
+server.tool(
+  "watch_base_address",
+  "New activity for a Base address since a cursor — pass the previous reply's `cursor` as `since` to get only what changed. Costs $0.002 in USDC via x402.",
+  {
+    address: z.string().describe("Address on Base (0x...)"),
+    since: z.string().optional().describe("ISO timestamp cursor from the previous reply"),
+  },
+  async ({ address, since }) => ({
+    content: [
+      {
+        type: "text",
+        text: await call(
+          `/api/watch/address/${encodeURIComponent(address)}` +
+            (since ? `?since=${encodeURIComponent(since)}` : ""),
+        ),
+      },
+    ],
+  }),
+);
+
+server.tool(
+  "watch_new_tokens",
+  "Only the Base pools that appeared since a cursor — pass the previous reply's `cursor` as `since`. Costs $0.003 in USDC via x402.",
+  { since: z.string().optional().describe("ISO timestamp cursor from the previous reply") },
+  async ({ since }) => ({
+    content: [
+      {
+        type: "text",
+        text: await call(`/api/watch/radar` + (since ? `?since=${encodeURIComponent(since)}` : "")),
+      },
+    ],
+  }),
+);
+
+server.tool(
+  "watch_price_alert",
+  "Cheap poll: has an asset moved past a threshold from your reference price? Returns triggered true/false. Costs $0.001 in USDC via x402.",
+  {
+    symbol: z.string().describe("Ticker (eth, btc, sol...) or CoinGecko id"),
+    ref: z.number().describe("Reference price in USD to compare against"),
+    pct: z.number().optional().describe("Threshold in percent (default 2)"),
+  },
+  async ({ symbol, ref, pct }) => ({
+    content: [
+      {
+        type: "text",
+        text: await call(
+          `/api/watch/price/${encodeURIComponent(symbol)}?ref=${ref}` +
+            (pct === undefined ? "" : `&pct=${pct}`),
+        ),
+      },
+    ],
+  }),
 );
 
 const transport = new StdioServerTransport();

@@ -44,6 +44,9 @@ inline, and gets the data.
 | `GET /api/brief` | One-call market brief: BTC/ETH/SOL, Base gas, sentiment | $0.005 |
 | `GET /api/base/radar` | New token radar: fresh Base pools that already have real liquidity | $0.003 |
 | `GET /api/try/premium` | Turkish lira premium: implied vs official USD/TRY via BTC cross-rate | $0.002 |
+| `GET /api/watch/address/:address?since=` | New activity for a Base address since your cursor | $0.002 |
+| `GET /api/watch/radar?since=` | Only the Base pools that appeared since your cursor | $0.003 |
+| `GET /api/watch/price/:symbol?ref=&pct=` | Price alert check: triggered true/false against your threshold | $0.001 |
 | `GET /api/stats` | Onchain-derived toll counter: calls collected and USDC revenue | free |
 | `GET /api/catalog` | Machine-readable catalog of everything for sale | free |
 | `GET /api/demo` | Sample response shapes for every paid endpoint | free |
@@ -51,6 +54,20 @@ inline, and gets the data.
 
 Responses are served from a short-lived cache (15-300s depending on endpoint) to
 keep upstream sources happy; every paid call still settles onchain.
+
+### Watch endpoints (stateless diffs)
+
+The `/api/watch/*` family answers "what changed since I last asked". Each reply
+carries a `cursor`; pass it back as `?since=` on the next call and you get only
+the new events. The agent holds the cursor, so the server stores nothing about
+you — no accounts, no subscriptions, still no state.
+
+```bash
+# first call — everything recent, plus a cursor
+curl "https://agenttoll.app/api/watch/radar"          # -> { pools: [...], cursor: "2026-08-05T08:40:01Z" }
+# later — only what appeared since
+curl "https://agenttoll.app/api/watch/radar?since=2026-08-05T08:40:01Z"
+```
 
 ### Agent-native discovery
 
@@ -123,7 +140,8 @@ No clone needed — the server is on npm as
 
 Tools exposed: `get_price`, `get_base_gas`, `get_trending`, `get_base_token_price`,
 `get_base_address_info`, `get_fear_greed`, `get_base_trending_pools`, `get_market_brief`,
-`get_new_token_radar`, `get_try_premium`.
+`get_new_token_radar`, `get_try_premium`, `watch_base_address`, `watch_new_tokens`,
+`watch_price_alert`.
 
 The wallet behind `AGENT_PRIVATE_KEY` needs USDC on Base — the hosted service
 settles on mainnet. (Against a self-hosted testnet instance it needs Base Sepolia
