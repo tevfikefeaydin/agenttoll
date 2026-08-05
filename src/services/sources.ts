@@ -24,6 +24,24 @@ export async function fromSources<T>(label: string, sources: Source<T>[]): Promi
   throw new Error(`Upstream data is unavailable for ${label} right now — please retry`);
 }
 
+/**
+ * GeckoTerminal's free tier allows ~30 requests a minute across all of our
+ * serverless instances, so a burst gets 429s. One short retry clears the
+ * transient case; sustained limiting still falls through to the next source.
+ */
+export async function fetchJsonRetrying(
+  url: string,
+  init: RequestInit = {},
+  attempts = 2,
+): Promise<unknown> {
+  for (let attempt = 1; ; attempt++) {
+    const res = await fetchWithTimeout(url, init);
+    if (res.ok) return res.json();
+    if (res.status !== 429 || attempt >= attempts) throw new Error(`HTTP ${res.status}`);
+    await new Promise((resolve) => setTimeout(resolve, 1200));
+  }
+}
+
 /** Public Base RPCs, tried in order. */
 const BASE_RPCS = [
   "https://mainnet.base.org",

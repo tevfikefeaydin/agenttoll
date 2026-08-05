@@ -1,6 +1,6 @@
 import { cached, fetchWithTimeout } from "./cache.js";
 import { badRequest } from "./errors.js";
-import { fromSources } from "./sources.js";
+import { fetchJsonRetrying, fromSources } from "./sources.js";
 
 interface TokenPrice {
   chain: string;
@@ -25,14 +25,10 @@ export async function getBaseTokenPrice(address: string) {
 }
 
 async function fromGeckoTerminal(addr: string): Promise<TokenPrice> {
-  const res = await fetchWithTimeout(
+  const json = (await fetchJsonRetrying(
     `https://api.geckoterminal.com/api/v2/simple/networks/base/token_price/${addr}`,
     { headers: { Accept: "application/json" } },
-  );
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const json = (await res.json()) as {
-    data?: { attributes?: { token_prices?: Record<string, string> } };
-  };
+  )) as { data?: { attributes?: { token_prices?: Record<string, string> } } };
   const price = json.data?.attributes?.token_prices?.[addr];
   if (!price) throw new Error("no price for this token");
   return { chain: "base", token: addr, usd: Number(price), source: "geckoterminal", at: new Date().toISOString() };

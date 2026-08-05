@@ -1,6 +1,7 @@
-import { cached, fetchWithTimeout } from "./cache.js";
+import { cached } from "./cache.js";
+import { fetchJsonRetrying, fromSources } from "./sources.js";
 
-interface TrendingPool {
+interface Pool {
   attributes: {
     name: string;
     address: string;
@@ -11,26 +12,55 @@ interface TrendingPool {
   };
 }
 
-// Trending DEX pools on Base right now, via GeckoTerminal.
+interface BaseTrending {
+  chain: string;
+  pools: {
+    name: string;
+    pool: string;
+    priceUsd: number;
+    volume24hUsd: number;
+    change24hPct: number;
+    liquidityUsd: number;
+  }[];
+  source: string;
+  at: string;
+}
+
+const shape = (data: Pool[], source: string): BaseTrending => ({
+  chain: "base",
+  pools: data.slice(0, 10).map(({ attributes: a }) => ({
+    name: a.name,
+    pool: a.address,
+    priceUsd: Number(a.base_token_price_usd),
+    volume24hUsd: Number(a.volume_usd?.h24 ?? 0),
+    change24hPct: Number(a.price_change_percentage?.h24 ?? 0),
+    liquidityUsd: Number(a.reserve_in_usd ?? 0),
+  })),
+  source,
+  at: new Date().toISOString(),
+});
+
+async function pools(path: string): Promise<Pool[]> {
+  const json = (await fetchJsonRetrying(
+    `https://api.geckoterminal.com/api/v2/networks/base/${path}`,
+    { headers: { Accept: "application/json" } },
+  )) as { data?: Pool[] };
+  if (!json.data?.length) throw new Error("empty response");
+  return json.data;
+}
+
+// Trending DEX pools on Base. The fallback is the same provider's top-by-volume
+// listing — it covers this endpoint failing on its own, not the provider being
+// down, so `source` says which ranking produced the answer.
 export async function getBaseTrending() {
-  return cached("basetrending", 60_000, async () => {
-    const res = await fetchWithTimeout(
-      "https://api.geckoterminal.com/api/v2/networks/base/trending_pools",
-      { headers: { Accept: "application/json" } },
-    );
-    if (!res.ok) throw new Error(`Upstream trending source returned ${res.status}`);
-    const json = (await res.json()) as { data: TrendingPool[] };
-    return {
-      chain: "base",
-      pools: json.data.slice(0, 10).map(({ attributes: a }) => ({
-        name: a.name,
-        pool: a.address,
-        priceUsd: Number(a.base_token_price_usd),
-        volume24hUsd: Number(a.volume_usd?.h24 ?? 0),
-        change24hPct: Number(a.price_change_percentage?.h24 ?? 0),
-        liquidityUsd: Number(a.reserve_in_usd ?? 0),
-      })),
-      at: new Date().toISOString(),
-    };
-  });
+  return cached("basetrending", 60_000, () =>
+    fromSources<BaseTrending>("base trending pools", [
+      { name: "geckoterminal-trending", load: async () => shape(await pools("trending_pools"), "geckoterminal-trending") },
+      {
+        name: "geckoterminal-volume",
+        load: async () =>
+          shape(await pools("pools?sort=h24_volume_usd_desc&page=1"), "geckoterminal-top-volume"),
+      },
+    ]),
+  );
 }
