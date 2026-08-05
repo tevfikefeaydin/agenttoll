@@ -68,6 +68,23 @@
     "/api/try/premium": {
       "get": { "summary": "Turkish lira premium: implied vs official USD/TRY via BTC cross-rate", "x-price-usdc": "0.002", "responses": { "200": { "description": "Premium" }, "402": { "description": "x402 payment quote" } } }
     },
+    "/api/base/name/{nameOrAddress}": {
+      "get": {
+        "summary": "Basename resolution both ways: a name returns its address, owner and text records; a 0x address returns its primary basename",
+        "x-price-usdc": "0.001",
+        "parameters": [
+          {
+            "name": "nameOrAddress",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "example": "agenttoll.base.eth",
+            "description": "A basename (the .base.eth suffix is optional) or a 0x address"
+          }
+        ],
+        "responses": { "200": { "description": "Resolution result" }, "402": { "description": "x402 payment quote" } }
+      }
+    },
     "/api/watch/address/{address}": {
       "get": {
         "summary": "New activity for a Base address since your cursor. The reply's `cursor` is what you pass as `since` next time.",

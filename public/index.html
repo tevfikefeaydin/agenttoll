@@ -356,7 +356,7 @@ console.log(<span class="k">await</span> res.json());
 <section class="band" id="endpoints">
   <div class="wrap">
     <p class="kicker rv">Catalog</p>
-    <h2 class="rv">Thirteen endpoints, priced per call</h2>
+    <h2 class="rv">Fourteen endpoints, priced per call</h2>
     <p class="sub rv">Base onchain data first — gas, any token by contract address, address
       analytics, DEX pools and a spam-filtered new-token radar — plus market and
       Turkish-lira feeds.</p>
@@ -368,7 +368,8 @@ console.log(<span class="k">await</span> res.json());
           <tr><td><code>GET /api/base/radar</code></td><td>New-token radar: fresh Base pools that already have real liquidity</td><td class="price">$0.003</td></tr>
           <tr><td><code>GET /api/base/trending</code></td><td>Trending DEX pools on Base: price, volume, liquidity</td><td class="price">$0.002</td></tr>
           <tr><td><code>GET /api/base/token/:address</code></td><td>Onchain USD price for any Base token by contract address</td><td class="price">$0.001</td></tr>
-          <tr><td><code>GET /api/base/address/:address</code></td><td>Base address snapshot: ETH balance, tx count, contract or EOA</td><td class="price">$0.001</td></tr>
+          <tr><td><code>GET /api/base/name/:nameOrAddress</code></td><td>Basename both ways: name → address + records, or address → primary name</td><td class="price">$0.001</td></tr>
+          <tr><td><code>GET /api/base/address/:address</code></td><td>Base address snapshot: basename, ETH balance, tx count, contract or EOA</td><td class="price">$0.001</td></tr>
           <tr><td><code>GET /api/gas</code></td><td>Base network gas price and latest block</td><td class="price">$0.001</td></tr>
           <tr><td><code>GET /api/brief</code></td><td>One-call market brief: BTC/ETH/SOL, Base gas, sentiment</td><td class="price">$0.005</td></tr>
           <tr><td><code>GET /api/price/:symbol</code></td><td>Spot price (USD) + 24h change for any asset</td><td class="price">$0.001</td></tr>
@@ -455,13 +456,14 @@ curl <span class="s">"https://agenttoll.app/api/watch/radar?since=2026-08-05T08:
       </div>
       <div class="card rv">
         <div class="ico">🧰</div>
-        <h3>13 tools, zero setup</h3>
+        <h3>14 tools, zero setup</h3>
         <p><code>get_price</code>, <code>get_base_gas</code>, <code>get_trending</code>,
           <code>get_base_token_price</code>, <code>get_base_address_info</code>,
           <code>get_fear_greed</code>, <code>get_base_trending_pools</code>,
           <code>get_market_brief</code>, <code>get_new_token_radar</code>,
-          <code>get_try_premium</code>, <code>watch_base_address</code>,
-          <code>watch_new_tokens</code>, <code>watch_price_alert</code>.</p>
+          <code>get_try_premium</code>, <code>resolve_basename</code>,
+          <code>watch_base_address</code>, <code>watch_new_tokens</code>,
+          <code>watch_price_alert</code>.</p>
         <p style="margin-top:12px;"><a href="https://www.npmjs.com/package/agenttoll-mcp">agenttoll-mcp on npm →</a></p>
       </div>
     </div>

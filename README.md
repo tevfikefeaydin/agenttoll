@@ -38,7 +38,8 @@ inline, and gets the data.
 | `GET /api/gas` | Base network gas price + latest block | $0.001 |
 | `GET /api/trending` | Tokens trending across the market right now | $0.002 |
 | `GET /api/base/token/:address` | Onchain USD price for any Base token by contract address | $0.001 |
-| `GET /api/base/address/:address` | Base address snapshot: ETH balance, tx count, contract or EOA | $0.001 |
+| `GET /api/base/address/:address` | Base address snapshot: primary basename, ETH balance, tx count, contract or EOA | $0.001 |
+| `GET /api/base/name/:nameOrAddress` | Basename both ways: name → address + text records, or address → primary name | $0.001 |
 | `GET /api/feargreed` | Crypto Fear & Greed index with yesterday comparison | $0.001 |
 | `GET /api/base/trending` | Trending DEX pools on Base: price, volume, liquidity | $0.002 |
 | `GET /api/brief` | One-call market brief: BTC/ETH/SOL, Base gas, sentiment | $0.005 |
@@ -157,8 +158,8 @@ No clone needed — the server is on npm as
 
 Tools exposed: `get_price`, `get_base_gas`, `get_trending`, `get_base_token_price`,
 `get_base_address_info`, `get_fear_greed`, `get_base_trending_pools`, `get_market_brief`,
-`get_new_token_radar`, `get_try_premium`, `watch_base_address`, `watch_new_tokens`,
-`watch_price_alert`.
+`get_new_token_radar`, `get_try_premium`, `resolve_basename`, `watch_base_address`,
+`watch_new_tokens`, `watch_price_alert`.
 
 The wallet behind `AGENT_PRIVATE_KEY` needs USDC on Base — the hosted service
 settles on mainnet. (Against a self-hosted testnet instance it needs Base Sepolia
@@ -174,16 +175,41 @@ server picks the CDP facilitator automatically.
 
 ## Roadmap
 
-- [x] Base-native data endpoints (onchain token prices, address analytics)
-- [x] MCP server wrapper so any AI assistant can use AgentToll as a native tool
-- [ ] Mainnet + listing in x402 Bazaar / ecosystem discovery
-- [ ] Usage dashboard (calls, revenue, top agents)
-- [ ] More endpoints (token metadata, DEX pools, TR-market data)
+Shipped:
+
+- [x] Base-native data: onchain token prices, address analytics, DEX pools, new-token radar
+- [x] Basename resolution both ways, with text records
+- [x] Watch endpoints — stateless diffs so scheduled agents only fetch what changed
+- [x] Base mainnet, settled through the Coinbase CDP facilitator
+- [x] Every endpoint indexed in the CDP x402 Bazaar
+- [x] MCP server on npm (`agenttoll-mcp`), published from CI
+- [x] Agent-native discovery: `/api/catalog`, `/.well-known/x402`, `openapi.json`, `llms.txt`
+- [x] Onchain toll counter, with the operator's own test wallet reported separately
+- [x] Backup data sources per endpoint, so one provider rate-limiting us is not an outage
+
+Next:
+
+- [ ] Wallet portfolio: every token an address holds on Base, with USD value
+- [ ] Token safety checks for the radar's output (honeypot, liquidity lock, holder concentration)
+- [ ] Turkish market data beyond the lira premium (local exchange spreads)
+- [ ] A directory of x402 services agents can call, served over x402 itself
 
 ## Stack
 
 TypeScript · Express · [`x402-express`](https://www.npmjs.com/package/x402-express) ·
 [`x402-fetch`](https://www.npmjs.com/package/x402-fetch) · viem · Base
+
+## Development
+
+```bash
+npm install
+npm run build        # type-check and compile the API
+npm run dev          # local server on :4021 (defaults to Base Sepolia)
+npm run build:web    # rebuild the browser demo bundle (public/demo.js)
+npm run brand:png    # re-export the brand assets
+```
+
+`mcp/` is a separate package; bump its version and push a `mcp-v*` tag to publish it.
 
 ## License
 

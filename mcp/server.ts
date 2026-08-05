@@ -40,7 +40,7 @@ async function call(path: string) {
   return body;
 }
 
-const server = new McpServer({ name: "agenttoll", version: "0.4.0" });
+const server = new McpServer({ name: "agenttoll", version: "0.5.0" });
 
 server.tool(
   "get_price",
@@ -116,6 +116,15 @@ server.tool(
   "Turkish lira premium: implied vs official USD/TRY via BTC cross-rate. Costs $0.002 in USDC via x402.",
   {},
   async () => ({ content: [{ type: "text", text: await call("/api/try/premium") }] }),
+);
+
+server.tool(
+  "resolve_basename",
+  "Resolve a Basename both ways: pass a name (agenttoll.base.eth, or just agenttoll) to get its address and text records, or pass a 0x address to get its primary basename. Costs $0.001 in USDC via x402.",
+  { query: z.string().describe("A basename or a 0x address") },
+  async ({ query }) => ({
+    content: [{ type: "text", text: await call(`/api/base/name/${encodeURIComponent(query)}`) }],
+  }),
 );
 
 server.tool(

@@ -15,6 +15,7 @@ import { getMarketBrief } from "./services/brief.js";
 import { getStats } from "./services/stats.js";
 import { getAddressActivity, getRadarSince, getPriceAlert } from "./services/watch.js";
 import { BadRequestError } from "./services/errors.js";
+import { resolveBasename } from "./services/basename.js";
 import { getNewTokenRadar } from "./services/radar.js";
 import { getTryPremium } from "./services/trypremium.js";
 
@@ -146,6 +147,13 @@ app.use(
         network: NETWORK,
         config: { description: "Turkish lira premium: implied vs official USD/TRY via BTC cross-rate" },
       },
+      "GET /api/base/name/*": {
+        price: "$0.001",
+        network: NETWORK,
+        config: {
+          description: "Basename resolution both ways: name to address, or address to primary name",
+        },
+      },
       "GET /api/watch/address/*": {
         price: "$0.002",
         network: NETWORK,
@@ -223,7 +231,8 @@ app.get("/.well-known/x402", (_req, res) => {
       { resource: `${PUBLIC_BASE}/api/gas`, price: "$0.001", description: "Base network gas price and latest block" },
       { resource: `${PUBLIC_BASE}/api/trending`, price: "$0.002", description: "Tokens trending across the market right now" },
       { resource: `${PUBLIC_BASE}/api/base/token/{address}`, price: "$0.001", description: "Onchain USD price for any Base token by contract address" },
-      { resource: `${PUBLIC_BASE}/api/base/address/{address}`, price: "$0.001", description: "Base address snapshot: ETH balance, tx count, contract or EOA" },
+      { resource: `${PUBLIC_BASE}/api/base/address/{address}`, price: "$0.001", description: "Base address snapshot: primary basename, ETH balance, tx count, contract or EOA" },
+      { resource: `${PUBLIC_BASE}/api/base/name/{nameOrAddress}`, price: "$0.001", description: "Basename resolution both ways: name to address, or address to primary name" },
       { resource: `${PUBLIC_BASE}/api/base/trending`, price: "$0.002", description: "Trending DEX pools on Base: price, volume, liquidity" },
       { resource: `${PUBLIC_BASE}/api/base/radar`, price: "$0.003", description: "New token radar: fresh Base pools with real liquidity" },
       { resource: `${PUBLIC_BASE}/api/feargreed`, price: "$0.001", description: "Crypto Fear & Greed index with yesterday comparison" },
@@ -249,7 +258,8 @@ app.get("/api/catalog", (_req, res) => {
       { path: "/api/gas", method: "GET", price: "$0.001", description: "Base network gas price and latest block" },
       { path: "/api/trending", method: "GET", price: "$0.002", description: "Tokens trending across the market right now" },
       { path: "/api/base/token/{address}", method: "GET", price: "$0.001", description: "Onchain USD price for any Base token by contract address" },
-      { path: "/api/base/address/{address}", method: "GET", price: "$0.001", description: "Base address snapshot: ETH balance, tx count, contract or EOA" },
+      { path: "/api/base/address/{address}", method: "GET", price: "$0.001", description: "Base address snapshot: primary basename, ETH balance, tx count, contract or EOA" },
+      { path: "/api/base/name/{nameOrAddress}", method: "GET", price: "$0.001", description: "Basename resolution both ways: name to address (with text records), or address to primary name" },
       { path: "/api/base/trending", method: "GET", price: "$0.002", description: "Trending DEX pools on Base: price, volume, liquidity" },
       { path: "/api/feargreed", method: "GET", price: "$0.001", description: "Crypto Fear & Greed index with yesterday comparison" },
       { path: "/api/brief", method: "GET", price: "$0.005", description: "One-call market brief: BTC/ETH/SOL, Base gas, sentiment" },
@@ -271,6 +281,7 @@ app.get("/api/gas", serve(() => getGas()));
 app.get("/api/trending", serve(() => getTrending()));
 app.get("/api/base/token/:address", serve((req) => getBaseTokenPrice(one(req.params.address))));
 app.get("/api/base/address/:address", serve((req) => getAddressInfo(one(req.params.address))));
+app.get("/api/base/name/:query", serve((req) => resolveBasename(one(req.params.query))));
 app.get("/api/base/radar", serve(() => getNewTokenRadar()));
 app.get("/api/base/trending", serve(() => getBaseTrending()));
 app.get("/api/feargreed", serve(() => getFearGreed()));

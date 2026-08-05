@@ -1,3 +1,4 @@
+import { primaryName } from "./basename.js";
 import { cached } from "./cache.js";
 import { badRequest } from "./errors.js";
 import { baseRpc } from "./sources.js";
@@ -9,14 +10,17 @@ export async function getAddressInfo(address: string) {
   }
   const addr = address.toLowerCase();
   return cached(`address:${addr}`, 15_000, async () => {
-    const [balanceHex, nonceHex, code] = await Promise.all([
+    const [balanceHex, nonceHex, code, basename] = await Promise.all([
       baseRpc<string>("eth_getBalance", [addr, "latest"]),
       baseRpc<string>("eth_getTransactionCount", [addr, "latest"]),
       baseRpc<string>("eth_getCode", [addr, "latest"]),
+      // Best-effort: an address without a primary name still returns fine.
+      primaryName(addr),
     ]);
     return {
       chain: "base",
       address: addr,
+      basename,
       ethBalance: Number(BigInt(balanceHex)) / 1e18,
       txCount: Number(BigInt(nonceHex)),
       isContract: code !== "0x",
