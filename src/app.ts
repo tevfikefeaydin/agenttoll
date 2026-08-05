@@ -39,6 +39,17 @@ app.set("trust proxy", true); // behind Vercel's proxy, keep https in quoted res
 app.disable("x-powered-by");
 app.use(express.json({ limit: "10kb" }));
 
+// Indexers and uptime probes use HEAD. Express answers HEAD from the GET route,
+// but the paywall is configured per "GET /path", so a HEAD probe skipped payment
+// entirely: it ran the handler (burning upstream quota for free) and returned
+// 200 where discovery crawlers expect a 402 challenge. Treating HEAD as GET puts
+// it back behind the paywall; Node decided not to send a body when the request
+// arrived, so the response stays header-only either way.
+app.use((req, _res, next) => {
+  if (req.method === "HEAD") req.method = "GET";
+  next();
+});
+
 // Structured request log: one JSON line per API call (path, status, latency).
 // This is the audit trail — query it via Vercel runtime logs.
 app.use((req, res, next) => {
