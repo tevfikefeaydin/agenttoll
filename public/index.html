@@ -168,6 +168,37 @@
   .foot { display: flex; justify-content: space-between; gap: 18px; flex-wrap: wrap; align-items: center; }
   .foot-links { display: flex; gap: 20px; flex-wrap: wrap; }
 
+  /* ---------- live demo ---------- */
+  .demo {
+    margin-top: 34px; border: 1px solid var(--line); border-radius: 20px;
+    background: linear-gradient(160deg, var(--surface) 0%, rgba(14,21,36,.5) 100%);
+    padding: 26px;
+  }
+  .demo-head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: baseline; margin-bottom: 20px; }
+  .demo-title { font-weight: 600; }
+  .demo-title code { font-family: var(--mono); font-size: .88em; color: var(--blue-soft); }
+  .demo-note { color: var(--muted); font-size: .84rem; }
+  .demo-actions { display: flex; gap: 11px; flex-wrap: wrap; }
+  .demo-actions .btn:disabled { opacity: .55; cursor: progress; }
+  #demo-out {
+    margin-top: 20px; padding: 18px 20px; border-radius: 14px;
+    background: #060A11; border: 1px solid var(--line); font-size: .9rem;
+  }
+  #demo-out[data-tone="ok"] { border-color: rgba(46,224,122,.34); }
+  #demo-out[data-tone="err"] { border-color: rgba(255,107,107,.34); }
+  #demo-out .line { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  #demo-out .tag { font-family: var(--mono); font-size: .78rem; padding: 3px 9px; border-radius: 6px; }
+  #demo-out .tag.warn { background: rgba(232,196,107,.14); color: #E8C46B; }
+  #demo-out .tag.good { background: rgba(46,224,122,.14); color: #2EE07A; }
+  #demo-out .kv { display: flex; justify-content: space-between; gap: 16px; padding: 7px 0; border-top: 1px solid var(--line); font-family: var(--mono); font-size: .86rem; }
+  #demo-out .kv span { color: var(--muted); }
+  #demo-out .kv b { color: var(--text); font-weight: 500; }
+  #demo-out .dim { color: var(--muted); }
+  #demo-out p.dim { margin-top: 13px; font-size: .87rem; font-family: var(--sans); }
+  #demo-out .bad { color: #FF8080; }
+  #demo-out pre.mini { margin: 12px 0 0; padding: 14px 16px; font-size: .82rem; border-radius: 11px; }
+  .demo-foot { margin-top: 16px; color: var(--muted); font-size: .85rem; max-width: 62ch; }
+
   /* ---------- small screens ---------- */
   @media (max-width: 720px) {
     .wrap { width: min(1120px, 100% - 36px); }
@@ -276,7 +307,22 @@
     <h2 class="rv">No wallet needed to look</h2>
     <p class="sub rv">The 402 response <em>is</em> the product: a price quote any agent can
       read and pay programmatically. Run this and you'll see one.</p>
-    <div class="two">
+    <div class="demo rv">
+      <div class="demo-head">
+        <span class="demo-title">Live demo · <code>GET /api/price/eth</code></span>
+        <span class="demo-note">real endpoint, real Base mainnet</span>
+      </div>
+      <div class="demo-actions">
+        <button id="demo-quote" class="btn btn-primary" type="button">Get the live 402 quote</button>
+        <button id="demo-pay" class="btn btn-ghost" type="button" hidden>Pay $0.001 with your wallet →</button>
+      </div>
+      <div id="demo-out" hidden></div>
+      <p class="demo-foot">The quote needs nothing at all. Paying is optional and needs a
+        browser wallet holding a cent of USDC on Base — the same signature your agent would
+        make, just done by hand.</p>
+    </div>
+
+    <div class="two" style="margin-top:34px;">
       <div class="rv">
 <pre><span class="c"># free — service status and full catalog</span>
 curl agenttoll.app/api/health

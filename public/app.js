@@ -50,6 +50,83 @@ if (matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObs
   setTimeout(revealAll, 2500);
 }
 
+// ---- live demo ----------------------------------------------------------
+// Stage 1 (the quote) is a plain fetch, so it costs no extra bytes and works
+// for every visitor. Stage 2 pulls the wallet bundle only when asked.
+const ENDPOINT = "/api/price/eth";
+const demoOut = document.getElementById("demo-out");
+const quoteBtn = document.getElementById("demo-quote");
+const payBtn = document.getElementById("demo-pay");
+
+const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]);
+
+function show(html, tone = "quote") {
+  if (!demoOut) return;
+  demoOut.dataset.tone = tone;
+  demoOut.innerHTML = html;
+  demoOut.hidden = false;
+}
+
+if (quoteBtn) {
+  quoteBtn.addEventListener("click", async () => {
+    quoteBtn.disabled = true;
+    show('<span class="dim">Requesting ' + ENDPOINT + " …</span>", "wait");
+    try {
+      const res = await fetch(ENDPOINT);
+      const body = await res.json();
+      const accept = body?.accepts?.[0];
+      if (res.status !== 402 || !accept) {
+        show('<span class="bad">Unexpected response: HTTP ' + res.status + "</span>", "err");
+        return;
+      }
+      const to = String(accept.payTo);
+      show(
+        '<div class="line"><span class="tag warn">HTTP 402</span> Payment Required</div>' +
+          '<div class="kv"><span>price</span><b>$' +
+          (Number(accept.maxAmountRequired) / 1e6).toFixed(3) +
+          " USDC</b></div>" +
+          '<div class="kv"><span>network</span><b>' + esc(accept.network) + "</b></div>" +
+          '<div class="kv"><span>pay to</span><b>' +
+          esc(to.slice(0, 10)) + "…" + esc(to.slice(-6)) +
+          "</b></div>" +
+          '<p class="dim">That is the whole protocol — a price your agent can read and pay on ' +
+          "its own. Pay it below to get the data.</p>",
+        "quote",
+      );
+      if (payBtn) payBtn.hidden = false;
+    } catch (err) {
+      show('<span class="bad">' + esc(err.message) + "</span>", "err");
+    } finally {
+      quoteBtn.disabled = false;
+    }
+  });
+}
+
+if (payBtn) {
+  let loading;
+  payBtn.addEventListener("click", async () => {
+    payBtn.disabled = true;
+    try {
+      if (!window.agentTollPay) {
+        show('<span class="dim">Loading the payment library…</span>', "wait");
+        loading ??= new Promise((resolve, reject) => {
+          const s = document.createElement("script");
+          s.src = "/demo.js";
+          s.onload = resolve;
+          s.onerror = () => reject(new Error("Could not load the payment library."));
+          document.head.appendChild(s);
+        });
+        await loading;
+      }
+      await window.agentTollPay(ENDPOINT, show);
+    } catch (err) {
+      show('<span class="bad">' + esc(err.message) + "</span>", "err");
+    } finally {
+      payBtn.disabled = false;
+    }
+  });
+}
+
 // The hero video is opt-in: the still is always painted first, and the 200 KB
 // clip only loads on a wide screen, with motion allowed and a decent connection.
 // Everyone else keeps the poster and downloads nothing extra.
