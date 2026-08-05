@@ -40,6 +40,7 @@ inline, and gets the data.
 | `GET /api/base/token/:address` | Onchain USD price for any Base token by contract address | $0.001 |
 | `GET /api/base/address/:address` | Base address snapshot: primary basename, ETH balance, tx count, contract or EOA | $0.001 |
 | `GET /api/base/portfolio/:address?minValue=&limit=` | Everything an address holds on Base, valued in USD: ETH + ERC-20s, largest first | $0.003 |
+| `GET /api/base/safety/:address` | Token safety checks: honeypot, taxes, owner privileges, holder concentration, liquidity risk | $0.003 |
 | `GET /api/base/name/:nameOrAddress` | Basename both ways: name → address + text records, or address → primary name | $0.001 |
 | `GET /api/feargreed?days=` | Crypto Fear & Greed index, plus up to 30 days of daily history | $0.001 |
 | `GET /api/base/trending?limit=` | Trending DEX pools on Base: price, volume, liquidity | $0.002 |
@@ -72,6 +73,7 @@ the ones that matter fall through to a backup rather than failing:
 | Base token price | GeckoTerminal | DexScreener |
 | Base RPC (gas, address) | mainnet.base.org | publicnode → llamarpc |
 | Portfolio holdings | Blockscout | Multicall3 onchain + DefiLlama |
+| Token safety | GoPlus + honeypot.is together | either alone, with the rest reported as unchecked |
 
 Price responses carry a `source` field so you can see which one answered.
 
@@ -80,6 +82,15 @@ answering short: if the portfolio indexer is down, the onchain path covers major
 Base tokens only and the reply comes back with `partial: true` and a `note`
 explaining what is missing. The same flag appears when an address holds more
 tokens than one call can enumerate.
+
+The safety endpoint takes this furthest, because there the cost of a confident
+wrong answer is someone's money. Its two sources answer different questions —
+GoPlus reads the contract, honeypot.is simulates a real buy and sell — so it
+queries both and merges rather than falling through. Any check it could not run
+is reported as `unknown`, and a token with unknown checks is never graded
+`clear`; it comes back as `insufficient-data`. A brand-new token with no holder
+or liquidity history looks exactly like a clean one to a naive checker, and that
+is precisely the token someone is about to lose money on.
 
 ### Optional parameters
 
@@ -235,10 +246,10 @@ Shipped:
 - [x] Backup data sources per endpoint, so one provider rate-limiting us is not an outage
 - [x] Wallet portfolio: every token an address holds on Base, with USD value
 - [x] Schemas inside the 402 quote, so discovery never depends on a second request
+- [x] Token safety checks: honeypot simulation, taxes, owner privileges, holder concentration, liquidity
 
 Next:
 
-- [ ] Token safety checks for the radar's output (honeypot, liquidity lock, holder concentration)
 - [ ] Turkish market data beyond the lira premium (local exchange spreads)
 - [ ] A directory of x402 services agents can call, served over x402 itself
 

@@ -197,6 +197,17 @@ server.tool(
 );
 
 server.tool(
+  "check_token_safety",
+  "Automated safety checks for a Base token: a simulated buy and sell to catch honeypots, buy/sell tax, contract verification, what the owner can still do, holder concentration, and whether anyone can still withdraw the liquidity. The verdict is clear, caution, high-risk or insufficient-data — a token too new to check is never reported as clear. Costs $0.003 in USDC via x402.",
+  { address: z.string().describe("Token contract address on Base (0x...)") },
+  async ({ address }) => ({
+    content: [
+      { type: "text", text: await call(`/api/base/safety/${encodeURIComponent(address)}`) },
+    ],
+  }),
+);
+
+server.tool(
   "resolve_basename",
   "Resolve a Basename both ways: pass a name (agenttoll.base.eth, or just agenttoll) to get its address and text records, or pass a 0x address to get its primary basename. Costs $0.001 in USDC via x402.",
   { query: z.string().describe("A basename or a 0x address") },

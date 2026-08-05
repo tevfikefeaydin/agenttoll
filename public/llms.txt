@@ -38,6 +38,7 @@ how to call it. MCP: `npx agenttoll-mcp` exposes all endpoints as tools
 - https://agenttoll.app/api/base/token/{address} : onchain USD price of any Base token ($0.001)
 - https://agenttoll.app/api/base/address/{address} : Base address snapshot, includes primary basename ($0.001)
 - https://agenttoll.app/api/base/portfolio/{address}?minValue={usd}&limit={n} : everything an address holds on Base valued in USD — ETH plus ERC-20 tokens, largest first, spam floor default $1 ($0.003)
+- https://agenttoll.app/api/base/safety/{address} : automated safety checks for a Base token — honeypot simulation, buy/sell tax, contract verification, owner privileges, holder concentration, whether anyone can still pull the liquidity. Verdict is clear, caution, high-risk or insufficient-data; a token too new to check is never reported as clear ($0.003)
 - https://agenttoll.app/api/base/name/{nameOrAddress} : Basename resolution both ways — name to address with text records, or address to primary name ($0.001)
 - https://agenttoll.app/api/base/trending?limit={n} : trending DEX pools on Base ($0.002)
 - https://agenttoll.app/api/base/radar?minLiquidity={usd}&limit={n} : new-token radar above your liquidity floor, default $10k ($0.003)

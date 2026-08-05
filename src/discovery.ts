@@ -130,6 +130,31 @@ export const DISCOVERY: Record<string, Discovery> = {
     },
   },
 
+  "GET /api/base/safety/:address": {
+    ...address,
+    output: {
+      chain: "base",
+      token: "0x940181a94a35a4569e4529a3cdfb74e38fd98631",
+      name: "Aerodrome",
+      symbol: "AERO",
+      verdict: "caution",
+      failed: [],
+      warnings: ["owner-powers", "liquidity"],
+      unchecked: [],
+      checks: [
+        { id: "honeypot", status: "pass", detail: "A simulated buy and sell both succeeded" },
+        { id: "taxes", status: "pass", detail: "Buy tax 0%, sell tax 0%" },
+        { id: "owner-powers", status: "warn", detail: "Owner can: owner can mint new supply" },
+      ],
+      holderCount: 748566,
+      listedOnCex: ["Coinbase"],
+      sources: ["goplus", "honeypot.is"],
+      disclaimer:
+        "Automated checks against public data, not investment advice. Passing every check does not make a token safe.",
+      at: "2026-08-05T13:31:58.678Z",
+    },
+  },
+
   "GET /api/base/name/:nameOrAddress": {
     pathParams: { nameOrAddress: "agenttoll.base.eth" },
     pathParamsSchema: {
