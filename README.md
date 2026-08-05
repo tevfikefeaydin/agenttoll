@@ -11,7 +11,7 @@
   <img src="https://img.shields.io/badge/license-MIT-8A97AF" alt="MIT">
 </p>
 
-**Live:** [www.agenttoll.app](https://agenttoll.app) — try `GET /api/price/eth` and get a real x402 quote.
+**Live:** [agenttoll.app](https://agenttoll.app) — try `GET /api/price/eth` and get a real x402 quote.
 Onchain identity: **agenttoll.base.eth** (Base mainnet).
 
 **Base-native onchain data for AI agents, pay-per-call.** Base gas, any token price by
