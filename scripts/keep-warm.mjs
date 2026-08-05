@@ -11,8 +11,11 @@
  *   node scripts/keep-warm.mjs
  */
 import "dotenv/config";
+import { createPublicClient, http } from "viem";
+import { base } from "viem/chains";
 import { privateKeyToAccount } from "viem/accounts";
-import { wrapFetchWithPayment } from "x402-fetch";
+import { wrapFetchWithPaymentFromConfig } from "@x402/fetch";
+import { ExactEvmScheme, toClientEvmSigner } from "@x402/evm";
 
 const BASE = process.env.AGENTTOLL_URL ?? "https://agenttoll.app";
 
@@ -45,12 +48,15 @@ const dayIndex = Math.floor(Date.now() / 86_400_000);
 const path = ENDPOINTS[dayIndex % ENDPOINTS.length];
 
 const account = privateKeyToAccount(key);
-const pay = wrapFetchWithPayment(fetch, account);
+const publicClient = createPublicClient({ chain: base, transport: http() });
+const pay = wrapFetchWithPaymentFromConfig(fetch, {
+  schemes: [{ network: "eip155:8453", client: new ExactEvmScheme(toClientEvmSigner(account, publicClient)) }],
+});
 
 try {
   const started = Date.now();
   const res = await pay(`${BASE}${path}`, { method: "GET" });
-  const receipt = res.headers.get("x-payment-response");
+  const receipt = res.headers.get("payment-response");
   const tx = receipt
     ? JSON.parse(Buffer.from(receipt, "base64").toString("utf8")).transaction
     : null;

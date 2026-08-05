@@ -5,9 +5,10 @@
  *
  * Exposed as window.agentTollPay(); app.js calls it once the bundle lands.
  */
-import { createWalletClient, custom, type EIP1193Provider } from "viem";
+import { createPublicClient, createWalletClient, custom, http, type EIP1193Provider } from "viem";
 import { base } from "viem/chains";
-import { wrapFetchWithPayment, decodeXPaymentResponse } from "x402-fetch";
+import { wrapFetchWithPaymentFromConfig, decodePaymentResponseHeader } from "@x402/fetch";
+import { ExactEvmScheme, toClientEvmSigner } from "@x402/evm";
 
 const BASE_CHAIN_ID = "0x2105"; // 8453
 
@@ -75,11 +76,19 @@ async function pay(endpoint: string, show: Show) {
     });
 
     show('<span class="dim">Sign the USDC authorization in your wallet…</span>', "wait");
-    const res = await wrapFetchWithPayment(fetch, wallet)(endpoint);
+    const publicClient = createPublicClient({ chain: base, transport: http() });
+    const pay = wrapFetchWithPaymentFromConfig(fetch, {
+      schemes: [
+        { network: "eip155:8453", client: new ExactEvmScheme(toClientEvmSigner(wallet, publicClient)) },
+      ],
+    });
+    const res = await pay(endpoint);
     const data = await res.json();
 
-    const header = res.headers.get("x-payment-response");
-    const tx = header ? decodeXPaymentResponse(header)?.transaction : null;
+    const header = res.headers.get("payment-response");
+    const tx = header
+      ? (decodePaymentResponseHeader(header) as { transaction?: string })?.transaction
+      : null;
 
     show(
       '<div class="line"><span class="tag good">HTTP 200</span> paid &amp; delivered</div>' +

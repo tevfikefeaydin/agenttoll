@@ -2,7 +2,9 @@ import "dotenv/config";
 import express, { type Request, type Response } from "express";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { paymentMiddleware, type Network } from "x402-express";
+import { paymentMiddlewareFromConfig } from "@x402/express";
+import { HTTPFacilitatorClient } from "@x402/core/server";
+import { ExactEvmScheme } from "@x402/evm/exact/server";
 import { facilitator as cdpFacilitator } from "@coinbase/x402";
 import { getPrice } from "./services/prices.js";
 import { getGas } from "./services/gas.js";
@@ -24,15 +26,23 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // payTo is a public address (where USDC revenue lands); env can override it.
 const PAY_TO = (process.env.ADDRESS ??
   "0xe55359021a6a22d8385b827405991c56075f56f8") as `0x${string}`;
-export const NETWORK = (process.env.NETWORK ?? "base-sepolia") as Network;
-const FACILITATOR_URL = (process.env.FACILITATOR_URL ??
-  "https://x402.org/facilitator") as `${string}://${string}`;
+export const NETWORK = process.env.NETWORK ?? "base-sepolia";
+const FACILITATOR_URL = process.env.FACILITATOR_URL ?? "https://x402.org/facilitator";
+
+// x402 v2 identifies networks by CAIP-2 rather than by name.
+const CHAIN: `${string}:${string}` = NETWORK === "base" ? "eip155:8453" : "eip155:84532";
 
 // Mainnet settles through the CDP facilitator (needs CDP_API_KEY_ID and
 // CDP_API_KEY_SECRET in the environment); testnet uses the public one.
-const FACILITATOR = (
-  NETWORK === "base" ? cdpFacilitator : { url: FACILITATOR_URL }
-) as Parameters<typeof paymentMiddleware>[2];
+const facilitatorClient = new HTTPFacilitatorClient(
+  NETWORK === "base" ? cdpFacilitator : { url: FACILITATOR_URL },
+);
+
+/** Every route is the same deal, only the price and the wording change. */
+const paid = (price: string, description: string) => ({
+  accepts: { scheme: "exact", payTo: PAY_TO, price, network: CHAIN },
+  description,
+});
 
 const app = express();
 app.set("trust proxy", true); // behind Vercel's proxy, keep https in quoted resource URLs
@@ -103,85 +113,57 @@ app.use((req, res, next) => {
   next();
 });
 
-// Everything under /api/* (except /api/health) requires an x402 payment.
+// Everything under /api/* (except the free endpoints) requires an x402 payment.
 app.use(
-  paymentMiddleware(
-    PAY_TO,
+  paymentMiddlewareFromConfig(
     {
-      "GET /api/price/*": {
-        price: "$0.001",
-        network: NETWORK,
-        config: { description: "Spot price (USD) for a crypto asset" },
-      },
-      "GET /api/gas": {
-        price: "$0.001",
-        network: NETWORK,
-        config: { description: "Base network gas price and latest block" },
-      },
-      "GET /api/trending": {
-        price: "$0.002",
-        network: NETWORK,
-        config: { description: "Tokens trending across the market right now" },
-      },
-      "GET /api/base/token/*": {
-        price: "$0.001",
-        network: NETWORK,
-        config: { description: "Onchain USD price for any Base token by contract address" },
-      },
-      "GET /api/base/address/*": {
-        price: "$0.001",
-        network: NETWORK,
-        config: { description: "Base address snapshot: ETH balance, tx count, contract or EOA" },
-      },
-      "GET /api/feargreed": {
-        price: "$0.001",
-        network: NETWORK,
-        config: { description: "Crypto Fear & Greed index with yesterday comparison" },
-      },
-      "GET /api/base/trending": {
-        price: "$0.002",
-        network: NETWORK,
-        config: { description: "Trending DEX pools on Base: price, volume, liquidity" },
-      },
-      "GET /api/brief": {
-        price: "$0.005",
-        network: NETWORK,
-        config: { description: "One-call market brief: BTC/ETH/SOL, Base gas, sentiment" },
-      },
-      "GET /api/base/radar": {
-        price: "$0.003",
-        network: NETWORK,
-        config: { description: "New token radar: fresh Base pools that already have real liquidity" },
-      },
-      "GET /api/try/premium": {
-        price: "$0.002",
-        network: NETWORK,
-        config: { description: "Turkish lira premium: implied vs official USD/TRY via BTC cross-rate" },
-      },
-      "GET /api/base/name/*": {
-        price: "$0.001",
-        network: NETWORK,
-        config: {
-          description: "Basename resolution both ways: name to address, or address to primary name",
-        },
-      },
-      "GET /api/watch/address/*": {
-        price: "$0.002",
-        network: NETWORK,
-        config: { description: "New activity for a Base address since your cursor (stateless watch)" },
-      },
-      "GET /api/watch/radar": {
-        price: "$0.003",
-        network: NETWORK,
-        config: { description: "Only the Base pools that appeared since your cursor" },
-      },
-      "GET /api/watch/price/*": {
-        price: "$0.001",
-        network: NETWORK,
-        config: { description: "Price alert check: has an asset moved past your threshold?" },
-      },
+      "GET /api/price/*": paid("$0.001", "Spot price (USD) and 24h change for a crypto asset"),
+      "GET /api/gas": paid("$0.001", "Current Base network gas price and latest block number"),
+      "GET /api/trending": paid("$0.002", "Tokens trending across the crypto market right now"),
+      "GET /api/base/token/*": paid(
+        "$0.001",
+        "Onchain USD price for any token on Base, looked up by contract address",
+      ),
+      "GET /api/base/address/*": paid(
+        "$0.001",
+        "Snapshot of a Base address: primary basename, ETH balance, transaction count, and whether it is a contract",
+      ),
+      "GET /api/feargreed": paid("$0.001", "Crypto Fear and Greed index, with yesterday's value for comparison"),
+      "GET /api/base/trending": paid(
+        "$0.002",
+        "Trending DEX pools on Base right now, with price, 24h volume and liquidity",
+      ),
+      "GET /api/brief": paid(
+        "$0.005",
+        "One-call market brief: BTC, ETH and SOL prices, Base gas, and market sentiment",
+      ),
+      "GET /api/base/radar": paid(
+        "$0.003",
+        "New token radar for Base: pools created in the last 24 hours that already hold real liquidity, spam filtered",
+      ),
+      "GET /api/try/premium": paid(
+        "$0.002",
+        "Turkish lira crypto premium: implied USD/TRY from the BTC cross-rate versus the official rate",
+      ),
+      "GET /api/base/name/*": paid(
+        "$0.001",
+        "Basename resolution both ways: a name returns its address and text records, an address returns its primary basename",
+      ),
+      "GET /api/watch/address/*": paid(
+        "$0.002",
+        "New activity for a Base address since your cursor, so a scheduled agent only fetches what changed",
+      ),
+      "GET /api/watch/radar": paid(
+        "$0.003",
+        "Only the Base pools that appeared since your cursor, for agents polling on a schedule",
+      ),
+      "GET /api/watch/price/*": paid(
+        "$0.001",
+        "Price alert check: tells you whether an asset moved past your threshold from a reference price",
+      ),
     },
-    FACILITATOR,
+    facilitatorClient,
+    [{ network: CHAIN, server: new ExactEvmScheme() }],
   ),
 );
 

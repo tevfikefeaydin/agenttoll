@@ -1,26 +1,42 @@
-﻿{
+{
   "name": "agenttoll-mcp",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "mcpName": "io.github.tevfikefeaydin/agenttoll",
   "description": "MCP server for AgentToll - pay-per-call data APIs for AI agents, paid in USDC on Base via x402",
   "type": "module",
-  "bin": { "agenttoll-mcp": "dist/server.js" },
-  "files": ["dist"],
+  "bin": {
+    "agenttoll-mcp": "dist/server.js"
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "npm run build"
   },
-  "keywords": ["mcp", "x402", "base", "ai-agents", "micropayments", "usdc"],
+  "keywords": [
+    "mcp",
+    "x402",
+    "base",
+    "ai-agents",
+    "micropayments",
+    "usdc"
+  ],
   "license": "MIT",
-  "repository": { "type": "git", "url": "git+https://github.com/tevfikefeaydin/agenttoll.git", "directory": "mcp" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tevfikefeaydin/agenttoll.git",
+    "directory": "mcp"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
+    "@x402/evm": "^2.21.0",
+    "@x402/fetch": "^2.21.0",
     "viem": "^2.21.0",
-    "x402-fetch": "^1.0.0",
     "zod": "^3.23.0"
   },
   "devDependencies": {
-    "typescript": "^5.7.0",
-    "@types/node": "^22.0.0"
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
   }
 }

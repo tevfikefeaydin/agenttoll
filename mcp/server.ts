@@ -20,8 +20,11 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
+import { createPublicClient, http } from "viem";
+import { base, baseSepolia } from "viem/chains";
 import { privateKeyToAccount } from "viem/accounts";
-import { wrapFetchWithPayment } from "x402-fetch";
+import { wrapFetchWithPaymentFromConfig } from "@x402/fetch";
+import { ExactEvmScheme, toClientEvmSigner } from "@x402/evm";
 
 const BASE_URL = process.env.AGENTTOLL_URL ?? "https://agenttoll.app";
 const pk = process.env.AGENT_PRIVATE_KEY;
@@ -30,8 +33,18 @@ if (!pk) {
   process.exit(1);
 }
 
+// x402 v2 needs the chain in CAIP-2 form and a scheme registered per network.
+const useTestnet = (process.env.AGENTTOLL_NETWORK ?? "base") !== "base";
+const chain = useTestnet ? baseSepolia : base;
+const caip2 = useTestnet ? "eip155:84532" : "eip155:8453";
+
 const account = privateKeyToAccount(pk as `0x${string}`);
-const payFetch = wrapFetchWithPayment(fetch, account);
+const publicClient = createPublicClient({ chain, transport: http() });
+const payFetch = wrapFetchWithPaymentFromConfig(fetch, {
+  schemes: [
+    { network: caip2, client: new ExactEvmScheme(toClientEvmSigner(account, publicClient)) },
+  ],
+});
 
 async function call(path: string) {
   const res = await payFetch(`${BASE_URL}${path}`, { method: "GET" });
@@ -40,7 +53,7 @@ async function call(path: string) {
   return body;
 }
 
-const server = new McpServer({ name: "agenttoll", version: "0.5.0" });
+const server = new McpServer({ name: "agenttoll", version: "0.6.0" });
 
 server.tool(
   "get_price",
