@@ -46,14 +46,19 @@ const payFetch = wrapFetchWithPaymentFromConfig(fetch, {
   ],
 });
 
-async function call(path: string) {
-  const res = await payFetch(`${BASE_URL}${path}`, { method: "GET" });
+async function call(path: string, query: Record<string, string | number | undefined> = {}) {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(query)) {
+    if (value !== undefined) params.set(key, String(value));
+  }
+  const qs = params.toString();
+  const res = await payFetch(`${BASE_URL}${path}${qs ? `?${qs}` : ""}`, { method: "GET" });
   const body = await res.text();
   if (!res.ok) throw new Error(`AgentToll returned ${res.status}: ${body}`);
   return body;
 }
 
-const server = new McpServer({ name: "agenttoll", version: "0.6.0" });
+const server = new McpServer({ name: "agenttoll", version: "0.7.0" });
 
 server.tool(
   "get_price",
@@ -66,16 +71,28 @@ server.tool(
 
 server.tool(
   "get_base_gas",
-  "Base network gas price and latest block. Costs $0.001 in USDC via x402.",
-  {},
-  async () => ({ content: [{ type: "text", text: await call("/api/gas") }] }),
+  "Base network gas price and latest block. Pass gasLimit to also get what a transaction that size would cost in ETH and USD. Costs $0.001 in USDC via x402.",
+  {
+    gasLimit: z
+      .number()
+      .int()
+      .min(21_000)
+      .max(30_000_000)
+      .optional()
+      .describe("Gas units to price: 21000 a transfer, ~65000 an ERC-20 transfer, 150000-300000 a swap"),
+  },
+  async ({ gasLimit }) => ({
+    content: [{ type: "text", text: await call("/api/gas", { gasLimit }) }],
+  }),
 );
 
 server.tool(
   "get_trending",
   "Tokens trending across the market right now. Costs $0.002 in USDC via x402.",
-  {},
-  async () => ({ content: [{ type: "text", text: await call("/api/trending") }] }),
+  { limit: z.number().int().min(1).max(25).optional().describe("Return only the top N tokens") },
+  async ({ limit }) => ({
+    content: [{ type: "text", text: await call("/api/trending", { limit }) }],
+  }),
 );
 
 server.tool(
@@ -98,37 +115,63 @@ server.tool(
 
 server.tool(
   "get_fear_greed",
-  "Crypto Fear & Greed index with yesterday comparison. Costs $0.001 in USDC via x402.",
-  {},
-  async () => ({ content: [{ type: "text", text: await call("/api/feargreed") }] }),
+  "Crypto Fear & Greed index with yesterday comparison. Pass days to also get a daily history, which shows whether sentiment is turning. Costs $0.001 in USDC via x402.",
+  { days: z.number().int().min(1).max(30).optional().describe("Days of daily history to include") },
+  async ({ days }) => ({
+    content: [{ type: "text", text: await call("/api/feargreed", { days }) }],
+  }),
 );
 
 server.tool(
   "get_base_trending_pools",
   "Trending DEX pools on Base: price, 24h volume, liquidity. Costs $0.002 in USDC via x402.",
-  {},
-  async () => ({ content: [{ type: "text", text: await call("/api/base/trending") }] }),
+  { limit: z.number().int().min(1).max(20).optional().describe("How many pools to return (default 10)") },
+  async ({ limit }) => ({
+    content: [{ type: "text", text: await call("/api/base/trending", { limit }) }],
+  }),
 );
 
 server.tool(
   "get_market_brief",
-  "One-call market brief: BTC/ETH/SOL prices, Base gas, Fear & Greed. Costs $0.005 in USDC via x402.",
-  {},
-  async () => ({ content: [{ type: "text", text: await call("/api/brief") }] }),
+  "One-call market brief: prices, Base gas, Fear & Greed. Defaults to BTC/ETH/SOL; pass symbols to price whatever you actually track, at the same flat price. Costs $0.005 in USDC via x402.",
+  {
+    symbols: z
+      .array(z.string())
+      .max(6)
+      .optional()
+      .describe("Tickers or CoinGecko ids to price instead of the majors, e.g. ['eth','degen']"),
+  },
+  async ({ symbols }) => ({
+    content: [
+      { type: "text", text: await call("/api/brief", { symbols: symbols?.join(",") }) },
+    ],
+  }),
 );
 
 server.tool(
   "get_new_token_radar",
-  "New token radar: pools created on Base in the last ~24h that already have real liquidity (min $10k). Costs $0.003 in USDC via x402.",
-  {},
-  async () => ({ content: [{ type: "text", text: await call("/api/base/radar") }] }),
+  "New token radar: pools created on Base in the last ~24h that already have real liquidity. The default floor is $10k; raise it to cut more spam, lower it to see everything new. Costs $0.003 in USDC via x402.",
+  {
+    minLiquidity: z.number().min(0).optional().describe("Liquidity floor in USD (default 10000)"),
+    limit: z.number().int().min(1).max(30).optional().describe("How many pools to return (default 15)"),
+  },
+  async ({ minLiquidity, limit }) => ({
+    content: [{ type: "text", text: await call("/api/base/radar", { minLiquidity, limit }) }],
+  }),
 );
 
 server.tool(
   "get_try_premium",
-  "Turkish lira premium: implied vs official USD/TRY via BTC cross-rate. Costs $0.002 in USDC via x402.",
-  {},
-  async () => ({ content: [{ type: "text", text: await call("/api/try/premium") }] }),
+  "Turkish lira premium: implied vs official USD/TRY via a crypto cross-rate. USDT is the reading desks quote, because it is what actually changes hands. Costs $0.002 in USDC via x402.",
+  {
+    asset: z
+      .enum(["btc", "eth", "usdt", "usdc"])
+      .optional()
+      .describe("Which asset carries the cross-rate (default btc)"),
+  },
+  async ({ asset }) => ({
+    content: [{ type: "text", text: await call("/api/try/premium", { asset }) }],
+  }),
 );
 
 server.tool(
@@ -151,10 +194,7 @@ server.tool(
     content: [
       {
         type: "text",
-        text: await call(
-          `/api/watch/address/${encodeURIComponent(address)}` +
-            (since ? `?since=${encodeURIComponent(since)}` : ""),
-        ),
+        text: await call(`/api/watch/address/${encodeURIComponent(address)}`, { since }),
       },
     ],
   }),
@@ -165,12 +205,7 @@ server.tool(
   "Only the Base pools that appeared since a cursor — pass the previous reply's `cursor` as `since`. Costs $0.003 in USDC via x402.",
   { since: z.string().optional().describe("ISO timestamp cursor from the previous reply") },
   async ({ since }) => ({
-    content: [
-      {
-        type: "text",
-        text: await call(`/api/watch/radar` + (since ? `?since=${encodeURIComponent(since)}` : "")),
-      },
-    ],
+    content: [{ type: "text", text: await call("/api/watch/radar", { since }) }],
   }),
 );
 
@@ -186,10 +221,7 @@ server.tool(
     content: [
       {
         type: "text",
-        text: await call(
-          `/api/watch/price/${encodeURIComponent(symbol)}?ref=${ref}` +
-            (pct === undefined ? "" : `&pct=${pct}`),
-        ),
+        text: await call(`/api/watch/price/${encodeURIComponent(symbol)}`, { ref, pct }),
       },
     ],
   }),

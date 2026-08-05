@@ -1,5 +1,6 @@
 import { cached } from "./cache.js";
 import { fetchJsonRetrying, fromSources } from "./sources.js";
+import { optionalInt } from "./params.js";
 
 interface Pool {
   attributes: {
@@ -26,9 +27,11 @@ interface BaseTrending {
   at: string;
 }
 
+const DEFAULT_LIMIT = 10;
+
 const shape = (data: Pool[], source: string): BaseTrending => ({
   chain: "base",
-  pools: data.slice(0, 10).map(({ attributes: a }) => ({
+  pools: data.map(({ attributes: a }) => ({
     name: a.name,
     pool: a.address,
     priceUsd: Number(a.base_token_price_usd),
@@ -52,8 +55,12 @@ async function pools(path: string): Promise<Pool[]> {
 // Trending DEX pools on Base. The fallback is the same provider's top-by-volume
 // listing — it covers this endpoint failing on its own, not the provider being
 // down, so `source` says which ranking produced the answer.
-export async function getBaseTrending() {
-  return cached("basetrending", 60_000, () =>
+//
+// The provider's page is cached whole and `limit` slices it per caller, so a
+// wider request costs no extra upstream call.
+export async function getBaseTrending(limitRaw?: string): Promise<BaseTrending> {
+  const limit = optionalInt("limit", limitRaw, { min: 1, max: 20 }) ?? DEFAULT_LIMIT;
+  const data = await cached("basetrending", 60_000, () =>
     fromSources<BaseTrending>("base trending pools", [
       { name: "geckoterminal-trending", load: async () => shape(await pools("trending_pools"), "geckoterminal-trending") },
       {
@@ -63,4 +70,5 @@ export async function getBaseTrending() {
       },
     ]),
   );
+  return { ...data, pools: data.pools.slice(0, limit) };
 }

@@ -118,8 +118,14 @@ app.use(
   paymentMiddlewareFromConfig(
     {
       "GET /api/price/*": paid("$0.001", "Spot price (USD) and 24h change for a crypto asset"),
-      "GET /api/gas": paid("$0.001", "Current Base network gas price and latest block number"),
-      "GET /api/trending": paid("$0.002", "Tokens trending across the crypto market right now"),
+      "GET /api/gas": paid(
+        "$0.001",
+        "Current Base network gas price and latest block number; add ?gasLimit=150000 to also get what a transaction that size costs in ETH and USD",
+      ),
+      "GET /api/trending": paid(
+        "$0.002",
+        "Tokens trending across the crypto market right now; ?limit=N trims the list",
+      ),
       "GET /api/base/token/*": paid(
         "$0.001",
         "Onchain USD price for any token on Base, looked up by contract address",
@@ -128,22 +134,25 @@ app.use(
         "$0.001",
         "Snapshot of a Base address: primary basename, ETH balance, transaction count, and whether it is a contract",
       ),
-      "GET /api/feargreed": paid("$0.001", "Crypto Fear and Greed index, with yesterday's value for comparison"),
+      "GET /api/feargreed": paid(
+        "$0.001",
+        "Crypto Fear and Greed index with yesterday's value; ?days=7 adds a daily history so you can see whether sentiment is turning",
+      ),
       "GET /api/base/trending": paid(
         "$0.002",
-        "Trending DEX pools on Base right now, with price, 24h volume and liquidity",
+        "Trending DEX pools on Base right now, with price, 24h volume and liquidity; ?limit=N sets how many",
       ),
       "GET /api/brief": paid(
         "$0.005",
-        "One-call market brief: BTC, ETH and SOL prices, Base gas, and market sentiment",
+        "One-call market brief: prices (BTC, ETH and SOL by default, or ?symbols=eth,degen), Base gas, and market sentiment",
       ),
       "GET /api/base/radar": paid(
         "$0.003",
-        "New token radar for Base: pools created in the last 24 hours that already hold real liquidity, spam filtered",
+        "New token radar for Base: pools created in the last 24 hours that already hold real liquidity; ?minLiquidity sets the spam floor in USD, default 10000",
       ),
       "GET /api/try/premium": paid(
         "$0.002",
-        "Turkish lira crypto premium: implied USD/TRY from the BTC cross-rate versus the official rate",
+        "Turkish lira crypto premium: implied USD/TRY from a crypto cross-rate versus the official rate; ?asset=usdt is the reading desks quote",
       ),
       "GET /api/base/name/*": paid(
         "$0.001",
@@ -197,11 +206,14 @@ app.get("/api/demo", (_req, res) => {
     samples: {
       "/api/price/eth": { symbol: "eth", id: "ethereum", usd: 1902.36, change24h: 0.25, at: "2026-07-31T06:55:14.465Z" },
       "/api/gas": { chain: "base", gasPriceWei: "6000000", gasPriceGwei: 0.006, latestBlock: 49345179, at: "2026-07-31T06:35:04.787Z" },
+      "/api/gas?gasLimit=150000": { chain: "base", gasPriceGwei: 0.006, latestBlock: 49345179, estimate: { gasLimit: 150000, ethCost: 9.0e-7, usdCost: 0.001692, ethUsd: 1867.28 }, at: "2026-07-31T06:35:04.787Z" },
       "/api/base/token/{address}": { chain: "base", token: "0x9401...8631", usd: 0.424, at: "2026-07-31T08:52:06.109Z" },
       "/api/base/address/{address}": { chain: "base", address: "0xe553...56f8", ethBalance: 0, txCount: 1, isContract: true, at: "2026-07-31T08:52:05.955Z" },
       "/api/feargreed": { value: 25, classification: "Extreme Fear", yesterday: 28, at: "2026-07-31T08:52:06.318Z" },
       "/api/base/trending": { chain: "base", pools: [{ name: "msUSD / USDC 0.05%", priceUsd: 1.0, volume24hUsd: 6029571, change24hPct: 0.01, liquidityUsd: 2100000 }], at: "2026-07-31T09:10:00.000Z" },
       "/api/brief": { majors: { eth: { usd: 1880.43 }, btc: { usd: 63654 }, sol: { usd: 98.2 } }, baseGas: { gasPriceGwei: 0.006 }, sentiment: { value: 25 }, at: "2026-07-31T09:10:00.000Z" },
+      "/api/base/radar": { chain: "base", minLiquidityUsd: 10000, count: 1, pools: [{ name: "BASED / ETH 1%", pool: "0x2acb...cac0", createdAt: "2026-08-05T13:01:33Z", priceUsd: 0.0000156, volume24hUsd: 19071.46, liquidityUsd: 14246.1 }], at: "2026-08-05T13:31:00.000Z" },
+      "/api/try/premium": { asset: "usdt", assetUsd: 0.999318, assetTry: 47.53, impliedUsdTry: 47.5624, officialUsdTry: 47.2891, premiumPct: 0.578, at: "2026-08-05T13:31:00.000Z" },
     },
   });
 });
@@ -221,16 +233,16 @@ app.get("/.well-known/x402", (_req, res) => {
     mcp: "https://www.npmjs.com/package/agenttoll-mcp",
     resources: [
       { resource: `${PUBLIC_BASE}/api/price/{symbol}`, price: "$0.001", description: "Spot price (USD) + 24h change for a crypto asset" },
-      { resource: `${PUBLIC_BASE}/api/gas`, price: "$0.001", description: "Base network gas price and latest block" },
-      { resource: `${PUBLIC_BASE}/api/trending`, price: "$0.002", description: "Tokens trending across the market right now" },
+      { resource: `${PUBLIC_BASE}/api/gas`, price: "$0.001", description: "Base network gas price and latest block; ?gasLimit=N also costs a transaction that size" },
+      { resource: `${PUBLIC_BASE}/api/trending`, price: "$0.002", description: "Tokens trending across the market right now; ?limit=N" },
       { resource: `${PUBLIC_BASE}/api/base/token/{address}`, price: "$0.001", description: "Onchain USD price for any Base token by contract address" },
       { resource: `${PUBLIC_BASE}/api/base/address/{address}`, price: "$0.001", description: "Base address snapshot: primary basename, ETH balance, tx count, contract or EOA" },
       { resource: `${PUBLIC_BASE}/api/base/name/{nameOrAddress}`, price: "$0.001", description: "Basename resolution both ways: name to address, or address to primary name" },
-      { resource: `${PUBLIC_BASE}/api/base/trending`, price: "$0.002", description: "Trending DEX pools on Base: price, volume, liquidity" },
-      { resource: `${PUBLIC_BASE}/api/base/radar`, price: "$0.003", description: "New token radar: fresh Base pools with real liquidity" },
-      { resource: `${PUBLIC_BASE}/api/feargreed`, price: "$0.001", description: "Crypto Fear & Greed index with yesterday comparison" },
-      { resource: `${PUBLIC_BASE}/api/brief`, price: "$0.005", description: "One-call market brief: BTC/ETH/SOL, Base gas, sentiment" },
-      { resource: `${PUBLIC_BASE}/api/try/premium`, price: "$0.002", description: "Turkish lira premium: implied vs official USD/TRY via BTC cross-rate" },
+      { resource: `${PUBLIC_BASE}/api/base/trending`, price: "$0.002", description: "Trending DEX pools on Base: price, volume, liquidity; ?limit=N" },
+      { resource: `${PUBLIC_BASE}/api/base/radar`, price: "$0.003", description: "New token radar: fresh Base pools above your liquidity floor; ?minLiquidity=USD&limit=N" },
+      { resource: `${PUBLIC_BASE}/api/feargreed`, price: "$0.001", description: "Crypto Fear & Greed index; ?days=1-30 adds daily history" },
+      { resource: `${PUBLIC_BASE}/api/brief`, price: "$0.005", description: "One-call market brief: prices, Base gas, sentiment; ?symbols=eth,degen" },
+      { resource: `${PUBLIC_BASE}/api/try/premium`, price: "$0.002", description: "Turkish lira premium: implied vs official USD/TRY; ?asset=btc|eth|usdt|usdc" },
       { resource: `${PUBLIC_BASE}/api/watch/address/{address}`, price: "$0.002", description: "New activity for a Base address since your cursor (stateless watch)" },
       { resource: `${PUBLIC_BASE}/api/watch/radar`, price: "$0.003", description: "Only the Base pools that appeared since your cursor" },
       { resource: `${PUBLIC_BASE}/api/watch/price/{symbol}`, price: "$0.001", description: "Price alert check against your reference and threshold" },
@@ -248,16 +260,16 @@ app.get("/api/catalog", (_req, res) => {
     payment: "x402",
     endpoints: [
       { path: "/api/price/{symbol}", method: "GET", price: "$0.001", description: "Spot price (USD) + 24h change for a crypto asset" },
-      { path: "/api/gas", method: "GET", price: "$0.001", description: "Base network gas price and latest block" },
-      { path: "/api/trending", method: "GET", price: "$0.002", description: "Tokens trending across the market right now" },
+      { path: "/api/gas?gasLimit={units}", method: "GET", price: "$0.001", description: "Base network gas price and latest block; with gasLimit, the ETH and USD cost of a transaction that size" },
+      { path: "/api/trending?limit={n}", method: "GET", price: "$0.002", description: "Tokens trending across the market right now" },
       { path: "/api/base/token/{address}", method: "GET", price: "$0.001", description: "Onchain USD price for any Base token by contract address" },
       { path: "/api/base/address/{address}", method: "GET", price: "$0.001", description: "Base address snapshot: primary basename, ETH balance, tx count, contract or EOA" },
       { path: "/api/base/name/{nameOrAddress}", method: "GET", price: "$0.001", description: "Basename resolution both ways: name to address (with text records), or address to primary name" },
-      { path: "/api/base/trending", method: "GET", price: "$0.002", description: "Trending DEX pools on Base: price, volume, liquidity" },
-      { path: "/api/feargreed", method: "GET", price: "$0.001", description: "Crypto Fear & Greed index with yesterday comparison" },
-      { path: "/api/brief", method: "GET", price: "$0.005", description: "One-call market brief: BTC/ETH/SOL, Base gas, sentiment" },
-      { path: "/api/base/radar", method: "GET", price: "$0.003", description: "New token radar: fresh Base pools that already have real liquidity" },
-      { path: "/api/try/premium", method: "GET", price: "$0.002", description: "Turkish lira premium: implied vs official USD/TRY via BTC cross-rate" },
+      { path: "/api/base/trending?limit={n}", method: "GET", price: "$0.002", description: "Trending DEX pools on Base: price, volume, liquidity" },
+      { path: "/api/feargreed?days={1-30}", method: "GET", price: "$0.001", description: "Crypto Fear & Greed index with yesterday comparison, optionally with daily history" },
+      { path: "/api/brief?symbols={a,b,c}", method: "GET", price: "$0.005", description: "One-call market brief: prices (BTC/ETH/SOL by default), Base gas, sentiment" },
+      { path: "/api/base/radar?minLiquidity={usd}&limit={n}", method: "GET", price: "$0.003", description: "New token radar: fresh Base pools above your liquidity floor, default $10k" },
+      { path: "/api/try/premium?asset={btc|eth|usdt|usdc}", method: "GET", price: "$0.002", description: "Turkish lira premium: implied vs official USD/TRY via a crypto cross-rate" },
       { path: "/api/watch/address/{address}?since={iso}", method: "GET", price: "$0.002", description: "New activity for a Base address since your cursor; reply carries the next cursor" },
       { path: "/api/watch/radar?since={iso}", method: "GET", price: "$0.003", description: "Only the Base pools that appeared since your cursor" },
       { path: "/api/watch/price/{symbol}?ref={price}&pct={threshold}", method: "GET", price: "$0.001", description: "Price alert check: triggered true/false against your reference and threshold" },
@@ -270,16 +282,19 @@ app.get("/api/catalog", (_req, res) => {
 });
 
 app.get("/api/price/:symbol", serve((req) => getPrice(one(req.params.symbol))));
-app.get("/api/gas", serve(() => getGas()));
-app.get("/api/trending", serve(() => getTrending()));
+app.get("/api/gas", serve((req) => getGas(opt(req.query.gasLimit))));
+app.get("/api/trending", serve((req) => getTrending(opt(req.query.limit))));
 app.get("/api/base/token/:address", serve((req) => getBaseTokenPrice(one(req.params.address))));
 app.get("/api/base/address/:address", serve((req) => getAddressInfo(one(req.params.address))));
 app.get("/api/base/name/:query", serve((req) => resolveBasename(one(req.params.query))));
-app.get("/api/base/radar", serve(() => getNewTokenRadar()));
-app.get("/api/base/trending", serve(() => getBaseTrending()));
-app.get("/api/feargreed", serve(() => getFearGreed()));
-app.get("/api/brief", serve(() => getMarketBrief()));
-app.get("/api/try/premium", serve(() => getTryPremium()));
+app.get(
+  "/api/base/radar",
+  serve((req) => getNewTokenRadar(opt(req.query.minLiquidity), opt(req.query.limit))),
+);
+app.get("/api/base/trending", serve((req) => getBaseTrending(opt(req.query.limit))));
+app.get("/api/feargreed", serve((req) => getFearGreed(opt(req.query.days))));
+app.get("/api/brief", serve((req) => getMarketBrief(opt(req.query.symbols))));
+app.get("/api/try/premium", serve((req) => getTryPremium(opt(req.query.asset))));
 app.get("/api/stats", serve(() => getStats(PAY_TO)));
 
 app.get(

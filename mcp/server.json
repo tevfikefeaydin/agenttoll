@@ -6,12 +6,12 @@
     "url": "https://github.com/tevfikefeaydin/agenttoll",
     "source": "github"
   },
-  "version": "0.6.0",
+  "version": "0.7.0",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "agenttoll-mcp",
-      "version": "0.6.0",
+      "version": "0.7.0",
       "transport": {
         "type": "stdio"
       },
@@ -25,7 +25,7 @@
         },
         {
           "name": "AGENTTOLL_URL",
-          "description": "API base URL (default: https://agenttoll-pi.vercel.app)",
+          "description": "API base URL (default: https://agenttoll.app)",
           "isRequired": false,
           "format": "string",
           "isSecret": false

@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "AgentToll",
-    "version": "0.4.0",
+    "version": "0.5.0",
     "description": "Pay-per-call data APIs for AI agents. Paid endpoints return HTTP 402 with an x402 quote; pay $0.001-$0.005 in USDC on Base mainnet per call. No API keys. Onchain identity: agenttoll.base.eth.",
     "contact": {
       "name": "AgentToll",
@@ -83,6 +83,9 @@
           "200": {
             "description": "Price data"
           },
+          "400": {
+            "description": "Invalid path or query parameter (not charged)"
+          },
           "402": {
             "description": "x402 payment quote"
           }
@@ -91,32 +94,64 @@
     },
     "/api/gas": {
       "get": {
-        "summary": "Base network gas price and latest block",
+        "summary": "Base network gas price and latest block, optionally costed for a transaction size",
         "x-price-usdc": "0.001",
+        "parameters": [
+          {
+            "name": "gasLimit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 21000,
+              "maximum": 30000000
+            },
+            "example": 150000,
+            "description": "Optional. Price a transaction of this gas size: the reply gains estimate.ethCost and estimate.usdCost. 21000 is a plain transfer, ~65000 an ERC-20 transfer, 150000-300000 a swap."
+          }
+        ],
         "responses": {
           "200": {
             "description": "Gas data"
           },
+          "400": {
+            "description": "Invalid query parameter (not charged)"
+          },
           "402": {
             "description": "x402 payment quote"
           }
-        },
-        "parameters": []
+        }
       }
     },
     "/api/trending": {
       "get": {
         "summary": "Tokens trending across the market right now",
         "x-price-usdc": "0.002",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 25
+            },
+            "example": 5,
+            "description": "Optional. Return only the top N tokens. Defaults to the provider's full list."
+          }
+        ],
         "responses": {
           "200": {
             "description": "Trending tokens"
           },
+          "400": {
+            "description": "Invalid query parameter (not charged)"
+          },
           "402": {
             "description": "x402 payment quote"
           }
-        },
-        "parameters": []
+        }
       }
     },
     "/api/base/token/{address}": {
@@ -137,6 +172,9 @@
         "responses": {
           "200": {
             "description": "Token price"
+          },
+          "400": {
+            "description": "Invalid path or query parameter (not charged)"
           },
           "402": {
             "description": "x402 payment quote"
@@ -163,6 +201,9 @@
           "200": {
             "description": "Address info"
           },
+          "400": {
+            "description": "Invalid path or query parameter (not charged)"
+          },
           "402": {
             "description": "x402 payment quote"
           }
@@ -173,75 +214,174 @@
       "get": {
         "summary": "Trending DEX pools on Base: price, volume, liquidity",
         "x-price-usdc": "0.002",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 20,
+              "default": 10
+            },
+            "example": 5,
+            "description": "Optional. How many pools to return."
+          }
+        ],
         "responses": {
           "200": {
             "description": "Trending pools"
           },
+          "400": {
+            "description": "Invalid query parameter (not charged)"
+          },
           "402": {
             "description": "x402 payment quote"
           }
-        },
-        "parameters": []
+        }
       }
     },
     "/api/base/radar": {
       "get": {
-        "summary": "New token radar: fresh Base pools with real liquidity (min $10k, spam filtered)",
+        "summary": "New token radar: fresh Base pools that already hold real liquidity, spam filtered",
         "x-price-usdc": "0.003",
+        "parameters": [
+          {
+            "name": "minLiquidity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1000000000,
+              "default": 10000
+            },
+            "example": 50000,
+            "description": "Optional. Liquidity floor in USD. Raise it to cut more spam, lower it to see everything new."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 30,
+              "default": 15
+            },
+            "example": 5,
+            "description": "Optional. How many pools to return, busiest first."
+          }
+        ],
         "responses": {
           "200": {
             "description": "New pools"
           },
+          "400": {
+            "description": "Invalid query parameter (not charged)"
+          },
           "402": {
             "description": "x402 payment quote"
           }
-        },
-        "parameters": []
+        }
       }
     },
     "/api/feargreed": {
       "get": {
-        "summary": "Crypto Fear & Greed index with yesterday comparison",
+        "summary": "Crypto Fear & Greed index with yesterday comparison and optional daily history",
         "x-price-usdc": "0.001",
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 30
+            },
+            "example": 7,
+            "description": "Optional. Add a daily history array covering this many days, so you can see whether sentiment is turning."
+          }
+        ],
         "responses": {
           "200": {
             "description": "Index"
           },
+          "400": {
+            "description": "Invalid query parameter (not charged)"
+          },
           "402": {
             "description": "x402 payment quote"
           }
-        },
-        "parameters": []
+        }
       }
     },
     "/api/brief": {
       "get": {
-        "summary": "One-call market brief: BTC/ETH/SOL, Base gas, sentiment",
+        "summary": "One-call market brief: prices, Base gas, sentiment",
         "x-price-usdc": "0.005",
+        "parameters": [
+          {
+            "name": "symbols",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "btc,eth,sol"
+            },
+            "example": "eth,degen,aero",
+            "description": "Optional. Comma-separated tickers or CoinGecko ids to price instead of the default majors, up to 6. Same flat price either way."
+          }
+        ],
         "responses": {
           "200": {
             "description": "Brief"
           },
-          "402": {
-            "description": "x402 payment quote"
-          }
-        },
-        "parameters": []
-      }
-    },
-    "/api/try/premium": {
-      "get": {
-        "summary": "Turkish lira premium: implied vs official USD/TRY via BTC cross-rate",
-        "x-price-usdc": "0.002",
-        "responses": {
-          "200": {
-            "description": "Premium"
+          "400": {
+            "description": "Invalid query parameter (not charged)"
           },
           "402": {
             "description": "x402 payment quote"
           }
-        },
-        "parameters": []
+        }
+      }
+    },
+    "/api/try/premium": {
+      "get": {
+        "summary": "Turkish lira premium: implied vs official USD/TRY via a crypto cross-rate",
+        "x-price-usdc": "0.002",
+        "parameters": [
+          {
+            "name": "asset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "btc",
+                "eth",
+                "usdt",
+                "usdc"
+              ],
+              "default": "btc"
+            },
+            "example": "usdt",
+            "description": "Optional. Which asset carries the cross-rate. USDT is the reading desks quote, because it is what actually changes hands."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Premium"
+          },
+          "400": {
+            "description": "Invalid query parameter (not charged)"
+          },
+          "402": {
+            "description": "x402 payment quote"
+          }
+        }
       }
     },
     "/api/base/name/{nameOrAddress}": {
@@ -263,6 +403,9 @@
         "responses": {
           "200": {
             "description": "Resolution result"
+          },
+          "400": {
+            "description": "Invalid path or query parameter (not charged)"
           },
           "402": {
             "description": "x402 payment quote"
@@ -299,6 +442,9 @@
           "200": {
             "description": "Events since the cursor"
           },
+          "400": {
+            "description": "Invalid path or query parameter (not charged)"
+          },
           "402": {
             "description": "x402 payment quote"
           }
@@ -324,6 +470,9 @@
         "responses": {
           "200": {
             "description": "New pools since the cursor"
+          },
+          "400": {
+            "description": "Invalid path or query parameter (not charged)"
           },
           "402": {
             "description": "x402 payment quote"
@@ -368,6 +517,9 @@
         "responses": {
           "200": {
             "description": "Alert state"
+          },
+          "400": {
+            "description": "Invalid path or query parameter (not charged)"
           },
           "402": {
             "description": "x402 payment quote"

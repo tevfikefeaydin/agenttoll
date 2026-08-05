@@ -35,16 +35,16 @@ inline, and gets the data.
 | Endpoint | Description | Price |
 |---|---|---|
 | `GET /api/price/:symbol` | Spot price (USD) + 24h change for any asset | $0.001 |
-| `GET /api/gas` | Base network gas price + latest block | $0.001 |
-| `GET /api/trending` | Tokens trending across the market right now | $0.002 |
+| `GET /api/gas?gasLimit=` | Base gas price + latest block; with `gasLimit`, what a transaction of that size costs in ETH and USD | $0.001 |
+| `GET /api/trending?limit=` | Tokens trending across the market right now | $0.002 |
 | `GET /api/base/token/:address` | Onchain USD price for any Base token by contract address | $0.001 |
 | `GET /api/base/address/:address` | Base address snapshot: primary basename, ETH balance, tx count, contract or EOA | $0.001 |
 | `GET /api/base/name/:nameOrAddress` | Basename both ways: name → address + text records, or address → primary name | $0.001 |
-| `GET /api/feargreed` | Crypto Fear & Greed index with yesterday comparison | $0.001 |
-| `GET /api/base/trending` | Trending DEX pools on Base: price, volume, liquidity | $0.002 |
-| `GET /api/brief` | One-call market brief: BTC/ETH/SOL, Base gas, sentiment | $0.005 |
-| `GET /api/base/radar` | New token radar: fresh Base pools that already have real liquidity | $0.003 |
-| `GET /api/try/premium` | Turkish lira premium: implied vs official USD/TRY via BTC cross-rate | $0.002 |
+| `GET /api/feargreed?days=` | Crypto Fear & Greed index, plus up to 30 days of daily history | $0.001 |
+| `GET /api/base/trending?limit=` | Trending DEX pools on Base: price, volume, liquidity | $0.002 |
+| `GET /api/brief?symbols=` | One-call market brief: prices (BTC/ETH/SOL by default), Base gas, sentiment | $0.005 |
+| `GET /api/base/radar?minLiquidity=&limit=` | New token radar: fresh Base pools above your liquidity floor | $0.003 |
+| `GET /api/try/premium?asset=` | Turkish lira premium: implied vs official USD/TRY, via BTC, ETH, USDT or USDC | $0.002 |
 | `GET /api/watch/address/:address?since=` | New activity for a Base address since your cursor | $0.002 |
 | `GET /api/watch/radar?since=` | Only the Base pools that appeared since your cursor | $0.003 |
 | `GET /api/watch/price/:symbol?ref=&pct=` | Price alert check: triggered true/false against your threshold | $0.001 |
@@ -72,6 +72,23 @@ the ones that matter fall through to a backup rather than failing:
 | Base RPC (gas, address) | mainnet.base.org | publicnode → llamarpc |
 
 Price responses carry a `source` field so you can see which one answered.
+
+### Optional parameters
+
+The listing endpoints take optional query parameters. They never change the
+price, and an out-of-range value returns `400` rather than being silently
+clamped — a call you did not intend is not a call you should pay for.
+
+```bash
+curl "https://agenttoll.app/api/gas?gasLimit=150000"        # + estimate.usdCost for a swap
+curl "https://agenttoll.app/api/feargreed?days=7"           # + a week of daily history
+curl "https://agenttoll.app/api/base/radar?minLiquidity=50000&limit=5"
+curl "https://agenttoll.app/api/brief?symbols=eth,degen,aero"
+curl "https://agenttoll.app/api/try/premium?asset=usdt"     # the reading desks actually quote
+```
+
+The upstream response is cached whole and filtered per caller, so a narrower or
+wider request never costs an extra upstream call.
 
 ### Watch endpoints (stateless diffs)
 

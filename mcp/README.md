@@ -19,8 +19,10 @@ becomes a native tool; each call is paid automatically from the configured walle
 }
 ```
 
-The wallet behind `AGENT_PRIVATE_KEY` needs USDC on Base Sepolia (testnet) —
-get some free at [faucet.circle.com](https://faucet.circle.com).
+The wallet behind `AGENT_PRIVATE_KEY` needs USDC on Base mainnet — a dollar
+covers hundreds of calls. To try it against testnet instead, set
+`AGENTTOLL_NETWORK=base-sepolia` and fund the wallet from
+[faucet.circle.com](https://faucet.circle.com).
 
 ## Tools
 
@@ -28,6 +30,12 @@ get some free at [faucet.circle.com](https://faucet.circle.com).
 `get_base_address_info`, `get_fear_greed`, `get_base_trending_pools`,
 `get_market_brief`, `get_new_token_radar`, `get_try_premium`,
 `resolve_basename`, `watch_base_address`, `watch_new_tokens`, `watch_price_alert`
+
+Several take optional arguments that do not change the price: `get_base_gas`
+takes a `gasLimit` and returns what a transaction that size costs,
+`get_fear_greed` takes `days` for history, `get_market_brief` takes `symbols`
+to price what you actually track, and `get_new_token_radar` takes
+`minLiquidity` to set your own spam floor.
 
 The `watch_*` tools return a `cursor`; pass it back as `since` on the next call
 to get only what changed — ideal for agents that poll on a schedule.

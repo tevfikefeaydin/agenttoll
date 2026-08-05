@@ -29,19 +29,25 @@ endpoints as tools (env: AGENT_PRIVATE_KEY).
 - https://agenttoll.app/api/stats : onchain-derived toll counter — calls, USDC revenue, unique payers, and the same excluding the operator's own test wallet (free)
 - https://agenttoll.app/api/health : service status (free)
 - https://agenttoll.app/api/price/{symbol} : spot price USD + 24h change ($0.001)
-- https://agenttoll.app/api/gas : Base gas price + latest block ($0.001)
-- https://agenttoll.app/api/trending : trending tokens market-wide ($0.002)
+- https://agenttoll.app/api/gas?gasLimit={units} : Base gas price + latest block; with gasLimit, the ETH and USD cost of a transaction that size ($0.001)
+- https://agenttoll.app/api/trending?limit={n} : trending tokens market-wide ($0.002)
 - https://agenttoll.app/api/base/token/{address} : onchain USD price of any Base token ($0.001)
 - https://agenttoll.app/api/base/address/{address} : Base address snapshot, includes primary basename ($0.001)
 - https://agenttoll.app/api/base/name/{nameOrAddress} : Basename resolution both ways — name to address with text records, or address to primary name ($0.001)
-- https://agenttoll.app/api/base/trending : trending DEX pools on Base ($0.002)
-- https://agenttoll.app/api/base/radar : new-token radar, spam-filtered ($0.003)
-- https://agenttoll.app/api/feargreed : Fear & Greed index ($0.001)
-- https://agenttoll.app/api/brief : one-call market brief ($0.005)
-- https://agenttoll.app/api/try/premium : Turkish lira premium ($0.002)
+- https://agenttoll.app/api/base/trending?limit={n} : trending DEX pools on Base ($0.002)
+- https://agenttoll.app/api/base/radar?minLiquidity={usd}&limit={n} : new-token radar above your liquidity floor, default $10k ($0.003)
+- https://agenttoll.app/api/feargreed?days={1-30} : Fear & Greed index, optionally with daily history ($0.001)
+- https://agenttoll.app/api/brief?symbols={a,b,c} : one-call market brief, BTC/ETH/SOL by default ($0.005)
+- https://agenttoll.app/api/try/premium?asset={btc|eth|usdt|usdc} : Turkish lira premium ($0.002)
 - https://agenttoll.app/api/watch/address/{address}?since={iso} : new activity for a Base address since your cursor ($0.002)
 - https://agenttoll.app/api/watch/radar?since={iso} : only the pools that appeared since your cursor ($0.003)
 - https://agenttoll.app/api/watch/price/{symbol}?ref={price}&pct={threshold} : price alert check, triggered true/false ($0.001)
+
+## Optional parameters
+
+The listing endpoints take optional query parameters (shown above). They never
+change the price. An out-of-range value returns 400 and is not billed, rather
+than being silently clamped to something you did not ask for.
 
 ## Watch endpoints (stateless diffs)
 

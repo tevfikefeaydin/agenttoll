@@ -1,5 +1,6 @@
 import { cached, fetchWithTimeout } from "./cache.js";
 import { fromSources } from "./sources.js";
+import { optionalInt } from "./params.js";
 
 interface TrendingCoin {
   item: {
@@ -24,13 +25,20 @@ interface Trending {
   at: string;
 }
 
-export async function getTrending() {
-  return cached("trending", 60_000, () =>
+/**
+ * Tokens trending right now. `limit` trims the list for agents that only want
+ * the top few — the upstream call is cached whole either way, so asking for
+ * fewer costs the same and hits no extra rate limit.
+ */
+export async function getTrending(limitRaw?: string): Promise<Trending> {
+  const limit = optionalInt("limit", limitRaw, { min: 1, max: 25 });
+  const data = await cached("trending", 60_000, () =>
     fromSources<Trending>("trending tokens", [
       { name: "coingecko", load: fromCoinGecko },
       { name: "binance", load: fromBinance },
     ]),
   );
+  return limit === undefined ? data : { ...data, coins: data.coins.slice(0, limit) };
 }
 
 async function fromCoinGecko(): Promise<Trending> {
