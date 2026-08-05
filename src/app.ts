@@ -1,5 +1,5 @@
 import "dotenv/config";
-import express from "express";
+import express, { type Request, type Response } from "express";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { paymentMiddleware, type Network } from "x402-express";
@@ -14,6 +14,7 @@ import { getBaseTrending } from "./services/basetrending.js";
 import { getMarketBrief } from "./services/brief.js";
 import { getStats } from "./services/stats.js";
 import { getAddressActivity, getRadarSince, getPriceAlert } from "./services/watch.js";
+import { BadRequestError } from "./services/errors.js";
 import { getNewTokenRadar } from "./services/radar.js";
 import { getTryPremium } from "./services/trypremium.js";
 
@@ -165,6 +166,25 @@ app.use(
   ),
 );
 
+// Express types path params and query values as string | string[]; the routes
+// below only ever want the single-value form.
+const one = (v: unknown): string => (Array.isArray(v) ? String(v[0]) : String(v ?? ""));
+const opt = (v: unknown): string | undefined =>
+  v === undefined ? undefined : one(v);
+
+// Wraps a data source so a caller mistake reports as 400 and only a genuine
+// upstream failure reports as 502. Either way x402 leaves the caller unbilled.
+const serve =
+  (load: (req: Request) => Promise<unknown>) =>
+  async (req: Request, res: Response) => {
+    try {
+      res.json(await load(req));
+    } catch (err) {
+      const status = err instanceof BadRequestError ? 400 : 502;
+      res.status(status).json({ error: (err as Error).message });
+    }
+  };
+
 app.get("/api/health", (_req, res) => {
   res.json({ ok: true, service: "agenttoll", network: NETWORK });
 });
@@ -246,123 +266,29 @@ app.get("/api/catalog", (_req, res) => {
   });
 });
 
-app.get("/api/price/:symbol", async (req, res) => {
-  try {
-    res.json(await getPrice(req.params.symbol));
-  } catch (err) {
-    res.status(502).json({ error: (err as Error).message });
-  }
-});
+app.get("/api/price/:symbol", serve((req) => getPrice(one(req.params.symbol))));
+app.get("/api/gas", serve(() => getGas()));
+app.get("/api/trending", serve(() => getTrending()));
+app.get("/api/base/token/:address", serve((req) => getBaseTokenPrice(one(req.params.address))));
+app.get("/api/base/address/:address", serve((req) => getAddressInfo(one(req.params.address))));
+app.get("/api/base/radar", serve(() => getNewTokenRadar()));
+app.get("/api/base/trending", serve(() => getBaseTrending()));
+app.get("/api/feargreed", serve(() => getFearGreed()));
+app.get("/api/brief", serve(() => getMarketBrief()));
+app.get("/api/try/premium", serve(() => getTryPremium()));
+app.get("/api/stats", serve(() => getStats(PAY_TO)));
 
-app.get("/api/gas", async (_req, res) => {
-  try {
-    res.json(await getGas());
-  } catch (err) {
-    res.status(502).json({ error: (err as Error).message });
-  }
-});
-
-app.get("/api/trending", async (_req, res) => {
-  try {
-    res.json(await getTrending());
-  } catch (err) {
-    res.status(502).json({ error: (err as Error).message });
-  }
-});
-
-app.get("/api/base/token/:address", async (req, res) => {
-  try {
-    res.json(await getBaseTokenPrice(req.params.address));
-  } catch (err) {
-    res.status(502).json({ error: (err as Error).message });
-  }
-});
-
-app.get("/api/base/address/:address", async (req, res) => {
-  try {
-    res.json(await getAddressInfo(req.params.address));
-  } catch (err) {
-    res.status(502).json({ error: (err as Error).message });
-  }
-});
-
-app.get("/api/feargreed", async (_req, res) => {
-  try {
-    res.json(await getFearGreed());
-  } catch (err) {
-    res.status(502).json({ error: (err as Error).message });
-  }
-});
-
-app.get("/api/stats", async (_req, res) => {
-  try {
-    res.json(await getStats(PAY_TO));
-  } catch (err) {
-    res.status(502).json({ error: (err as Error).message });
-  }
-});
-
-app.get("/api/watch/address/:address", async (req, res) => {
-  try {
-    res.json(await getAddressActivity(req.params.address, req.query.since as string));
-  } catch (err) {
-    res.status(502).json({ error: (err as Error).message });
-  }
-});
-
-app.get("/api/watch/radar", async (req, res) => {
-  try {
-    res.json(await getRadarSince(req.query.since as string));
-  } catch (err) {
-    res.status(502).json({ error: (err as Error).message });
-  }
-});
-
-app.get("/api/watch/price/:symbol", async (req, res) => {
-  try {
-    res.json(
-      await getPriceAlert(
-        req.params.symbol,
-        req.query.ref as string,
-        req.query.pct as string,
-      ),
-    );
-  } catch (err) {
-    res.status(502).json({ error: (err as Error).message });
-  }
-});
-
-app.get("/api/base/radar", async (_req, res) => {
-  try {
-    res.json(await getNewTokenRadar());
-  } catch (err) {
-    res.status(502).json({ error: (err as Error).message });
-  }
-});
-
-app.get("/api/try/premium", async (_req, res) => {
-  try {
-    res.json(await getTryPremium());
-  } catch (err) {
-    res.status(502).json({ error: (err as Error).message });
-  }
-});
-
-app.get("/api/base/trending", async (_req, res) => {
-  try {
-    res.json(await getBaseTrending());
-  } catch (err) {
-    res.status(502).json({ error: (err as Error).message });
-  }
-});
-
-app.get("/api/brief", async (_req, res) => {
-  try {
-    res.json(await getMarketBrief());
-  } catch (err) {
-    res.status(502).json({ error: (err as Error).message });
-  }
-});
+app.get(
+  "/api/watch/address/:address",
+  serve((req) => getAddressActivity(one(req.params.address), opt(req.query.since))),
+);
+app.get("/api/watch/radar", serve((req) => getRadarSince(opt(req.query.since))));
+app.get(
+  "/api/watch/price/:symbol",
+  serve((req) =>
+    getPriceAlert(one(req.params.symbol), opt(req.query.ref), opt(req.query.pct)),
+  ),
+);
 
 // Local static serving; on Vercel the public/ folder is served by the CDN.
 app.use(express.static(path.join(__dirname, "..", "public")));

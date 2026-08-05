@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terms of Service — AgentToll</title>
+<meta name="description" content="Terms of service for AgentToll, a pay-per-call data API settled in USDC on Base via x402.">
+<link rel="icon" href="/icon.png" type="image/png">
+<style>
+  :root { --bg:#070B14; --text:#EAF0FA; --muted:#8A97AF; --line:rgba(138,151,175,.16); --blue:#7BA6FF; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:"Segoe UI",system-ui,sans-serif; line-height:1.7; }
+  .wrap { width:min(760px,100% - 44px); margin:0 auto; padding:56px 0 80px; }
+  a { color:var(--blue); text-decoration:none; } a:hover { text-decoration:underline; }
+  h1 { font-size:2rem; letter-spacing:-.02em; margin-bottom:8px; }
+  h2 { font-size:1.1rem; margin:34px 0 10px; letter-spacing:-.01em; }
+  p, li { color:var(--muted); }
+  ul { padding-left:20px; margin-top:8px; }
+  li { margin-bottom:6px; }
+  .meta { color:var(--muted); font-size:.9rem; margin-bottom:28px; }
+  hr { border:none; border-top:1px solid var(--line); margin:40px 0 22px; }
+  code { font-family:Consolas,monospace; font-size:.9em; color:var(--text); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="meta"><a href="/">← AgentToll</a></p>
+  <h1>Terms of Service</h1>
+  <p class="meta">Last updated 5 August 2026</p>
+
+  <p>AgentToll is a pay-per-call data API. Each request to a paid endpoint is quoted in an
+  HTTP 402 response and settled in USDC on Base through the x402 protocol. By calling the
+  service you accept these terms.</p>
+
+  <h2>The service</h2>
+  <ul>
+    <li>There are no accounts, API keys, subscriptions or minimum commitments. You pay per call.</li>
+    <li>Prices are stated in each 402 quote and in the free catalog at <code>/api/catalog</code>. They may change at any time; the quote you receive is the price for that call.</li>
+    <li>Requests that do not return your data are not charged. Settlement only runs after a successful response.</li>
+    <li>Responses may be served from a short-lived cache (up to five minutes depending on the endpoint).</li>
+  </ul>
+
+  <h2>Payments</h2>
+  <ul>
+    <li>Payments are onchain and final. Because a payment settles wallet-to-wallet on Base, we cannot reverse one.</li>
+    <li>We never take custody of your funds and never hold your keys. You sign each authorization yourself.</li>
+    <li>You are responsible for the wallet you pay from and for any applicable taxes.</li>
+  </ul>
+
+  <h2>Acceptable use</h2>
+  <ul>
+    <li>Do not attempt to bypass payment, disrupt the service, or use it to break the law.</li>
+    <li>Automated use is expected — this API is built for agents. Free endpoints are rate limited per IP.</li>
+  </ul>
+
+  <h2>Data and warranty</h2>
+  <ul>
+    <li>Data is aggregated from third-party sources and public blockchain data. It is provided for informational purposes only and is <strong>not financial advice</strong>.</li>
+    <li>The service is provided “as is”, without warranty of any kind. We do not guarantee accuracy, completeness, or availability, and we are not liable for losses arising from use of the data.</li>
+    <li>Upstream sources can fail or change. When that happens the endpoint returns an error and, again, you are not charged.</li>
+  </ul>
+
+  <h2>Software</h2>
+  <p>The service is open source under the MIT licence at
+  <a href="https://github.com/tevfikefeaydin/agenttoll">github.com/tevfikefeaydin/agenttoll</a>.
+  The licence covers the software; these terms cover the hosted service.</p>
+
+  <h2>Contact</h2>
+  <p>Questions and reports:
+  <a href="https://github.com/tevfikefeaydin/agenttoll/issues">open an issue on GitHub</a>.
+  Security reports: see <a href="https://github.com/tevfikefeaydin/agenttoll/blob/main/SECURITY.md">SECURITY.md</a>.</p>
+
+  <hr>
+  <p class="meta">AgentToll · agenttoll.base.eth · <a href="/privacy.html">Privacy</a></p>
+</div>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy — AgentToll</title>
+<meta name="description" content="What AgentToll collects: no accounts, no keys, no tracking. Short-lived server logs and public onchain payment data only.">
+<link rel="icon" href="/icon.png" type="image/png">
+<style>
+  :root { --bg:#070B14; --text:#EAF0FA; --muted:#8A97AF; --line:rgba(138,151,175,.16); --blue:#7BA6FF; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:"Segoe UI",system-ui,sans-serif; line-height:1.7; }
+  .wrap { width:min(760px,100% - 44px); margin:0 auto; padding:56px 0 80px; }
+  a { color:var(--blue); text-decoration:none; } a:hover { text-decoration:underline; }
+  h1 { font-size:2rem; letter-spacing:-.02em; margin-bottom:8px; }
+  h2 { font-size:1.1rem; margin:34px 0 10px; letter-spacing:-.01em; }
+  p, li { color:var(--muted); }
+  ul { padding-left:20px; margin-top:8px; }
+  li { margin-bottom:6px; }
+  .meta { color:var(--muted); font-size:.9rem; margin-bottom:28px; }
+  hr { border:none; border-top:1px solid var(--line); margin:40px 0 22px; }
+  code { font-family:Consolas,monospace; font-size:.9em; color:var(--text); }
+  strong { color:var(--text); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="meta"><a href="/">← AgentToll</a></p>
+  <h1>Privacy</h1>
+  <p class="meta">Last updated 5 August 2026</p>
+
+  <p>AgentToll has <strong>no accounts, no API keys and no sessions</strong>, so there is very
+  little about you for us to hold in the first place. This page describes exactly what exists.</p>
+
+  <h2>What we do not collect</h2>
+  <ul>
+    <li>No sign-ups, names, emails or passwords — there is no account system.</li>
+    <li>No cookies, no analytics, no advertising or tracking scripts. The site loads no third-party code.</li>
+    <li>No private keys. Payment authorizations are signed in your own wallet or agent.</li>
+    <li>No per-caller state. The watch endpoints work from a cursor <em>you</em> send back, so we do not store where you left off.</li>
+  </ul>
+
+  <h2>What does exist</h2>
+  <ul>
+    <li><strong>Server logs.</strong> Each API request writes one line containing the time, path,
+      HTTP status, response time, requesting IP address and user-agent. These are kept by our
+      hosting provider (Vercel) for a short retention window and are used only to debug faults,
+      spot abuse and keep the service up.</li>
+    <li><strong>Onchain payments.</strong> x402 payments settle on Base, a public blockchain. The
+      paying address, amount and timestamp are public by nature — recorded by the network, not by
+      us. Our <code>/api/stats</code> counter simply reads those public transfers.</li>
+    <li><strong>Short-lived caches.</strong> Upstream responses are cached in memory for 15–300
+      seconds. Caches are keyed by the data requested (for example a token address), never by who
+      requested it.</li>
+  </ul>
+
+  <h2>Third parties</h2>
+  <p>Requests reach us through Vercel (hosting) and payments are verified through Coinbase's CDP
+  x402 facilitator. Endpoint data comes from public sources such as CoinGecko, GeckoTerminal,
+  Blockscout, alternative.me and Base RPC. Those providers see our server's requests, not yours.</p>
+
+  <h2>Your choices</h2>
+  <p>Because we hold no account data, there is no profile to export or delete. If you want a
+  server log line removed, or have any privacy question, open an issue at
+  <a href="https://github.com/tevfikefeaydin/agenttoll/issues">github.com/tevfikefeaydin/agenttoll</a>
+  with the approximate timestamp.</p>
+
+  <hr>
+  <p class="meta">AgentToll · agenttoll.base.eth · <a href="/terms.html">Terms</a></p>
+</div>
+</body>
+</html>

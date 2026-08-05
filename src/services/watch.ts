@@ -1,4 +1,5 @@
 import { cached, fetchWithTimeout } from "./cache.js";
+import { badRequest } from "./errors.js";
 import { getPrice } from "./prices.js";
 import { getNewTokenRadar } from "./radar.js";
 
@@ -12,7 +13,7 @@ const BLOCKSCOUT = MAINNET
 function parseSince(since?: string): number {
   if (!since) return 0;
   const t = Date.parse(since);
-  if (Number.isNaN(t)) throw new Error("Invalid 'since' — use an ISO timestamp");
+  if (Number.isNaN(t)) badRequest("Invalid 'since' — pass the ISO cursor from the previous reply");
   return t;
 }
 
@@ -27,7 +28,7 @@ interface Tx {
 
 /** New activity for a Base address since a cursor: transfers in/out, newest first. */
 export async function getAddressActivity(address: string, since?: string) {
-  if (!/^0x[0-9a-fA-F]{40}$/.test(address)) throw new Error("Invalid address");
+  if (!/^0x[0-9a-fA-F]{40}$/.test(address)) badRequest("Invalid address — expected 0x + 40 hex chars");
   const addr = address.toLowerCase();
   const sinceMs = parseSince(since);
 
@@ -89,9 +90,13 @@ export async function getPriceAlert(symbol: string, ref?: string, pct?: string) 
   const reference = Number(ref);
   const threshold = pct === undefined ? 2 : Number(pct);
   if (!Number.isFinite(reference) || reference <= 0) {
-    throw new Error("Query 'ref' is required: the reference price to compare against");
+    badRequest(
+      "Query 'ref' is required — the reference price to compare against, e.g. /api/watch/price/eth?ref=1900&pct=2",
+    );
   }
-  if (!Number.isFinite(threshold) || threshold < 0) throw new Error("Invalid 'pct'");
+  if (!Number.isFinite(threshold) || threshold < 0) {
+    badRequest("Invalid 'pct' — the threshold must be a non-negative number of percent");
+  }
 
   const price = await getPrice(symbol);
   const changePct = ((price.usd - reference) / reference) * 100;

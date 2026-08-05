@@ -1,6 +1,15 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "rewrites": [{ "source": "/api/(.*)", "destination": "/api/index" }],
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index" },
+    { "source": "/favicon.ico", "destination": "/icon.png" },
+    { "source": "/terms", "destination": "/terms.html" },
+    { "source": "/privacy", "destination": "/privacy.html" },
+    { "source": "/legal", "destination": "/terms.html" },
+    { "source": "/legal-notice", "destination": "/terms.html" },
+    { "source": "/imprint", "destination": "/terms.html" },
+    { "source": "/privacy-policy", "destination": "/privacy.html" }
+  ],
   "headers": [
     {
       "source": "/(.*)",

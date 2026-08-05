@@ -1,4 +1,5 @@
 import { cached, fetchWithTimeout } from "./cache.js";
+import { badRequest } from "./errors.js";
 
 const BASE_RPC = "https://mainnet.base.org";
 
@@ -17,7 +18,7 @@ async function rpc<T>(method: string, params: unknown[]): Promise<T> {
 // Snapshot of a Base address: ETH balance, tx count, contract or EOA.
 export async function getAddressInfo(address: string) {
   if (!/^0x[0-9a-fA-F]{40}$/.test(address)) {
-    throw new Error("Invalid address");
+    badRequest("Invalid address — expected 0x + 40 hex chars");
   }
   const addr = address.toLowerCase();
   return cached(`address:${addr}`, 15_000, async () => {

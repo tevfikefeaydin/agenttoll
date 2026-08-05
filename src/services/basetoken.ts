@@ -1,9 +1,10 @@
 import { cached, fetchWithTimeout } from "./cache.js";
+import { badRequest } from "./errors.js";
 
 // Onchain spot price for any Base token by contract address, via GeckoTerminal.
 export async function getBaseTokenPrice(address: string) {
   if (!/^0x[0-9a-fA-F]{40}$/.test(address)) {
-    throw new Error("Invalid token address");
+    badRequest("Invalid token address — expected 0x + 40 hex chars");
   }
   const addr = address.toLowerCase();
   return cached(`basetoken:${addr}`, 30_000, async () => {
