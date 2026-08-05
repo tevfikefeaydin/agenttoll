@@ -168,6 +168,20 @@
   .foot { display: flex; justify-content: space-between; gap: 18px; flex-wrap: wrap; align-items: center; }
   .foot-links { display: flex; gap: 20px; flex-wrap: wrap; }
 
+  /* ---------- small screens ---------- */
+  @media (max-width: 720px) {
+    .wrap { width: min(1120px, 100% - 36px); }
+    section.band { padding: 62px 0; }
+    .hero-in { padding: 64px 0 68px; }
+    .hero { min-height: auto; }
+    .grid { margin-top: 30px; }
+    .card { padding: 22px; }
+    pre { padding: 18px 16px; font-size: .8rem; border-radius: 13px; }
+    .cta { gap: 10px; }
+    .cta .btn { flex: 1 1 100%; justify-content: center; }
+    th, td { padding: 12px 14px; }
+  }
+
   /* ---------- reveal ----------
      Fail-open: content is visible by default. The hidden state only applies
      once JS has marked the document, so a blocked or broken script can never
@@ -328,7 +342,8 @@ console.log(<span class="k">await</span> res.json());
     </div>
     <p class="sub rv" style="margin-top:20px; font-size:.9rem;">Responses come from a
       short-lived cache (15–300s) to keep upstream sources happy. Every paid call still
-      settles onchain.</p>
+      settles onchain — and <strong style="color:var(--text);">failed requests are never
+      charged</strong>: payment only settles when the endpoint actually returns your data.</p>
   </div>
 </section>
 
@@ -420,6 +435,10 @@ curl <span class="s">"https://agenttoll.app/api/watch/radar?since=2026-08-05T08:
         <h3>Nothing to leak</h3>
         <p>No accounts, no API keys, no sessions. Even the watch endpoints keep the cursor on
           your side, not ours.</p></div>
+      <div class="card rv"><div class="ico">🧾</div>
+        <h3>Failed requests aren't charged</h3>
+        <p>Settlement happens only after the endpoint returns your data. If an upstream is
+          down you get an error — and keep your USDC.</p></div>
       <div class="card rv"><div class="ico">📖</div>
         <h3>Open source, MIT</h3>
         <p>The whole tollbooth is on GitHub. Fork it and run your own — the payment rail is

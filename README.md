@@ -55,6 +55,11 @@ inline, and gets the data.
 Responses are served from a short-lived cache (15-300s depending on endpoint) to
 keep upstream sources happy; every paid call still settles onchain.
 
+**Failed requests are never charged.** Settlement only runs after the handler
+returns a success status — if an upstream is down you get the error and keep
+your USDC. (Verified against production: a 502 response left the caller's
+balance untouched.)
+
 ### Watch endpoints (stateless diffs)
 
 The `/api/watch/*` family answers "what changed since I last asked". Each reply

@@ -5,7 +5,9 @@
 > plus market and Turkish-lira feeds. Every endpoint costs $0.001-$0.005, paid in
 > USDC on Base mainnet via the x402 protocol (HTTP 402). No API keys, no accounts,
 > no subscriptions - an agent sends one HTTP request, pays inline, gets the data.
-> Open source (MIT), with an MCP server on npm.
+> Open source (MIT), with an MCP server on npm. Failed requests are never
+> charged: settlement only happens once the endpoint returns data, so an
+> upstream error costs the caller nothing.
 
 Onchain identity: agenttoll.base.eth. Open source (MIT): https://github.com/tevfikefeaydin/agenttoll
 
