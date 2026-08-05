@@ -168,11 +168,14 @@
   .foot { display: flex; justify-content: space-between; gap: 18px; flex-wrap: wrap; align-items: center; }
   .foot-links { display: flex; gap: 20px; flex-wrap: wrap; }
 
-  /* ---------- reveal ---------- */
-  .rv { opacity: 0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
-  .rv.in { opacity: 1; transform: none; }
+  /* ---------- reveal ----------
+     Fail-open: content is visible by default. The hidden state only applies
+     once JS has marked the document, so a blocked or broken script can never
+     leave the page blank. */
+  .js-anim .rv { opacity: 0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
+  .js-anim .rv.in { opacity: 1; transform: none; }
   @media (prefers-reduced-motion: reduce) {
-    .rv { opacity: 1; transform: none; transition: none; }
+    .js-anim .rv { opacity: 1; transform: none; transition: none; }
     html { scroll-behavior: auto; }
   }
 </style>

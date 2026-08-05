@@ -22,10 +22,14 @@ const onScroll = () => nav && nav.classList.toggle("scrolled", window.scrollY > 
 addEventListener("scroll", onScroll, { passive: true });
 onScroll();
 
-// Reveal-on-scroll, skipped entirely when the visitor prefers reduced motion.
+// Reveal-on-scroll. The hidden state is opt-in via .js-anim, so if this script
+// never runs the page shows everything instead of going blank.
 const reveals = document.querySelectorAll(".rv");
-if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
-  reveals.forEach((el) => el.classList.add("in"));
+const revealAll = () => reveals.forEach((el) => el.classList.add("in"));
+document.documentElement.classList.add("js-anim");
+
+if (matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) {
+  revealAll();
 } else {
   const io = new IntersectionObserver(
     (entries) => {
@@ -41,7 +45,9 @@ if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
     el.style.transitionDelay = `${Math.min(i % 3, 2) * 70}ms`;
     io.observe(el);
   });
-
+  // Safety net: if the observer never fires (suspended rendering, odd browser),
+  // show everything rather than leaving sections invisible.
+  setTimeout(revealAll, 2500);
 }
 
 // The hero video is opt-in: the still is always painted first, and the 200 KB
