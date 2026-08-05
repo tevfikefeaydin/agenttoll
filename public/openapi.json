@@ -4,6 +4,11 @@
     "title": "AgentToll",
     "version": "0.4.0",
     "description": "Pay-per-call data APIs for AI agents. Paid endpoints return HTTP 402 with an x402 quote; pay $0.001-$0.005 in USDC on Base mainnet per call. No API keys. Onchain identity: agenttoll.base.eth.",
+    "contact": {
+      "name": "AgentToll",
+      "url": "https://github.com/tevfikefeaydin/agenttoll/issues",
+      "email": "tevfikefe.aydin@gmail.com"
+    },
     "license": { "name": "MIT", "url": "https://github.com/tevfikefeaydin/agenttoll/blob/main/LICENSE" }
   },
   "servers": [{ "url": "https://agenttoll.app" }],
