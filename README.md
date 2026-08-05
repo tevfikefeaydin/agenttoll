@@ -47,7 +47,7 @@ inline, and gets the data.
 | `GET /api/watch/address/:address?since=` | New activity for a Base address since your cursor | $0.002 |
 | `GET /api/watch/radar?since=` | Only the Base pools that appeared since your cursor | $0.003 |
 | `GET /api/watch/price/:symbol?ref=&pct=` | Price alert check: triggered true/false against your threshold | $0.001 |
-| `GET /api/stats` | Onchain-derived toll counter: calls collected and USDC revenue | free |
+| `GET /api/stats` | Onchain toll counter: calls, USDC revenue, unique payers — and the same excluding our own test wallet | free |
 | `GET /api/catalog` | Machine-readable catalog of everything for sale | free |
 | `GET /api/demo` | Sample response shapes for every paid endpoint | free |
 | `GET /api/health` | Service status | free |

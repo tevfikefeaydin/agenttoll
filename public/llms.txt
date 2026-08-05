@@ -26,7 +26,7 @@ endpoints as tools (env: AGENT_PRIVATE_KEY).
 
 - https://agenttoll.app/api/catalog : machine-readable catalog of everything for sale (free)
 - https://agenttoll.app/api/demo : sample response shapes for every paid endpoint (free)
-- https://agenttoll.app/api/stats : onchain-derived toll counter (free)
+- https://agenttoll.app/api/stats : onchain-derived toll counter — calls, USDC revenue, unique payers, and the same excluding the operator's own test wallet (free)
 - https://agenttoll.app/api/health : service status (free)
 - https://agenttoll.app/api/price/{symbol} : spot price USD + 24h change ($0.001)
 - https://agenttoll.app/api/gas : Base gas price + latest block ($0.001)

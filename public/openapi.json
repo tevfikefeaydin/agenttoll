@@ -18,7 +18,10 @@
       "get": { "summary": "Sample response shapes for every paid endpoint (free)", "responses": { "200": { "description": "Samples" } } }
     },
     "/api/stats": {
-      "get": { "summary": "Onchain-derived toll counter: calls and USDC revenue (free)", "responses": { "200": { "description": "Stats" } } }
+      "get": {
+        "summary": "Onchain-derived toll counter (free): calls, USDC revenue, unique payers, and the same figures excluding the operator's own test wallet",
+        "responses": { "200": { "description": "Stats read from USDC transfers on Base" } }
+      }
     },
     "/api/price/{symbol}": {
       "get": {
