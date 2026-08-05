@@ -4,12 +4,14 @@ fetch("/api/stats")
   .then((s) => {
     const el = document.getElementById("toll-counter");
     if (!el || typeof s.tollsCollected !== "number") return;
-    el.innerHTML =
-      "<strong>" +
-      s.tollsCollected.toLocaleString("en-US") +
-      "</strong> tolls · <strong>$" +
-      s.revenueUsdc.toFixed(3) +
-      "</strong> USDC settled onchain";
+    const n = (v) => "<strong>" + v.toLocaleString("en-US") + "</strong>";
+    // Only claim agents once someone other than our own test wallet has paid.
+    el.innerHTML = s.externalPayers
+      ? n(s.externalPayers) +
+        (s.externalPayers === 1 ? " agent has paid · " : " agents have paid · ") +
+        n(s.tollsCollected) +
+        " tolls settled onchain"
+      : n(s.tollsCollected) + " tolls · <strong>$" + s.revenueUsdc.toFixed(3) + "</strong> USDC settled onchain";
   })
   .catch(() => {
     const el = document.getElementById("toll-counter");

@@ -475,8 +475,9 @@ curl <span class="s">"https://agenttoll.app/api/watch/radar?since=2026-08-05T08:
     <div class="grid g3">
       <div class="card rv"><div class="ico">⛓️</div>
         <h3>Revenue read from the chain</h3>
-        <p><code>/api/stats</code> counts the actual USDC transfers to our address on Base.
-          Not self-reported — verify the same transactions on BaseScan.</p></div>
+        <p><code>/api/stats</code> counts the actual USDC transfers to our address on Base,
+          and separates our own test wallet from real payers. Not self-reported — verify the
+          same transactions on BaseScan.</p></div>
       <div class="card rv"><div class="ico">🔒</div>
         <h3>Nothing to leak</h3>
         <p>No accounts, no API keys, no sessions. Even the watch endpoints keep the cursor on
