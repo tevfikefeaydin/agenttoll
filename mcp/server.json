@@ -1,4 +1,4 @@
-{
+﻿{
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.tevfikefeaydin/agenttoll",
   "description": "Pay-per-call market and Base onchain data for AI agents - prices, gas, trending pools, new-token radar, market briefs. Each call paid automatically in USDC on Base via x402 ($0.001-$0.005). No API keys.",
@@ -6,12 +6,12 @@
     "url": "https://github.com/tevfikefeaydin/agenttoll",
     "source": "github"
   },
-  "version": "0.3.2",
+  "version": "0.3.3",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "agenttoll-mcp",
-      "version": "0.3.2",
+      "version": "0.3.3",
       "transport": {
         "type": "stdio"
       },

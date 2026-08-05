@@ -10,14 +10,14 @@
 <meta property="og:site_name" content="AgentToll">
 <meta property="og:title" content="AgentToll — Pay-per-call APIs for AI agents">
 <meta property="og:description" content="Base-native onchain data for AI agents — gas, token prices by contract, address analytics, DEX pools, new-token radar. From $0.001 a call in USDC via x402. No API keys. Open source.">
-<meta property="og:url" content="https://agenttoll-pi.vercel.app/">
-<meta property="og:image" content="https://agenttoll-pi.vercel.app/og.png">
+<meta property="og:url" content="https://www.agenttoll.app/">
+<meta property="og:image" content="https://www.agenttoll.app/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="AgentToll — Pay-per-call APIs for AI agents">
 <meta name="twitter:description" content="USDC micropayments on Base via x402. No API keys, no subscriptions — one request, one micropayment, one response.">
-<meta name="twitter:image" content="https://agenttoll-pi.vercel.app/og.png">
+<meta name="twitter:image" content="https://www.agenttoll.app/og.png">
 <link rel="icon" href="/icon.png" type="image/png">
 <style>
   :root {
@@ -210,10 +210,10 @@
   <section>
     <h2>Try it in 10 seconds — no wallet needed</h2>
 <pre><span class="c"># free health check</span>
-curl https://agenttoll-pi.vercel.app/api/health
+curl https://www.agenttoll.app/api/health
 
 <span class="c"># hit a paid endpoint without paying: you get the machine-readable 402 quote</span>
-curl -i https://agenttoll-pi.vercel.app/api/price/eth
+curl -i https://www.agenttoll.app/api/price/eth
 <span class="c"># HTTP/1.1 402 Payment Required</span>
 <span class="c"># {"x402Version":1,"accepts":[{"maxAmountRequired":"1000","asset":"USDC","payTo":"0x..."}]}</span></pre>
     <p style="color: var(--muted); margin-top: 14px;">That 402 response is the whole product:
@@ -229,7 +229,7 @@ curl -i https://agenttoll-pi.vercel.app/api/price/eth
 <span class="k">import</span> { privateKeyToAccount } <span class="k">from</span> <span class="s">"viem/accounts"</span>;
 
 <span class="k">const</span> pay = wrapFetchWithPayment(fetch, privateKeyToAccount(AGENT_KEY));
-<span class="k">const</span> res = <span class="k">await</span> pay(<span class="s">"https://agenttoll-pi.vercel.app/api/price/eth"</span>);
+<span class="k">const</span> res = <span class="k">await</span> pay(<span class="s">"https://www.agenttoll.app/api/price/eth"</span>);
 console.log(<span class="k">await</span> res.json()); <span class="c">// { symbol: "eth", usd: ..., change24h: ... }</span></pre>
   </section>
 
