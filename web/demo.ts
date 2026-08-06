@@ -98,6 +98,32 @@ async function pay(endpoint: string, show: Show) {
       schemes: [{ network: "eip155:8453", client: new ExactEvmScheme(signer) }],
     });
     const res = await pay(endpoint);
+
+    // The wrapper returns the final response either way, so a payment that
+    // failed to settle comes back as a 402 with an empty body — which this
+    // demo used to dress up as "paid & delivered". Read the verdict instead:
+    // the facilitator's reason travels in the PAYMENT-REQUIRED header.
+    if (!res.ok) {
+      let reason = "";
+      try {
+        const quote = res.headers.get("payment-required");
+        reason = quote ? ((JSON.parse(atob(quote)) as { error?: string }).error ?? "") : "";
+      } catch {
+        /* no decodable header — fall through to the generic message */
+      }
+      const noFunds = /reverted|insufficient|exceeds balance/i.test(reason);
+      show(
+        '<span class="bad">Payment did not settle — nothing was charged.</span>' +
+          (noFunds
+            ? '<p class="dim">This wallet has no USDC on <b>Base mainnet</b>. USDC on another ' +
+              "network (Ethereum, Solana, an exchange balance…) cannot pay here — bridge or " +
+              "withdraw about a cent of USDC to Base first.</p>"
+            : '<p class="dim">The facilitator said: <code>' + esc(reason || `HTTP ${res.status}`) + "</code></p>"),
+        "err",
+      );
+      return;
+    }
+
     const data = await res.json();
 
     const header = res.headers.get("payment-response");
@@ -106,7 +132,7 @@ async function pay(endpoint: string, show: Show) {
       : null;
 
     show(
-      '<div class="line"><span class="tag good">HTTP 200</span> paid &amp; delivered</div>' +
+      '<div class="line"><span class="tag good">HTTP ' + res.status + '</span> paid &amp; delivered</div>' +
         '<pre class="mini">' +
         esc(JSON.stringify(data, null, 2)) +
         "</pre>" +
