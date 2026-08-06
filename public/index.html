@@ -266,7 +266,7 @@
       the data in the same round trip. No accounts. No API keys. No subscriptions.</p>
     <div class="cta">
       <a class="btn btn-primary" href="#try">Try it in 10 seconds</a>
-      <a class="btn btn-ghost" href="#endpoints">See the 17 endpoints</a>
+      <a class="btn btn-ghost" href="#endpoints">See the 19 endpoints</a>
     </div>
     <div class="hero-meta">
       <span class="chip" id="toll-counter">reading the chain…</span>
@@ -356,7 +356,7 @@ console.log(<span class="k">await</span> res.json());
 <section class="band" id="endpoints">
   <div class="wrap">
     <p class="kicker rv">Catalog</p>
-    <h2 class="rv">Seventeen endpoints, priced per call</h2>
+    <h2 class="rv">Nineteen endpoints, priced per call</h2>
     <p class="sub rv">Base onchain data first — gas, any token by contract address, wallet
       portfolios, address analytics, DEX pools and a spam-filtered new-token radar — plus
       market and Turkish-lira feeds.</p>
@@ -367,6 +367,8 @@ console.log(<span class="k">await</span> res.json());
         <tbody>
           <tr><td><code>GET /api/base/safety/:address</code></td><td>Token safety checks: honeypot simulation, taxes, owner privileges, holder concentration, liquidity risk</td><td class="price">$0.003</td></tr>
           <tr><td><code>GET /api/base/scout</code></td><td>Radar + safety in one call: today's new pools, each with a verdict already attached</td><td class="price">$0.008</td></tr>
+          <tr><td><code>GET /api/base/radar/history</code></td><td>A past day's snapshot, exactly as committed to public git the day it was taken</td><td class="price">$0.002</td></tr>
+          <tr><td><code>GET /api/base/scorecard</code></td><td>The radar's track record: verdicts then vs prices now, per cohort</td><td class="price">$0.005</td></tr>
           <tr><td><code>GET /api/base/portfolio/:address</code></td><td>Everything an address holds on Base, valued in USD: ETH + ERC-20s, largest first</td><td class="price">$0.003</td></tr>
           <tr><td><code>GET /api/base/radar</code></td><td>New-token radar: fresh Base pools that already have real liquidity</td><td class="price">$0.003</td></tr>
           <tr><td><code>GET /api/base/trending</code></td><td>Trending DEX pools on Base: price, volume, liquidity</td><td class="price">$0.002</td></tr>

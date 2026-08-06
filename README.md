@@ -42,6 +42,8 @@ inline, and gets the data.
 | `GET /api/base/portfolio/:address?minValue=&limit=` | Everything an address holds on Base, valued in USD: ETH + ERC-20s, largest first | $0.003 |
 | `GET /api/base/safety/:address` | Token safety checks: honeypot, taxes, owner privileges, holder concentration, liquidity risk | $0.003 |
 | `GET /api/base/scout?minLiquidity=&pools=` | Radar + safety in one call: new pools with a verdict already attached | $0.008 |
+| `GET /api/base/radar/history?date=` | A past day's snapshot, exactly as committed to public git the day it was taken | $0.002 |
+| `GET /api/base/scorecard?days=` | The radar's track record: verdicts then vs prices now, per cohort | $0.005 |
 | `GET /api/base/name/:nameOrAddress` | Basename both ways: name → address + text records, or address → primary name | $0.001 |
 | `GET /api/feargreed?days=` | Crypto Fear & Greed index, plus up to 30 days of daily history | $0.001 |
 | `GET /api/base/trending?limit=` | Trending DEX pools on Base: price, volume, liquidity | $0.002 |
@@ -83,6 +85,16 @@ answering short: if the portfolio indexer is down, the onchain path covers major
 Base tokens only and the reply comes back with `partial: true` and a `note`
 explaining what is missing. The same flag appears when an address holds more
 tokens than one call can enumerate.
+
+### The track record lives in git
+
+Once a day, CI buys one scout call and commits the result to
+[`data/scout/`](data/scout/) — dated, hash-chained, tamper-evident. Each
+snapshot carries the Base transaction that paid for it, so even "when was this
+really taken" is provable. `/api/base/radar/history` serves any past day
+exactly as committed, and `/api/base/scorecard` turns the pile into the
+question that matters: of the tokens we flagged, how many still trade — and at
+what price? Our revenue is read from the chain; our claims are read from git.
 
 The safety endpoint takes this furthest, because there the cost of a confident
 wrong answer is someone's money. Its two sources answer different questions —

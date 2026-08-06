@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "AgentToll",
-    "version": "0.9.0",
+    "version": "0.10.0",
     "description": "Pay-per-call data APIs for AI agents. Paid endpoints return HTTP 402 with an x402 quote; pay $0.001-$0.005 in USDC on Base mainnet per call. No API keys. Onchain identity: agenttoll.base.eth.",
     "contact": {
       "name": "AgentToll",
@@ -956,6 +956,104 @@
         "responses": {
           "200": {
             "description": "New pools with safety verdicts and a summary"
+          },
+          "400": {
+            "description": "Invalid query parameter (not charged)"
+          },
+          "402": {
+            "description": "x402 payment quote"
+          }
+        }
+      }
+    },
+    "/api/base/radar/history": {
+      "get": {
+        "summary": "A past day’s radar+safety snapshot, exactly as committed to public git the day it was taken, with the Base tx that paid for it",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.002"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
+        "parameters": [
+          {
+            "name": "date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^d{4}-d{2}-d{2}$"
+            },
+            "example": "2026-08-06",
+            "description": "Optional. Snapshot day, default latest. History begins 2026-08-06."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The snapshot plus provenance links (git commit, raw file, settlement tx)"
+          },
+          "400": {
+            "description": "Invalid or unavailable date (not charged)"
+          },
+          "402": {
+            "description": "x402 payment quote"
+          }
+        }
+      }
+    },
+    "/api/base/scorecard": {
+      "get": {
+        "summary": "The radar’s track record: tokens it surfaced grouped by the verdict they got then, valued at what they trade for now",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.005"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 30,
+              "default": 7
+            },
+            "example": 7,
+            "description": "Optional. How many trailing snapshot days to cover."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cohort stats and per-token rows, each verifiable against a dated git commit"
           },
           "400": {
             "description": "Invalid query parameter (not charged)"

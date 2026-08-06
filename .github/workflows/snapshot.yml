@@ -1,0 +1,35 @@
+name: Daily scout snapshot
+
+# Buys one scout call a day and commits the result to data/scout/. The track
+# record has to live in git: a dated commit is the tamper-evident form of
+# "this is what we flagged, before what happened next happened".
+on:
+  schedule:
+    - cron: "23 7 * * *" # 07:23 UTC daily
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run build
+      - name: Buy today's snapshot
+        run: node scripts/snapshot.mjs
+        env:
+          AGENT_PRIVATE_KEY: ${{ secrets.AGENT_WALLET_KEY }}
+          AGENTTOLL_URL: https://agenttoll.app
+      - name: Commit it
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/scout
+          git diff --cached --quiet && echo "nothing new" || git commit -m "Scout snapshot: $(date -u +%F)"
+          git push

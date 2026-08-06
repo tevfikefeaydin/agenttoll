@@ -160,6 +160,49 @@ export const DISCOVERY: Record<string, Discovery> = {
     },
   },
 
+  "GET /api/base/radar/history": {
+    input: { date: "2026-08-06" },
+    inputSchema: {
+      properties: {
+        date: { type: "string", pattern: "^\\d{4}-\\d{2}-\\d{2}$", description: "Optional. Snapshot day, default latest. History begins 2026-08-06" },
+      },
+    },
+    output: {
+      chain: "base",
+      date: "2026-08-06",
+      at: "2026-08-06T10:57:00.000Z",
+      settlement: "0x9c41...b02a",
+      summary: { found: 3, checked: 3, unchecked: 0, highRisk: 1, caution: 2, insufficientData: 0, clear: 0 },
+      pools: [{ name: "openhuman / WETH", pool: "0x74bb...dc77", token: "0x74bb95da6692c34ee9755ac87ea10366653dbc77", createdAt: "2026-08-05T13:02:05Z", priceUsd: 0.0000047, liquidityUsd: 68437, volume24hUsd: 5.4, safety: { verdict: "high-risk", failed: ["liquidity"], warnings: ["creator-stake"], unchecked: [] } }],
+      provenance: { commit: "https://github.com/tevfikefeaydin/agenttoll/commits/main/data/scout/2026-08-06.json", raw: "https://raw.githubusercontent.com/.../2026-08-06.json", paidWith: "https://basescan.org/tx/0x9c41...b02a" },
+      availableDates: { first: "2026-08-06", last: "2026-08-06", count: 1 },
+    },
+  },
+
+  "GET /api/base/scorecard": {
+    input: { days: 7 },
+    inputSchema: {
+      properties: {
+        days: { type: "integer", minimum: 1, maximum: 30, description: "Optional. Window in days, default 7" },
+      },
+    },
+    output: {
+      chain: "base",
+      windowDays: 7,
+      trackRecord: { daysCovered: 7, firstSnapshot: "2026-08-06", lastSnapshot: "2026-08-12" },
+      cohorts: {
+        "high-risk": { count: 5, liquidityGone: 4, medianChangePct: -97.2 },
+        caution: { count: 9, liquidityGone: 2, medianChangePct: -41.5 },
+        "insufficient-data": { count: 2, liquidityGone: 0, medianChangePct: -12.3 },
+        clear: { count: 1, liquidityGone: 0, medianChangePct: 8.4 },
+      },
+      tokens: [{ token: "0x74bb...dc77", name: "openhuman / WETH", flaggedOn: "2026-08-06", verdictThen: "high-risk", liquidityThenUsd: 68437, liquidityNowUsd: 3, priceChangePct: -99.1, liquidityGone: true }],
+      methodology: "Each token judged from its first appearance: verdict and price then, deepest-pool price now. Snapshots are dated git commits.",
+      disclaimer: "A track record, not investment advice.",
+      at: "2026-08-12T10:00:00.000Z",
+    },
+  },
+
   "GET /api/base/safety/:address": {
     ...address,
     output: {
