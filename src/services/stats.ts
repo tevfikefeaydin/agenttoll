@@ -14,9 +14,13 @@ const MAX_PAGES = 20; // 50 transfers/page; raise when the tollbooth gets busy
 // Tolls are micro-payments; anything bigger is the owner funding the wallet.
 const MAX_TOLL_UNITS = 50_000n; // $0.05
 
-// The wallet we run our own tests from. Counted like any other payer, but
+// The wallets we run our own tests from. Counted like any other payer, but
 // reported separately so "did anyone else pay yet" is answerable at a glance.
-const OWN_TEST_WALLET = "0x5f871f89b13f5c7f570a765aa54c211323f36f78";
+// Retired wallets stay listed: their historical calls remain ours forever.
+const OWN_TEST_WALLETS = new Set([
+  "0x5f871f89b13f5c7f570a765aa54c211323f36f78", // retired 2026-08-06
+  "0x29d7837a1c19890d2ab123999e9cf8bfe40985b0",
+]);
 
 interface TransferPage {
   items: { total?: { value?: string }; from?: { hash?: string }; timestamp?: string }[];
@@ -68,7 +72,7 @@ export async function getStats(payTo: string) {
           .join("&");
     }
 
-    const external = [...payers.entries()].filter(([addr]) => addr !== OWN_TEST_WALLET);
+    const external = [...payers.entries()].filter(([addr]) => !OWN_TEST_WALLETS.has(addr));
     const externalCalls = external.reduce((sum, [, p]) => sum + p.calls, 0);
     const externalRevenue = external.reduce((sum, [, p]) => sum + p.usdc, 0n);
 
@@ -87,7 +91,7 @@ export async function getStats(payTo: string) {
           address,
           calls: p.calls,
           usdc: Number(p.usdc) / 1e6,
-          self: address === OWN_TEST_WALLET,
+          self: OWN_TEST_WALLETS.has(address),
         })),
       firstTollAt: firstAt,
       lastTollAt: lastAt,
