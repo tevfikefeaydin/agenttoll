@@ -23,6 +23,7 @@ import { resolveBasename } from "./services/basename.js";
 import { getNewTokenRadar } from "./services/radar.js";
 import { getPortfolio } from "./services/portfolio.js";
 import { getTokenSafety } from "./services/safety.js";
+import { getScout } from "./services/scout.js";
 import { getTryPremium } from "./services/trypremium.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -177,6 +178,10 @@ app.use(
         "$0.003",
         "Automated safety checks for a Base token: honeypot simulation, buy and sell tax, contract verification, owner privileges, holder concentration and whether anyone can still pull the liquidity",
       ),
+      "GET /api/base/scout": paid("GET /api/base/scout",
+        "$0.008",
+        "The radar and the safety check in one call: today's new Base pools above your liquidity floor, each with a safety verdict already attached (honeypot simulation, taxes, owner powers). One call instead of N+1",
+      ),
       "GET /api/base/name/:nameOrAddress": paid("GET /api/base/name/:nameOrAddress",
         "$0.001",
         "Basename resolution both ways: a name returns its address and text records, an address returns its primary basename",
@@ -263,6 +268,7 @@ app.get("/.well-known/x402", (_req, res) => {
       { resource: `${PUBLIC_BASE}/api/base/address/{address}`, price: "$0.001", description: "Base address snapshot: primary basename, ETH balance, tx count, contract or EOA" },
       { resource: `${PUBLIC_BASE}/api/base/portfolio/{address}`, price: "$0.003", description: "Everything a Base address holds, valued in USD: ETH plus ERC-20 tokens; ?minValue=USD&limit=N" },
       { resource: `${PUBLIC_BASE}/api/base/safety/{address}`, price: "$0.003", description: "Automated safety checks for a Base token: honeypot, taxes, owner privileges, holder concentration, liquidity" },
+      { resource: `${PUBLIC_BASE}/api/base/scout`, price: "$0.008", description: "Radar + safety in one call: new pools with a verdict attached; ?minLiquidity=USD&pools=N" },
       { resource: `${PUBLIC_BASE}/api/base/name/{nameOrAddress}`, price: "$0.001", description: "Basename resolution both ways: name to address, or address to primary name" },
       { resource: `${PUBLIC_BASE}/api/base/trending`, price: "$0.002", description: "Trending DEX pools on Base: price, volume, liquidity; ?limit=N" },
       { resource: `${PUBLIC_BASE}/api/base/radar`, price: "$0.003", description: "New token radar: fresh Base pools above your liquidity floor; ?minLiquidity=USD&limit=N" },
@@ -292,6 +298,7 @@ app.get("/api/catalog", (_req, res) => {
       { path: "/api/base/address/{address}", method: "GET", price: "$0.001", description: "Base address snapshot: primary basename, ETH balance, tx count, contract or EOA" },
       { path: "/api/base/portfolio/{address}?minValue={usd}&limit={n}", method: "GET", price: "$0.003", description: "Everything a Base address holds, valued in USD: ETH plus ERC-20 tokens, largest first, spam floor default $1" },
       { path: "/api/base/safety/{address}", method: "GET", price: "$0.003", description: "Automated safety checks for a Base token: honeypot simulation, taxes, contract verification, owner privileges, holder concentration, liquidity withdrawal risk" },
+      { path: "/api/base/scout?minLiquidity={usd}&pools={1-4}", method: "GET", price: "$0.008", description: "Radar + safety composed: today's new pools above your floor, each with a safety verdict attached. One call instead of N+1" },
       { path: "/api/base/name/{nameOrAddress}", method: "GET", price: "$0.001", description: "Basename resolution both ways: name to address (with text records), or address to primary name" },
       { path: "/api/base/trending?limit={n}", method: "GET", price: "$0.002", description: "Trending DEX pools on Base: price, volume, liquidity" },
       { path: "/api/feargreed?days={1-30}", method: "GET", price: "$0.001", description: "Crypto Fear & Greed index with yesterday comparison, optionally with daily history" },
@@ -316,6 +323,10 @@ app.get("/api/base/token/:address", serve((req) => getBaseTokenPrice(one(req.par
 app.get("/api/base/address/:address", serve((req) => getAddressInfo(one(req.params.address))));
 app.get("/api/base/name/:query", serve((req) => resolveBasename(one(req.params.query))));
 app.get("/api/base/safety/:address", serve((req) => getTokenSafety(one(req.params.address))));
+app.get(
+  "/api/base/scout",
+  serve((req) => getScout(opt(req.query.minLiquidity), opt(req.query.pools))),
+);
 app.get(
   "/api/base/portfolio/:address",
   serve((req) =>

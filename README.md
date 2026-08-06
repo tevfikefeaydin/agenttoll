@@ -41,6 +41,7 @@ inline, and gets the data.
 | `GET /api/base/address/:address` | Base address snapshot: primary basename, ETH balance, tx count, contract or EOA | $0.001 |
 | `GET /api/base/portfolio/:address?minValue=&limit=` | Everything an address holds on Base, valued in USD: ETH + ERC-20s, largest first | $0.003 |
 | `GET /api/base/safety/:address` | Token safety checks: honeypot, taxes, owner privileges, holder concentration, liquidity risk | $0.003 |
+| `GET /api/base/scout?minLiquidity=&pools=` | Radar + safety in one call: new pools with a verdict already attached | $0.008 |
 | `GET /api/base/name/:nameOrAddress` | Basename both ways: name → address + text records, or address → primary name | $0.001 |
 | `GET /api/feargreed?days=` | Crypto Fear & Greed index, plus up to 30 days of daily history | $0.001 |
 | `GET /api/base/trending?limit=` | Trending DEX pools on Base: price, volume, liquidity | $0.002 |
@@ -111,10 +112,12 @@ wider request never costs an extra upstream call.
 
 ### Finding a new token and checking it
 
-The radar and the safety endpoint are deliberately separate calls. Pay-per-call
+The radar and the safety endpoint are separate calls on purpose: pay-per-call
 means the agent decides which candidates are worth checking, rather than being
 billed for checks on fifteen pools it will ignore. Each radar pool carries its
-`token` address so the second call is immediate:
+`token` address so the second call is immediate. And for the agent that just
+wants today's vetted list, `/api/base/scout` sells the whole chain as one call
+($0.008): the top pools above your floor, each with its verdict attached.
 
 ```bash
 curl "https://agenttoll.app/api/base/radar?minLiquidity=25000&limit=5"

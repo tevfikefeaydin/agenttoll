@@ -1,0 +1,6 @@
+{
+  "title": "Add AgentToll to Base ecosystem",
+  "head": "tevfikefeaydin:add-agenttoll",
+  "base": "master",
+  "body": "Adds AgentToll to the ecosystem page.\n\nAgentToll is a pay-per-call data API for AI agents, built on Base and paid in USDC via x402 (HTTP 402): Base gas, token prices by contract address, wallet portfolios valued in USD, token safety checks, a spam-filtered new-token radar, Basename resolution, and stateless watch endpoints. No API keys or accounts; every endpoint is indexed in the x402 Bazaar and on x402scan, settled through the Coinbase CDP facilitator on Base mainnet.\n\n- Live: https://agenttoll.app\n- Open source (MIT): https://github.com/tevfikefeaydin/agenttoll\n- Onchain identity: agenttoll.base.eth"
+}

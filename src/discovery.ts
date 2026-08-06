@@ -130,6 +130,36 @@ export const DISCOVERY: Record<string, Discovery> = {
     },
   },
 
+  "GET /api/base/scout": {
+    input: { minLiquidity: 25000, pools: 3 },
+    inputSchema: {
+      properties: {
+        minLiquidity: { type: "number", minimum: 0, description: "Optional. Liquidity floor in USD, default 15000" },
+        pools: { type: "integer", minimum: 1, maximum: 4, description: "Optional. How many pools to check, default 3" },
+      },
+    },
+    output: {
+      chain: "base",
+      minLiquidityUsd: 25000,
+      pools: [
+        {
+          name: "SAAS / WETH 1%",
+          pool: "0x1c3a...9d2e",
+          token: "0x74bb95da6692c34ee9755ac87ea10366653dbc77",
+          createdAt: "2026-08-06T09:12:44Z",
+          priceUsd: 0.0021,
+          volume24hUsd: 88410.2,
+          liquidityUsd: 445120.5,
+          safety: { verdict: "high-risk", failed: ["liquidity"], warnings: ["creator-stake"], unchecked: [] },
+        },
+      ],
+      summary: { found: 3, checked: 3, unchecked: 0, highRisk: 1, caution: 2, insufficientData: 0, clear: 0 },
+      source: "geckoterminal-new-pools",
+      disclaimer: "Automated checks against public data, not investment advice.",
+      at: "2026-08-06T10:00:00.000Z",
+    },
+  },
+
   "GET /api/base/safety/:address": {
     ...address,
     output: {

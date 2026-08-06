@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "AgentToll",
-    "version": "0.8.1",
+    "version": "0.9.0",
     "description": "Pay-per-call data APIs for AI agents. Paid endpoints return HTTP 402 with an x402 quote; pay $0.001-$0.005 in USDC on Base mainnet per call. No API keys. Onchain identity: agenttoll.base.eth.",
     "contact": {
       "name": "AgentToll",
@@ -896,6 +896,69 @@
           },
           "400": {
             "description": "Invalid path or query parameter (not charged)"
+          },
+          "402": {
+            "description": "x402 payment quote"
+          }
+        }
+      }
+    },
+    "/api/base/scout": {
+      "get": {
+        "summary": "Radar and safety composed: today’s new Base pools above your liquidity floor, each with a safety verdict attached",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.008"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
+        "parameters": [
+          {
+            "name": "minLiquidity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1000000000,
+              "default": 15000
+            },
+            "example": 25000,
+            "description": "Optional. Liquidity floor in USD."
+          },
+          {
+            "name": "pools",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 4,
+              "default": 3
+            },
+            "example": 3,
+            "description": "Optional. How many of the top pools to safety-check."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "New pools with safety verdicts and a summary"
+          },
+          "400": {
+            "description": "Invalid query parameter (not charged)"
           },
           "402": {
             "description": "x402 payment quote"

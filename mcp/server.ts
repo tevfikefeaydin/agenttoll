@@ -208,6 +208,18 @@ server.tool(
 );
 
 server.tool(
+  "scout_new_tokens",
+  "The radar and the safety check in one call: today's new Base pools above your liquidity floor, each returned with a safety verdict already attached (honeypot simulation, taxes, owner powers, holder concentration). One call instead of N+1. A pool whose check could not run is returned with safety: null, never dropped. Costs $0.008 in USDC via x402.",
+  {
+    minLiquidity: z.number().min(0).optional().describe("Liquidity floor in USD (default 15000)"),
+    pools: z.number().int().min(1).max(4).optional().describe("How many of the top pools to check (default 3)"),
+  },
+  async ({ minLiquidity, pools }) => ({
+    content: [{ type: "text", text: await call("/api/base/scout", { minLiquidity, pools }) }],
+  }),
+);
+
+server.tool(
   "resolve_basename",
   "Resolve a Basename both ways: pass a name (agenttoll.base.eth, or just agenttoll) to get its address and text records, or pass a 0x address to get its primary basename. Costs $0.001 in USDC via x402.",
   { query: z.string().describe("A basename or a 0x address") },
