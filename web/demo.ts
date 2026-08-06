@@ -77,10 +77,25 @@ async function pay(endpoint: string, show: Show) {
 
     show('<span class="dim">Sign the USDC authorization in your wallet…</span>', "wait");
     const publicClient = createPublicClient({ chain: base, transport: http() });
+    // toClientEvmSigner wants an account-shaped signer: a top-level `address`
+    // plus signTypedData. A WalletClient keeps its address one level down at
+    // wallet.account.address, so passing the client straight through leaves
+    // signer.address undefined and the USDC authorization is built for
+    // address "undefined". This adapter is the browser-wallet equivalent of
+    // the privateKeyToAccount object our Node clients pass.
+    const signer = toClientEvmSigner(
+      {
+        address: address as `0x${string}`,
+        signTypedData: (message) =>
+          wallet.signTypedData({
+            account: address as `0x${string}`,
+            ...message,
+          } as Parameters<typeof wallet.signTypedData>[0]),
+      },
+      publicClient,
+    );
     const pay = wrapFetchWithPaymentFromConfig(fetch, {
-      schemes: [
-        { network: "eip155:8453", client: new ExactEvmScheme(toClientEvmSigner(wallet, publicClient)) },
-      ],
+      schemes: [{ network: "eip155:8453", client: new ExactEvmScheme(signer) }],
     });
     const res = await pay(endpoint);
     const data = await res.json();
