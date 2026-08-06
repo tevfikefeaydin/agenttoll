@@ -75,19 +75,34 @@ if (quoteBtn) {
     show('<span class="dim">Requesting ' + ENDPOINT + " …</span>", "wait");
     try {
       const res = await fetch(ENDPOINT);
-      const body = await res.json();
-      const accept = body?.accepts?.[0];
+      // x402 v2 puts the quote in the PAYMENT-REQUIRED header (base64 JSON);
+      // the body is deliberately empty. Reading the body here is the v1 shape
+      // and shows every visitor an error.
+      let quote = null;
+      try {
+        const header = res.headers.get("payment-required");
+        quote = header ? JSON.parse(atob(header)) : null;
+      } catch {
+        /* fall through to the error below */
+      }
+      const accept = quote?.accepts?.[0];
       if (res.status !== 402 || !accept) {
         show('<span class="bad">Unexpected response: HTTP ' + res.status + "</span>", "err");
         return;
       }
       const to = String(accept.payTo);
+      const network =
+        accept.network === "eip155:8453"
+          ? "Base mainnet"
+          : accept.network === "eip155:84532"
+            ? "Base Sepolia"
+            : accept.network;
       show(
         '<div class="line"><span class="tag warn">HTTP 402</span> Payment Required</div>' +
           '<div class="kv"><span>price</span><b>$' +
-          (Number(accept.maxAmountRequired) / 1e6).toFixed(3) +
+          (Number(accept.amount) / 1e6).toFixed(3) +
           " USDC</b></div>" +
-          '<div class="kv"><span>network</span><b>' + esc(accept.network) + "</b></div>" +
+          '<div class="kv"><span>network</span><b>' + esc(network) + "</b></div>" +
           '<div class="kv"><span>pay to</span><b>' +
           esc(to.slice(0, 10)) + "…" + esc(to.slice(-6)) +
           "</b></div>" +
