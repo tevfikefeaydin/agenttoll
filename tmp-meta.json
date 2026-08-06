@@ -1,8 +1,0 @@
-{
-  "name": "AgentToll",
-  "url": "https://agenttoll.app",
-  "description": "Base-native onchain data for AI agents, pay-per-call in USDC via x402. Token prices, wallet portfolios, token safety checks, a new-token radar and more - no API keys, no accounts, from $0.001 a call.",
-  "imageUrl": "/images/partners/agenttoll.webp",
-  "category": "ai",
-  "subcategory": "ai"
-}
