@@ -1,8 +1,15 @@
 # AgentToll
 
-> Base-native onchain data for AI agents, pay-per-call. Base gas, any token price by
-> contract address, address analytics, DEX pools, a spam-filtered new-token radar,
-> plus market and Turkish-lira feeds. Every endpoint costs $0.001-$0.005, paid in
+> Base-native onchain data for AI agents, pay-per-call. The core is three steps:
+> /api/base/fresh reads Base's own pool-creation log, so a new token surfaces about a
+> block after it exists (one was caught 2 seconds old) with the launched token's
+> address; /api/base/safety checks whether that token is a trap - simulated buy AND
+> sell, taxes, owner powers, holder concentration, liquidity risk, and the deployer's
+> own history; /api/base/scorecard says whether those verdicts held up, scored against
+> daily snapshots committed to public git with the Base transaction that paid for each.
+> Around that: wallet portfolios valued in USD, any token priced from onchain
+> liquidity, Basename resolution, gas costed per transaction size, stateless watch
+> endpoints, and market feeds. Every endpoint costs $0.001-$0.008, paid in
 > USDC on Base mainnet via the x402 protocol (HTTP 402). No API keys, no accounts,
 > no subscriptions - an agent sends one HTTP request, pays inline, gets the data.
 > Open source (MIT), with an MCP server on npm. Failed requests are never

@@ -42,7 +42,7 @@ to price what you actually track, and `get_new_token_radar` takes
 The `watch_*` tools return a `cursor`; pass it back as `since` on the next call
 to get only what changed — ideal for agents that poll on a schedule.
 
-Prices per call: $0.001–$0.005. Catalog: `GET https://agenttoll.app/api/catalog`.
+Prices per call: $0.001–$0.008. Catalog: `GET https://agenttoll.app/api/catalog`.
 
 ## Publishing
 

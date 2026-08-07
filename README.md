@@ -11,15 +11,28 @@
   <img src="https://img.shields.io/badge/license-MIT-8A97AF" alt="MIT">
 </p>
 
-**Live:** [agenttoll.app](https://agenttoll.app) — try `GET /api/price/eth` and get a real x402 quote.
-Onchain identity: **agenttoll.base.eth** (Base mainnet).
+**Live:** [agenttoll.app](https://agenttoll.app) — try `curl -i agenttoll.app/api/base/fresh`
+and get a real x402 quote. Onchain identity: **agenttoll.base.eth** (Base mainnet).
 
-**Base-native onchain data for AI agents, pay-per-call.** Base gas, any token price by
-contract address, address analytics, DEX pools, a spam-filtered new-token radar, plus
-market and Turkish-lira feeds. Every endpoint costs a fraction of a cent, paid in USDC
-and settled on [Base](https://base.org) via the [x402 protocol](https://x402.org).
-No API keys, no subscriptions, no accounts — an agent sends one HTTP request, pays
-inline, and gets the data.
+**See a token before the indexers do — then find out whether it's a trap.**
+
+1. **`/api/base/fresh`** reads Base's own pool-creation log, so a new token surfaces about
+   a block after it exists. We have caught one **2 seconds old**. Every pool carries the
+   launched token's address.
+2. **`/api/base/safety/:address`** answers what that address is worth knowing: a simulated
+   buy *and* sell, taxes, owner powers, holder concentration, liquidity risk — and who
+   deployed it, because a token shipped from a six-transaction wallet holding dust is the
+   shape most rugs share.
+3. **`/api/base/scorecard`** says whether we were right. A daily CI job buys one scout call
+   and commits the result to [`data/scout/`](data/scout/), with the Base transaction that
+   paid for it, so yesterday's verdicts can be scored against today's prices by anyone.
+
+Around that core: wallet portfolios valued in USD, any token priced from onchain
+liquidity, Basename resolution, gas costed for a transaction size, stateless watch
+endpoints, and market feeds. Every endpoint costs a fraction of a cent, paid in USDC and
+settled on [Base](https://base.org) via the [x402 protocol](https://x402.org). No API
+keys, no subscriptions, no accounts — an agent sends one HTTP request, pays inline, and
+gets the data.
 
 > Base's stated goal is to be the default chain for AI agents. AgentToll is a small,
 > open building block for that: a tollbooth any agent can drive through autonomously.

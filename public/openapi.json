@@ -2,8 +2,8 @@
   "openapi": "3.0.3",
   "info": {
     "title": "AgentToll",
-    "version": "0.11.0",
-    "description": "Pay-per-call data APIs for AI agents. Paid endpoints return HTTP 402 with an x402 quote; pay $0.001-$0.005 in USDC on Base mainnet per call. No API keys. Onchain identity: agenttoll.base.eth.",
+    "version": "0.12.0",
+    "description": "Pay-per-call data APIs for AI agents. Paid endpoints return HTTP 402 with an x402 quote; pay $0.001-$0.008 in USDC on Base mainnet per call. No API keys. Onchain identity: agenttoll.base.eth.",
     "contact": {
       "name": "AgentToll",
       "url": "https://github.com/tevfikefeaydin/agenttoll/issues",
