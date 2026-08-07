@@ -4,19 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AgentToll — Base-native data for AI agents</title>
-<meta name="description" content="Base-native onchain data for AI agents — gas, token prices by contract, address analytics, DEX pools, new-token radar. From $0.001 a call in USDC via x402. No API keys. Open source.">
+<meta name="description" content="See a token before the indexers do: Base pools read straight off the chain seconds after they exist, with safety verdicts and a git-committed track record. From $0.001 a call in USDC via x402. No API keys.">
 
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="AgentToll">
 <meta property="og:title" content="AgentToll — Pay-per-call APIs for AI agents">
-<meta property="og:description" content="Base-native onchain data for AI agents — gas, token prices by contract, address analytics, DEX pools, new-token radar. From $0.001 a call in USDC via x402. No API keys. Open source.">
+<meta property="og:description" content="See a token before the indexers do: Base pools read straight off the chain seconds after they exist, with safety verdicts and a git-committed track record. From $0.001 a call in USDC via x402. No API keys.">
 <meta property="og:url" content="https://agenttoll.app/">
 <meta property="og:image" content="https://agenttoll.app/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="AgentToll — Pay-per-call APIs for AI agents">
-<meta name="twitter:description" content="USDC micropayments on Base via x402. No API keys, no subscriptions — one request, one micropayment, one response.">
+<meta name="twitter:description" content="Pools read off Base seconds after they exist, safety verdicts on the token, and a track record committed to public git. One request, one micropayment, one response.">
 <meta name="twitter:image" content="https://agenttoll.app/og.png">
 <link rel="icon" href="/icon.png" type="image/png">
 <style>
@@ -260,10 +260,10 @@
   </div>
   <div class="wrap hero-in">
     <span class="eyebrow"><span class="dot"></span> Live on Base mainnet</span>
-    <h1>Base-native data for <em>AI agents</em></h1>
-    <p class="lede">Every endpoint is a URL with a price tag. Your agent sends one HTTP
-      request, gets a 402 quote, pays a fraction of a cent in USDC over x402, and receives
-      the data in the same round trip. No accounts. No API keys. No subscriptions.</p>
+    <h1>See a token <em>before</em> the indexers do</h1>
+    <p class="lede">Pools read straight off Base seconds after they exist, each with the
+      launched token's address — then ask whether it's a trap in the next call. Your agent
+      pays a fraction of a cent in USDC per request. No accounts. No API keys.</p>
     <div class="cta">
       <a class="btn btn-primary" href="#try">Try it in 10 seconds</a>
       <a class="btn btn-ghost" href="#endpoints">See the 20 endpoints</a>
@@ -285,18 +285,21 @@
       nothing is gated behind a signup form — the price is quoted in the HTTP response and
       paid by the agent itself, machine to machine.</p>
     <div class="grid g3">
-      <div class="card rv"><div class="ico">🤖</div>
-        <h3>Who uses it</h3>
-        <p>Trading bots, portfolio monitors, DeFi watchers and AI assistants that need market
-          or Base onchain data on a schedule.</p></div>
-      <div class="card rv"><div class="ico">💸</div>
-        <h3>What it costs</h3>
-        <p>$0.001–$0.005 per call. An agent polling every five minutes spends cents a month —
-          and pays nothing at all while it sits idle.</p></div>
-      <div class="card rv"><div class="ico">🔍</div>
-        <h3>How agents find it</h3>
-        <p>A free machine-readable catalog at <code>/api/catalog</code>, plus x402 discovery,
-          OpenAPI and llms.txt. We're indexed in the x402 Bazaar.</p></div>
+      <div class="card rv"><div class="ico">⚡</div>
+        <h3>Seconds, not minutes</h3>
+        <p>Everything else reads an indexer. <code>/api/base/fresh</code> reads Base's own
+          pool-creation log, so a token shows up about a block after it's born — we've
+          caught one <strong>2 seconds old</strong>.</p></div>
+      <div class="card rv"><div class="ico">🕵️</div>
+        <h3>Then: is it a trap?</h3>
+        <p>A simulated buy <em>and</em> sell, taxes, owner powers, holder concentration,
+          and who deployed it — a token shipped from a six-transaction wallet holding dust
+          is the shape most rugs share.</p></div>
+      <div class="card rv"><div class="ico">📒</div>
+        <h3>Were we right?</h3>
+        <p>Every day a CI job buys one scout call and commits the result to public git,
+          with the Base transaction that paid for it. <code>/api/base/scorecard</code>
+          scores yesterday's verdicts against today's prices.</p></div>
     </div>
   </div>
 </section>
@@ -309,12 +312,12 @@
       read and pay programmatically. Run this and you'll see one.</p>
     <div class="demo rv">
       <div class="demo-head">
-        <span class="demo-title">Live demo · <code>GET /api/price/eth</code></span>
-        <span class="demo-note">real endpoint, real Base mainnet</span>
+        <span class="demo-title">Live demo · <code>GET /api/base/fresh</code></span>
+        <span class="demo-note">pools born on Base in the last 10 minutes</span>
       </div>
       <div class="demo-actions">
         <button id="demo-quote" class="btn btn-primary" type="button">Get the live 402 quote</button>
-        <button id="demo-pay" class="btn btn-ghost" type="button" hidden>Pay $0.001 with your wallet →</button>
+        <button id="demo-pay" class="btn btn-ghost" type="button" hidden>Pay $0.004 with your wallet →</button>
       </div>
       <div id="demo-out" hidden></div>
       <p class="demo-foot">The quote needs nothing at all. Paying is optional and needs a
@@ -324,30 +327,33 @@
 
     <div class="two" style="margin-top:34px;">
       <div class="rv">
-<pre><span class="c"># free — service status and full catalog</span>
+<pre><span class="c"># free — status, catalog, and a sample of every shape</span>
 curl agenttoll.app/api/health
 curl agenttoll.app/api/catalog
+curl agenttoll.app/api/demo
 
 <span class="c"># a paid endpoint, unpaid: you get the quote</span>
-curl -i agenttoll.app/api/price/eth
+curl -i agenttoll.app/api/base/fresh
 <span class="y">HTTP/1.1 402 Payment Required</span>
-<span class="c">{"x402Version":1,"accepts":[{
-  "maxAmountRequired":"1000",
-  "asset":"USDC","network":"base" }]}</span></pre>
+<span class="c">PAYMENT-REQUIRED: &lt;base64&gt;
+  price   $0.004 USDC
+  network eip155:8453 (Base)
+  + the request and response schema,
+    so no second fetch is needed</span></pre>
       </div>
       <div class="rv">
-<pre><span class="c">// from your agent — npm i x402-fetch viem</span>
-<span class="k">import</span> { wrapFetchWithPayment } <span class="k">from</span> <span class="s">"x402-fetch"</span>;
-<span class="k">import</span> { privateKeyToAccount } <span class="k">from</span> <span class="s">"viem/accounts"</span>;
-
-<span class="k">const</span> pay = wrapFetchWithPayment(fetch,
-  privateKeyToAccount(AGENT_KEY));
+<pre><span class="c">// npm i @x402/fetch @x402/evm viem</span>
+<span class="k">const</span> pay = wrapFetchWithPaymentFromConfig(fetch, {
+  schemes: [{ network: <span class="s">"eip155:8453"</span>,
+    client: <span class="k">new</span> ExactEvmScheme(signer) }],
+});
 
 <span class="k">const</span> res = <span class="k">await</span> pay(
-  <span class="s">"https://agenttoll.app/api/price/eth"</span>);
+  <span class="s">"https://agenttoll.app/api/base/fresh"</span>);
 
 console.log(<span class="k">await</span> res.json());
-<span class="c">// { symbol: "eth", usd: …, change24h: … }</span></pre>
+<span class="c">// pools: [{ token, ageSeconds: 14,
+//   funded: true, hookPools: 21 }, …]</span></pre>
       </div>
     </div>
   </div>

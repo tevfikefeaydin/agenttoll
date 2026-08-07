@@ -238,6 +238,30 @@ server.tool(
 );
 
 server.tool(
+  "get_radar_scorecard",
+  "The radar's own track record: every token it surfaced over the last N days, grouped by the safety verdict it got THEN, valued at what it trades for NOW - including the ones whose liquidity is gone entirely. Use this to judge how much weight to give a verdict before acting on one. Each row is verifiable against a dated public git commit via get_radar_history. Costs $0.005 in USDC via x402.",
+  { days: z.number().int().min(1).max(30).optional().describe("Trailing window in days (default 7)") },
+  async ({ days }) => ({
+    content: [{ type: "text", text: await call("/api/base/scorecard", { days }) }],
+  }),
+);
+
+server.tool(
+  "get_radar_history",
+  "A past day's scout snapshot, exactly as it was committed to a public git repository the day it was taken, with the Base transaction that paid for it. This is the audit trail behind get_radar_scorecard: what was flagged, when, and provably before whatever happened next. Costs $0.002 in USDC via x402.",
+  {
+    date: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/)
+      .optional()
+      .describe("Snapshot day as YYYY-MM-DD (default: the most recent one)"),
+  },
+  async ({ date }) => ({
+    content: [{ type: "text", text: await call("/api/base/radar/history", { date }) }],
+  }),
+);
+
+server.tool(
   "resolve_basename",
   "Resolve a Basename both ways: pass a name (agenttoll.base.eth, or just agenttoll) to get its address and text records, or pass a 0x address to get its primary basename. Costs $0.001 in USDC via x402.",
   { query: z.string().describe("A basename or a 0x address") },

@@ -1,6 +1,6 @@
 {
   "name": "agenttoll-mcp",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "mcpName": "io.github.tevfikefeaydin/agenttoll",
   "description": "MCP server for AgentToll - pay-per-call data APIs for AI agents, paid in USDC on Base via x402",
   "type": "module",

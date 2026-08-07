@@ -242,22 +242,16 @@ app.get("/api/health", (_req, res) => {
 });
 
 // Free sample responses so people can see data shapes without a wallet.
+//
+// Generated from the same declarations that go inside the 402 quotes, so this
+// covers every paid endpoint and cannot drift from what the quotes advertise.
+// It used to be a hand-kept list, which had quietly fallen to eleven of twenty.
 app.get("/api/demo", (_req, res) => {
   res.json({
-    note: "Sample shapes with static values. Pay per call for live data - see /api/catalog.",
-    samples: {
-      "/api/price/eth": { symbol: "eth", id: "ethereum", usd: 1902.36, change24h: 0.25, at: "2026-07-31T06:55:14.465Z" },
-      "/api/gas": { chain: "base", gasPriceWei: "6000000", gasPriceGwei: 0.006, latestBlock: 49345179, at: "2026-07-31T06:35:04.787Z" },
-      "/api/gas?gasLimit=150000": { chain: "base", gasPriceGwei: 0.006, latestBlock: 49345179, estimate: { gasLimit: 150000, ethCost: 9.0e-7, usdCost: 0.001692, ethUsd: 1867.28 }, at: "2026-07-31T06:35:04.787Z" },
-      "/api/base/token/{address}": { chain: "base", token: "0x9401...8631", usd: 0.424, at: "2026-07-31T08:52:06.109Z" },
-      "/api/base/address/{address}": { chain: "base", address: "0xe553...56f8", ethBalance: 0, txCount: 1, isContract: true, at: "2026-07-31T08:52:05.955Z" },
-      "/api/feargreed": { value: 25, classification: "Extreme Fear", yesterday: 28, at: "2026-07-31T08:52:06.318Z" },
-      "/api/base/trending": { chain: "base", pools: [{ name: "msUSD / USDC 0.05%", priceUsd: 1.0, volume24hUsd: 6029571, change24hPct: 0.01, liquidityUsd: 2100000 }], at: "2026-07-31T09:10:00.000Z" },
-      "/api/brief": { majors: { eth: { usd: 1880.43 }, btc: { usd: 63654 }, sol: { usd: 98.2 } }, baseGas: { gasPriceGwei: 0.006 }, sentiment: { value: 25 }, at: "2026-07-31T09:10:00.000Z" },
-      "/api/base/radar": { chain: "base", minLiquidityUsd: 10000, count: 1, pools: [{ name: "BASED / ETH 1%", pool: "0x2acb...cac0", token: "0xb6bb...eb07", createdAt: "2026-08-05T13:01:33Z", priceUsd: 0.0000156, volume24hUsd: 19071.46, liquidityUsd: 14246.1 }], at: "2026-08-05T13:31:00.000Z" },
-      "/api/try/premium": { asset: "usdt", assetUsd: 0.999318, assetTry: 47.53, impliedUsdTry: 47.5624, officialUsdTry: 47.2891, premiumPct: 0.578, at: "2026-08-05T13:31:00.000Z" },
-      "/api/base/portfolio/{address}": { chain: "base", address: "0x1985...5c87", basename: null, native: { symbol: "ETH", balance: 194.68, priceUsd: 1868.57, valueUsd: 363774.32 }, tokens: [{ symbol: "CBBTC", name: "Coinbase Wrapped BTC", address: "0xcbb7...33bf", balance: 5.673857, priceUsd: 64198, valueUsd: 364250.29 }], totalUsd: 7143109.27, tokenCount: 52, shown: 1, hiddenBelowFloor: 48, unpriced: 0, minValueUsd: 10000, source: "blockscout", at: "2026-08-05T13:31:00.000Z" },
-    },
+    note: "Sample shapes with static values, one per paid endpoint. Pay per call for live data - see /api/catalog.",
+    samples: Object.fromEntries(
+      Object.entries(DISCOVERY).map(([route, d]) => [route.replace(/^GET /, ""), d.output]),
+    ),
   });
 });
 
