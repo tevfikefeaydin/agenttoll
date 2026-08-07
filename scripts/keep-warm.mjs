@@ -34,6 +34,7 @@ const ENDPOINTS = [
   "/api/base/portfolio/0x1985ea6e9c68e1c272d8209f3b478ac2fdb25c87?minValue=1000&limit=5",
   "/api/base/safety/0x940181a94a35a4569e4529a3cdfb74e38fd98631",
   "/api/base/scout?pools=1",
+  "/api/base/fresh?minutes=10&limit=3",
   "/api/base/name/agenttoll.base.eth",
   "/api/watch/radar",
   "/api/watch/price/eth?ref=1900&pct=2",

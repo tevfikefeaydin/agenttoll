@@ -42,6 +42,7 @@ inline, and gets the data.
 | `GET /api/base/portfolio/:address?minValue=&limit=` | Everything an address holds on Base, valued in USD: ETH + ERC-20s, largest first | $0.003 |
 | `GET /api/base/safety/:address` | Token safety checks: honeypot, taxes, owner privileges, holder concentration, liquidity risk | $0.003 |
 | `GET /api/base/scout?minLiquidity=&pools=` | Radar + safety in one call: new pools with a verdict already attached | $0.008 |
+| `GET /api/base/fresh?minutes=&fundedOnly=` | Pools read off the chain seconds after creation, before indexers see them | $0.004 |
 | `GET /api/base/radar/history?date=` | A past day's snapshot, exactly as committed to public git the day it was taken | $0.002 |
 | `GET /api/base/scorecard?days=` | The radar's track record: verdicts then vs prices now, per cohort | $0.005 |
 | `GET /api/base/name/:nameOrAddress` | Basename both ways: name → address + text records, or address → primary name | $0.001 |

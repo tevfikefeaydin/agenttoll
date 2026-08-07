@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "AgentToll",
-    "version": "0.10.0",
+    "version": "0.11.0",
     "description": "Pay-per-call data APIs for AI agents. Paid endpoints return HTTP 402 with an x402 quote; pay $0.001-$0.005 in USDC on Base mainnet per call. No API keys. Onchain identity: agenttoll.base.eth.",
     "contact": {
       "name": "AgentToll",
@@ -1054,6 +1054,80 @@
         "responses": {
           "200": {
             "description": "Cohort stats and per-token rows, each verifiable against a dated git commit"
+          },
+          "400": {
+            "description": "Invalid query parameter (not charged)"
+          },
+          "402": {
+            "description": "x402 payment quote"
+          }
+        }
+      }
+    },
+    "/api/base/fresh": {
+      "get": {
+        "summary": "Uniswap v4 pools read straight off Base seconds after they exist, before any indexer has them",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.004"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
+        "parameters": [
+          {
+            "name": "minutes",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 60,
+              "default": 10
+            },
+            "example": 10,
+            "description": "Optional. How far back to look."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 15
+            },
+            "example": 15,
+            "description": "Optional. How many pools to return, youngest first."
+          },
+          {
+            "name": "fundedOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "example": true,
+            "description": "Optional. Drop pools nobody has added liquidity to yet."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pools with the launched token, funding status, and hook provenance"
           },
           "400": {
             "description": "Invalid query parameter (not charged)"

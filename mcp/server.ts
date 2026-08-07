@@ -208,6 +208,24 @@ server.tool(
 );
 
 server.tool(
+  "get_fresh_pools",
+  "Pools read straight off Base seconds after they exist, before any indexer has them - the earliest possible signal that a token launched. Returns the launched token address (ready for check_token_safety), whether anyone has funded it yet, and whether its Uniswap v4 hook belongs to a launchpad used by many pools or is bespoke code shipped with this one token. USD liquidity is deliberately not claimed here; use get_new_token_radar for that, minutes later. Costs $0.004 in USDC via x402.",
+  {
+    minutes: z.number().int().min(1).max(60).optional().describe("How far back to look (default 10)"),
+    limit: z.number().int().min(1).max(50).optional().describe("How many pools to return, youngest first (default 15)"),
+    fundedOnly: z.boolean().optional().describe("Drop pools nobody has added liquidity to yet"),
+  },
+  async ({ minutes, limit, fundedOnly }) => ({
+    content: [
+      {
+        type: "text",
+        text: await call("/api/base/fresh", { minutes, limit, fundedOnly: fundedOnly === undefined ? undefined : String(fundedOnly) }),
+      },
+    ],
+  }),
+);
+
+server.tool(
   "scout_new_tokens",
   "The radar and the safety check in one call: today's new Base pools above your liquidity floor, each returned with a safety verdict already attached (honeypot simulation, taxes, owner powers, holder concentration). One call instead of N+1. A pool whose check could not run is returned with safety: null, never dropped. Costs $0.008 in USDC via x402.",
   {

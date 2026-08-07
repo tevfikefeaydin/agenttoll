@@ -160,6 +160,46 @@ export const DISCOVERY: Record<string, Discovery> = {
     },
   },
 
+  "GET /api/base/fresh": {
+    input: { minutes: 10, fundedOnly: true },
+    inputSchema: {
+      properties: {
+        minutes: { type: "integer", minimum: 1, maximum: 60, description: "Optional. How far back to look, default 10" },
+        limit: { type: "integer", minimum: 1, maximum: 50, description: "Optional. How many pools to return, default 15" },
+        fundedOnly: { type: "boolean", description: "Optional. Drop pools nobody has added liquidity to yet" },
+      },
+    },
+    output: {
+      chain: "base",
+      scope: "uniswap-v4",
+      windowMinutes: 10,
+      headBlock: 49648349,
+      pools: [
+        {
+          poolId: "0xb2417a41cd75...",
+          protocol: "uniswap-v4",
+          token: "0x47d4126cb8...",
+          tokenBasis: "quote-asset",
+          pair: ["0x4200000000000000000000000000000000000006", "0x47d4126cb8..."],
+          quote: "0x4200000000000000000000000000000000000006",
+          quoteSymbol: "WETH",
+          block: 49648342,
+          createdAt: "2026-08-07T09:41:12.000Z",
+          ageSeconds: 14,
+          funded: true,
+          hook: "0xbdf938149a...",
+          hookPools: 21,
+          feeMode: "dynamic",
+          feeBps: null,
+        },
+      ],
+      summary: { found: 10, funded: 10, bespokeHooks: 0, shown: 10 },
+      method: "Read from the Uniswap v4 PoolManager's own Initialize log on Base...",
+      notMeasured: "USD liquidity - v4 keeps every pool's tokens in one singleton...",
+      at: "2026-08-07T09:41:26.000Z",
+    },
+  },
+
   "GET /api/base/radar/history": {
     input: { date: "2026-08-06" },
     inputSchema: {
