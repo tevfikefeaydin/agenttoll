@@ -121,10 +121,16 @@ export async function getScorecard(daysRaw?: string) {
     if (!dates.length) throw new Error("No snapshots are published yet — history begins " + HISTORY_BEGINS);
     const window = dates.slice(-days);
 
+    // Fetched together, read in order: the window grows a file a day, and
+    // walking them one request at a time would make a month-long scorecard
+    // thirty round trips deep. Promise.all keeps the order, which is what the
+    // first-sighting rule below depends on.
+    const snapshots = await Promise.all(window.map(getSnapshot));
+
     // First sighting wins: a token seen on day 1 and day 3 is judged from day 1.
     const seen = new Map<string, { date: string; name: string; verdict: string; thenPriceUsd: number; thenLiquidityUsd: number }>();
-    for (const date of window) {
-      const snap = await getSnapshot(date);
+    for (const [i, snap] of snapshots.entries()) {
+      const date = window[i];
       for (const pool of snap?.pools ?? []) {
         if (!pool.token || !pool.safety || seen.has(pool.token)) continue;
         seen.set(pool.token, {
