@@ -178,7 +178,7 @@ app.use(
       ),
       "GET /api/base/safety/:address": paid("GET /api/base/safety/:address",
         "$0.003",
-        "Automated safety checks for a Base token: honeypot simulation, buy and sell tax, contract verification, owner privileges, holder concentration and whether anyone can still pull the liquidity",
+        "Automated safety checks for a Base token: honeypot simulation, buy and sell tax, contract verification, owner privileges, holder concentration, whether anyone can still pull the liquidity, and who deployed the contract - a token shipped from a wallet with a handful of transactions is the shape most rugs share",
       ),
       "GET /api/base/scout": paid("GET /api/base/scout",
         "$0.008",

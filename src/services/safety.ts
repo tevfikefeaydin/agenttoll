@@ -1,5 +1,6 @@
 import { cached, fetchWithTimeout } from "./cache.js";
 import { badRequest } from "./errors.js";
+import { baseRpc } from "./sources.js";
 
 /**
  * Automated safety checks for a Base token.
@@ -10,6 +11,7 @@ import { badRequest } from "./errors.js";
  *   GoPlus      static analysis of the contract, plus holder and LP data
  *   honeypot.is an actual simulated buy and sell, which catches traps that
  *               only appear at execution time
+ *   deployer    who shipped the contract, read from the explorer and the chain
  *
  * Where a source is missing, its checks report `unknown`. That distinction is
  * the whole point: on a safety endpoint, "we could not check" must never be
@@ -248,6 +250,138 @@ function buildChecks(gp: GoPlusToken | null, hp: HoneypotResult | null): Check[]
   return checks;
 }
 
+// ---------------------------------------------------------------------------
+// Who shipped this contract.
+//
+// The strongest shared trait of a rug is not in the bytecode, it is in the
+// wallet that deployed it: a throwaway funded minutes earlier, used a handful
+// of times, holding dust. That is cheap to establish - the explorer names the
+// creator, and the chain itself gives an exact transaction count and balance
+// that no indexer can be stale about.
+// ---------------------------------------------------------------------------
+
+const BLOCKSCOUT_ADDR = "https://base.blockscout.com/api/v2/addresses";
+/** Below this, a wallet has barely been used; above it, it has a life. */
+const THROWAWAY_TXS = 10;
+const ESTABLISHED_TXS = 25;
+
+export interface Deployer {
+  address: string;
+  isContract: boolean;
+  txCount: number | null;
+  balanceEth: number | null;
+  firstSeen: string | null;
+  ageHours: number | null;
+  flaggedScam: boolean;
+}
+
+async function fromDeployer(token: string): Promise<Deployer | null> {
+  const res = await fetchWithTimeout(`${BLOCKSCOUT_ADDR}/${token}`, {
+    headers: { Accept: "application/json" },
+  });
+  if (!res.ok) throw new Error(`Explorer returned ${res.status}`);
+  const info = (await res.json()) as {
+    creator_address_hash?: string | null;
+    is_scam?: boolean;
+  };
+  const creator = info.creator_address_hash;
+  // No creator on record is its own answer, and a different one from "the
+  // lookup failed" — that case throws and is reported separately, because
+  // telling a caller a contract is unindexed when we simply could not reach
+  // the explorer is exactly the sort of confident wrong answer this endpoint
+  // exists to avoid.
+  if (!creator) return null;
+
+  const [codeResult, nonceResult, balanceResult] = await Promise.allSettled([
+    baseRpc<string>("eth_getCode", [creator, "latest"]),
+    baseRpc<string>("eth_getTransactionCount", [creator, "latest"]),
+    baseRpc<string>("eth_getBalance", [creator, "latest"]),
+  ]);
+  const value = <T>(r: PromiseSettledResult<T>) => (r.status === "fulfilled" ? r.value : null);
+  const code = value(codeResult);
+  const nonceHex = value(nonceResult);
+  const balanceHex = value(balanceResult);
+
+  const isContract = code !== null && code !== "0x";
+  const txCount = nonceHex === null ? null : Number(BigInt(nonceHex));
+
+  // A wallet with few transactions fits on one page, so its first one - and
+  // therefore its age - is one request away. A busy wallet is established by
+  // definition, and paging back through it would buy nothing.
+  let firstSeen: string | null = null;
+  if (!isContract && txCount !== null && txCount > 0 && txCount <= 50) {
+    try {
+      const txRes = await fetchWithTimeout(`${BLOCKSCOUT_ADDR}/${creator}/transactions?filter=from`, {
+        headers: { Accept: "application/json" },
+      });
+      if (txRes.ok) {
+        const items = ((await txRes.json()) as { items?: { timestamp?: string }[] }).items ?? [];
+        firstSeen = items[items.length - 1]?.timestamp ?? null;
+      }
+    } catch {
+      /* age is a bonus; the transaction count already carries the signal */
+    }
+  }
+
+  return {
+    address: creator.toLowerCase(),
+    isContract,
+    txCount,
+    balanceEth: balanceHex === null ? null : Number(BigInt(balanceHex)) / 1e18,
+    firstSeen,
+    ageHours:
+      firstSeen === null ? null : Math.round((Date.now() - Date.parse(firstSeen)) / 3_600_000),
+    flaggedScam: info.is_scam === true,
+  };
+}
+
+function deployerCheck(d: Deployer | null, lookupFailed: boolean): Check {
+  if (lookupFailed) {
+    return { id: "deployer", status: "unknown", detail: "The deployer could not be looked up right now" };
+  }
+  if (!d) {
+    return {
+      id: "deployer",
+      status: "unknown",
+      detail:
+        "No creator is on record for this contract — it is either too new to be indexed or was deployed at genesis",
+    };
+  }
+  if (d.flaggedScam) {
+    return { id: "deployer", status: "fail", detail: "The explorer flags this contract as a scam" };
+  }
+  // Launchpads deploy through a factory, so a contract creator is the normal
+  // case there and says nothing about the wallet behind it either way.
+  if (d.isContract) {
+    return {
+      id: "deployer",
+      status: "pass",
+      detail: `Deployed by a contract (${d.address.slice(0, 10)}…), which is how launchpads ship tokens`,
+    };
+  }
+  if (d.txCount === null) {
+    return { id: "deployer", status: "unknown", detail: "The deployer's activity could not be read" };
+  }
+
+  const age = d.ageHours === null ? "" : `, first active ${d.ageHours < 48 ? `${d.ageHours}h` : `${Math.round(d.ageHours / 24)}d`} ago`;
+  const balance = d.balanceEth === null ? "" : ` and holds ${d.balanceEth.toFixed(5)} ETH`;
+  const body = `The deployer is a wallet with ${d.txCount} transaction${d.txCount === 1 ? "" : "s"}${age}${balance}`;
+
+  if (d.txCount < THROWAWAY_TXS) {
+    return {
+      id: "deployer",
+      // A throwaway is a strong signal, not proof: plenty of honest launches
+      // start from a fresh wallet, so this warns rather than condemns.
+      status: "warn",
+      detail: `${body} — consistent with a wallet created to launch one token`,
+    };
+  }
+  if (d.txCount < ESTABLISHED_TXS) {
+    return { id: "deployer", status: "warn", detail: `${body} — lightly used` };
+  }
+  return { id: "deployer", status: "pass", detail: body };
+}
+
 export async function getTokenSafety(address: string) {
   if (!/^0x[0-9a-fA-F]{40}$/.test(address)) {
     badRequest("Invalid token address — expected 0x + 40 hex chars");
@@ -258,9 +392,14 @@ export async function getTokenSafety(address: string) {
     // Both are asked at once and either may fail; only a total blackout is an
     // error, because a partial answer with honest `unknown` checks is still
     // worth more than nothing.
-    const [gpResult, hpResult] = await Promise.allSettled([fromGoPlus(addr), fromHoneypot(addr)]);
+    const [gpResult, hpResult, depResult] = await Promise.allSettled([
+      fromGoPlus(addr),
+      fromHoneypot(addr),
+      fromDeployer(addr),
+    ]);
     const gp = gpResult.status === "fulfilled" ? gpResult.value : null;
     const hp = hpResult.status === "fulfilled" ? hpResult.value : null;
+    const deployer = depResult.status === "fulfilled" ? depResult.value : null;
 
     if (!gp && !hp) {
       throw new Error("Both safety sources are unavailable right now — please retry");
@@ -269,7 +408,7 @@ export async function getTokenSafety(address: string) {
       badRequest("That address is not a token we can analyse on Base");
     }
 
-    const checks = buildChecks(gp, hp);
+    const checks = [...buildChecks(gp, hp), deployerCheck(deployer, depResult.status === "rejected")];
     const failed = checks.filter((c) => c.status === "fail");
     const warned = checks.filter((c) => c.status === "warn");
     const unknown = checks.filter((c) => c.status === "unknown");
@@ -277,6 +416,7 @@ export async function getTokenSafety(address: string) {
     const sources: string[] = [];
     if (gp) sources.push("goplus");
     if (hp) sources.push("honeypot.is");
+    if (deployer) sources.push("blockscout+rpc");
 
     return {
       chain: "base",
@@ -299,6 +439,7 @@ export async function getTokenSafety(address: string) {
       warnings: warned.map((c) => c.id),
       unchecked: unknown.map((c) => c.id),
       checks,
+      deployer,
       holderCount: num(gp?.holder_count) ?? hp?.token?.totalHolders ?? null,
       listedOnCex: flag(gp?.is_in_cex?.listed) ? (gp?.is_in_cex?.cex_list ?? []) : [],
       sources,

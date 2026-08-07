@@ -198,7 +198,7 @@ server.tool(
 
 server.tool(
   "check_token_safety",
-  "Automated safety checks for a Base token: a simulated buy and sell to catch honeypots, buy/sell tax, contract verification, what the owner can still do, holder concentration, and whether anyone can still withdraw the liquidity. The verdict is clear, caution, high-risk or insufficient-data — a token too new to check is never reported as clear. Costs $0.003 in USDC via x402.",
+  "Automated safety checks for a Base token: a simulated buy and sell to catch honeypots, buy/sell tax, contract verification, what the owner can still do, holder concentration, whether anyone can still withdraw the liquidity, and who deployed the contract - a token shipped from a wallet with a handful of transactions and dust in it is the shape most rugs share. The verdict is clear, caution, high-risk or insufficient-data — a token too new to check is never reported as clear. Costs $0.003 in USDC via x402.",
   { address: z.string().describe("Token contract address on Base (0x...)") },
   async ({ address }) => ({
     content: [

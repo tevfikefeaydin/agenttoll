@@ -40,7 +40,7 @@ inline, and gets the data.
 | `GET /api/base/token/:address` | Onchain USD price for any Base token by contract address | $0.001 |
 | `GET /api/base/address/:address` | Base address snapshot: primary basename, ETH balance, tx count, contract or EOA | $0.001 |
 | `GET /api/base/portfolio/:address?minValue=&limit=` | Everything an address holds on Base, valued in USD: ETH + ERC-20s, largest first | $0.003 |
-| `GET /api/base/safety/:address` | Token safety checks: honeypot, taxes, owner privileges, holder concentration, liquidity risk | $0.003 |
+| `GET /api/base/safety/:address` | Token safety checks: honeypot, taxes, owner privileges, holder concentration, liquidity risk, deployer history | $0.003 |
 | `GET /api/base/scout?minLiquidity=&pools=` | Radar + safety in one call: new pools with a verdict already attached | $0.008 |
 | `GET /api/base/fresh?minutes=&fundedOnly=` | Pools read off the chain seconds after creation, before indexers see them | $0.004 |
 | `GET /api/base/radar/history?date=` | A past day's snapshot, exactly as committed to public git the day it was taken | $0.002 |
@@ -77,7 +77,7 @@ the ones that matter fall through to a backup rather than failing:
 | Base token price | GeckoTerminal | DexScreener |
 | Base RPC (gas, address) | mainnet.base.org | publicnode → llamarpc |
 | Portfolio holdings | Blockscout | Multicall3 onchain + DefiLlama |
-| Token safety | GoPlus + honeypot.is together | either alone, with the rest reported as unchecked |
+| Token safety | GoPlus + honeypot.is + deployer (Blockscout & RPC) | any one alone, with the rest reported as unchecked |
 
 Price responses carry a `source` field so you can see which one answered.
 
