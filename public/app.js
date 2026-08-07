@@ -55,7 +55,7 @@ if (matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObs
 // ---- live demo ----------------------------------------------------------
 // Stage 1 (the quote) is a plain fetch, so it costs no extra bytes and works
 // for every visitor. Stage 2 pulls the wallet bundle only when asked.
-const ENDPOINT = "/api/price/eth";
+const ENDPOINT = "/api/base/fresh";
 const demoOut = document.getElementById("demo-out");
 const quoteBtn = document.getElementById("demo-quote");
 const payBtn = document.getElementById("demo-pay");
