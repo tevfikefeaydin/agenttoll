@@ -162,6 +162,7 @@ Agents (and indexers) can find and understand the service without reading the si
 | x402 discovery | [`/.well-known/x402`](https://agenttoll.app/.well-known/x402) |
 | OpenAPI | [`/openapi.json`](https://agenttoll.app/openapi.json) |
 | llms.txt | [`/llms.txt`](https://agenttoll.app/llms.txt) |
+| Agent card | [`/.well-known/agent-card.json`](https://agenttoll.app/.well-known/agent-card.json) |
 
 The 402 challenge carries its own documentation. Every paid endpoint declares
 the x402 bazaar discovery extension, so the payment quote itself contains the

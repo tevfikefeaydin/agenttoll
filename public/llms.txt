@@ -68,4 +68,5 @@ server keeps no state about you. Use these to poll cheaply on a schedule.
 
 - OpenAPI: https://agenttoll.app/openapi.json
 - x402 discovery: https://agenttoll.app/.well-known/x402
+- Agent card: https://agenttoll.app/.well-known/agent-card.json
 - MCP package: https://www.npmjs.com/package/agenttoll-mcp

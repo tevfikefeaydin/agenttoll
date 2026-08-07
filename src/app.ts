@@ -102,7 +102,7 @@ app.use((req, res, next) => {
 // itself). Per-instance only — Vercel's platform DDoS protection sits in front.
 const freeHits = new Map<string, { n: number; reset: number }>();
 app.use((req, res, next) => {
-  if (!["/api/health", "/api/catalog", "/api/demo", "/api/stats", "/.well-known/x402"].includes(req.path)) return next();
+  if (!["/api/health", "/api/catalog", "/api/demo", "/api/stats", "/.well-known/x402", "/.well-known/agent-card.json"].includes(req.path)) return next();
   const ip = req.ip ?? "?";
   const now = Date.now();
   const slot = freeHits.get(ip);
@@ -293,15 +293,8 @@ app.get("/.well-known/x402", (_req, res) => {
   });
 });
 
-// Free machine-readable catalog so agents can discover what is for sale.
-app.get("/api/catalog", (_req, res) => {
-  res.json({
-    service: "agenttoll",
-    description:
-      "Base-native onchain data for AI agents, pay-per-call in USDC via x402. Open source (MIT).",
-    network: NETWORK,
-    payment: "x402",
-    endpoints: [
+// One list feeds both the catalog and the agent card, so they cannot drift.
+const CATALOG_ENDPOINTS = [
       { path: "/api/price/{symbol}", method: "GET", price: "$0.001", description: "Spot price (USD) + 24h change for a crypto asset" },
       { path: "/api/gas?gasLimit={units}", method: "GET", price: "$0.001", description: "Base network gas price and latest block; with gasLimit, the ETH and USD cost of a transaction that size" },
       { path: "/api/trending?limit={n}", method: "GET", price: "$0.002", description: "Tokens trending across the market right now" },
@@ -325,7 +318,60 @@ app.get("/api/catalog", (_req, res) => {
       { path: "/api/demo", method: "GET", price: "free", description: "Sample response shapes for every paid endpoint" },
       { path: "/api/health", method: "GET", price: "free", description: "Service status" },
       { path: "/api/catalog", method: "GET", price: "free", description: "This catalog" },
-    ],
+];
+
+// Free machine-readable catalog so agents can discover what is for sale.
+app.get("/api/catalog", (_req, res) => {
+  res.json({
+    service: "agenttoll",
+    description:
+      "Base-native onchain data for AI agents, pay-per-call in USDC via x402. Open source (MIT).",
+    network: NETWORK,
+    payment: "x402",
+    endpoints: CATALOG_ENDPOINTS,
+  });
+});
+
+// Agent card in the loose .well-known convention several x402 services share.
+// Honest about what we are: an HTTP + MCP data service paid over x402 — not an
+// A2A task server, so no A2A endpoints are claimed.
+app.get("/.well-known/agent-card.json", (_req, res) => {
+  res.json({
+    name: "AgentToll",
+    description:
+      "Base-native onchain data for AI agents, pay-per-call in USDC via x402. Token prices, wallet portfolios, token safety checks, a new-token scout with verdicts attached, Basename resolution, and a git-committed track record. No API keys, no accounts; failed requests are never charged.",
+    url: PUBLIC_BASE,
+    provider: { organization: "AgentToll", url: PUBLIC_BASE },
+    version: "1.0.0",
+    identity: { basename: "agenttoll.base.eth", payTo: PAY_TO },
+    interfaces: {
+      http: {
+        type: "rest",
+        baseUrl: PUBLIC_BASE,
+        payment: { protocol: "x402", version: 2, network: "eip155:8453", asset: "USDC" },
+        openapi: `${PUBLIC_BASE}/openapi.json`,
+        discovery: `${PUBLIC_BASE}/.well-known/x402`,
+      },
+      mcp: {
+        type: "stdio",
+        package: "agenttoll-mcp",
+        install: "npx agenttoll-mcp",
+        registryUrl: "https://www.npmjs.com/package/agenttoll-mcp",
+      },
+    },
+    skills: CATALOG_ENDPOINTS.map((e) => ({
+      id: e.path.split("?")[0],
+      name: e.description.split(":")[0].slice(0, 60),
+      description: e.description,
+      price: e.price,
+      url: `${PUBLIC_BASE}${e.path}`,
+    })),
+    trust: {
+      openSource: "https://github.com/tevfikefeaydin/agenttoll",
+      onchainStats: `${PUBLIC_BASE}/api/stats`,
+      trackRecord: "https://github.com/tevfikefeaydin/agenttoll/tree/main/data/scout",
+      note: "Revenue is read from USDC transfers on Base, not self-reported; radar claims are dated git commits.",
+    },
   });
 });
 
