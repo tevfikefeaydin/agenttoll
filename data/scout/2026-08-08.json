@@ -1,0 +1,106 @@
+{
+  "date": "2026-08-08",
+  "at": "2026-08-08T08:05:14.527Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x33ee2aa858c23cea7dc393b77b0e9a1a8ec18769109489d035dbc1339640520c",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 1,
+    "caution": 3,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "CORE / WETH",
+      "pool": "0x27db71ae0e40949ed8ec7a493d9012778d8a3364",
+      "token": "0x4dcdc0051eca27f869279d8472c62c7f8189a048",
+      "createdAt": "2026-08-08T07:28:25Z",
+      "priceUsd": 0.00000593149358061727,
+      "volume24hUsd": 5585.859137,
+      "liquidityUsd": 68581.3156,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "liquidity"
+        ],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration"
+        ]
+      }
+    },
+    {
+      "name": "XST / WETH",
+      "pool": "0x3b7bcafcf75824c70f777a8381c1548e113ce6560372172438a2498046b921c1",
+      "token": "0xcb3a44e8498e2e23e01cbcc42336b3369443cc43",
+      "createdAt": "2026-08-08T06:09:21Z",
+      "priceUsd": 0.0000989213493471213,
+      "volume24hUsd": 103.3658618503,
+      "liquidityUsd": 97569.1648,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "AOPR / WETH",
+      "pool": "0xb27bf6e00a4f1824d6bdbf9211c7647c9f43d39fd6e9fdfe5246d56b85787f86",
+      "token": "0xbc2503db81f65712ea3d1cf496f0b7c1e68b9688",
+      "createdAt": "2026-08-08T07:01:03Z",
+      "priceUsd": 0.000149270476399206,
+      "volume24hUsd": 38.0638928353,
+      "liquidityUsd": 150719.4272,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "B80% / ZORA",
+      "pool": "0x2e065376001a3698aee9922d34b20e6c00472366291dd4412e6c5424f0d670e5",
+      "token": "0xdbb90631baf8305512088a1bbd9bb5c3d63769dd",
+      "createdAt": "2026-08-08T06:13:23Z",
+      "priceUsd": 0.99580238449023,
+      "volume24hUsd": 32.2299063752,
+      "liquidityUsd": 503040932.4179,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    }
+  ]
+}
