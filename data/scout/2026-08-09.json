@@ -1,0 +1,106 @@
+{
+  "date": "2026-08-09",
+  "at": "2026-08-09T08:06:12.819Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x9bd2ff87002070f31fe7de15a9584a099cb0aca1d2e6a6dbf62ffc98dc95920f",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 3,
+    "caution": 0,
+    "insufficientData": 1,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "OpenAI / USDC",
+      "pool": "0x36debe6e898b8b2f104cd23ced948ccb3f698585",
+      "token": "0x6b458b475695121b78b7ef8fa88a73973c6bcb07",
+      "createdAt": "2026-08-09T07:27:09Z",
+      "priceUsd": 0.000100973714809829,
+      "volume24hUsd": 17977408.6654414,
+      "liquidityUsd": 1324930.1068,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "concentration",
+          "liquidity"
+        ],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "HODIH / USDC",
+      "pool": "0xa527438ceace7df7314091cf60de17a070d720c7",
+      "token": "0x2914a59b8abc360662bda5c3de67548bb78f4cd9",
+      "createdAt": "2026-08-09T07:01:17Z",
+      "priceUsd": 0.00201468213996663,
+      "volume24hUsd": 30335.0064949076,
+      "liquidityUsd": 120422.7931,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "verified",
+          "liquidity"
+        ],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration"
+        ]
+      }
+    },
+    {
+      "name": "OFF / WETH",
+      "pool": "0xe764741b1fedef4c9525ffefa930e839030c9579",
+      "token": "0x2cef505e3f2da52b0c3b2a8a57bfc5ab110fe023",
+      "createdAt": "2026-08-09T07:26:53Z",
+      "priceUsd": 0.00000435056769619905,
+      "volume24hUsd": 5985.331517,
+      "liquidityUsd": 69555.3704,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "liquidity"
+        ],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration"
+        ]
+      }
+    },
+    {
+      "name": "XST / WETH 1%",
+      "pool": "0x101559cac048b7b0116899f449b655dd6e1e2dc5",
+      "token": "0x932c68749dd6df1104fa5077a92b2a3fab4d2412",
+      "createdAt": "2026-08-09T07:10:05Z",
+      "priceUsd": 0.000558780622611723,
+      "volume24hUsd": 1.0422701807,
+      "liquidityUsd": 447024.4453,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    }
+  ]
+}
