@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "AgentToll",
-    "version": "0.12.0",
+    "version": "0.13.0",
     "description": "Pay-per-call data APIs for AI agents. Paid endpoints return HTTP 402 with an x402 quote; pay $0.001-$0.008 in USDC on Base mainnet per call. No API keys. Onchain identity: agenttoll.base.eth.",
     "contact": {
       "name": "AgentToll",
@@ -66,7 +66,7 @@
     },
     "/api/price/{symbol}": {
       "get": {
-        "summary": "Spot price (USD) + 24h change for a crypto asset",
+        "summary": "Token price lookup: spot price in USD + 24h change for a crypto asset",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -116,7 +116,7 @@
     },
     "/api/gas": {
       "get": {
-        "summary": "Base network gas price and latest block, optionally costed for a transaction size",
+        "summary": "Base gas price check: gas price and latest block, optionally costed for a transaction size",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -165,7 +165,7 @@
     },
     "/api/trending": {
       "get": {
-        "summary": "Tokens trending across the market right now",
+        "summary": "Trending token scan: the tokens moving across the market right now",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -214,7 +214,7 @@
     },
     "/api/base/token/{address}": {
       "get": {
-        "summary": "Onchain USD price for any Base token by contract address",
+        "summary": "Base token price lookup by contract address: onchain USD price for any Base token",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -260,7 +260,7 @@
     },
     "/api/base/address/{address}": {
       "get": {
-        "summary": "Base address snapshot: ETH balance, tx count, contract or EOA",
+        "summary": "Base wallet lookup: primary basename, ETH balance, tx count, contract or EOA",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -306,7 +306,7 @@
     },
     "/api/base/trending": {
       "get": {
-        "summary": "Trending DEX pools on Base: price, volume, liquidity",
+        "summary": "Trending Base pool scan: price, volume, liquidity",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -356,7 +356,7 @@
     },
     "/api/base/radar": {
       "get": {
-        "summary": "New token radar: fresh Base pools that already hold real liquidity, spam filtered",
+        "summary": "New token radar on Base with a liquidity floor: fresh pools that already hold real liquidity, spam filtered",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -419,7 +419,7 @@
     },
     "/api/feargreed": {
       "get": {
-        "summary": "Crypto Fear & Greed index with yesterday comparison and optional daily history",
+        "summary": "Crypto market sentiment check: Fear & Greed index with yesterday comparison and optional daily history",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -468,7 +468,7 @@
     },
     "/api/brief": {
       "get": {
-        "summary": "One-call market brief: prices, Base gas, sentiment",
+        "summary": "Market brief in one call: prices, Base gas, sentiment",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -516,7 +516,7 @@
     },
     "/api/try/premium": {
       "get": {
-        "summary": "Turkish lira premium: implied vs official USD/TRY via a crypto cross-rate",
+        "summary": "Turkish lira crypto premium check: implied vs official USD/TRY via a crypto cross-rate",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -570,7 +570,7 @@
     },
     "/api/base/portfolio/{address}": {
       "get": {
-        "summary": "Everything a Base address holds, valued in USD: ETH plus its ERC-20 tokens, largest first",
+        "summary": "Wallet portfolio on Base: everything an address holds valued in USD, ETH plus its ERC-20 tokens, largest first",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -642,7 +642,7 @@
     },
     "/api/base/safety/{address}": {
       "get": {
-        "summary": "Automated safety checks for a Base token: honeypot, taxes, owner privileges, holder concentration, liquidity",
+        "summary": "Token safety check for a Base token - honeypot, rug and trap detection: simulated buy and sell, taxes, owner privileges, holder concentration, liquidity, deployer history",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -690,7 +690,7 @@
     },
     "/api/base/name/{nameOrAddress}": {
       "get": {
-        "summary": "Basename resolution both ways: a name returns its address, owner and text records; a 0x address returns its primary basename",
+        "summary": "Basename lookup both ways: a name returns its address, owner and text records; a 0x address returns its primary basename",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -737,7 +737,7 @@
     },
     "/api/watch/address/{address}": {
       "get": {
-        "summary": "New activity for a Base address since your cursor. The reply's `cursor` is what you pass as `since` next time.",
+        "summary": "Wallet activity watch: new activity for a Base address since your cursor. The reply's `cursor` is what you pass as `since` next time.",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -793,7 +793,7 @@
     },
     "/api/watch/radar": {
       "get": {
-        "summary": "Only the Base pools that appeared since your cursor",
+        "summary": "New pool watch: only the Base pools that appeared since your cursor",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -905,7 +905,7 @@
     },
     "/api/base/scout": {
       "get": {
-        "summary": "Radar and safety composed: today’s new Base pools above your liquidity floor, each with a safety verdict attached",
+        "summary": "New token scan with a safety verdict attached: today’s new Base pools above your liquidity floor, each already checked",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -968,7 +968,7 @@
     },
     "/api/base/radar/history": {
       "get": {
-        "summary": "A past day’s radar+safety snapshot, exactly as committed to public git the day it was taken, with the Base tx that paid for it",
+        "summary": "Past-day radar snapshot: exactly as committed to public git the day it was taken, with the Base tx that paid for it",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -1016,7 +1016,7 @@
     },
     "/api/base/scorecard": {
       "get": {
-        "summary": "The radar’s track record: tokens it surfaced grouped by the verdict they got then, valued at what they trade for now",
+        "summary": "Radar track record: tokens it surfaced grouped by the verdict they got then, valued at what they trade for now",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -1066,7 +1066,7 @@
     },
     "/api/base/fresh": {
       "get": {
-        "summary": "Uniswap v4 pools read straight off Base seconds after they exist, before any indexer has them",
+        "summary": "New pair scan seconds after launch: Uniswap v4 pools read straight off Base before any indexer has them",
         "x-payment-info": {
           "price": {
             "currency": "USD",
