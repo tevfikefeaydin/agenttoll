@@ -199,6 +199,10 @@
   #demo-out .bad { color: #FF8080; }
   #demo-out pre.mini { margin: 12px 0 0; padding: 14px 16px; font-size: .82rem; border-radius: 11px; }
   .demo-foot { margin-top: 16px; color: var(--muted); font-size: .85rem; max-width: 62ch; }
+  .run-link { margin-top: 22px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; font-size: .92rem; }
+  .run-link a { color: var(--blue-lit); font-weight: 600; text-decoration: none; border-bottom: 1px solid currentColor; padding-bottom: 1px; }
+  .run-link a:hover { color: #fff; }
+  .run-link span { color: var(--muted); }
 
   /* ---------- small screens ---------- */
   @media (max-width: 720px) {
@@ -325,6 +329,12 @@
         browser wallet holding a cent of USDC on Base — the same signature your agent would
         make, just done by hand.</p>
     </div>
+
+    <p class="run-link rv">
+      <a href="/run">Watch a full run that was already paid for →</a>
+      <span>A pool eight seconds old, a verdict on its token, and both settlement
+        transactions linked so you can check them.</span>
+    </p>
 
     <div class="two" style="margin-top:34px;">
       <div class="rv">
