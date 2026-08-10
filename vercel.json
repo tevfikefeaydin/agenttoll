@@ -1,5 +1,13 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "comment": "One service, one origin. The same deployment answers on three hosts, and directories that key off the URL counted us three times - fifteen records under the vercel host, one under www, eighteen under the apex, all describing the same twenty-one resources. Machine-facing surfaces now redirect permanently to the apex so a crawler sees one canonical origin. The HTML site is deliberately left reachable on the vercel host: the operator's corporate network intermittently intercepts .app domains, and that host is the fallback for reading the site at all.",
+  "redirects": [
+    { "source": "/:path*", "has": [{ "type": "host", "value": "www.agenttoll.app" }], "destination": "https://agenttoll.app/:path*", "permanent": true },
+    { "source": "/api/:path*", "has": [{ "type": "host", "value": "agenttoll-pi.vercel.app" }], "destination": "https://agenttoll.app/api/:path*", "permanent": true },
+    { "source": "/.well-known/:path*", "has": [{ "type": "host", "value": "agenttoll-pi.vercel.app" }], "destination": "https://agenttoll.app/.well-known/:path*", "permanent": true },
+    { "source": "/openapi.json", "has": [{ "type": "host", "value": "agenttoll-pi.vercel.app" }], "destination": "https://agenttoll.app/openapi.json", "permanent": true },
+    { "source": "/llms.txt", "has": [{ "type": "host", "value": "agenttoll-pi.vercel.app" }], "destination": "https://agenttoll.app/llms.txt", "permanent": true }
+  ],
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/index" },
     { "source": "/favicon.ico", "destination": "/icon.png" },
