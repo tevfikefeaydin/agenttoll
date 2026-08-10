@@ -10,6 +10,7 @@
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/index" },
     { "source": "/favicon.ico", "destination": "/icon.png" },
+    { "source": "/run", "destination": "/run.html" },
     { "source": "/terms", "destination": "/terms.html" },
     { "source": "/privacy", "destination": "/privacy.html" },
     { "source": "/legal", "destination": "/terms.html" },

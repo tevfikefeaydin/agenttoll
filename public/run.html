@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgentToll — one real run, start to finish</title>
+<meta name="description" content="The verbatim output of one real AgentToll run on Base mainnet: a pool eight seconds old, a high-risk verdict on its token, and both settlement transactions linked so you can verify them.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="AgentToll">
+<meta property="og:title" content="AgentToll — one real run, start to finish">
+<meta property="og:description" content="Not a mockup. The verbatim output of one real run on Base mainnet, with both settlement transactions linked for verification.">
+<meta property="og:url" content="https://agenttoll.app/run">
+<meta property="og:image" content="https://agenttoll.app/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="AgentToll — one real run, start to finish">
+<meta name="twitter:description" content="Not a mockup. The verbatim output of one real run on Base mainnet, with both settlement transactions linked for verification.">
+<meta name="twitter:image" content="https://agenttoll.app/og.png">
+<link rel="canonical" href="https://agenttoll.app/run">
+<link rel="icon" href="/icon.png" type="image/png">
+<style>
+  :root {
+    --ground: #F6F7F9;
+    --panel: #FFFFFF;
+    --terminal: #0C1017;
+    --terminal-text: #C9D2E0;
+    --ink: #12161F;
+    --ink-soft: #59637A;
+    --ink-faint: #8B93A6;
+    --rule: #E1E5EC;
+    --accent: #0B4CE0;
+    --accent-soft: #E8EEFD;
+    --pass: #0E7C5A;
+    --warn: #9A6206;
+    --fail: #C0342B;
+    --unknown: #6B7386;
+    --term-dim: #5C6883;
+    --term-bright: #F2F5FA;
+    --term-accent: #6BA5FF;
+    --shadow: 0 1px 2px rgba(18,22,31,.05), 0 12px 32px -12px rgba(18,22,31,.18);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground: #0A0D13;
+      --panel: #12171F;
+      --terminal: #05070B;
+      --terminal-text: #C3CDDC;
+      --ink: #E8ECF3;
+      --ink-soft: #98A2B6;
+      --ink-faint: #6B7488;
+      --rule: #222936;
+      --accent: #7AAAFF;
+      --accent-soft: #142138;
+      --pass: #3FBF8F;
+      --warn: #D9A02B;
+      --fail: #F0776C;
+      --unknown: #7C859A;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 32px -12px rgba(0,0,0,.7);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #0A0D13;
+    --panel: #12171F;
+    --terminal: #05070B;
+    --terminal-text: #C3CDDC;
+    --ink: #E8ECF3;
+    --ink-soft: #98A2B6;
+    --ink-faint: #6B7488;
+    --rule: #222936;
+    --accent: #7AAAFF;
+    --accent-soft: #142138;
+    --pass: #3FBF8F;
+    --warn: #D9A02B;
+    --fail: #F0776C;
+    --unknown: #7C859A;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 32px -12px rgba(0,0,0,.7);
+  }
+  :root[data-theme="light"] {
+    --ground: #F6F7F9;
+    --panel: #FFFFFF;
+    --terminal: #0C1017;
+    --terminal-text: #C9D2E0;
+    --ink: #12161F;
+    --ink-soft: #59637A;
+    --ink-faint: #8B93A6;
+    --rule: #E1E5EC;
+    --accent: #0B4CE0;
+    --accent-soft: #E8EEFD;
+    --pass: #0E7C5A;
+    --warn: #9A6206;
+    --fail: #C0342B;
+    --unknown: #6B7386;
+    --shadow: 0 1px 2px rgba(18,22,31,.05), 0 12px 32px -12px rgba(18,22,31,.18);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: clamp(20px, 5vw, 56px) clamp(16px, 4vw, 32px) 64px;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: ui-sans-serif, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+
+  /* ---- masthead ---- */
+  .eyebrow {
+    font-size: 11px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    font-weight: 600;
+    margin: 0 0 10px;
+  }
+  h1 {
+    font-size: clamp(28px, 5vw, 40px);
+    line-height: 1.12;
+    letter-spacing: -.022em;
+    font-weight: 640;
+    margin: 0 0 14px;
+    text-wrap: balance;
+  }
+  .standfirst {
+    margin: 0;
+    font-size: clamp(16px, 2.2vw, 18px);
+    color: var(--ink-soft);
+    max-width: 62ch;
+  }
+
+  /* ---- receipt strip ---- */
+  .receipt {
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    box-shadow: var(--shadow);
+    padding: 20px 22px;
+    display: grid;
+    gap: 16px;
+  }
+  .receipt-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 10px 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px dashed var(--rule);
+  }
+  .receipt-title {
+    font-size: 11px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .receipt-note { font-size: 13px; color: var(--ink-soft); margin-left: auto; }
+  .rows { display: grid; gap: 11px; }
+  .row {
+    display: grid;
+    grid-template-columns: minmax(120px, 168px) 1fr;
+    gap: 6px 18px;
+    align-items: baseline;
+    font-size: 13.5px;
+  }
+  .row dt {
+    color: var(--ink-faint);
+    font-size: 11px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .row dd {
+    margin: 0;
+    font-family: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+    word-break: break-all;
+  }
+  .row dd .label {
+    font-family: inherit;
+    color: var(--ink-soft);
+    font-size: 12.5px;
+  }
+  a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* ---- terminal ---- */
+  .terminal-shell {
+    background: var(--terminal);
+    border-radius: 6px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    border: 1px solid var(--rule);
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    background: rgba(255,255,255,.035);
+    border-bottom: 1px solid rgba(255,255,255,.07);
+  }
+  .dots { display: flex; gap: 6px; }
+  .dots i { width: 10px; height: 10px; border-radius: 50%; background: #39414F; display: block; }
+  .cmd {
+    font-family: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+    font-size: 12.5px;
+    color: var(--term-dim);
+  }
+  .controls { margin-left: auto; display: flex; gap: 8px; }
+  button {
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    padding: 5px 12px;
+    border-radius: 3px;
+    border: 1px solid rgba(255,255,255,.16);
+    background: rgba(255,255,255,.06);
+    color: #DCE3EE;
+    cursor: pointer;
+  }
+  button:hover { background: rgba(255,255,255,.13); }
+
+  pre.screen {
+    margin: 0;
+    padding: 22px clamp(14px, 3vw, 26px) 30px;
+    overflow-x: auto;
+    font-family: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+    font-size: clamp(11px, 1.65vw, 13.5px);
+    line-height: 1.72;
+    color: var(--terminal-text);
+    min-height: 60vh;
+    tab-size: 2;
+  }
+  pre.screen b { font-weight: 700; color: var(--term-bright); }
+  .l-rule   { color: #29323F; }
+  .l-beat   { color: var(--term-bright); font-weight: 700; }
+  .l-note   { color: var(--term-dim); font-style: italic; }
+  .l-key    { color: var(--term-bright); }
+  .l-pass    { color: #4FC79A; }
+  .l-warn    { color: #E0A93A; }
+  .l-fail    { color: #F2857A; }
+  .l-unknown { color: #79839A; }
+  pre.screen a { color: var(--term-accent); }
+  .cursor {
+    display: inline-block;
+    width: 8px;
+    height: 1.05em;
+    background: var(--term-accent);
+    vertical-align: -.18em;
+    animation: blink 1.05s steps(2, start) infinite;
+  }
+  @keyframes blink { to { visibility: hidden; } }
+  @media (prefers-reduced-motion: reduce) {
+    .cursor { animation: none; }
+  }
+
+  /* ---- closing ---- */
+  .after {
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 22px;
+    display: grid;
+    gap: 12px;
+  }
+  .after h2 {
+    margin: 0;
+    font-size: 12px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    font-weight: 700;
+  }
+  .after p { margin: 0; color: var(--ink-soft); font-size: 14.5px; max-width: 68ch; }
+  .after strong { color: var(--ink); font-weight: 620; }
+  footer {
+    color: var(--ink-faint);
+    font-size: 12.5px;
+    text-align: center;
+    padding-top: 6px;
+  }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Product demo · recorded run</p>
+    <h1>One real run of AgentToll, start to finish.</h1>
+    <p class="standfirst">
+      Not a mockup and not a re-enactment. This is the verbatim output of
+      <code>node scripts/demo.mjs</code> against the live service on Base mainnet.
+      It paid for the two calls it makes, and both settlements are on the chain —
+      the hashes below are links, so you can check them before you watch.
+    </p>
+  </header>
+
+  <section class="receipt" aria-label="What this run cost and where to verify it">
+    <div class="receipt-head">
+      <span class="receipt-title">Settlement receipt</span>
+      <span class="receipt-note">Base mainnet · 10 August 2026</span>
+    </div>
+    <dl class="rows">
+      <div class="row">
+        <dt>Paid from</dt>
+        <dd>0x29d7837A1c19890d2ab123999e9cf8BFE40985B0</dd>
+      </div>
+      <div class="row">
+        <dt>Paid to</dt>
+        <dd>0xE55359021a6a22d8385b827405991C56075f56F8 <span class="label">agenttoll.base.eth</span></dd>
+      </div>
+      <div class="row">
+        <dt>Call 1 — $0.004</dt>
+        <dd><a href="https://basescan.org/tx/0x497b3a3cf839872d046a8fd9822ab9557d3dcd64cb78166a2f631d1ebd9668cf" target="_blank" rel="noopener">0x497b3a3c…d9668cf</a> <span class="label">/api/base/fresh · block 49785675</span></dd>
+      </div>
+      <div class="row">
+        <dt>Call 2 — $0.003</dt>
+        <dd><a href="https://basescan.org/tx/0x1cb0c2edde23a2f51127a3b2e2907e98f07bead85806814596dcd2aa58f9e235" target="_blank" rel="noopener">0x1cb0c2ed…58f9e235</a> <span class="label">/api/base/safety · block 49785676</span></dd>
+      </div>
+      <div class="row">
+        <dt>Total</dt>
+        <dd>$0.007 USDC</dd>
+      </div>
+    </dl>
+  </section>
+
+  <div class="terminal-shell">
+    <div class="bar">
+      <span class="dots"><i></i><i></i><i></i></span>
+      <span class="cmd">node scripts/demo.mjs</span>
+      <span class="controls">
+        <button id="toggle" type="button">Pause</button>
+        <button id="restart" type="button">Replay</button>
+        <button id="skip" type="button">Show all</button>
+      </span>
+    </div>
+    <pre class="screen" id="screen" aria-live="polite"></pre>
+  </div>
+
+  <section class="after">
+    <h2>What you just watched</h2>
+    <p>
+      A pool <strong>eight seconds old</strong> was read straight off the Uniswap v4
+      PoolManager's own event log — before any indexer had it. Its token was then
+      checked and came back <strong>high-risk</strong>, because the contract source
+      is not published and its behaviour cannot be verified.
+    </p>
+    <p>
+      The restraint matters as much as the finding: on a token that young the public
+      sources have no holder or liquidity data, and the answer says so rather than
+      filling the gap. A token that cannot be verified is never reported as clear.
+    </p>
+    <p>
+      Every day's run is committed to public git with the transaction that paid for it, at
+      <a href="https://github.com/tevfikefeaydin/agenttoll/tree/main/data/scout" target="_blank" rel="noopener">data/scout</a> —
+      so a verdict cannot be quietly rewritten after the fact.
+    </p>
+  </section>
+
+  <footer>
+    20 paid endpoints · $0.001–$0.008 a call · USDC on Base via x402 · MIT ·
+    <a href="https://agenttoll.app" target="_blank" rel="noopener">agenttoll.app</a>
+  </footer>
+</div>
+
+<script src="/run.js"></script>
+</body>
+</html>
