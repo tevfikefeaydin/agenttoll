@@ -1,0 +1,26 @@
+name: Surfaces agree
+
+# The same fact is stated in the paywall config, the catalog, the manifest, the
+# OpenAPI spec, the MCP tool list and the site copy. Every hand-kept one of them
+# has fallen behind at least once without breaking anything, which is why the
+# drift survived so long. This makes a stale count fail the build instead.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - name: Counts and prices agree across surfaces
+        run: node scripts/consistency.mjs
+      - name: OpenAPI examples match the declarations
+        run: npx tsx scripts/openapi-examples.mjs --check
