@@ -1,0 +1,105 @@
+{
+  "date": "2026-08-12",
+  "at": "2026-08-12T08:44:15.331Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0xe8e3190ae4008a15866c0f7215a0f4e4c4004d249e4ab8545a99b8abd49bd542",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 1,
+    "caution": 3,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "OpenAI / USDC",
+      "pool": "0x301c2ea7489e9e520a9f173d860c2de9c256f5bd",
+      "token": "0xe07db5ccb5764c7dd276c67fa5f8f4e67e6b89bf",
+      "createdAt": "2026-08-12T08:00:23Z",
+      "priceUsd": 0.0102380115311482,
+      "volume24hUsd": 12007502.1263337,
+      "liquidityUsd": 9675892.9405,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "openhuman / WETH",
+      "pool": "0x464c5e5bd8c6d979ff8fa5c34be9a5b3592dd8a4",
+      "token": "0x364788d42fafbbecc53449d5812f629fae5f02d7",
+      "createdAt": "2026-08-12T08:25:13Z",
+      "priceUsd": 0.00000790272191863529,
+      "volume24hUsd": 3103.7384037246,
+      "liquidityUsd": 62892.3126,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "CRYPTO / WETH",
+      "pool": "0xaa0e14bea454fc97d30cbb9cfea0c3021e7f7c98c5c95bcfc3a85d29d577dc4b",
+      "token": "0xb70acb18465379b1653cd042bd04373ddc190e1c",
+      "createdAt": "2026-08-12T08:03:29Z",
+      "priceUsd": 2.1300437836111e-7,
+      "volume24hUsd": 232.0128772856,
+      "liquidityUsd": 20992.976,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "liquidity"
+        ],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "XSOLUTS / ZORA",
+      "pool": "0x53161323c1be37d4f1dfc97dd5749c339f79266bc109e3c09a6012f12b6bf4c4",
+      "token": "0xc9243249a0c83ef1b2f4c0fec45d02f044f2b15e",
+      "createdAt": "2026-08-12T08:23:47Z",
+      "priceUsd": 0.000383981140082921,
+      "volume24hUsd": 90.8947754703,
+      "liquidityUsd": 373338.0455,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    }
+  ]
+}
