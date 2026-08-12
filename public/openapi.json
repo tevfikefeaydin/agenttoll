@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "AgentToll",
-    "version": "0.13.0",
+    "version": "0.14.0",
     "description": "Pay-per-call data APIs for AI agents. Paid endpoints return HTTP 402 with an x402 quote; pay $0.001-$0.008 in USDC on Base mainnet per call. No API keys. Onchain identity: agenttoll.base.eth.",
     "contact": {
       "name": "AgentToll",
@@ -103,7 +103,19 @@
         ],
         "responses": {
           "200": {
-            "description": "Price data"
+            "description": "Price data",
+            "content": {
+              "application/json": {
+                "example": {
+                  "symbol": "eth",
+                  "id": "ethereum",
+                  "usd": 1867.28,
+                  "change24h": -0.1,
+                  "source": "coingecko",
+                  "at": "2026-08-05T13:31:57.070Z"
+                }
+              }
+            }
           },
           "400": {
             "description": "Invalid path or query parameter (not charged)"
@@ -152,7 +164,24 @@
         ],
         "responses": {
           "200": {
-            "description": "Gas data"
+            "description": "Gas data",
+            "content": {
+              "application/json": {
+                "example": {
+                  "chain": "base",
+                  "gasPriceWei": "6041753",
+                  "gasPriceGwei": 0.006041753,
+                  "latestBlock": 49573693,
+                  "estimate": {
+                    "gasLimit": 150000,
+                    "ethCost": 9.06263e-7,
+                    "usdCost": 0.001692,
+                    "ethUsd": 1867.28
+                  },
+                  "at": "2026-08-05T13:32:13.596Z"
+                }
+              }
+            }
           },
           "400": {
             "description": "Invalid query parameter (not charged)"
@@ -201,7 +230,25 @@
         ],
         "responses": {
           "200": {
-            "description": "Trending tokens"
+            "description": "Trending tokens",
+            "content": {
+              "application/json": {
+                "example": {
+                  "coins": [
+                    {
+                      "id": "hyperliquid",
+                      "symbol": "hype",
+                      "name": "Hyperliquid",
+                      "rank": 18,
+                      "usd": 22.4,
+                      "change24h": 3.1
+                    }
+                  ],
+                  "source": "coingecko",
+                  "at": "2026-08-05T13:31:58.678Z"
+                }
+              }
+            }
           },
           "400": {
             "description": "Invalid query parameter (not charged)"
@@ -247,7 +294,18 @@
         ],
         "responses": {
           "200": {
-            "description": "Token price"
+            "description": "Token price",
+            "content": {
+              "application/json": {
+                "example": {
+                  "chain": "base",
+                  "token": "0x4200000000000000000000000000000000000006",
+                  "usd": 1867.28,
+                  "source": "geckoterminal",
+                  "at": "2026-08-05T13:31:58.678Z"
+                }
+              }
+            }
           },
           "400": {
             "description": "Invalid path or query parameter (not charged)"
@@ -293,7 +351,20 @@
         ],
         "responses": {
           "200": {
-            "description": "Address info"
+            "description": "Address info",
+            "content": {
+              "application/json": {
+                "example": {
+                  "chain": "base",
+                  "address": "0xe553...56f8",
+                  "basename": "agenttoll.base.eth",
+                  "ethBalance": 0.0019,
+                  "txCount": 42,
+                  "isContract": false,
+                  "at": "2026-08-05T13:31:58.678Z"
+                }
+              }
+            }
           },
           "400": {
             "description": "Invalid path or query parameter (not charged)"
@@ -343,7 +414,26 @@
         ],
         "responses": {
           "200": {
-            "description": "Trending pools"
+            "description": "Trending pools",
+            "content": {
+              "application/json": {
+                "example": {
+                  "chain": "base",
+                  "pools": [
+                    {
+                      "name": "AERO / USDC",
+                      "pool": "0x6cdc...971d",
+                      "priceUsd": 0.4206,
+                      "volume24hUsd": 1118348.8,
+                      "change24hPct": 2.711,
+                      "liquidityUsd": 25358508.8
+                    }
+                  ],
+                  "source": "geckoterminal-trending",
+                  "at": "2026-08-05T13:31:58.678Z"
+                }
+              }
+            }
           },
           "400": {
             "description": "Invalid query parameter (not charged)"
@@ -406,7 +496,29 @@
         ],
         "responses": {
           "200": {
-            "description": "New pools, each carrying its token address so it can be passed straight to /api/base/safety"
+            "description": "New pools, each carrying its token address so it can be passed straight to /api/base/safety",
+            "content": {
+              "application/json": {
+                "example": {
+                  "chain": "base",
+                  "pools": [
+                    {
+                      "name": "BASED / ETH 1%",
+                      "pool": "0x2acb...cac0",
+                      "token": "0xb6bb786056c690e41b20a587573fd77aade2eb07",
+                      "createdAt": "2026-08-05T13:01:33Z",
+                      "priceUsd": 0.0000156,
+                      "volume24hUsd": 19071.46,
+                      "liquidityUsd": 14246.1
+                    }
+                  ],
+                  "minLiquidityUsd": 10000,
+                  "count": 1,
+                  "source": "geckoterminal-new-pools",
+                  "at": "2026-08-05T13:31:58.678Z"
+                }
+              }
+            }
           },
           "400": {
             "description": "Invalid query parameter (not charged)"
@@ -455,7 +567,25 @@
         ],
         "responses": {
           "200": {
-            "description": "Index"
+            "description": "Index",
+            "content": {
+              "application/json": {
+                "example": {
+                  "value": 27,
+                  "classification": "Fear",
+                  "yesterday": 25,
+                  "days": 7,
+                  "history": [
+                    {
+                      "date": "2026-08-05T00:00:00.000Z",
+                      "value": 27,
+                      "classification": "Fear"
+                    }
+                  ],
+                  "at": "2026-08-05T13:32:14.339Z"
+                }
+              }
+            }
           },
           "400": {
             "description": "Invalid query parameter (not charged)"
@@ -503,7 +633,31 @@
         ],
         "responses": {
           "200": {
-            "description": "Brief"
+            "description": "Brief",
+            "content": {
+              "application/json": {
+                "example": {
+                  "majors": {
+                    "eth": {
+                      "symbol": "eth",
+                      "usd": 1867.28,
+                      "change24h": -0.1
+                    }
+                  },
+                  "baseGas": {
+                    "chain": "base",
+                    "gasPriceGwei": 0.006,
+                    "latestBlock": 49573686
+                  },
+                  "sentiment": {
+                    "value": 27,
+                    "classification": "Fear",
+                    "yesterday": 25
+                  },
+                  "at": "2026-08-05T13:31:59.006Z"
+                }
+              }
+            }
           },
           "400": {
             "description": "Invalid query parameter (not charged)"
@@ -557,7 +711,20 @@
         ],
         "responses": {
           "200": {
-            "description": "Premium"
+            "description": "Premium",
+            "content": {
+              "application/json": {
+                "example": {
+                  "asset": "usdt",
+                  "assetUsd": 0.999318,
+                  "assetTry": 47.53,
+                  "impliedUsdTry": 47.5624,
+                  "officialUsdTry": 47.2891,
+                  "premiumPct": 0.578,
+                  "at": "2026-08-05T13:31:58.678Z"
+                }
+              }
+            }
           },
           "400": {
             "description": "Invalid query parameter (not charged)"
@@ -629,7 +796,40 @@
         ],
         "responses": {
           "200": {
-            "description": "Holdings, totals, and how many were hidden or could not be priced"
+            "description": "Holdings, totals, and how many were hidden or could not be priced",
+            "content": {
+              "application/json": {
+                "example": {
+                  "chain": "base",
+                  "address": "0x1985...5c87",
+                  "basename": null,
+                  "native": {
+                    "symbol": "ETH",
+                    "balance": 194.68,
+                    "priceUsd": 1868.57,
+                    "valueUsd": 363774.32
+                  },
+                  "tokens": [
+                    {
+                      "symbol": "CBBTC",
+                      "name": "Coinbase Wrapped BTC",
+                      "address": "0xcbb7...33bf",
+                      "balance": 5.673857,
+                      "priceUsd": 64198,
+                      "valueUsd": 364250.29
+                    }
+                  ],
+                  "totalUsd": 7143109.27,
+                  "tokenCount": 52,
+                  "shown": 1,
+                  "hiddenBelowFloor": 48,
+                  "unpriced": 0,
+                  "minValueUsd": 10000,
+                  "source": "blockscout",
+                  "at": "2026-08-05T13:31:58.678Z"
+                }
+              }
+            }
           },
           "400": {
             "description": "Invalid path or query parameter (not charged)"
@@ -677,7 +877,65 @@
         ],
         "responses": {
           "200": {
-            "description": "Verdict (clear, caution, high-risk or insufficient-data) plus every individual check"
+            "description": "Verdict (clear, caution, high-risk or insufficient-data) plus every individual check",
+            "content": {
+              "application/json": {
+                "example": {
+                  "chain": "base",
+                  "token": "0x940181a94a35a4569e4529a3cdfb74e38fd98631",
+                  "name": "Aerodrome",
+                  "symbol": "AERO",
+                  "verdict": "caution",
+                  "failed": [],
+                  "warnings": [
+                    "owner-powers",
+                    "liquidity"
+                  ],
+                  "unchecked": [],
+                  "checks": [
+                    {
+                      "id": "honeypot",
+                      "status": "pass",
+                      "detail": "A simulated buy and sell both succeeded"
+                    },
+                    {
+                      "id": "taxes",
+                      "status": "pass",
+                      "detail": "Buy tax 0%, sell tax 0%"
+                    },
+                    {
+                      "id": "owner-powers",
+                      "status": "warn",
+                      "detail": "Owner can: owner can mint new supply"
+                    },
+                    {
+                      "id": "deployer",
+                      "status": "pass",
+                      "detail": "The deployer is a wallet with 731 transactions and holds 0.12094 ETH"
+                    }
+                  ],
+                  "deployer": {
+                    "address": "0xe83f922c34a1...",
+                    "isContract": false,
+                    "txCount": 731,
+                    "balanceEth": 0.12094,
+                    "firstSeen": null,
+                    "ageHours": null,
+                    "flaggedScam": false
+                  },
+                  "holderCount": 748566,
+                  "listedOnCex": [
+                    "Coinbase"
+                  ],
+                  "sources": [
+                    "goplus",
+                    "honeypot.is"
+                  ],
+                  "disclaimer": "Automated checks against public data, not investment advice. Passing every check does not make a token safe.",
+                  "at": "2026-08-05T13:31:58.678Z"
+                }
+              }
+            }
           },
           "400": {
             "description": "Invalid path or query parameter (not charged)"
@@ -724,7 +982,19 @@
         ],
         "responses": {
           "200": {
-            "description": "Resolution result"
+            "description": "Resolution result",
+            "content": {
+              "application/json": {
+                "example": {
+                  "query": "agenttoll.base.eth",
+                  "name": "agenttoll.base.eth",
+                  "address": "0xe553...56f8",
+                  "resolver": "0x426fA03f...",
+                  "records": {},
+                  "at": "2026-08-05T13:31:58.678Z"
+                }
+              }
+            }
           },
           "400": {
             "description": "Invalid path or query parameter (not charged)"
@@ -780,7 +1050,29 @@
         ],
         "responses": {
           "200": {
-            "description": "Events since the cursor"
+            "description": "Events since the cursor",
+            "content": {
+              "application/json": {
+                "example": {
+                  "chain": "base",
+                  "address": "0xe553...56f8",
+                  "since": "2026-08-05T08:40:01Z",
+                  "count": 1,
+                  "events": [
+                    {
+                      "hash": "0x4893...3c91",
+                      "at": "2026-08-05T12:10:44Z",
+                      "direction": "in",
+                      "counterparty": "0x5f87...6f78",
+                      "ethValue": 0,
+                      "method": "transferWithAuthorization"
+                    }
+                  ],
+                  "cursor": "2026-08-05T12:10:44Z",
+                  "at": "2026-08-05T13:31:58.678Z"
+                }
+              }
+            }
           },
           "400": {
             "description": "Invalid path or query parameter (not charged)"
@@ -827,7 +1119,29 @@
         ],
         "responses": {
           "200": {
-            "description": "New pools since the cursor"
+            "description": "New pools since the cursor",
+            "content": {
+              "application/json": {
+                "example": {
+                  "chain": "base",
+                  "since": "2026-08-05T08:40:01Z",
+                  "count": 1,
+                  "pools": [
+                    {
+                      "name": "BASED / ETH 1%",
+                      "pool": "0x2acb...cac0",
+                      "token": "0xb6bb786056c690e41b20a587573fd77aade2eb07",
+                      "createdAt": "2026-08-05T13:01:33Z",
+                      "priceUsd": 0.0000156,
+                      "volume24hUsd": 19071.46,
+                      "liquidityUsd": 14246.1
+                    }
+                  ],
+                  "cursor": "2026-08-05T13:01:33Z",
+                  "at": "2026-08-05T13:31:58.678Z"
+                }
+              }
+            }
           },
           "400": {
             "description": "Invalid path or query parameter (not charged)"
@@ -892,7 +1206,21 @@
         ],
         "responses": {
           "200": {
-            "description": "Alert state"
+            "description": "Alert state",
+            "content": {
+              "application/json": {
+                "example": {
+                  "symbol": "eth",
+                  "usd": 1867.28,
+                  "ref": 1900,
+                  "changePct": -1.7221,
+                  "thresholdPct": 2,
+                  "triggered": false,
+                  "direction": "down",
+                  "at": "2026-08-05T13:31:58.678Z"
+                }
+              }
+            }
           },
           "400": {
             "description": "Invalid path or query parameter (not charged)"
@@ -955,7 +1283,48 @@
         ],
         "responses": {
           "200": {
-            "description": "New pools with safety verdicts and a summary"
+            "description": "New pools with safety verdicts and a summary",
+            "content": {
+              "application/json": {
+                "example": {
+                  "chain": "base",
+                  "minLiquidityUsd": 25000,
+                  "pools": [
+                    {
+                      "name": "SAAS / WETH 1%",
+                      "pool": "0x1c3a...9d2e",
+                      "token": "0x74bb95da6692c34ee9755ac87ea10366653dbc77",
+                      "createdAt": "2026-08-06T09:12:44Z",
+                      "priceUsd": 0.0021,
+                      "volume24hUsd": 88410.2,
+                      "liquidityUsd": 445120.5,
+                      "safety": {
+                        "verdict": "high-risk",
+                        "failed": [
+                          "liquidity"
+                        ],
+                        "warnings": [
+                          "creator-stake"
+                        ],
+                        "unchecked": []
+                      }
+                    }
+                  ],
+                  "summary": {
+                    "found": 3,
+                    "checked": 3,
+                    "unchecked": 0,
+                    "highRisk": 1,
+                    "caution": 2,
+                    "insufficientData": 0,
+                    "clear": 0
+                  },
+                  "source": "geckoterminal-new-pools",
+                  "disclaimer": "Automated checks against public data, not investment advice.",
+                  "at": "2026-08-06T10:00:00.000Z"
+                }
+              }
+            }
           },
           "400": {
             "description": "Invalid query parameter (not charged)"
@@ -1003,7 +1372,57 @@
         ],
         "responses": {
           "200": {
-            "description": "The snapshot plus provenance links (git commit, raw file, settlement tx)"
+            "description": "The snapshot plus provenance links (git commit, raw file, settlement tx)",
+            "content": {
+              "application/json": {
+                "example": {
+                  "chain": "base",
+                  "date": "2026-08-06",
+                  "at": "2026-08-06T10:57:00.000Z",
+                  "settlement": "0x9c41...b02a",
+                  "summary": {
+                    "found": 3,
+                    "checked": 3,
+                    "unchecked": 0,
+                    "highRisk": 1,
+                    "caution": 2,
+                    "insufficientData": 0,
+                    "clear": 0
+                  },
+                  "pools": [
+                    {
+                      "name": "openhuman / WETH",
+                      "pool": "0x74bb...dc77",
+                      "token": "0x74bb95da6692c34ee9755ac87ea10366653dbc77",
+                      "createdAt": "2026-08-05T13:02:05Z",
+                      "priceUsd": 0.0000047,
+                      "liquidityUsd": 68437,
+                      "volume24hUsd": 5.4,
+                      "safety": {
+                        "verdict": "high-risk",
+                        "failed": [
+                          "liquidity"
+                        ],
+                        "warnings": [
+                          "creator-stake"
+                        ],
+                        "unchecked": []
+                      }
+                    }
+                  ],
+                  "provenance": {
+                    "commit": "https://github.com/tevfikefeaydin/agenttoll/commits/main/data/scout/2026-08-06.json",
+                    "raw": "https://raw.githubusercontent.com/.../2026-08-06.json",
+                    "paidWith": "https://basescan.org/tx/0x9c41...b02a"
+                  },
+                  "availableDates": {
+                    "first": "2026-08-06",
+                    "last": "2026-08-06",
+                    "count": 1
+                  }
+                }
+              }
+            }
           },
           "400": {
             "description": "Invalid or unavailable date (not charged)"
@@ -1053,7 +1472,57 @@
         ],
         "responses": {
           "200": {
-            "description": "Cohort stats and per-token rows, each verifiable against a dated git commit"
+            "description": "Cohort stats and per-token rows, each verifiable against a dated git commit",
+            "content": {
+              "application/json": {
+                "example": {
+                  "chain": "base",
+                  "windowDays": 7,
+                  "trackRecord": {
+                    "daysCovered": 7,
+                    "firstSnapshot": "2026-08-06",
+                    "lastSnapshot": "2026-08-12"
+                  },
+                  "cohorts": {
+                    "high-risk": {
+                      "count": 5,
+                      "liquidityGone": 4,
+                      "medianChangePct": -97.2
+                    },
+                    "caution": {
+                      "count": 9,
+                      "liquidityGone": 2,
+                      "medianChangePct": -41.5
+                    },
+                    "insufficient-data": {
+                      "count": 2,
+                      "liquidityGone": 0,
+                      "medianChangePct": -12.3
+                    },
+                    "clear": {
+                      "count": 1,
+                      "liquidityGone": 0,
+                      "medianChangePct": 8.4
+                    }
+                  },
+                  "tokens": [
+                    {
+                      "token": "0x74bb...dc77",
+                      "name": "openhuman / WETH",
+                      "flaggedOn": "2026-08-06",
+                      "verdictThen": "high-risk",
+                      "liquidityThenUsd": 68437,
+                      "liquidityNowUsd": 3,
+                      "priceChangePct": -99.1,
+                      "liquidityGone": true
+                    }
+                  ],
+                  "methodology": "Each token judged from its first appearance: verdict and price then, deepest-pool price now. Snapshots are dated git commits.",
+                  "disclaimer": "A track record, not investment advice.",
+                  "at": "2026-08-12T10:00:00.000Z"
+                }
+              }
+            }
           },
           "400": {
             "description": "Invalid query parameter (not charged)"
@@ -1127,7 +1596,48 @@
         ],
         "responses": {
           "200": {
-            "description": "Pools with the launched token, funding status, and hook provenance"
+            "description": "Pools with the launched token, funding status, and hook provenance",
+            "content": {
+              "application/json": {
+                "example": {
+                  "chain": "base",
+                  "scope": "uniswap-v4",
+                  "windowMinutes": 10,
+                  "headBlock": 49648349,
+                  "pools": [
+                    {
+                      "poolId": "0xb2417a41cd75...",
+                      "protocol": "uniswap-v4",
+                      "token": "0x47d4126cb8...",
+                      "tokenBasis": "quote-asset",
+                      "pair": [
+                        "0x4200000000000000000000000000000000000006",
+                        "0x47d4126cb8..."
+                      ],
+                      "quote": "0x4200000000000000000000000000000000000006",
+                      "quoteSymbol": "WETH",
+                      "block": 49648342,
+                      "createdAt": "2026-08-07T09:41:12.000Z",
+                      "ageSeconds": 14,
+                      "funded": true,
+                      "hook": "0xbdf938149a...",
+                      "hookPools": 21,
+                      "feeMode": "dynamic",
+                      "feeBps": null
+                    }
+                  ],
+                  "summary": {
+                    "found": 10,
+                    "funded": 10,
+                    "bespokeHooks": 0,
+                    "shown": 10
+                  },
+                  "method": "Read from the Uniswap v4 PoolManager's own Initialize log on Base...",
+                  "notMeasured": "USD liquidity - v4 keeps every pool's tokens in one singleton...",
+                  "at": "2026-08-07T09:41:26.000Z"
+                }
+              }
+            }
           },
           "400": {
             "description": "Invalid query parameter (not charged)"
