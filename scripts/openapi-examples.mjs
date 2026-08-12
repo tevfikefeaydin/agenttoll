@@ -63,8 +63,13 @@ if (missing.length) console.error(`declared but absent from the spec: ${missing.
 if (uncovered.length) console.error(`paid operations still without a 200 example: ${uncovered.join(", ")}`);
 
 if (CHECK) {
+  // Compare content, not line endings. Git hands Windows checkouts CRLF while
+  // this script writes LF, so a byte comparison called every Windows working
+  // copy out of date and would have failed for a difference that does not
+  // exist once the file is parsed.
+  const norm = (s) => s.replace(/\r\n/g, "\n");
   const current = readFileSync(SPEC, "utf8");
-  const drifted = current !== after;
+  const drifted = norm(current) !== norm(after);
   console.log(drifted ? "openapi.json is out of date — run scripts/openapi-examples.mjs" : `openapi.json is current (${filled} examples)`);
   process.exit(drifted || missing.length || uncovered.length ? 1 : 0);
 }
