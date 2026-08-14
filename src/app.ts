@@ -99,21 +99,57 @@ app.use((req, res, next) => {
   next();
 });
 
-// Light per-IP rate limit for the free endpoints (paid ones are gated by payment
-// itself). Per-instance only — Vercel's platform DDoS protection sits in front.
-const freeHits = new Map<string, { n: number; reset: number }>();
-app.use((req, res, next) => {
-  if (!["/api/health", "/api/catalog", "/api/demo", "/api/stats", "/.well-known/x402", "/.well-known/agent-card.json"].includes(req.path)) return next();
-  const ip = req.ip ?? "?";
+// Two per-IP ceilings a minute wide. Per-instance only — Vercel's platform
+// DDoS protection sits in front of this, and each serverless instance keeps its
+// own counter, so treat both numbers as an upper bound rather than a promise.
+//
+// Free endpoints get the tight one: they spend upstream quota and nobody paid
+// for the answer.
+//
+// Paid endpoints used to have no ceiling at all, on the reasoning that payment
+// is the gate. Payment is a gate, but a cheap one: at $0.001 a call, a few
+// dollars a minute is enough to exhaust the upstreams' free tiers
+// (GeckoTerminal allows us ~30 requests a minute), and then the callers paying
+// honestly get the degraded service. So paid traffic gets a ceiling too, set
+// far above what any real agent does — a caller who trips it is not using the
+// API, they are draining what it depends on.
+const FREE_PATHS = [
+  "/api/health",
+  "/api/catalog",
+  "/api/demo",
+  "/api/stats",
+  "/.well-known/x402",
+  "/.well-known/agent-card.json",
+];
+const FREE_PER_MINUTE = 60;
+const PAID_PER_MINUTE = 600;
+
+const hits = new Map<string, { n: number; reset: number }>();
+
+/** Counts one request against a per-minute bucket; true when it goes over. */
+function overLimit(key: string, max: number): boolean {
   const now = Date.now();
-  const slot = freeHits.get(ip);
+  const slot = hits.get(key);
   if (!slot || slot.reset < now) {
-    if (freeHits.size > 5000) freeHits.clear();
-    freeHits.set(ip, { n: 1, reset: now + 60_000 });
-    return next();
+    if (hits.size > 5000) hits.clear();
+    hits.set(key, { n: 1, reset: now + 60_000 });
+    return false;
   }
-  if (++slot.n > 60) {
-    res.status(429).json({ error: "Rate limited. Paid endpoints are not rate limited." });
+  return ++slot.n > max;
+}
+
+app.use((req, res, next) => {
+  const metered = req.path.startsWith("/api/") || req.path.startsWith("/.well-known/");
+  if (!metered) return next();
+
+  const free = FREE_PATHS.includes(req.path);
+  const max = free ? FREE_PER_MINUTE : PAID_PER_MINUTE;
+  // Separate buckets, so a burst of free calls cannot lock out paid ones.
+  if (overLimit(`${free ? "free" : "paid"}:${req.ip ?? "?"}`, max)) {
+    res.setHeader("Retry-After", "60");
+    res.status(429).json({
+      error: `Rate limited — at most ${max} calls a minute per IP on this endpoint. Retry in a minute.`,
+    });
     return;
   }
   next();

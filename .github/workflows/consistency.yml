@@ -11,6 +11,11 @@ on:
   pull_request:
   workflow_dispatch:
 
+# This job only reads the checkout and runs two scripts over it. Pull requests
+# run untrusted code by definition, so don't hand them a token that can write.
+permissions:
+  contents: read
+
 jobs:
   check:
     runs-on: ubuntu-latest
