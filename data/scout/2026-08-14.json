@@ -1,0 +1,105 @@
+{
+  "date": "2026-08-14",
+  "at": "2026-08-14T08:41:59.097Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0xf82f562e17489119616cedb36673b155fbd1500de70efd732ed80a2b04764968",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 0,
+    "caution": 4,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "HAYLORD / WETH",
+      "pool": "0x50b690c440cf1462f253d17e8e2e61ac297dcc7d",
+      "token": "0x08753bfadb137d7c0d92aa8db085d2a1378fb052",
+      "createdAt": "2026-08-14T08:28:13Z",
+      "priceUsd": 0.00000408842792646513,
+      "volume24hUsd": 1647.702559,
+      "liquidityUsd": 59497.0101,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "SOAF / WETH",
+      "pool": "0xeaf56566a14856fe038759f4fe94544ea3d3cc349c36dfa15cbabe9dafd0d736",
+      "token": "0x19eadbc295bc6bcec1c2e243514c2912ce7f2436",
+      "createdAt": "2026-08-14T06:39:57Z",
+      "priceUsd": 0.0000932162051464477,
+      "volume24hUsd": 141.5288770553,
+      "liquidityUsd": 91460.2147,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "AFOS / WETH",
+      "pool": "0xfb02fe75ed4bb534a4a5d69fcc266903755be169096ca107ebc41bfd1919f138",
+      "token": "0x8d1636004297fd2ef60adaedc03d09df858d7461",
+      "createdAt": "2026-08-14T06:33:31Z",
+      "priceUsd": 0.0000867780313388247,
+      "volume24hUsd": 69.8074825505,
+      "liquidityUsd": 85586.5287,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "ASOF / WETH",
+      "pool": "0x612af2afae0294409f76cee4784662ddd79cedfbb213727308f1611ecee4ca23",
+      "token": "0x76ec08a1a940c507313d0361ff66d41bf5151734",
+      "createdAt": "2026-08-14T06:27:31Z",
+      "priceUsd": 0.0000861232788706579,
+      "volume24hUsd": 63.5715176309,
+      "liquidityUsd": 84911.8651,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    }
+  ]
+}
