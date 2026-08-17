@@ -1,0 +1,107 @@
+{
+  "date": "2026-08-17",
+  "at": "2026-08-17T08:05:11.114Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x48b53a4a5857b47ab8ae6f3b03b5b75da218321ec3859b8e0037fc19adf420fe",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 1,
+    "caution": 3,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "BASEDOG / ETH 0.3%",
+      "pool": "0xcc4595e82a15959d82685cd595cebe3d26df23741e0d633173b3e0a21d165f99",
+      "token": "0xb200000000000000000000cc0ea80ba1b790e7c5",
+      "createdAt": "2026-08-17T07:30:49Z",
+      "priceUsd": 0.0000280840891575753,
+      "volume24hUsd": 19607.8963514003,
+      "liquidityUsd": 19965.8142,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "BALD / ETH 0.3%",
+      "pool": "0xa9bc9dace182df2ed88522846762974947a865b2c5feb5804cb5596c68fbf7a3",
+      "token": "0xb200000000000000000000b32dd0ea1cce95e09f",
+      "createdAt": "2026-08-17T07:30:59Z",
+      "priceUsd": 0.0000245948520393674,
+      "volume24hUsd": 19422.7046686425,
+      "liquidityUsd": 20227.4272,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "Panda / WETH",
+      "pool": "0x1f00a5a66094d99f3a4432f687c50f706d29c6d6",
+      "token": "0x25e0c5ef1c12a893be1ca7a20f7ef76166354bfc",
+      "createdAt": "2026-08-17T07:48:11Z",
+      "priceUsd": 0.00000431725168896383,
+      "volume24hUsd": 2183.070764,
+      "liquidityUsd": 61361.2983,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "liquidity"
+        ],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration"
+        ]
+      }
+    },
+    {
+      "name": "WWR / WETH",
+      "pool": "0x6d340781f610b15221045ea3a2584ec3e65ac2ee2c32fe34132dc9c96224cf4e",
+      "token": "0xd4207c2c4f6a8230f9b6ae5c251caa164908826e",
+      "createdAt": "2026-08-17T07:46:59Z",
+      "priceUsd": 0.000126809285398487,
+      "volume24hUsd": 7.1531850101,
+      "liquidityUsd": 124724.3077,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    }
+  ]
+}
