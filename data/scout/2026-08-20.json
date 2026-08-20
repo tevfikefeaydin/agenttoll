@@ -1,0 +1,100 @@
+{
+  "date": "2026-08-20",
+  "at": "2026-08-20T08:02:20.076Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x372a3dbef3f44c2da4303526d5d26f080a2c12de1930d306576375d729bc84fa",
+  "summary": {
+    "found": 4,
+    "checked": 3,
+    "unchecked": 1,
+    "highRisk": 2,
+    "caution": 1,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "owl1 / ETH 0.05%",
+      "pool": "0xc3cf896730d2e9ee4b18c02d6a70d319c945489beaaf383b500ea62abdb4d5bb",
+      "token": "0xdb1cec303282f316e2118520cb18f07868d03465",
+      "createdAt": "2026-08-20T07:34:37Z",
+      "priceUsd": 4.08919516511871e-7,
+      "volume24hUsd": 70765.2075177665,
+      "liquidityUsd": 20892.149,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "verified"
+        ],
+        "warnings": [
+          "honeypot",
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "ETH / USDC",
+      "pool": "0x472233b192094ee5409d0b2ea8979eb7efb8ea2567495b78c01a5bb334451b26",
+      "token": "0x0000000000000000000000000000000000000000",
+      "createdAt": "2026-08-20T07:39:31Z",
+      "priceUsd": 2249.22,
+      "volume24hUsd": 41758.0828532189,
+      "liquidityUsd": 113964.1537,
+      "safety": null
+    },
+    {
+      "name": "CHARM / WETH",
+      "pool": "0xd50675a073372d88176f49904fe2764046517fd366e9ba3aa29c9ed5bcbd2536",
+      "token": "0x4eb2fe751e7d64d60f6b23e7c9344d9864f10ba3",
+      "createdAt": "2026-08-20T07:35:23Z",
+      "priceUsd": 1.14099303581496e-7,
+      "volume24hUsd": 12035.0750813035,
+      "liquidityUsd": 18352.3055,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "verified"
+        ],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "TB / ETH 0.3%",
+      "pool": "0x39764ddf188211d8fe726ecc3f709d4f5daecac2188eac64b52b2c0e86c877f7",
+      "token": "0xb2000000000000000000005e0167608c0ca5d2a9",
+      "createdAt": "2026-08-20T07:41:57Z",
+      "priceUsd": 0.0000200461557388376,
+      "volume24hUsd": 10385.8447231762,
+      "liquidityUsd": 17031.3188,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    }
+  ]
+}
