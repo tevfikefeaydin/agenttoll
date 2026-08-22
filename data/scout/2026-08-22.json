@@ -1,0 +1,110 @@
+{
+  "date": "2026-08-22",
+  "at": "2026-08-22T07:51:54.414Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0xf0859f5ff0586d5bec7b8b6c0d5c27f9af8d9f4ff8969ead056023034bd2c1e1",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 1,
+    "caution": 3,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "TREX / ETH 0.05%",
+      "pool": "0xa18f350a18caf53dd0fa6fb43dc5f66f206efcab3b7600bba886205bb5c4ae8d",
+      "token": "0x3d4b0f92893ea02bf4eff5d5ba19e3adc4b11505",
+      "createdAt": "2026-08-22T07:27:29Z",
+      "priceUsd": 4.03035568293142e-7,
+      "volume24hUsd": 81666.2065092617,
+      "liquidityUsd": 25227.7917,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot",
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "TREX / GOOGLc",
+      "pool": "0x0400ff85b1e89ca75dbe3c09291b811a618f818f133f82d0def8103ae43f06e9",
+      "token": "0xb20000000000000000000099776e0186dc8b0701",
+      "createdAt": "2026-08-22T07:11:25Z",
+      "priceUsd": 0.0000224711687633496,
+      "volume24hUsd": 62711.3012014585,
+      "liquidityUsd": 16021.5104,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "liquidity"
+        ],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "BASELAPTOP / ETH 0.3%",
+      "pool": "0xb18c46f0742e988440ab94baa90d75e7704edfba3f3f2baa88c678d6c0202228",
+      "token": "0xb200000000000000000000448f9920115238990a",
+      "createdAt": "2026-08-22T07:43:13Z",
+      "priceUsd": 0.0000189544657356584,
+      "volume24hUsd": 6521.6262236431,
+      "liquidityUsd": 16286.4253,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "BlueTick / ETH 0.3%",
+      "pool": "0xaeb54be638d59e78eaabdce4bc8187525c52879d6e514b134b30e4498ba95820",
+      "token": "0xb2000000000000000000005b9d839c171a63d5d8",
+      "createdAt": "2026-08-22T07:43:17Z",
+      "priceUsd": 0.0000175509657144513,
+      "volume24hUsd": 5002.9911398449,
+      "liquidityUsd": 15176.7259,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    }
+  ]
+}
