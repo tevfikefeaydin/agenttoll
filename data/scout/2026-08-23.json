@@ -1,0 +1,100 @@
+{
+  "date": "2026-08-23",
+  "at": "2026-08-23T07:53:40.714Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x7be3ac93ed674d5dcbea8e22859b5a0772f4d0caabaf4f0cccbd5c2784be5b46",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 1,
+    "caution": 1,
+    "insufficientData": 2,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "AEYE / ETH 0.3%",
+      "pool": "0x3e98a91933f1b1194572fee0a986d20969750d917d955cc7089a73e71389b6e4",
+      "token": "0xb200000000000000000000d82d1d3336d7eb12b2",
+      "createdAt": "2026-08-23T07:41:53Z",
+      "priceUsd": 0.0000233166393844512,
+      "volume24hUsd": 7145.2995215125,
+      "liquidityUsd": 17377.5244,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "liquidity"
+        ],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "BASECITY / ETH 0.3%",
+      "pool": "0x9e55d26a2dac5a0fa3d0d05aa7a573a550cd112a6cd1874d9eea5472f91d7977",
+      "token": "0xb2000000000000000000007daf8a7729f76fd001",
+      "createdAt": "2026-08-23T07:42:03Z",
+      "priceUsd": 0.0000176314187531998,
+      "volume24hUsd": 5435.2591059559,
+      "liquidityUsd": 15822.316,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "NOK / WETH",
+      "pool": "0x30940ea899c41909ab4e1ce4e15fcf7d13b7eaa7",
+      "token": "0xd9c672a9f7cf266aa7fdda3ab67d210e7f1bd2c9",
+      "createdAt": "2026-08-23T07:17:07Z",
+      "priceUsd": 0.000487896237415466,
+      "volume24hUsd": 3437.2201410426,
+      "liquidityUsd": 18587.9539,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "concentration"
+        ]
+      }
+    },
+    {
+      "name": "MRNA / WETH",
+      "pool": "0x17e9001bfcf193e1b003e102b1583d5d18ec0b57",
+      "token": "0xfc13cf2c9192c2717a5ead384aa00dc5647c569f",
+      "createdAt": "2026-08-23T07:22:37Z",
+      "priceUsd": 0.00000129029172968933,
+      "volume24hUsd": 3278.7811224094,
+      "liquidityUsd": 17642.0221,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "concentration"
+        ]
+      }
+    }
+  ]
+}
