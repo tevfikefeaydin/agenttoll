@@ -1,0 +1,111 @@
+{
+  "date": "2026-08-24",
+  "at": "2026-08-24T08:09:36.120Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0xb11fa26b827f4151faadcc5bfbd468d923381f7def86260c9d80b988f92ce9c4",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 2,
+    "caution": 2,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "Basecat / USDC",
+      "pool": "0xf004ac3ba1aa538facbd2290c2d72186b512b135",
+      "token": "0x0aa9d7af5cc30abfd402cc0360d727f111fbab07",
+      "createdAt": "2026-08-24T07:43:27Z",
+      "priceUsd": 0.0000494171047080354,
+      "volume24hUsd": 16760578.968198,
+      "liquidityUsd": 3643040.9808,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "concentration",
+          "liquidity"
+        ],
+        "warnings": [
+          "honeypot",
+          "creator-stake"
+        ],
+        "unchecked": [
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "Basekit / WETH 0.05%",
+      "pool": "0xc9ae7e7d3ddb70e3cafcaccaa55e2ff8a28986a00d676945194738d2fce8f4cc",
+      "token": "0x06ae0fa814d583f4f0a6a22335c96004fd808ba3",
+      "createdAt": "2026-08-24T07:58:39Z",
+      "priceUsd": 6.02499930363715e-7,
+      "volume24hUsd": 126914.744038258,
+      "liquidityUsd": 42797.4671,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot",
+          "creator-stake"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "BALL / ETH 0.3%",
+      "pool": "0xcc4e28e3f5de8c68965d108dd945866cda20fd3bcd4b57b9f6a00b389522977a",
+      "token": "0xb20000000000000000000075aebbc16a183dd5f2",
+      "createdAt": "2026-08-24T07:35:09Z",
+      "priceUsd": 0.0000404943881401491,
+      "volume24hUsd": 29156.9935790195,
+      "liquidityUsd": 29326.7798,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "liquidity"
+        ],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "SNIPERJAK / ETH 0.3%",
+      "pool": "0x155f99f169a22fd0d5f31ca2410d489db83954ae05e864892f3f510d098e0dd7",
+      "token": "0xb2000000000000000000005a86aad3b0f662a8b6",
+      "createdAt": "2026-08-24T07:37:33Z",
+      "priceUsd": 0.0000327145372984785,
+      "volume24hUsd": 22770.2720128731,
+      "liquidityUsd": 26220.9967,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    }
+  ]
+}
