@@ -90,7 +90,7 @@ the ones that matter fall through to a backup rather than failing:
 |---|---|---|
 | Asset prices | CoinGecko | Binance → Coinbase |
 | Base token price | GeckoTerminal | DexScreener |
-| Base RPC (gas, address) | mainnet.base.org | publicnode → llamarpc |
+| Base RPC (gas, address) | mainnet.base.org | publicnode → meowrpc |
 | Portfolio holdings | Blockscout | Multicall3 onchain + DefiLlama |
 | Token safety | GoPlus + honeypot.is + deployer (Blockscout & RPC) | any one alone, with the rest reported as unchecked |
 

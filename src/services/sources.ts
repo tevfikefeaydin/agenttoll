@@ -71,7 +71,7 @@ export async function blockscoutFetch(
 const BASE_RPCS = [
   "https://mainnet.base.org",
   "https://base-rpc.publicnode.com",
-  "https://base.llamarpc.com",
+  "https://base.meowrpc.com",
 ];
 
 export async function baseRpc<T>(method: string, params: unknown[] = []): Promise<T> {

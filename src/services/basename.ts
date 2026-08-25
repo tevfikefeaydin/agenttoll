@@ -19,7 +19,7 @@ const client = createPublicClient({
   transport: fallback([
     http("https://mainnet.base.org"),
     http("https://base-rpc.publicnode.com"),
-    http("https://base.llamarpc.com"),
+    http("https://base.meowrpc.com"),
   ]),
 });
 
