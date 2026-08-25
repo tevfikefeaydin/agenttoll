@@ -42,6 +42,31 @@ export async function fetchJsonRetrying(
   }
 }
 
+/**
+ * Blockscout's public API needs no key, but a key gets its own 10 req/s
+ * quota instead of sharing the anonymous pool. Anonymous first (works for
+ * everyone, including self-hosters with no key configured), then one retry
+ * with the key if we have one — this only helps when the first failure was
+ * rate-limiting, not when Blockscout's backend itself is degraded, since a
+ * keyed request hits the same indexer.
+ */
+export async function blockscoutFetch(
+  url: string,
+  init: RequestInit = {},
+  ms = 4000,
+): Promise<Response> {
+  try {
+    const res = await fetchWithTimeout(url, init, ms);
+    if (res.ok) return res;
+    throw new Error(`HTTP ${res.status}`);
+  } catch (err) {
+    const key = process.env.BLOCKSCOUT_API_KEY;
+    if (!key) throw err;
+    const keyed = url + (url.includes("?") ? "&" : "?") + `apikey=${encodeURIComponent(key)}`;
+    return fetchWithTimeout(keyed, init, ms);
+  }
+}
+
 /** Public Base RPCs, tried in order. */
 const BASE_RPCS = [
   "https://mainnet.base.org",

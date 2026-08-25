@@ -4,7 +4,7 @@ import { badRequest } from "./errors.js";
 import { optionalInt, optionalNumber } from "./params.js";
 import { primaryName } from "./basename.js";
 import { getPrice } from "./prices.js";
-import { baseRpc, fromSources } from "./sources.js";
+import { baseRpc, blockscoutFetch, fromSources } from "./sources.js";
 
 /**
  * What an address actually holds on Base, valued in USD.
@@ -77,8 +77,7 @@ async function fromBlockscout(address: string): Promise<Holdings> {
   let truncated = false;
 
   for (let page = 1; ; page++) {
-    const res = await fetchWithTimeout(url, { headers: { Accept: "application/json" } });
-    if (!res.ok) throw new Error(`Indexer returned ${res.status}`);
+    const res = await blockscoutFetch(url, { headers: { Accept: "application/json" } });
     const json = (await res.json()) as {
       items?: BlockscoutEntry[];
       next_page_params?: Record<string, unknown> | null;

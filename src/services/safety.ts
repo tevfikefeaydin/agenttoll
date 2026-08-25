@@ -1,6 +1,6 @@
 import { cached, fetchWithTimeout } from "./cache.js";
 import { badRequest } from "./errors.js";
-import { baseRpc } from "./sources.js";
+import { baseRpc, blockscoutFetch } from "./sources.js";
 
 /**
  * Automated safety checks for a Base token.
@@ -276,10 +276,9 @@ export interface Deployer {
 }
 
 async function fromDeployer(token: string): Promise<Deployer | null> {
-  const res = await fetchWithTimeout(`${BLOCKSCOUT_ADDR}/${token}`, {
+  const res = await blockscoutFetch(`${BLOCKSCOUT_ADDR}/${token}`, {
     headers: { Accept: "application/json" },
   });
-  if (!res.ok) throw new Error(`Explorer returned ${res.status}`);
   const info = (await res.json()) as {
     creator_address_hash?: string | null;
     is_scam?: boolean;
@@ -311,13 +310,11 @@ async function fromDeployer(token: string): Promise<Deployer | null> {
   let firstSeen: string | null = null;
   if (!isContract && txCount !== null && txCount > 0 && txCount <= 50) {
     try {
-      const txRes = await fetchWithTimeout(`${BLOCKSCOUT_ADDR}/${creator}/transactions?filter=from`, {
+      const txRes = await blockscoutFetch(`${BLOCKSCOUT_ADDR}/${creator}/transactions?filter=from`, {
         headers: { Accept: "application/json" },
       });
-      if (txRes.ok) {
-        const items = ((await txRes.json()) as { items?: { timestamp?: string }[] }).items ?? [];
-        firstSeen = items[items.length - 1]?.timestamp ?? null;
-      }
+      const items = ((await txRes.json()) as { items?: { timestamp?: string }[] }).items ?? [];
+      firstSeen = items[items.length - 1]?.timestamp ?? null;
     } catch {
       /* age is a bonus; the transaction count already carries the signal */
     }

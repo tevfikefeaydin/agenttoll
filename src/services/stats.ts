@@ -1,4 +1,5 @@
-import { cached, fetchWithTimeout } from "./cache.js";
+import { cached } from "./cache.js";
+import { blockscoutFetch } from "./sources.js";
 
 // Toll stats derived straight from the chain: every payment is a USDC Transfer
 // to the payTo address, so the counter cannot lie and needs no database.
@@ -41,12 +42,10 @@ export async function getStats(payTo: string) {
       // Shorter than the default 8s timeout: this feeds the homepage counter,
       // which should fail fast to its "Live on Base mainnet" fallback rather
       // than leave a visitor staring at "reading the chain..." for 8 seconds.
-      const res = await fetchWithTimeout(
+      const res = await blockscoutFetch(
         `${BLOCKSCOUT}/addresses/${payTo}/token-transfers?type=ERC-20&filter=to&token=${USDC}${params}`,
         { headers: { Accept: "application/json" } },
-        4000,
       );
-      if (!res.ok) throw new Error(`Indexer returned ${res.status}`);
       const json = (await res.json()) as TransferPage;
 
       for (const item of json.items) {

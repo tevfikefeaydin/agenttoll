@@ -1,7 +1,8 @@
-import { cached, fetchWithTimeout } from "./cache.js";
+import { cached } from "./cache.js";
 import { badRequest } from "./errors.js";
 import { getPrice } from "./prices.js";
 import { getNewTokenRadar } from "./radar.js";
+import { blockscoutFetch } from "./sources.js";
 
 // Stateless "what changed since I last asked" endpoints. The agent keeps the
 // cursor, so the server stores nothing and every reply is verifiable.
@@ -33,20 +34,9 @@ export async function getAddressActivity(address: string, since?: string) {
   const sinceMs = parseSince(since);
 
   const all = await cached(`activity:${addr}`, 20_000, async () => {
-    const url = `${BLOCKSCOUT}/addresses/${addr}/transactions`;
-    const opts = { headers: { Accept: "application/json" } };
-    // Shorter than the default 8s, with one retry: the free Blockscout
-    // instance occasionally has a slow or failing beat, and a caller paying
-    // per call should get a fast answer or a fast, honest failure rather
-    // than wait out two full 8s timeouts.
-    let res: Response;
-    try {
-      res = await fetchWithTimeout(url, opts, 4000);
-      if (!res.ok) throw new Error(`Indexer returned ${res.status}`);
-    } catch {
-      res = await fetchWithTimeout(url, opts, 4000);
-      if (!res.ok) throw new Error(`Indexer returned ${res.status}`);
-    }
+    const res = await blockscoutFetch(`${BLOCKSCOUT}/addresses/${addr}/transactions`, {
+      headers: { Accept: "application/json" },
+    });
     return ((await res.json()) as { items?: Tx[] }).items ?? [];
   });
 
