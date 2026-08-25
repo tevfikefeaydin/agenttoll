@@ -38,9 +38,13 @@ export async function getStats(payTo: string) {
     const payers = new Map<string, { calls: number; usdc: bigint }>();
 
     for (let page = 0; page < MAX_PAGES; page++) {
+      // Shorter than the default 8s timeout: this feeds the homepage counter,
+      // which should fail fast to its "Live on Base mainnet" fallback rather
+      // than leave a visitor staring at "reading the chain..." for 8 seconds.
       const res = await fetchWithTimeout(
         `${BLOCKSCOUT}/addresses/${payTo}/token-transfers?type=ERC-20&filter=to&token=${USDC}${params}`,
         { headers: { Accept: "application/json" } },
+        4000,
       );
       if (!res.ok) throw new Error(`Indexer returned ${res.status}`);
       const json = (await res.json()) as TransferPage;
