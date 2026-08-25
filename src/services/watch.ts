@@ -33,11 +33,20 @@ export async function getAddressActivity(address: string, since?: string) {
   const sinceMs = parseSince(since);
 
   const all = await cached(`activity:${addr}`, 20_000, async () => {
-    const res = await fetchWithTimeout(
-      `${BLOCKSCOUT}/addresses/${addr}/transactions`,
-      { headers: { Accept: "application/json" } },
-    );
-    if (!res.ok) throw new Error(`Indexer returned ${res.status}`);
+    const url = `${BLOCKSCOUT}/addresses/${addr}/transactions`;
+    const opts = { headers: { Accept: "application/json" } };
+    // Shorter than the default 8s, with one retry: the free Blockscout
+    // instance occasionally has a slow or failing beat, and a caller paying
+    // per call should get a fast answer or a fast, honest failure rather
+    // than wait out two full 8s timeouts.
+    let res: Response;
+    try {
+      res = await fetchWithTimeout(url, opts, 4000);
+      if (!res.ok) throw new Error(`Indexer returned ${res.status}`);
+    } catch {
+      res = await fetchWithTimeout(url, opts, 4000);
+      if (!res.ok) throw new Error(`Indexer returned ${res.status}`);
+    }
     return ((await res.json()) as { items?: Tx[] }).items ?? [];
   });
 
