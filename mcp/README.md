@@ -28,7 +28,7 @@ covers hundreds of calls. To try it against testnet instead, set
 
 `get_price`, `get_base_gas`, `get_trending`, `get_base_token_price`,
 `get_base_address_info`, `get_fear_greed`, `get_base_trending_pools`,
-`get_market_brief`, `get_new_token_radar`, `get_fresh_pools`, `scout_new_tokens`, `get_try_premium`, `get_base_portfolio`,
+`get_market_brief`, `get_new_token_radar`, `get_fresh_pools`, `scout_new_tokens`, `get_try_premium`, `get_try_spread`, `get_base_portfolio`,
 `check_token_safety`,
 `get_radar_scorecard`, `get_radar_history`,
 `resolve_basename`, `watch_base_address`, `watch_new_tokens`, `watch_price_alert`

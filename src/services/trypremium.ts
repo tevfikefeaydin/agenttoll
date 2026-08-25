@@ -15,7 +15,7 @@ const ASSETS = {
 type Asset = keyof typeof ASSETS;
 
 /** The official rate is the same for every asset, so it gets its own cache slot. */
-async function officialUsdTry(): Promise<number> {
+export async function officialUsdTry(): Promise<number> {
   return cached("fx:usdtry", 60_000, async () => {
     const res = await fetchWithTimeout("https://open.er-api.com/v6/latest/USD");
     if (!res.ok) throw new Error(`Upstream fx source returned ${res.status}`);

@@ -271,7 +271,7 @@
       pays a fraction of a cent in USDC per request. No accounts. No API keys.</p>
     <div class="cta">
       <a class="btn btn-primary" href="#try">Try it in 10 seconds</a>
-      <a class="btn btn-ghost" href="#endpoints">See the 20 endpoints</a>
+      <a class="btn btn-ghost" href="#endpoints">See the 21 endpoints</a>
     </div>
     <div class="hero-meta">
       <span class="chip" id="toll-counter">reading the chain…</span>
@@ -373,7 +373,7 @@ console.log(<span class="k">await</span> res.json());
 <section class="band" id="endpoints">
   <div class="wrap">
     <p class="kicker rv">Catalog</p>
-    <h2 class="rv">Twenty endpoints, priced per call</h2>
+    <h2 class="rv">Twenty-one endpoints, priced per call</h2>
     <p class="sub rv">Base onchain data first — gas, any token by contract address, wallet
       portfolios, address analytics, DEX pools and a spam-filtered new-token radar — plus
       market and Turkish-lira feeds.</p>
@@ -399,6 +399,7 @@ console.log(<span class="k">await</span> res.json());
           <tr><td><code>GET /api/trending</code></td><td>Tokens trending across the market right now</td><td class="price">$0.002</td></tr>
           <tr><td><code>GET /api/feargreed</code></td><td>Crypto Fear &amp; Greed index with yesterday comparison</td><td class="price">$0.001</td></tr>
           <tr><td><code>GET /api/try/premium</code></td><td>Turkish lira premium: implied vs official USD/TRY</td><td class="price">$0.002</td></tr>
+          <tr><td><code>GET /api/try/spread</code></td><td>Turkish exchange spread: BTCTurk and Paribu TRY quotes vs the global price</td><td class="price">$0.002</td></tr>
           <tr><td><code>GET /api/watch/address/:address</code></td><td>New activity for a Base address since your cursor</td><td class="price">$0.002</td></tr>
           <tr><td><code>GET /api/watch/radar</code></td><td>Only the pools that appeared since your cursor</td><td class="price">$0.003</td></tr>
           <tr><td><code>GET /api/watch/price/:symbol</code></td><td>Price alert check against your reference and threshold</td><td class="price">$0.001</td></tr>
@@ -479,12 +480,12 @@ curl <span class="s">"https://agenttoll.app/api/watch/radar?since=2026-08-05T08:
       </div>
       <div class="card rv">
         <div class="ico">🧰</div>
-        <h3>20 tools, zero setup</h3>
+        <h3>21 tools, zero setup</h3>
         <p><code>get_price</code>, <code>get_base_gas</code>, <code>get_trending</code>,
           <code>get_base_token_price</code>, <code>get_base_address_info</code>,
           <code>get_fear_greed</code>, <code>get_base_trending_pools</code>,
           <code>get_market_brief</code>, <code>get_new_token_radar</code>,
-          <code>get_try_premium</code>, <code>resolve_basename</code>,
+          <code>get_try_premium</code>, <code>get_try_spread</code>, <code>resolve_basename</code>,
           <code>watch_base_address</code>, <code>watch_new_tokens</code>,
           <code>watch_price_alert</code>.</p>
         <p style="margin-top:12px;"><a href="https://www.npmjs.com/package/agenttoll-mcp">agenttoll-mcp on npm →</a></p>

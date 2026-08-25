@@ -360,6 +360,25 @@ export const DISCOVERY: Record<string, Discovery> = {
     },
   },
 
+  "GET /api/try/spread": {
+    input: { asset: "usdt" },
+    inputSchema: {
+      properties: {
+        asset: { type: "string", enum: ["btc", "usdt"], description: "Optional. Cross-rate asset, default btc" },
+      },
+    },
+    output: {
+      asset: "usdt",
+      officialUsdTry: 47.2891,
+      globalUsd: 0.999318,
+      exchanges: [
+        { name: "btcturk", try: 47.53, impliedUsd: 1.00509, spreadPct: 0.578, unavailable: false },
+        { name: "paribu", try: 47.51, impliedUsd: 1.00466, spreadPct: 0.535, unavailable: false },
+      ],
+      at: "2026-08-05T13:31:58.678Z",
+    },
+  },
+
   "GET /api/watch/address/:address": {
     ...address,
     input: { since: "2026-08-05T08:40:01Z" },

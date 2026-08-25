@@ -64,6 +64,7 @@ gets the data.
 | `GET /api/brief?symbols=` | One-call market brief: prices (BTC/ETH/SOL by default), Base gas, sentiment | $0.005 |
 | `GET /api/base/radar?minLiquidity=&limit=` | New token radar: fresh Base pools above your liquidity floor | $0.003 |
 | `GET /api/try/premium?asset=` | Turkish lira premium: implied vs official USD/TRY, via BTC, ETH, USDT or USDC | $0.002 |
+| `GET /api/try/spread?asset=` | Turkish exchange spread: BTCTurk and Paribu's TRY quotes vs the global USD price, via BTC or USDT | $0.002 |
 | `GET /api/watch/address/:address?since=` | New activity for a Base address since your cursor | $0.002 |
 | `GET /api/watch/radar?since=` | Only the Base pools that appeared since your cursor | $0.003 |
 | `GET /api/watch/price/:symbol?ref=&pct=` | Price alert check: triggered true/false against your threshold | $0.001 |
@@ -261,7 +262,7 @@ No clone needed — the server is on npm as
 
 Tools exposed: `get_price`, `get_base_gas`, `get_trending`, `get_base_token_price`,
 `get_base_address_info`, `get_fear_greed`, `get_base_trending_pools`, `get_market_brief`,
-`get_new_token_radar`, `get_try_premium`, `resolve_basename`, `watch_base_address`,
+`get_new_token_radar`, `get_try_premium`, `get_try_spread`, `resolve_basename`, `watch_base_address`,
 `watch_new_tokens`, `watch_price_alert`.
 
 The wallet behind `AGENT_PRIVATE_KEY` needs USDC on Base — the hosted service
@@ -292,10 +293,10 @@ Shipped:
 - [x] Wallet portfolio: every token an address holds on Base, with USD value
 - [x] Schemas inside the 402 quote, so discovery never depends on a second request
 - [x] Token safety checks: honeypot simulation, taxes, owner privileges, holder concentration, liquidity
+- [x] Turkish exchange spread check: BTCTurk and Paribu TRY quotes vs the global price
 
 Next:
 
-- [ ] Turkish market data beyond the lira premium (local exchange spreads)
 - [ ] A directory of x402 services agents can call, served over x402 itself
 
 ## Stack

@@ -27,6 +27,7 @@ import { getScout } from "./services/scout.js";
 import { getFreshPools } from "./services/fresh.js";
 import { getRadarHistory, getScorecard } from "./services/history.js";
 import { getTryPremium } from "./services/trypremium.js";
+import { getTrySpread } from "./services/tryspread.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -208,6 +209,10 @@ app.use(
         "$0.002",
         "Turkish lira crypto premium check: implied USD/TRY from a crypto cross-rate versus the official rate; ?asset=usdt is the reading desks quote",
       ),
+      "GET /api/try/spread": paid("GET /api/try/spread",
+        "$0.002",
+        "Turkish exchange spread check: BTCTurk and Paribu's TRY quotes converted back to USD via the official rate and compared against the global price; ?asset=usdt is the pair with the deepest local volume",
+      ),
       "GET /api/base/portfolio/:address": paid("GET /api/base/portfolio/:address",
         "$0.003",
         "Wallet portfolio on Base: everything an address holds valued in USD, ETH plus its ERC-20 tokens, largest first, with a spam floor you set",
@@ -322,6 +327,7 @@ app.get("/.well-known/x402", (_req, res) => {
       { resource: `${PUBLIC_BASE}/api/feargreed`, price: "$0.001", description: "Crypto market sentiment check: Fear & Greed index; ?days=1-30 adds daily history" },
       { resource: `${PUBLIC_BASE}/api/brief`, price: "$0.005", description: "Market brief in one call: prices, Base gas, sentiment; ?symbols=eth,degen" },
       { resource: `${PUBLIC_BASE}/api/try/premium`, price: "$0.002", description: "Turkish lira crypto premium check: implied vs official USD/TRY; ?asset=btc|eth|usdt|usdc" },
+      { resource: `${PUBLIC_BASE}/api/try/spread`, price: "$0.002", description: "Turkish exchange spread check: BTCTurk and Paribu TRY quotes vs the global USD price; ?asset=btc|usdt" },
       { resource: `${PUBLIC_BASE}/api/watch/address/{address}`, price: "$0.002", description: "Wallet activity watch: new activity for a Base address since your cursor (stateless)" },
       { resource: `${PUBLIC_BASE}/api/watch/radar`, price: "$0.003", description: "New pool watch: only the Base pools that appeared since your cursor" },
       { resource: `${PUBLIC_BASE}/api/watch/price/{symbol}`, price: "$0.001", description: "Price alert check against your reference and threshold" },
@@ -348,6 +354,7 @@ const CATALOG_ENDPOINTS = [
       { path: "/api/brief?symbols={a,b,c}", method: "GET", price: "$0.005", description: "Market brief in one call: prices (BTC/ETH/SOL by default), Base gas, sentiment" },
       { path: "/api/base/radar?minLiquidity={usd}&limit={n}", method: "GET", price: "$0.003", description: "New token radar on Base with a liquidity floor: fresh pools above your floor, default $10k" },
       { path: "/api/try/premium?asset={btc|eth|usdt|usdc}", method: "GET", price: "$0.002", description: "Turkish lira crypto premium check: implied vs official USD/TRY via a crypto cross-rate" },
+      { path: "/api/try/spread?asset={btc|usdt}", method: "GET", price: "$0.002", description: "Turkish exchange spread check: BTCTurk and Paribu TRY quotes converted to USD vs the global price" },
       { path: "/api/watch/address/{address}?since={iso}", method: "GET", price: "$0.002", description: "Wallet activity watch: new activity for a Base address since your cursor; reply carries the next cursor" },
       { path: "/api/watch/radar?since={iso}", method: "GET", price: "$0.003", description: "New pool watch: only the Base pools that appeared since your cursor" },
       { path: "/api/watch/price/{symbol}?ref={price}&pct={threshold}", method: "GET", price: "$0.001", description: "Price alert check: triggered true/false against your reference and threshold" },
@@ -443,6 +450,7 @@ app.get("/api/base/trending", serve((req) => getBaseTrending(opt(req.query.limit
 app.get("/api/feargreed", serve((req) => getFearGreed(opt(req.query.days))));
 app.get("/api/brief", serve((req) => getMarketBrief(opt(req.query.symbols))));
 app.get("/api/try/premium", serve((req) => getTryPremium(opt(req.query.asset))));
+app.get("/api/try/spread", serve((req) => getTrySpread(opt(req.query.asset))));
 app.get("/api/stats", serve(() => getStats(PAY_TO)));
 
 app.get(

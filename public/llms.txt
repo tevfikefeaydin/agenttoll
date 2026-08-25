@@ -56,6 +56,7 @@ how to call it. MCP: `npx agenttoll-mcp` exposes all endpoints as tools
 - https://agenttoll.app/api/feargreed?days={1-30} : crypto market sentiment check — Fear & Greed index, optionally with daily history ($0.001)
 - https://agenttoll.app/api/brief?symbols={a,b,c} : market brief in one call, BTC/ETH/SOL by default ($0.005)
 - https://agenttoll.app/api/try/premium?asset={btc|eth|usdt|usdc} : Turkish lira crypto premium check ($0.002)
+- https://agenttoll.app/api/try/spread?asset={btc|usdt} : Turkish exchange spread check — BTCTurk and Paribu TRY quotes converted to USD via the official rate, vs the global price ($0.002)
 - https://agenttoll.app/api/watch/address/{address}?since={iso} : wallet activity watch — new activity for a Base address since your cursor ($0.002)
 - https://agenttoll.app/api/watch/radar?since={iso} : new pool watch — only the pools that appeared since your cursor ($0.003)
 - https://agenttoll.app/api/watch/price/{symbol}?ref={price}&pct={threshold} : price alert check, triggered true/false ($0.001)

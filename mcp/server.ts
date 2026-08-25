@@ -175,6 +175,20 @@ server.tool(
 );
 
 server.tool(
+  "get_try_spread",
+  "Turkish exchange spread: BTCTurk and Paribu's TRY quotes converted back to USD via the official rate and compared against the global price, so you can see which local exchange is charging the bigger premium. Costs $0.002 in USDC via x402.",
+  {
+    asset: z
+      .enum(["btc", "usdt"])
+      .optional()
+      .describe("Which pair to check (default btc)"),
+  },
+  async ({ asset }) => ({
+    content: [{ type: "text", text: await call("/api/try/spread", { asset }) }],
+  }),
+);
+
+server.tool(
   "get_base_portfolio",
   "Everything a Base address holds, valued in USD: ETH plus its ERC-20 tokens, largest first. The reply carries totals and says how many holdings fell below the floor or could not be priced. Costs $0.003 in USDC via x402.",
   {

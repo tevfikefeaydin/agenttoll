@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "AgentToll",
-    "version": "0.14.0",
+    "version": "0.15.0",
     "description": "Pay-per-call data APIs for AI agents. Paid endpoints return HTTP 402 with an x402 quote; pay $0.001-$0.008 in USDC on Base mainnet per call. No API keys. Onchain identity: agenttoll.base.eth.",
     "contact": {
       "name": "AgentToll",
@@ -721,6 +721,84 @@
                   "impliedUsdTry": 47.5624,
                   "officialUsdTry": 47.2891,
                   "premiumPct": 0.578,
+                  "at": "2026-08-05T13:31:58.678Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameter (not charged)"
+          },
+          "402": {
+            "description": "x402 payment quote"
+          }
+        }
+      }
+    },
+    "/api/try/spread": {
+      "get": {
+        "summary": "Turkish exchange spread check: BTCTurk and Paribu TRY quotes converted to USD vs the global price",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.002"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
+        "parameters": [
+          {
+            "name": "asset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "btc",
+                "usdt"
+              ],
+              "default": "btc"
+            },
+            "example": "usdt",
+            "description": "Optional. Which pair to check, default btc."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "example": {
+                  "asset": "usdt",
+                  "officialUsdTry": 47.2891,
+                  "globalUsd": 0.999318,
+                  "exchanges": [
+                    {
+                      "name": "btcturk",
+                      "try": 47.53,
+                      "impliedUsd": 1.00509,
+                      "spreadPct": 0.578,
+                      "unavailable": false
+                    },
+                    {
+                      "name": "paribu",
+                      "try": 47.51,
+                      "impliedUsd": 1.00466,
+                      "spreadPct": 0.535,
+                      "unavailable": false
+                    }
+                  ],
                   "at": "2026-08-05T13:31:58.678Z"
                 }
               }
