@@ -9,6 +9,7 @@
   <img src="https://img.shields.io/badge/network-Base%20mainnet-0052FF" alt="Base mainnet">
   <img src="https://img.shields.io/badge/payments-x402-0052FF" alt="x402">
   <img src="https://img.shields.io/badge/license-MIT-8A97AF" alt="MIT">
+  <a href="https://x402-list.com/services/agenttoll?utm_source=badge&utm_medium=referral&utm_campaign=embed"><img src="https://x402-list.com/badge/agenttoll.svg" alt="Listed on x402-list" height="20"></a>
 </p>
 
 **Live:** [agenttoll.app](https://agenttoll.app) — try `curl -i agenttoll.app/api/base/fresh`
