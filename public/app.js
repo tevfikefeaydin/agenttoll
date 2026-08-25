@@ -3,7 +3,13 @@ fetch("/api/stats")
   .then((r) => r.json())
   .then((s) => {
     const el = document.getElementById("toll-counter");
-    if (!el || typeof s.tollsCollected !== "number") return;
+    if (!el) return;
+    // An error body (upstream indexer hiccup) has no tollsCollected — fall
+    // back to the static line instead of leaving "reading the chain…" stuck.
+    if (typeof s.tollsCollected !== "number") {
+      el.textContent = "Live on Base mainnet";
+      return;
+    }
     const n = (v) => "<strong>" + v.toLocaleString("en-US") + "</strong>";
     // Only claim agents once someone other than our own test wallet has paid.
     el.innerHTML = s.externalPayers
