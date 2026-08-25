@@ -121,7 +121,6 @@ const FREE_PATHS = [
   "/api/stats",
   "/.well-known/x402",
   "/.well-known/agent-card.json",
-  "/.well-known/x402list.txt",
 ];
 const FREE_PER_MINUTE = 60;
 const PAID_PER_MINUTE = 600;
@@ -418,14 +417,6 @@ app.get("/.well-known/agent-card.json", (_req, res) => {
       note: "Revenue is read from USDC transfers on Base, not self-reported; radar claims are dated git commits.",
     },
   });
-});
-
-// One-time domain-ownership proof for the x402-list.com directory listing
-// update (token issued 2026-08-25, expires 72h later). A static file under
-// public/.well-known/ would 404 — express.static ignores dotfile
-// directories by default — so this is a route like the other well-known ones.
-app.get("/.well-known/x402list.txt", (_req, res) => {
-  res.type("text/plain").send("x402list-verify-FZ8iD6ZQTLNpo1Fi0wKco6qZ2NUvuRZpL4OFEi_dBjk\n");
 });
 
 app.get("/api/price/:symbol", serve((req) => getPrice(one(req.params.symbol))));
