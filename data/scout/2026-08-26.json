@@ -1,0 +1,109 @@
+{
+  "date": "2026-08-26",
+  "at": "2026-08-26T08:06:00.676Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x7fd5c0ab4869ea05bb58196a7b06892616425ed24002f6a424cbdd96cc831357",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 0,
+    "caution": 4,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "WUF / ETH 0.05%",
+      "pool": "0xfd4ef966c6c914effc86de5b3d415858299b54e30316207c0fe79229d2a7518b",
+      "token": "0xb200000000000000000000b344cb4a1e8bd51968",
+      "createdAt": "2026-08-26T07:57:07Z",
+      "priceUsd": 5.03427336420642e-7,
+      "volume24hUsd": 36599.8796363516,
+      "liquidityUsd": 27098.9598,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "MILKER / ETH 0.3%",
+      "pool": "0xebeb92028a2d366f1572cfc25f7a00c0be7f782d091e47345cb7a184ba194b83",
+      "token": "0xb2000000000000000000009322a9fb700c32d023",
+      "createdAt": "2026-08-26T07:32:39Z",
+      "priceUsd": 0.0000280060843599252,
+      "volume24hUsd": 28142.9493369275,
+      "liquidityUsd": 23280.0931,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "DOLORES / ETH 0.3%",
+      "pool": "0x276839d6d563ca6b39fb6f7111171f82f9b34aa30753662469a8f8f8217c1977",
+      "token": "0xb200000000000000000000ca973a214394d577a0",
+      "createdAt": "2026-08-26T07:31:53Z",
+      "priceUsd": 0.0000321147259888718,
+      "volume24hUsd": 24501.6936740696,
+      "liquidityUsd": 27021.8778,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "BA / ETH 0.3%",
+      "pool": "0x0a4c46997e0ba757ad2442182beae9387d0c4a9d16ca72dad75dbc8bb4973bb3",
+      "token": "0xb200000000000000000000a365ed7b6f3feec34a",
+      "createdAt": "2026-08-26T07:33:07Z",
+      "priceUsd": 0.0000212013843401337,
+      "volume24hUsd": 20643.0065567299,
+      "liquidityUsd": 19480.8999,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    }
+  ]
+}
