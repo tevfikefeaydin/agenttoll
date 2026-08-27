@@ -16,7 +16,7 @@ const MAX_PAGES = 20; // 50 transfers/page; raise when the tollbooth gets busy
 const MAX_TOLL_UNITS = 50_000n; // $0.05
 // Blockscout normally answers this query in about 4–5s. Leave enough headroom
 // for a healthy response while keeping the homepage counter bounded on outages.
-const STATS_UPSTREAM_TIMEOUT_MS = 6_000;
+const STATS_UPSTREAM_TIMEOUT_MS = 8_000;
 
 // The wallets we run our own tests from. Counted like any other payer, but
 // reported separately so "did anyone else pay yet" is answerable at a glance.
