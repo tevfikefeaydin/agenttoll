@@ -14,6 +14,9 @@ const USDC = MAINNET
 const MAX_PAGES = 20; // 50 transfers/page; raise when the tollbooth gets busy
 // Tolls are micro-payments; anything bigger is the owner funding the wallet.
 const MAX_TOLL_UNITS = 50_000n; // $0.05
+// Blockscout normally answers this query in about 4–5s. Leave enough headroom
+// for a healthy response while keeping the homepage counter bounded on outages.
+const STATS_UPSTREAM_TIMEOUT_MS = 6_000;
 
 // The wallets we run our own tests from. Counted like any other payer, but
 // reported separately so "did anyone else pay yet" is answerable at a glance.
@@ -39,12 +42,12 @@ export async function getStats(payTo: string) {
     const payers = new Map<string, { calls: number; usdc: bigint }>();
 
     for (let page = 0; page < MAX_PAGES; page++) {
-      // Shorter than the default 8s timeout: this feeds the homepage counter,
-      // which should fail fast to its "Live on Base mainnet" fallback rather
-      // than leave a visitor staring at "reading the chain..." for 8 seconds.
+      // This feeds the homepage counter, so do not let an unhealthy upstream
+      // keep a visitor staring at "reading the chain..." indefinitely.
       const res = await blockscoutFetch(
         `${BLOCKSCOUT}/addresses/${payTo}/token-transfers?type=ERC-20&filter=to&token=${USDC}${params}`,
         { headers: { Accept: "application/json" } },
+        STATS_UPSTREAM_TIMEOUT_MS,
       );
       const json = (await res.json()) as TransferPage;
 
