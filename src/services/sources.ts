@@ -63,7 +63,9 @@ export async function blockscoutFetch(
     const key = process.env.BLOCKSCOUT_API_KEY;
     if (!key) throw err;
     const keyed = url + (url.includes("?") ? "&" : "?") + `apikey=${encodeURIComponent(key)}`;
-    return fetchWithTimeout(keyed, init, ms);
+    const res = await fetchWithTimeout(keyed, init, ms);
+    if (res.ok) return res;
+    throw new Error(`HTTP ${res.status}`);
   }
 }
 
