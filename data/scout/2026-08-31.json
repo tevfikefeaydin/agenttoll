@@ -1,0 +1,106 @@
+{
+  "date": "2026-08-31",
+  "at": "2026-08-31T15:13:43.063Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x1fd9695877af31c78ae26a4c5c4cea69e03c4171933e5503a783fee3cf60f2e1",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 3,
+    "caution": 0,
+    "insufficientData": 1,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "TheNativeToken / WETH",
+      "pool": "0x6f531ed4bc1302ed8d4425897b54ee631a89e98a",
+      "token": "0xff0738062e8fd009c9577e30f8a25c4539fd32cf",
+      "createdAt": "2026-08-31T14:34:07Z",
+      "priceUsd": 0.00000786104872660166,
+      "volume24hUsd": 6813.4953108989,
+      "liquidityUsd": 87568.0523,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "liquidity"
+        ],
+        "warnings": [
+          "creator-stake"
+        ],
+        "unchecked": [
+          "concentration",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "MEOW / WETH",
+      "pool": "0xd70368b8a84f5e96d8d6dd236220f666074b6a4f",
+      "token": "0x8bf5df788a3939044a328b63a89bacfb0e3c40f5",
+      "createdAt": "2026-08-31T14:56:55Z",
+      "priceUsd": 5.69418783987801e-14,
+      "volume24hUsd": 4145.491201538,
+      "liquidityUsd": 16760.7068,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "verified"
+        ],
+        "warnings": [],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "FOMO / WETH",
+      "pool": "0xabe7c6c7d718319155e747666f6d664528750302",
+      "token": "0x22e6af17f4ad5972230e90fe9d2e0a0facd72891",
+      "createdAt": "2026-08-31T14:42:47Z",
+      "priceUsd": 0.00000908992855628775,
+      "volume24hUsd": 2303.1287994321,
+      "liquidityUsd": 15100.3086,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "concentration",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "ETHCAT / WETH",
+      "pool": "0x14ab36f2a8be7ecda3090d825dbc04df14533b5b",
+      "token": "0x5a11235f694a36eab18ba8883f7634a4bd98aa82",
+      "createdAt": "2026-08-31T14:48:47Z",
+      "priceUsd": 1.01724618168219e-10,
+      "volume24hUsd": 1955.3822551449,
+      "liquidityUsd": 15888.3693,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "honeypot"
+        ],
+        "warnings": [
+          "creator-stake"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    }
+  ]
+}
