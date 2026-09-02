@@ -15,6 +15,9 @@
 **Live:** [agenttoll.app](https://agenttoll.app) — try `curl -i agenttoll.app/api/base/fresh`
 and get a real x402 quote. Onchain identity: **agenttoll.base.eth** (Base mainnet).
 
+*Not affiliated with other similarly-named x402 services (agenttoll.dev, agent402.tools,
+etc.) — this is the only AgentToll, at agenttoll.app / agenttoll.base.eth.*
+
 **See a token before the indexers do — then find out whether it's a trap.**
 
 1. **`/api/base/fresh`** reads Base's own pool-creation log, so a new token surfaces about
