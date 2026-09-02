@@ -1,0 +1,97 @@
+{
+  "date": "2026-09-02",
+  "at": "2026-09-02T12:10:23.530Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x8eb12e45b0a1fd23567c1e4de88c49e7343bd91c939fb5c7dd07949edb636ab6",
+  "summary": {
+    "found": 4,
+    "checked": 3,
+    "unchecked": 1,
+    "highRisk": 1,
+    "caution": 2,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "特朗普 / USDC",
+      "pool": "0x88260b7745c40db0a5b3384fadad3a4618f61bfe",
+      "token": "0x0e3dd9cf5b09002c14e21c920006245076a0db07",
+      "createdAt": "2026-09-02T11:31:13Z",
+      "priceUsd": 0.0000503277653878748,
+      "volume24hUsd": 14128570.1514903,
+      "liquidityUsd": 4805068.7451,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "umia / USDC 2.1%",
+      "pool": "0xe9729410128968edfcbe2c0c2f3bca342aa36bf3c2e69f7e558172d02c45e8f8",
+      "token": "0x56ab53b77f07da3af732150e8aec4783eb5bba7d",
+      "createdAt": "2026-09-02T11:51:25Z",
+      "priceUsd": 0.466051725944015,
+      "volume24hUsd": 380739.787990317,
+      "liquidityUsd": 117992.9046,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot",
+          "owner-powers"
+        ],
+        "unchecked": [
+          "liquidity",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "[invalid] / WETH 0.01%",
+      "pool": "0xdce690234e69567e29133a693ec14fb4cce3fe0bd2d519924841e9f75390fca1",
+      "token": "0x1aa873b7b6341eed825e57a1da3bbda6373133bd",
+      "createdAt": "2026-09-02T11:35:43Z",
+      "priceUsd": 0.00000259940522111532,
+      "volume24hUsd": 318537.268602121,
+      "liquidityUsd": 79733.8725,
+      "safety": null
+    },
+    {
+      "name": "Suwappu / WETH",
+      "pool": "0xc78e27e9d57294c312e8da3780bcaffde061b02a",
+      "token": "0xd93842500cf7c658df58e7374b7842844bf12d7f",
+      "createdAt": "2026-09-02T11:46:03Z",
+      "priceUsd": 0.00000679127725730954,
+      "volume24hUsd": 4344.7400650319,
+      "liquidityUsd": 79698.3028,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "verified"
+        ],
+        "warnings": [
+          "creator-stake"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    }
+  ]
+}
