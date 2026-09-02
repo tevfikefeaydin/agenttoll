@@ -330,6 +330,57 @@ weeks (~$0.002/day). It runs from `.github/workflows/keep-warm.yml` and needs
 an `AGENT_WALLET_KEY` secret — a throwaway wallet holding a little USDC on
 Base, nothing else.
 
+## FAQ
+
+**How does payment actually work?** One HTTP request. The server replies `402
+Payment Required` with a price quote; the client signs a USDC authorization
+(EIP-3009 — no gas needed) and retries with a payment header. The facilitator
+verifies and settles on Base, and the data comes back in the same round trip.
+No separate checkout, no polling for confirmation.
+
+**Do I need an API key or account?** No. No signup, no key, no subscription —
+an agent sends one request and pays inline. The wallet address paying is the
+only identity involved.
+
+**Am I charged if the call fails?** No. Settlement only runs after the handler
+returns a success status. A malformed request returns `400`; a genuine
+upstream failure returns `502`. Neither is billed — verified against
+production, not just claimed.
+
+**How is this different from a normal API with a key or subscription?**
+
+| | AgentToll (x402) | Typical API |
+|---|---|---|
+| Onboarding | None — the first call is the first interaction | Sign up, verify, generate a key |
+| Billing | Per call, in USDC, inline with the request | Subscription or prepaid credit balance |
+| Failed requests | Never charged | Often still metered |
+| Auth | None — payment is the auth | API key on every request |
+| Price discovery | Inside the 402 response itself | A separate pricing page |
+
+**What chain and token does it settle in?** Base mainnet, USDC, via the x402
+protocol (HTTP 402) and Coinbase's CDP facilitator. A self-hosted instance
+defaults to Base Sepolia testnet with the free public facilitator instead.
+
+**How do I know the price before I pay?** Every 402 quote carries the price
+plus the full request and response schema — an agent that has only ever seen
+a 402 can already build the call correctly, with no second request to learn
+the shape.
+
+**What makes the data trustworthy, not just fast?** The track record lives in
+git, not in a claim: CI buys one scout call a day and commits it to
+[`data/scout/`](data/scout/) with the Base transaction that paid for it.
+`/api/base/scorecard` grades past verdicts against current prices — anyone
+can check whether the calls held up.
+
+**Can I use this from LangChain, CrewAI, or another agent framework?** Yes —
+see [`examples/langchain-tool.ts`](examples/langchain-tool.ts) and
+[`examples/crewai_tool.py`](examples/crewai_tool.py) for a wrapped tool in
+each, or use the [MCP server](#use-it-as-an-mcp-server-claude--friends)
+directly if your framework speaks MCP.
+
+**Is it open source?** Yes, MIT, including the MCP server —
+[github.com/tevfikefeaydin/agenttoll](https://github.com/tevfikefeaydin/agenttoll).
+
 ## License
 
 MIT — open source, building in public.
