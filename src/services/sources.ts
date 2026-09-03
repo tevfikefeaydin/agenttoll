@@ -48,12 +48,14 @@ export async function fetchJsonRetrying(
  * everyone, including self-hosters with no key configured), then one retry
  * with the key if we have one — this only helps when the first failure was
  * rate-limiting, not when Blockscout's backend itself is degraded, since a
- * keyed request hits the same indexer.
+ * keyed request hits the same indexer. Callers that have a second source of
+ * their own can pass retryWithKey: false and fail over instead of waiting.
  */
 export async function blockscoutFetch(
   url: string,
   init: RequestInit = {},
   ms = 4000,
+  { retryWithKey = true }: { retryWithKey?: boolean } = {},
 ): Promise<Response> {
   try {
     const res = await fetchWithTimeout(url, init, ms);
@@ -61,7 +63,9 @@ export async function blockscoutFetch(
     throw new Error(`HTTP ${res.status}`);
   } catch (err) {
     const key = process.env.BLOCKSCOUT_API_KEY;
-    if (!key) throw err;
+    // A caller with its own fallback is better off spending the next second
+    // there than on a second try against the same unhealthy indexer.
+    if (!key || !retryWithKey) throw err;
     const keyed = url + (url.includes("?") ? "&" : "?") + `apikey=${encodeURIComponent(key)}`;
     const res = await fetchWithTimeout(keyed, init, ms);
     if (res.ok) return res;

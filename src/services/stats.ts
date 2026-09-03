@@ -63,6 +63,9 @@ async function fromBlockscout(payTo: string): Promise<Tally> {
       `${BLOCKSCOUT}/addresses/${payTo}/token-transfers?type=ERC-20&filter=to&token=${USDC}${params}`,
       { headers: { Accept: "application/json" } },
       STATS_UPSTREAM_TIMEOUT_MS,
+      // One try only: reading the chain below is faster than a second attempt
+      // against an indexer that just failed, and halves the wait on an outage.
+      { retryWithKey: false },
     );
     const json = (await res.json()) as TransferPage;
 
