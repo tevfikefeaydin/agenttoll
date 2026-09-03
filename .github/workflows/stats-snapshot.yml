@@ -1,0 +1,37 @@
+name: Refresh the toll baseline
+
+# /api/stats reads Blockscout first and the chain second. The chain reading
+# starts from data/stats.json and only scans the blocks since, so this keeps
+# that file close to the head: a day of drift is ~5 getLogs calls per request,
+# a month of drift is more than one request can catch up with.
+#
+# Public logs off a public RPC — no wallet, no secrets, nothing to pay for.
+on:
+  schedule:
+    - cron: "41 5 * * *" # 05:41 UTC daily, before the scout run
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run build
+      - name: Walk the chain
+        run: node scripts/stats-snapshot.mjs
+        env:
+          NETWORK: base
+      - name: Commit it
+        run: |
+          git config user.name "Tevfik Efe Aydin"
+          git config user.email "tevfikefe.aydin@gmail.com"
+          git add data/stats.json
+          git diff --cached --quiet && echo "no new tolls" || git commit -m "Toll baseline: $(date -u +%F)"
+          git push
