@@ -1,0 +1,74 @@
+{
+  "network": "base",
+  "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8",
+  "block": 50841615,
+  "at": "2026-09-03T21:57:39.139Z",
+  "firstTollAt": "2026-07-31T13:49:17.000Z",
+  "lastTollAt": "2026-09-03T13:17:23.000Z",
+  "payers": {
+    "0x29d7837a1c19890d2ab123999e9cf8bfe40985b0": {
+      "calls": 85,
+      "usdcUnits": "407000"
+    },
+    "0x5f871f89b13f5c7f570a765aa54c211323f36f78": {
+      "calls": 37,
+      "usdcUnits": "62000"
+    },
+    "0x51063e78f02f028ddce8f722e24800ed433e435f": {
+      "calls": 27,
+      "usdcUnits": "31000"
+    },
+    "0xc59e74ed6386b2a12d892fff2509a6965a0498dc": {
+      "calls": 26,
+      "usdcUnits": "54000"
+    },
+    "0x686ca1f3baf7f7df3334f2f1a65ae314ee9cdb29": {
+      "calls": 11,
+      "usdcUnits": "27000"
+    },
+    "0x6777e11fb0a7917b8110b7dab9188aa3f6d23986": {
+      "calls": 4,
+      "usdcUnits": "8000"
+    },
+    "0x95b1e99a4c89c6e5bec4c45f59ede7682d18f9d2": {
+      "calls": 3,
+      "usdcUnits": "3000"
+    },
+    "0x644678ad37833c0d52f0170f1f73a5e62bc3e6d5": {
+      "calls": 2,
+      "usdcUnits": "2000"
+    },
+    "0xc533bf5268a2f64adde58dce380651f70aa92d7a": {
+      "calls": 2,
+      "usdcUnits": "2000"
+    },
+    "0xe0b2bf1ebf16ddaf46905cabc75b623261e87c39": {
+      "calls": 1,
+      "usdcUnits": "2000"
+    },
+    "0x4afc5ecf6d1fd84d71fee3e06769bc0271aadcf7": {
+      "calls": 1,
+      "usdcUnits": "2000"
+    },
+    "0x9a07cea7ed111c93a233d1d12bbb68a511b59eea": {
+      "calls": 1,
+      "usdcUnits": "5000"
+    },
+    "0x6e5306c83602b204acaa65ceb05ec178120ea265": {
+      "calls": 1,
+      "usdcUnits": "1000"
+    },
+    "0x34eb6e6101fae8c9900d22ad9b1dc84204d8a195": {
+      "calls": 1,
+      "usdcUnits": "4000"
+    },
+    "0xd10616149e2b967316f9a82c1af4dda6d3608d1d": {
+      "calls": 1,
+      "usdcUnits": "1000"
+    },
+    "0x1ded5e8bb5c8135038cf05ac446f090631780649": {
+      "calls": 1,
+      "usdcUnits": "1000"
+    }
+  }
+}
