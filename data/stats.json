@@ -1,22 +1,22 @@
 {
   "network": "base",
   "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8",
-  "block": 50863277,
-  "at": "2026-09-04T09:59:30.997Z",
+  "block": 50905276,
+  "at": "2026-09-05T09:19:40.781Z",
   "firstTollAt": "2026-07-31T13:49:17.000Z",
-  "lastTollAt": "2026-09-04T01:01:23.000Z",
+  "lastTollAt": "2026-09-05T01:01:05.000Z",
   "payers": {
     "0x29d7837a1c19890d2ab123999e9cf8bfe40985b0": {
-      "calls": 85,
-      "usdcUnits": "407000"
+      "calls": 87,
+      "usdcUnits": "416000"
     },
     "0x5f871f89b13f5c7f570a765aa54c211323f36f78": {
       "calls": 37,
       "usdcUnits": "62000"
     },
     "0x51063e78f02f028ddce8f722e24800ed433e435f": {
-      "calls": 27,
-      "usdcUnits": "31000"
+      "calls": 28,
+      "usdcUnits": "32000"
     },
     "0xc59e74ed6386b2a12d892fff2509a6965a0498dc": {
       "calls": 26,
@@ -25,6 +25,10 @@
     "0x686ca1f3baf7f7df3334f2f1a65ae314ee9cdb29": {
       "calls": 11,
       "usdcUnits": "27000"
+    },
+    "0xbb5dc827367e34e5fc663a4d86451b12aaeb71a9": {
+      "calls": 10,
+      "usdcUnits": "31000"
     },
     "0x6777e11fb0a7917b8110b7dab9188aa3f6d23986": {
       "calls": 5,
@@ -41,6 +45,10 @@
     "0xc533bf5268a2f64adde58dce380651f70aa92d7a": {
       "calls": 2,
       "usdcUnits": "2000"
+    },
+    "0xc9c7b38c0942914fc8ea12063bc92dcd3b581670": {
+      "calls": 2,
+      "usdcUnits": "11000"
     },
     "0xe0b2bf1ebf16ddaf46905cabc75b623261e87c39": {
       "calls": 1,
