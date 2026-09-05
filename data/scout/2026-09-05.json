@@ -1,0 +1,111 @@
+{
+  "date": "2026-09-05",
+  "at": "2026-09-05T11:18:54.516Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0xcb64b91b8ecb7eac976d80ad047ecd8b1a9dc9e5adb26deb0f225c27c70aa105",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 1,
+    "caution": 3,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "NEKO / WETH 0.01%",
+      "pool": "0x8769116586c4b3ed07df34f0e2858f53158e0968502d7b9456a229d12349848f",
+      "token": "0x6a350fccb5cb9b44eb87e8754967733fe7ed76db",
+      "createdAt": "2026-09-05T10:27:49Z",
+      "priceUsd": 0.0000567047228791547,
+      "volume24hUsd": 178601.781224746,
+      "liquidityUsd": 37483.4822,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "verified"
+        ],
+        "warnings": [
+          "honeypot",
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "HOOK / ETH 0.3%",
+      "pool": "0x6c86561ecc3b8456cd924ae1edc5da538d8c440a0294c853dcf656e353cdc0ff",
+      "token": "0xb200000000000000000000fb3d3d66c77b215656",
+      "createdAt": "2026-09-05T10:57:33Z",
+      "priceUsd": 0.0000912581707258528,
+      "volume24hUsd": 60523.6500922665,
+      "liquidityUsd": 27066.294,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "COIN / ETH 0.3%",
+      "pool": "0xa53287d951932046593780748b6fe6b7134b8f2087151013fbd5318d85cd5535",
+      "token": "0xb200000000000000000000d9090b08cdf7972099",
+      "createdAt": "2026-09-05T10:51:17Z",
+      "priceUsd": 0.000134914967677683,
+      "volume24hUsd": 59600.7295004159,
+      "liquidityUsd": 36876.0479,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "IKUN / ETH 0.3%",
+      "pool": "0x0f3dc303682f4f56c7091e1d90b77d23a722f003fd44b942e935cc72d764368a",
+      "token": "0xb200000000000000000000c05777c6a41c01aa7c",
+      "createdAt": "2026-09-05T10:54:27Z",
+      "priceUsd": 0.0000735074747064964,
+      "volume24hUsd": 58610.6191971596,
+      "liquidityUsd": 28891.4155,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    }
+  ]
+}
