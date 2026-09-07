@@ -267,6 +267,34 @@ export async function fromChain(payTo: string): Promise<Tally> {
   };
 }
 
+/**
+ * History cannot shrink. A wallet that had paid 37 tolls by the baseline block
+ * has 37 forever, so an indexer reporting fewer is serving an incomplete view
+ * rather than a smaller truth — which is exactly what Blockscout did for days
+ * after its September outage, answering 200 OK while quietly missing a dozen
+ * calls. Failing here hands the request to the chain reading instead.
+ *
+ * Best effort: if the baseline itself is unreachable, that is no reason to
+ * reject an answer we have nothing to contradict.
+ */
+async function assertNotBehindBaseline(tally: Tally): Promise<void> {
+  let base: BaselineFile;
+  try {
+    base = await baseline();
+  } catch {
+    return;
+  }
+
+  for (const [addr, recorded] of Object.entries(base.payers)) {
+    const seen = tally.payers.get(addr.toLowerCase());
+    if (!seen || seen.calls < recorded.calls) {
+      throw new Error(
+        `behind the committed baseline (${addr.slice(0, 10)}…: ${seen?.calls ?? 0} < ${recorded.calls})`,
+      );
+    }
+  }
+}
+
 // --- shared shape ----------------------------------------------------------
 
 function summarise(t: Tally) {
@@ -312,7 +340,14 @@ export async function getStats(payTo: string) {
   return cached("stats", 300_000, async () =>
     summarise(
       await fromSources<Tally>("stats", [
-        { name: "blockscout", load: () => fromBlockscout(payTo) },
+        {
+          name: "blockscout",
+          load: async () => {
+            const tally = await fromBlockscout(payTo);
+            await assertNotBehindBaseline(tally);
+            return tally;
+          },
+        },
         { name: "onchain-logs", load: () => fromChain(payTo) },
       ]),
     ),
