@@ -48,6 +48,7 @@ interface RawLog {
   data: `0x${string}`;
   topics: [`0x${string}`, ...`0x${string}`[]];
   blockNumber: `0x${string}`;
+  transactionHash: `0x${string}`;
 }
 
 interface FreshPool {
@@ -63,6 +64,10 @@ interface FreshPool {
   createdAt: string;
   ageSeconds: number;
   funded: boolean;
+  /** The transaction that opened the pool, so the line below can be checked. */
+  launchTx: string;
+  /** The wallet that sent it, or null if unreadable. */
+  launchedBy: string | null;
   hook: string;
   hookPools: number;
   feeMode: "dynamic" | "static";
@@ -77,6 +82,59 @@ interface Window {
 }
 
 const hex = (n: number | bigint) => `0x${BigInt(n).toString(16)}`;
+
+/**
+ * Who sent the transaction that opened each pool.
+ *
+ * No indexer can answer this for a token minutes old — it has not been indexed
+ * yet, which is why /api/base/safety leaves the deployer unchecked on most of
+ * what this endpoint surfaces. The chain can: the Initialize log carries its
+ * own transaction hash, and that transaction has a sender. For a launchpad
+ * pool that sender is the person who pressed the button rather than the
+ * factory contract, which is the more telling of the two.
+ *
+ * A transaction's sender never changes, so answers are kept for the life of
+ * the instance: the hour-long window holds hundreds of pools, and the same
+ * ones are asked for again every time the window refreshes.
+ */
+const senderCache = new Map<string, string>();
+const SENDER_CACHE_MAX = 2_000;
+
+async function sendersOf(hashes: string[]): Promise<Map<string, string>> {
+  const senders = new Map<string, string>();
+  const BATCH = 6; // quick enough, small enough not to trip a public RPC
+
+  const missing: string[] = [];
+  for (const h of hashes) {
+    const known = senderCache.get(h);
+    if (known) senders.set(h, known);
+    else if (!missing.includes(h)) missing.push(h);
+  }
+
+  for (let i = 0; i < missing.length; i += BATCH) {
+    const slice = missing.slice(i, i + BATCH);
+    const results = await Promise.allSettled(
+      slice.map((h) => baseRpc<{ from?: string } | null>("eth_getTransactionByHash", [h])),
+    );
+    results.forEach((result, j) => {
+      const from = result.status === "fulfilled" ? result.value?.from : undefined;
+      // A sender we could not read is null, not an error: the pool itself is
+      // still worth reporting, and this is one field on it.
+      if (from) {
+        senders.set(slice[j], from.toLowerCase());
+        senderCache.set(slice[j], from.toLowerCase());
+      }
+    });
+  }
+
+  // Oldest first out, since pools age out of the window in the same order.
+  if (senderCache.size > SENDER_CACHE_MAX) {
+    for (const k of [...senderCache.keys()].slice(0, senderCache.size - SENDER_CACHE_MAX)) {
+      senderCache.delete(k);
+    }
+  }
+  return senders;
+}
 
 async function readWindow(): Promise<Window> {
   const headHex = await baseRpc<string>("eth_blockNumber");
@@ -105,7 +163,7 @@ async function readWindow(): Promise<Window> {
         hooks: string;
       };
     };
-    return { ...args, block: Number(BigInt(log.blockNumber)) };
+    return { ...args, block: Number(BigInt(log.blockNumber)), tx: log.transactionHash };
   });
 
   // One request answers "was this funded" for every pool in the window: v4
@@ -192,6 +250,8 @@ async function readWindow(): Promise<Window> {
       createdAt: new Date(headTime - age * 1000).toISOString(),
       ageSeconds: age,
       funded: funded.has(d.id.toLowerCase()),
+      launchTx: d.tx,
+      launchedBy: null,
       hook: d.hooks.toLowerCase(),
       hookPools: hookUse.get(d.hooks.toLowerCase()) ?? 1,
       feeMode: dynamic ? "dynamic" : "static",
@@ -221,7 +281,13 @@ export async function getFreshPools(
 
   const cutoff = minutes * 60;
   const inWindow = window.pools.filter((p) => p.ageSeconds <= cutoff);
-  const pools = (fundedOnly ? inWindow.filter((p) => p.funded) : inWindow).slice(0, limit);
+  const shown = (fundedOnly ? inWindow.filter((p) => p.funded) : inWindow).slice(0, limit);
+
+  // Only what the caller will actually see gets a sender lookup. The hour-long
+  // window holds hundreds of pools and resolving all of them cost fourteen
+  // seconds for fields nobody asked for.
+  const senders = await sendersOf(shown.map((p) => p.launchTx));
+  const pools = shown.map((p) => ({ ...p, launchedBy: senders.get(p.launchTx) ?? null }));
 
   return {
     chain: "base",
@@ -236,7 +302,7 @@ export async function getFreshPools(
       shown: pools.length,
     },
     method:
-      "Read from the Uniswap v4 PoolManager's own Initialize log on Base, so a pool appears about a block after it exists. `funded` comes from ModifyLiquidity events for the same pool id. `hookPools` counts how many pools in the last hour share that hook: a high count is a launchpad, exactly 1 is bespoke code shipped with this token. `tokenBasis` says how the launched side was identified — against a known quote asset, or inferred because the other side recurs across the window as a backing asset; when both sides are equally new it stays null rather than guessing, and `pair` always carries both. Ages are derived from block height at 2s per block.",
+      "Read from the Uniswap v4 PoolManager's own Initialize log on Base, so a pool appears about a block after it exists. `funded` comes from ModifyLiquidity events for the same pool id. `hookPools` counts how many pools in the last hour share that hook: a high count is a launchpad, exactly 1 is bespoke code shipped with this token. `tokenBasis` says how the launched side was identified — against a known quote asset, or inferred because the other side recurs across the window as a backing asset; when both sides are equally new it stays null rather than guessing, and `pair` always carries both. `launchedBy` is the sender of the pool-opening transaction, read from the chain rather than an index — for a launchpad pool that is the person who pressed the button, not the factory; it is who opened the pool, which is not necessarily who deployed the token. Ages are derived from block height at 2s per block.",
     notMeasured:
       "USD liquidity. v4 keeps every pool's tokens in one singleton contract, and the pool's liquidity at the current tick reads 0 for most fresh launches, so any USD figure here would be invented. /api/base/radar carries real liquidity and volume once an indexer has the pool, minutes later.",
     at: window.at,

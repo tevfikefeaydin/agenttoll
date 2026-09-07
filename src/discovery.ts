@@ -187,6 +187,8 @@ export const DISCOVERY: Record<string, Discovery> = {
           createdAt: "2026-08-07T09:41:12.000Z",
           ageSeconds: 14,
           funded: true,
+          launchTx: "0xd31d3b760a...",
+          launchedBy: "0x51dfdeecdc...",
           hook: "0xbdf938149a...",
           hookPools: 21,
           feeMode: "dynamic",
