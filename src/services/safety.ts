@@ -66,6 +66,7 @@ interface GoPlusToken {
   owner_change_balance?: string;
   external_call?: string;
   honeypot_with_same_creator?: string;
+  creator_address?: string;
   creator_percent?: string;
   owner_percent?: string;
   holder_count?: string;
@@ -290,7 +291,23 @@ async function fromDeployer(token: string): Promise<Deployer | null> {
   // the explorer is exactly the sort of confident wrong answer this endpoint
   // exists to avoid.
   if (!creator) return null;
+  return deployerFromCreator(creator, info.is_scam === true);
+}
 
+/**
+ * Everything about a creator that the chain itself can answer: whether it is a
+ * contract, how used the wallet is, what it holds. Split out because the hard
+ * part is only ever learning *who* the creator is — once we have an address,
+ * this works off plain RPC and needs no explorer at all.
+ *
+ * `withAge` is the one part that still wants an explorer, so the caller can
+ * turn it off when it already knows Blockscout is unreachable.
+ */
+async function deployerFromCreator(
+  creator: string,
+  flaggedScam: boolean,
+  withAge = true,
+): Promise<Deployer> {
   const [codeResult, nonceResult, balanceResult] = await Promise.allSettled([
     baseRpc<string>("eth_getCode", [creator, "latest"]),
     baseRpc<string>("eth_getTransactionCount", [creator, "latest"]),
@@ -308,7 +325,7 @@ async function fromDeployer(token: string): Promise<Deployer | null> {
   // therefore its age - is one request away. A busy wallet is established by
   // definition, and paging back through it would buy nothing.
   let firstSeen: string | null = null;
-  if (!isContract && txCount !== null && txCount > 0 && txCount <= 50) {
+  if (withAge && !isContract && txCount !== null && txCount > 0 && txCount <= 50) {
     try {
       const txRes = await blockscoutFetch(`${BLOCKSCOUT_ADDR}/${creator}/transactions?filter=from`, {
         headers: { Accept: "application/json" },
@@ -328,7 +345,7 @@ async function fromDeployer(token: string): Promise<Deployer | null> {
     firstSeen,
     ageHours:
       firstSeen === null ? null : Math.round((Date.now() - Date.parse(firstSeen)) / 3_600_000),
-    flaggedScam: info.is_scam === true,
+    flaggedScam,
   };
 }
 
@@ -396,7 +413,7 @@ export async function getTokenSafety(address: string) {
     ]);
     const gp = gpResult.status === "fulfilled" ? gpResult.value : null;
     const hp = hpResult.status === "fulfilled" ? hpResult.value : null;
-    const deployer = depResult.status === "fulfilled" ? depResult.value : null;
+    const deployerFromBlockscout = depResult.status === "fulfilled" ? depResult.value : null;
 
     if (!gp && !hp) {
       throw new Error("Both safety sources are unavailable right now — please retry");
@@ -405,7 +422,28 @@ export async function getTokenSafety(address: string) {
       badRequest("That address is not a token we can analyse on Base");
     }
 
-    const checks = [...buildChecks(gp, hp), deployerCheck(deployer, depResult.status === "rejected")];
+    // Blockscout is the only source that carries a scam flag, and also the
+    // least reliable thing this endpoint touches: while it was down, and for
+    // any token too new for it to have indexed, the deployer check went
+    // "unchecked" on every call — 76% of the tokens in our own snapshots.
+    // GoPlus has already told us who the creator is, and everything after
+    // that is plain RPC, so fall back to it rather than giving up. Age is
+    // skipped there: it is the one part that still needs an explorer, and we
+    // would only be waiting out the same timeout twice.
+    let deployer = deployerFromBlockscout;
+    let deployerFailed = depResult.status === "rejected";
+    let deployerSource = deployer ? "blockscout+rpc" : null;
+    if ((deployerFailed || !deployer) && gp?.creator_address) {
+      try {
+        deployer = await deployerFromCreator(gp.creator_address, false, false);
+        deployerFailed = false;
+        deployerSource = "goplus+rpc";
+      } catch {
+        /* keep whatever the first attempt concluded */
+      }
+    }
+
+    const checks = [...buildChecks(gp, hp), deployerCheck(deployer, deployerFailed)];
     const failed = checks.filter((c) => c.status === "fail");
     const warned = checks.filter((c) => c.status === "warn");
     const unknown = checks.filter((c) => c.status === "unknown");
@@ -413,7 +451,7 @@ export async function getTokenSafety(address: string) {
     const sources: string[] = [];
     if (gp) sources.push("goplus");
     if (hp) sources.push("honeypot.is");
-    if (deployer) sources.push("blockscout+rpc");
+    if (deployerSource) sources.push(deployerSource);
 
     return {
       chain: "base",
