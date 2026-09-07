@@ -262,7 +262,7 @@ export const DISCOVERY: Record<string, Discovery> = {
         { id: "owner-powers", status: "warn", detail: "Owner can: owner can mint new supply" },
         { id: "deployer", status: "pass", detail: "The deployer is a wallet with 731 transactions and holds 0.12094 ETH" },
       ],
-      deployer: { address: "0xe83f922c34a1...", isContract: false, txCount: 731, balanceEth: 0.12094, firstSeen: null, ageHours: null, flaggedScam: false },
+      deployer: { address: "0xe83f922c34a1...", basis: "contract-creator", isContract: false, txCount: 731, balanceEth: 0.12094, firstSeen: null, ageHours: null, flaggedScam: false },
       holderCount: 748566,
       listedOnCex: ["Coinbase"],
       sources: ["goplus", "honeypot.is"],

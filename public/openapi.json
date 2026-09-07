@@ -994,6 +994,7 @@
                   ],
                   "deployer": {
                     "address": "0xe83f922c34a1...",
+                    "basis": "contract-creator",
                     "isContract": false,
                     "txCount": 731,
                     "balanceEth": 0.12094,

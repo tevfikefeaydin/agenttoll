@@ -264,6 +264,22 @@ async function readWindow(): Promise<Window> {
 }
 
 /**
+ * The wallet that opened this token's pool, if it launched inside the window.
+ *
+ * /api/base/safety uses this when no index knows the token yet, which for a
+ * launch minutes old is the normal case. Reads the same cached window and the
+ * same remembered senders, so asking costs a lookup rather than a scan.
+ */
+export async function launcherOf(token: string): Promise<{ address: string; tx: string } | null> {
+  const window = await cached("fresh", 30_000, readWindow);
+  const pool = window.pools.find((p) => p.token === token.toLowerCase());
+  if (!pool) return null;
+
+  const address = (await sendersOf([pool.launchTx])).get(pool.launchTx);
+  return address ? { address, tx: pool.launchTx } : null;
+}
+
+/**
  * `minutes` is how far back to look (default 10, max 60) and `limit` caps the
  * list. `fundedOnly` drops pools nobody has put anything into yet.
  */

@@ -1,5 +1,6 @@
 import { cached, fetchWithTimeout } from "./cache.js";
 import { badRequest } from "./errors.js";
+import { launcherOf } from "./fresh.js";
 import { baseRpc, blockscoutFetch } from "./sources.js";
 
 /**
@@ -268,6 +269,13 @@ const ESTABLISHED_TXS = 25;
 
 export interface Deployer {
   address: string;
+  /**
+   * Which wallet this actually is. The contract's creator when an index knows
+   * it; otherwise whoever opened the token's pool — a different question with
+   * the same purpose, and for a launchpad launch usually the better answer,
+   * since the creator there is just the factory.
+   */
+  basis: "contract-creator" | "pool-opener";
   isContract: boolean;
   txCount: number | null;
   balanceEth: number | null;
@@ -307,6 +315,7 @@ async function deployerFromCreator(
   creator: string,
   flaggedScam: boolean,
   withAge = true,
+  basis: Deployer["basis"] = "contract-creator",
 ): Promise<Deployer> {
   const [codeResult, nonceResult, balanceResult] = await Promise.allSettled([
     baseRpc<string>("eth_getCode", [creator, "latest"]),
@@ -339,6 +348,7 @@ async function deployerFromCreator(
 
   return {
     address: creator.toLowerCase(),
+    basis,
     isContract,
     txCount,
     balanceEth: balanceHex === null ? null : Number(BigInt(balanceHex)) / 1e18,
@@ -370,7 +380,10 @@ function deployerCheck(d: Deployer | null, lookupFailed: boolean): Check {
     return {
       id: "deployer",
       status: "pass",
-      detail: `Deployed by a contract (${d.address.slice(0, 10)}…), which is how launchpads ship tokens`,
+      detail:
+        d.basis === "pool-opener"
+          ? `The pool was opened by a contract (${d.address.slice(0, 10)}…), typically a router or an aggregator`
+          : `Deployed by a contract (${d.address.slice(0, 10)}…), which is how launchpads ship tokens`,
     };
   }
   if (d.txCount === null) {
@@ -379,7 +392,8 @@ function deployerCheck(d: Deployer | null, lookupFailed: boolean): Check {
 
   const age = d.ageHours === null ? "" : `, first active ${d.ageHours < 48 ? `${d.ageHours}h` : `${Math.round(d.ageHours / 24)}d`} ago`;
   const balance = d.balanceEth === null ? "" : ` and holds ${d.balanceEth.toFixed(5)} ETH`;
-  const body = `The deployer is a wallet with ${d.txCount} transaction${d.txCount === 1 ? "" : "s"}${age}${balance}`;
+  const who = d.basis === "pool-opener" ? "The wallet that opened the pool has" : "The deployer is a wallet with";
+  const body = `${who} ${d.txCount} transaction${d.txCount === 1 ? "" : "s"}${age}${balance}`;
 
   if (d.txCount < THROWAWAY_TXS) {
     return {
@@ -440,6 +454,24 @@ export async function getTokenSafety(address: string) {
         deployerSource = "goplus+rpc";
       } catch {
         /* keep whatever the first attempt concluded */
+      }
+    }
+
+    // Last resort, and the only one that works on a token minutes old: if it
+    // launched inside the fresh window, the chain knows who opened its pool
+    // even though no index has heard of the token. A different question from
+    // "who deployed the contract" — for a launchpad launch, a better one, and
+    // the answer says which it is.
+    if (!deployer) {
+      try {
+        const launcher = await launcherOf(addr);
+        if (launcher) {
+          deployer = await deployerFromCreator(launcher.address, false, false, "pool-opener");
+          deployerFailed = false;
+          deployerSource = "fresh+rpc";
+        }
+      } catch {
+        /* keep whatever the earlier attempts concluded */
       }
     }
 
