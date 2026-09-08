@@ -1,0 +1,117 @@
+{
+  "date": "2026-09-08",
+  "at": "2026-09-08T12:12:40.710Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x268c008174ea4bc0a2efb648058037b891263b1b4eb32dcb82e9ceb2714490d1",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 2,
+    "caution": 2,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "BODEN / WETH 0.01%",
+      "pool": "0xcdd64afa264951381c574713ebe655e41d907efbeb75bdf804587e791f9a7bfa",
+      "token": "0xaf46d9d552b3b05b6eabb3342c0a070ed850ce47",
+      "createdAt": "2026-09-08T12:00:23Z",
+      "priceUsd": 0.00012634671852865,
+      "volume24hUsd": 77653.4590679259,
+      "liquidityUsd": 40303.3691,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "verified"
+        ],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "owner-powers",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "NOVA / WETH",
+      "pool": "0xcfbdc70dbe1f8401f411dfb439b3551c0e1e5065",
+      "token": "0xa9f98c77b0d1b88d754d015d11ce1679cbc32d60",
+      "createdAt": "2026-09-08T11:34:19Z",
+      "priceUsd": 0.00000899974412299776,
+      "volume24hUsd": 7300.5657180132,
+      "liquidityUsd": 88518.0979,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "NOVA / ETH 0.3%",
+      "pool": "0xfd07731fd4643c60bbf9ef73f1561d4f673e9943ca93ba961f32e6c613c9a759",
+      "token": "0xb2000000000000000000006ff9dc5cc75cf35562",
+      "createdAt": "2026-09-08T12:01:39Z",
+      "priceUsd": 0.0000152353361731296,
+      "volume24hUsd": 5039.6099702907,
+      "liquidityUsd": 16138.251,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "owner-powers",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "1KTO100M / WETH",
+      "pool": "0xea8f5db2516b8dd1c50fe0f920ca512a478ba428",
+      "token": "0x28617dc3971fcefb7669d1ae87f980cc580d3470",
+      "createdAt": "2026-09-08T12:00:11Z",
+      "priceUsd": 0.00000241411191341329,
+      "volume24hUsd": 3819.6181481941,
+      "liquidityUsd": 18965.0902,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "verified"
+        ],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "verified",
+          "owner-powers",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    }
+  ]
+}
