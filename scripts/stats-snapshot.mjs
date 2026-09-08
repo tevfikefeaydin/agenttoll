@@ -17,7 +17,7 @@ import path from "node:path";
 // data/stats.json is the mainnet baseline, so pin the network before the
 // module is evaluated — it picks its USDC address from the environment at
 // import time, and a static import would run before this line.
-process.env.NETWORK ??= "base";
+process.env.NETWORK = "base";
 const { scanTollLogs, latestBlock, blockMinedAt, LOG_CHUNK } = await import("../dist/services/stats.js");
 
 const PAY_TO = process.env.ADDRESS ?? "0xe55359021a6a22d8385b827405991c56075f56f8";
@@ -26,7 +26,7 @@ const PAY_TO = process.env.ADDRESS ?? "0xe55359021a6a22d8385b827405991c56075f56f
 const FIRST_BLOCK = Number(process.env.STATS_FROM_BLOCK ?? 49_340_000);
 const OUT = path.join(process.cwd(), "data", "stats.json");
 
-const head = await latestBlock();
+const head = await latestBlock("base");
 console.log(`scanning ${FIRST_BLOCK} → ${head} (${Math.ceil((head - FIRST_BLOCK) / LOG_CHUNK)} chunks)`);
 
 const payers = new Map();
@@ -40,7 +40,7 @@ for (let from = FIRST_BLOCK; from <= head; from += LOG_CHUNK) {
   // so retry a few times and give up loudly rather than write a wrong file.
   for (let attempt = 1; ; attempt++) {
     try {
-      tolls = await scanTollLogs(PAY_TO, from, to);
+      tolls = await scanTollLogs(PAY_TO, from, to, "base");
       break;
     } catch (err) {
       if (attempt >= 4) throw new Error(`blocks ${from}-${to}: ${err.message}`);
@@ -63,8 +63,8 @@ const snapshot = {
   payTo: PAY_TO,
   block: head,
   at: new Date().toISOString(),
-  firstTollAt: firstBlock ? await blockMinedAt(firstBlock) : null,
-  lastTollAt: lastBlock ? await blockMinedAt(lastBlock) : null,
+  firstTollAt: firstBlock ? await blockMinedAt(firstBlock, "base") : null,
+  lastTollAt: lastBlock ? await blockMinedAt(lastBlock, "base") : null,
   // Micro-USDC as strings: exact, and the reader parses them back to BigInt.
   payers: Object.fromEntries(
     [...payers.entries()]

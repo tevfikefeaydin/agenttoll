@@ -11,10 +11,10 @@ fetch("/api/stats")
       return;
     }
     const n = (v) => "<strong>" + v.toLocaleString("en-US") + "</strong>";
-    // Only claim agents once someone other than our own test wallet has paid.
+    // Count distinct paying wallets; an address does not establish an agent identity.
     el.innerHTML = s.externalPayers
       ? n(s.externalPayers) +
-        (s.externalPayers === 1 ? " agent has paid · " : " agents have paid · ") +
+        (s.externalPayers === 1 ? " wallet has paid · " : " wallets have paid · ") +
         n(s.tollsCollected) +
         " tolls settled onchain"
       : n(s.tollsCollected) + " tolls · <strong>$" + s.revenueUsdc.toFixed(3) + "</strong> USDC settled onchain";
@@ -62,6 +62,8 @@ if (matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObs
 // Stage 1 (the quote) is a plain fetch, so it costs no extra bytes and works
 // for every visitor. Stage 2 pulls the wallet bundle only when asked.
 const ENDPOINT = "/api/base/fresh";
+let displayedQuote;
+let displayedRecipient;
 const demoOut = document.getElementById("demo-out");
 const quoteBtn = document.getElementById("demo-quote");
 const payBtn = document.getElementById("demo-pay");
@@ -78,9 +80,12 @@ function show(html, tone = "quote") {
 if (quoteBtn) {
   quoteBtn.addEventListener("click", async () => {
     quoteBtn.disabled = true;
+    displayedQuote = undefined;
+    displayedRecipient = undefined;
+    if (payBtn) payBtn.hidden = true;
     show('<span class="dim">Requesting ' + ENDPOINT + " …</span>", "wait");
     try {
-      const res = await fetch(ENDPOINT);
+      const res = await fetch(ENDPOINT, { signal: AbortSignal.timeout(10000), redirect: "error" });
       // x402 v2 puts the quote in the PAYMENT-REQUIRED header (base64 JSON);
       // the body is deliberately empty. Reading the body here is the v1 shape
       // and shows every visitor an error.
@@ -96,6 +101,17 @@ if (quoteBtn) {
         show('<span class="bad">Unexpected response: HTTP ' + res.status + "</span>", "err");
         return;
       }
+      const identityResponse = await fetch("/.well-known/agent-card.json", { signal: AbortSignal.timeout(10000), redirect: "error" });
+      if (!identityResponse.ok) throw new Error("Could not read the deployment payment configuration.");
+      const identity = await identityResponse.json();
+      const recipient = identity.identity?.payTo;
+      if (typeof recipient !== "string" || !/^0x[0-9a-fA-F]{40}$/.test(recipient) ||
+          recipient.toLowerCase() !== String(accept.payTo).toLowerCase() ||
+          identity.interfaces?.http?.payment?.network !== accept.network) {
+        throw new Error("The quote recipient or network differs from the deployment configuration.");
+      }
+      displayedQuote = quote;
+      displayedRecipient = recipient;
       const to = String(accept.payTo);
       const network =
         accept.network === "eip155:8453"
@@ -136,12 +152,13 @@ if (payBtn) {
           const s = document.createElement("script");
           s.src = "/demo.js";
           s.onload = resolve;
-          s.onerror = () => reject(new Error("Could not load the payment library."));
+          s.onerror = () => { loading = undefined; s.remove(); reject(new Error("Could not load the payment library.")); };
           document.head.appendChild(s);
         });
         await loading;
       }
-      await window.agentTollPay(ENDPOINT, show);
+      if (!displayedQuote || !displayedRecipient) throw new Error("Request and inspect a payment quote first.");
+      await window.agentTollPay(ENDPOINT, show, { quote: displayedQuote, recipient: displayedRecipient });
     } catch (err) {
       show('<span class="bad">' + esc(err.message) + "</span>", "err");
     } finally {

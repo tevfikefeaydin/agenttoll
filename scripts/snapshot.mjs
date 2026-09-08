@@ -1,11 +1,9 @@
 /**
  * Daily scout snapshot — the raw material of the track record.
  *
- * Pays for one scout call and commits the result to data/scout/<date>.json.
- * The history lives in git on purpose: every claim the scorecard later makes
- * traces back to a dated, hash-chained commit that anyone can audit, and the
- * settlement hash inside each snapshot proves the data was bought onchain the
- * day it says it was.
+ * Pays for one scout call and writes data/scout/<date>.json; CI publishes it
+ * in git. A commit SHA pins the published bytes. The payment receipt records
+ * settlement but does not authenticate those bytes or prove capture time.
  *
  *   node scripts/snapshot.mjs            # skips if today's file exists
  *   FORCE=1 node scripts/snapshot.mjs    # re-shoot today
@@ -18,7 +16,10 @@ import path from "node:path";
 import { payingFetch } from "../dist/pay.js";
 import { decodePaymentResponseHeader } from "@x402/fetch";
 
-const BASE = process.env.AGENTTOLL_URL ?? "https://agenttoll.app";
+const BASE = (process.env.AGENTTOLL_URL ?? "https://agenttoll.app").replace(/\/+$/, "");
+const local = ["localhost", "127.0.0.1", "[::1]"].includes(new URL(BASE).hostname);
+const network = process.env.AGENTTOLL_NETWORK ?? (local ? process.env.NETWORK ?? "base-sepolia" : "base");
+const recipient = process.env.AGENTTOLL_RECIPIENT ?? (local ? process.env.ADDRESS : undefined);
 const DIR = path.join(process.cwd(), "data", "scout");
 const date = new Date().toISOString().slice(0, 10);
 const file = path.join(DIR, `${date}.json`);
@@ -33,7 +34,12 @@ if (!key) {
   console.error("AGENT_PRIVATE_KEY eksik.");
   process.exit(1);
 }
-const { fetchWithPayment } = payingFetch(key, "base");
+const { fetchWithPayment } = payingFetch(key, network, {
+  baseUrl: BASE, recipient,
+  totalBudgetUsdc: process.env.AGENTTOLL_BUDGET_USDC,
+  maxPerCallUsdc: process.env.AGENTTOLL_MAX_PER_CALL_USDC,
+  timeoutMs: process.env.AGENTTOLL_TIMEOUT_MS === undefined ? undefined : Number(process.env.AGENTTOLL_TIMEOUT_MS),
+});
 
 const res = await fetchWithPayment(`${BASE}/api/base/scout?minLiquidity=15000&pools=4`, {
   method: "GET",
@@ -53,7 +59,7 @@ const snapshot = {
   at: scout.at,
   source: "scout",
   params: { minLiquidity: 15000, pools: 4 },
-  // The Base tx that settled the $0.008 paid for this very snapshot.
+  // Payment receipt only; it does not bind the response contents or timestamp.
   settlement,
   summary: scout.summary,
   pools: scout.pools,

@@ -17,8 +17,19 @@
  */
 import "dotenv/config";
 import { payingFetch } from "../dist/pay.js";
+import { createPaymentClient, getNetworkConfig } from "../dist/payment-policy.js";
 
-const BASE = process.env.AGENTTOLL_URL ?? "https://agenttoll.app";
+const BASE = (process.env.AGENTTOLL_URL ?? "https://agenttoll.app").replace(/\/+$/, "");
+const local = ["localhost", "127.0.0.1", "[::1]"].includes(new URL(BASE).hostname);
+const network = process.env.AGENTTOLL_NETWORK ?? (local ? process.env.NETWORK ?? "base-sepolia" : "base");
+const chain = getNetworkConfig(network);
+const paymentOptions = {
+  baseUrl: BASE,
+  recipient: process.env.AGENTTOLL_RECIPIENT ?? (local ? process.env.ADDRESS : undefined),
+  totalBudgetUsdc: process.env.AGENTTOLL_BUDGET_USDC,
+  maxPerCallUsdc: process.env.AGENTTOLL_MAX_PER_CALL_USDC,
+  timeoutMs: process.env.AGENTTOLL_TIMEOUT_MS === undefined ? undefined : Number(process.env.AGENTTOLL_TIMEOUT_MS),
+};
 const DRY = process.argv.includes("--dry");
 const SPEED = process.env.SPEED === undefined ? 1 : Number(process.env.SPEED);
 const REPO = "https://github.com/tevfikefeaydin/agenttoll";
@@ -33,13 +44,6 @@ async function beat(title) {
   line(`  ${title}`);
   rule();
   await sleep(600);
-}
-
-/** Pulls the quote out of the 402 challenge, which v2 puts in a header. */
-function quoteFrom(res) {
-  const header = res.headers.get("payment-required");
-  if (!header) return null;
-  return JSON.parse(Buffer.from(header, "base64").toString("utf8"));
 }
 
 /** The settlement receipt the server hands back once payment clears. */
@@ -60,23 +64,19 @@ await beat("1. There is no API key. There is a price.");
 line(`  GET ${BASE}/api/base/fresh`);
 await sleep(500);
 
-const challenge = await fetch(`${BASE}/api/base/fresh`);
-const quote = quoteFrom(challenge);
-if (!quote) {
-  console.error(`  Expected a 402 challenge, got HTTP ${challenge.status}.`);
-  process.exit(1);
-}
+const quoteClient = createPaymentClient(network, undefined, paymentOptions);
+const { quote } = await quoteClient.getPaymentQuote("/api/base/fresh");
 const accept = quote.accepts[0];
 
 line();
-line(`  HTTP ${challenge.status}  ${quote.error}`);
+line("  HTTP 402  Payment Required");
 line(`  price     ${usd(accept.amount)} USDC`);
-line(`  network   ${accept.network}   (Base mainnet)`);
+line(`  network   ${accept.network}   (${chain.name})`);
 line(`  payTo     ${accept.payTo}`);
 line();
-line("  The quote rides in the response header, and it carries this");
-line("  endpoint's request and response schema with it - so an agent that");
-line("  has only ever seen a 402 already knows how to call us.");
+line("  The quote rides in PAYMENT-REQUIRED. The client validates its");
+line("  network, USDC contract, recipient and registered price ceiling");
+line("  before a wallet is asked to sign.");
 await sleep(2600);
 
 if (DRY) {
@@ -90,7 +90,7 @@ if (!key) {
   console.error("\n  AGENT_PRIVATE_KEY missing - cannot make a paid call.");
   process.exit(1);
 }
-const { fetchWithPayment, address } = payingFetch(key, "base");
+const { fetchWithPayment, address } = payingFetch(key, network, paymentOptions);
 
 // ---------------------------------------------------------------- beat 2
 await beat("2. The agent pays it, inline, and gets the data.");
@@ -98,7 +98,7 @@ line(`  wallet    ${address}`);
 line("  paying...");
 
 const started = Date.now();
-const freshRes = await fetchWithPayment(`${BASE}/api/base/fresh?minutes=15&limit=5`);
+const freshRes = await fetchWithPayment(`${BASE}/api/base/fresh?minutes=15&limit=5`, undefined, quote);
 const freshMs = Date.now() - started;
 if (!freshRes.ok) {
   console.error(`  fresh -> HTTP ${freshRes.status}`);
@@ -111,11 +111,11 @@ line();
 line(`  HTTP ${freshRes.status}  in ${freshMs}ms`);
 if (receipt?.transaction) {
   line(`  settled   ${receipt.transaction}`);
-  line(`            https://basescan.org/tx/${receipt.transaction}`);
+  line(`            ${chain.explorer}/tx/${receipt.transaction}`);
 }
 line();
 line("  That is the whole business model. No account was created, no key");
-line("  was issued, and nothing is charged when a request fails.");
+line("  was issued. After a signed timeout, check the wallet before retrying.");
 await sleep(2800);
 
 // ---------------------------------------------------------------- beat 3
@@ -128,7 +128,7 @@ const subjectPool = withToken[0];
 
 line(`  Uniswap v4 pools created in the last ${fresh.windowMinutes} minutes: ${fresh.summary.found}`);
 line(`  read from Base block ${fresh.headBlock}`);
-line(`  youngest one is ${byAge[0].ageSeconds} seconds old`);
+line(byAge.length ? `  youngest one is ${byAge[0].ageSeconds} seconds old` : "  no pools were returned in this window");
 line();
 if (subjectPool) {
   line(`  launched token    ${subjectPool.token}`);
@@ -200,19 +200,19 @@ if (subjectPool) {
 // ---------------------------------------------------------------- beat 5
 await beat("5. And then: were we right?");
 line("  Every day, a CI job buys one scout call and commits the result to");
-line("  public git, with the Base transaction that paid for it inside.");
+line("  public git, with the payment receipt recorded alongside it.");
 line();
 line(`  ${REPO}/tree/main/data/scout`);
 line();
-line("  So a verdict cannot be quietly rewritten after the fact. Anyone can");
-line("  check what we flagged, on the date we flagged it, and what happened");
-line("  to it since. Nobody else in this ecosystem publishes that.");
+line("  A commit SHA pins the published bytes. The receipt does not prove");
+line("  their contents or capture time. The scorecard compares sampled");
+line("  first sightings with current quotes over varying holding periods.");
 await sleep(2600);
 
 // ---------------------------------------------------------------- close
 line();
 rule();
-line("  20 paid endpoints. $0.001 to $0.008 a call. USDC on Base, via x402.");
+line(`  21 paid endpoints. $0.001 to $0.008 a call. USDC on ${chain.name}, via x402.`);
 line("  Open source, MIT. MCP server on npm as agenttoll-mcp.");
 line(`  ${BASE}`);
 rule();

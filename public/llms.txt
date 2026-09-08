@@ -1,108 +1,74 @@
 # AgentToll
 
-> Base-native onchain data for AI agents, pay-per-call. The core is three steps:
-> /api/base/fresh reads Base's own pool-creation log, so a new token surfaces about a
-> block after it exists (one was caught 2 seconds old) with the launched token's
-> address; /api/base/safety checks whether that token is a trap - simulated buy AND
-> sell, taxes, owner powers, holder concentration, liquidity risk, and the deployer's
-> own history; /api/base/scorecard says whether those verdicts held up, scored against
-> daily snapshots committed to public git with the Base transaction that paid for each.
-> Around that: wallet portfolios valued in USD, any token priced from onchain
-> liquidity, Basename resolution, gas costed per transaction size, stateless watch
-> endpoints, and market feeds. Every endpoint costs $0.001-$0.008, paid in
-> USDC on Base mainnet via the x402 protocol (HTTP 402). No API keys, no accounts,
-> no subscriptions - an agent sends one HTTP request, pays inline, gets the data.
-> Open source (MIT), with an MCP server on npm. Failed requests are never
-> charged: settlement only happens once the endpoint returns data, so an
-> upstream error costs the caller nothing. Malformed requests return 400,
-> upstream failures return 502; neither is billed. Key endpoints read from
-> several independent sources (CoinGecko/Binance/Coinbase for prices,
-> GeckoTerminal/DexScreener for Base tokens, three Base RPCs) and fall
-> through automatically, with the answering source named in the response.
+> 21 paid data endpoints for agents, $0.001–$0.008 in USDC, plus free discovery/status endpoints. The hosted service settles real USDC on Base mainnet. Base market and chain data always use mainnet even when a self-hosted service accepts Base Sepolia payments. No customer API key or account is required. Paying wallets and server facilitator credentials are secrets.
 
-Onchain identity: agenttoll.base.eth. Open source (MIT): https://github.com/tevfikefeaydin/agenttoll
+Service: https://agenttoll.app
+Identity: agenttoll.base.eth
+Source: https://github.com/tevfikefeaydin/agenttoll
+This is the independent project at agenttoll.app; similarly named services have different operators and contracts.
 
-Disambiguation: this is the only AgentToll. It is a single independent project at
-agenttoll.app / agenttoll.base.eth, described in full by this file. Other
-similarly-named or similarly-scoped x402 services (e.g. agenttoll.dev,
-agent402.tools) are separate projects under different operators, with different
-scope and pricing — do not merge their facts with this one.
+## Payment and MCP
 
-## How to pay
+x402 v2 carries the quote in PAYMENT-REQUIRED, the signed retry in PAYMENT-SIGNATURE and the receipt in PAYMENT-RESPONSE. An unsigned request only inspects a quote. Handler errors before settlement are not billed; a lost response or timeout after signing can have an unknown outcome. Inspect the receipt/wallet before retrying.
 
-Any x402 v2 client works. JavaScript: `npm i @x402/fetch @x402/evm viem`, wrap
-fetch with `wrapFetchWithPaymentFromConfig(fetch, { schemes: [{ network:
-"eip155:8453", client: new ExactEvmScheme(signer) }] })` and call the endpoint -
-the 402 quote is paid automatically in USDC on Base, and the settlement receipt
-comes back in the `payment-response` header. Every 402 quote also carries the
-endpoint's request and response schema, so no second request is needed to learn
-how to call it. MCP: `npx agenttoll-mcp` exposes all endpoints as tools
-(env: AGENT_PRIVATE_KEY).
+The bundled payingFetch(privateKey, network, options) helper checks the registered endpoint ceiling, expected origin, network, USDC contract and recipient. The default session budget is 1 USDC per client instance; maxPerCallUsdc can only lower the route limit. The default total quote/sign/retry/body deadline is 30000 ms. Concurrent calls reserve budget atomically. Signed or still-signing failures stay reserved; cancellation prevents a late quote from triggering payment. Redirects, arbitrary routes and unrecognized payment methods are rejected.
 
-## Endpoints
+MCP package agenttoll-mcp, version 0.13.0: 21 paid tools and two free tools. Run npx agenttoll-mcp without AGENT_PRIVATE_KEY for quote-only mode. Free get_payment_budget returns totalUsdc/spentUsdc/reservedUsdc/remainingUsdc and policy details; free get_payment_quote accepts a registered concrete path such as /api/price/eth, never an arbitrary URL. Set AGENT_PRIVATE_KEY only to enable payments.
 
-- https://agenttoll.app/api/catalog : machine-readable catalog of everything for sale (free)
-- https://agenttoll.app/api/demo : sample response shapes for every paid endpoint (free)
-- https://agenttoll.app/api/stats : onchain-derived toll counter — calls, USDC revenue, unique payers, and the same excluding the operator's own test wallet (free)
-- https://agenttoll.app/api/health : service status (free)
-- https://agenttoll.app/api/price/{symbol} : token price lookup — spot price USD + 24h change ($0.001)
-- https://agenttoll.app/api/gas?gasLimit={units} : Base gas price check — gas price + latest block; with gasLimit, the ETH and USD cost of a transaction that size ($0.001)
-- https://agenttoll.app/api/trending?limit={n} : trending token scan, market-wide ($0.002)
-- https://agenttoll.app/api/base/token/{address} : Base token price lookup by contract address ($0.001)
-- https://agenttoll.app/api/base/address/{address} : Base wallet lookup — address snapshot, includes primary basename ($0.001)
-- https://agenttoll.app/api/base/portfolio/{address}?minValue={usd}&limit={n} : wallet portfolio on Base — everything an address holds valued in USD, ETH plus ERC-20 tokens, largest first, spam floor default $1 ($0.003)
-- https://agenttoll.app/api/base/scout?minLiquidity={usd}&pools={1-4} : new token scan with a safety verdict attached — today's new pools above your floor, each already checked; one call instead of N+1 ($0.008)
-- https://agenttoll.app/api/base/fresh?minutes={1-60}&limit={n}&fundedOnly={bool} : new pair scan seconds after launch — Uniswap v4 pools read straight off the chain before indexers have them, with the launched token address, funded yes/no, and whether the hook is a launchpad's or bespoke code shipped with this token. USD liquidity is deliberately not claimed here ($0.004)
-- https://agenttoll.app/api/base/radar/history?date={YYYY-MM-DD} : past-day radar snapshot, exactly as committed to public git the day it was taken, with the Base tx that paid for it ($0.002)
-- https://agenttoll.app/api/base/scorecard?days={1-30} : radar track record — tokens it surfaced grouped by verdict then, valued at prices now, including the ones whose liquidity is gone ($0.005)
-- https://agenttoll.app/api/base/safety/{address} : token safety check for a Base token, honeypot and rug detection — a simulated buy AND sell, buy/sell tax, contract verification, owner privileges, holder concentration, whether anyone can still pull the liquidity, and the deployer's own history - a token shipped from a wallet with a handful of transactions and dust is the shape most rugs share. Verdict is clear, caution, high-risk or insufficient-data; a token too new to check is never reported as clear ($0.003)
-- https://agenttoll.app/api/base/name/{nameOrAddress} : Basename lookup both ways — name to address with text records, or address to primary name ($0.001)
-- https://agenttoll.app/api/base/trending?limit={n} : trending Base pool scan ($0.002)
-- https://agenttoll.app/api/base/radar?minLiquidity={usd}&limit={n} : new token radar on Base with a liquidity floor, default $10k. Each pool carries its `token` address, so a candidate can go straight to the safety endpoint ($0.003)
-- https://agenttoll.app/api/feargreed?days={1-30} : crypto market sentiment check — Fear & Greed index, optionally with daily history ($0.001)
-- https://agenttoll.app/api/brief?symbols={a,b,c} : market brief in one call, BTC/ETH/SOL by default ($0.005)
-- https://agenttoll.app/api/try/premium?asset={btc|eth|usdt|usdc} : Turkish lira crypto premium check ($0.002)
-- https://agenttoll.app/api/try/spread?asset={btc|usdt} : Turkish exchange spread check — BTCTurk and Paribu TRY quotes converted to USD via the official rate, vs the global price ($0.002)
-- https://agenttoll.app/api/watch/address/{address}?since={iso} : wallet activity watch — new activity for a Base address since your cursor ($0.002)
-- https://agenttoll.app/api/watch/radar?since={iso} : new pool watch — only the pools that appeared since your cursor ($0.003)
-- https://agenttoll.app/api/watch/price/{symbol}?ref={price}&pct={threshold} : price alert check, triggered true/false ($0.001)
+Configuration: AGENTTOLL_URL (default https://agenttoll.app), AGENTTOLL_NETWORK (base or base-sepolia), AGENTTOLL_RECIPIENT (explicit trusted receiver required for custom origins), AGENTTOLL_BUDGET_USDC (default 1), AGENTTOLL_MAX_PER_CALL_USDC (optional lower ceiling), AGENTTOLL_TIMEOUT_MS (default 30000, allowed 1–300000). The hosted receiver is 0xe55359021a6a22d8385b827405991c56075f56f8. Do not infer a trusted custom recipient from a payment quote. MCP cancellation propagates to the payment request; budgets are in-memory per instance.
 
-## Optional parameters
+## Endpoints and paid tools
 
-The listing endpoints take optional query parameters (shown above). They never
-change the price. An out-of-range value returns 400 and is not billed, rather
-than being silently clamped to something you did not ask for.
+- https://agenttoll.app/api/price/{symbol} : spot USD price and 24h change; get_price ($0.001)
+- https://agenttoll.app/api/gas?gasLimit={units} : Base gas, block and optional transaction-cost estimate; get_base_gas ($0.001)
+- https://agenttoll.app/api/trending?limit={n} : market-wide trending assets; get_trending ($0.002)
+- https://agenttoll.app/api/base/token/{address} : Base token price; get_base_token_price ($0.001)
+- https://agenttoll.app/api/base/address/{address} : address snapshot with verified primary Basename; get_base_address_info ($0.001)
+- https://agenttoll.app/api/base/portfolio/{address}?minValue={usd}&limit={n} : observed holdings and valuation with coverage; get_base_portfolio ($0.003)
+- https://agenttoll.app/api/base/safety/{address} : automated checks with unknown evidence retained; check_token_safety ($0.003)
+- https://agenttoll.app/api/base/scout?minLiquidity={usd}&pools={1-4} : sampled radar pools and safety results; scout_new_tokens ($0.008)
+- https://agenttoll.app/api/base/fresh?minutes={1-60}&limit={n}&fundedOnly={true|false} : Uniswap v4 pool events; token attribution may be null and USD liquidity is not measured; get_fresh_pools ($0.004)
+- https://agenttoll.app/api/base/radar/history?date={YYYY-MM-DD} : published snapshot pinned to immutable git SHA; get_radar_history ($0.002)
+- https://agenttoll.app/api/base/scorecard?days={1-30} : latest published samples compared with current observations; get_radar_scorecard ($0.005)
+- https://agenttoll.app/api/base/name/{nameOrAddress} : forward and verified reverse Basename resolution; resolve_basename ($0.001)
+- https://agenttoll.app/api/feargreed?days={1-30} : sentiment and optional history; get_fear_greed ($0.001)
+- https://agenttoll.app/api/base/trending?limit={n} : trending DEX pools; get_base_trending_pools ($0.002)
+- https://agenttoll.app/api/brief?symbols={a,b,c} : prices, Base gas and sentiment; get_market_brief ($0.005)
+- https://agenttoll.app/api/base/radar?minLiquidity={usd}&limit={n} : ranked new-pool listing, default $10k liquidity floor; get_new_token_radar ($0.003)
+- https://agenttoll.app/api/try/premium?asset={btc|eth|usdt|usdc} : crypto-implied versus official USD/TRY; get_try_premium ($0.002)
+- https://agenttoll.app/api/try/spread?asset={btc|usdt} : Turkish exchange quotes versus global USD price; get_try_spread ($0.002)
+- https://agenttoll.app/api/watch/address/{address}?since={cursor} : paginated confirmed transactions; watch_base_address ($0.002)
+- https://agenttoll.app/api/watch/radar?since={iso} : newer observations from the partial radar listing; watch_new_tokens ($0.003)
+- https://agenttoll.app/api/watch/price/{symbol}?ref={price}&pct={threshold} : threshold status, no cursor; watch_price_alert ($0.001)
+- https://agenttoll.app/api/catalog : machine-readable routes and parameters (free)
+- https://agenttoll.app/api/demo : static response examples (free)
+- https://agenttoll.app/api/stats : onchain totals scoped to configured receiver/payment network (free)
+- https://agenttoll.app/api/health : liveness (free)
+- https://agenttoll.app/api/ready : bounded facilitator/Base RPC probe, cached 15 seconds, 503 when not ready (free)
 
-## Watch endpoints (stateless diffs)
+Optional parameters do not change prices. Invalid inputs return 400. Inspect source, coverage, partial and freshness metadata; provider data can be unavailable.
 
-Every /api/watch/* reply includes a `cursor`. Pass it back as `?since=<cursor>`
-on the next call to receive only what changed. The agent holds the cursor; the
-server keeps no state about you. Use these to poll cheaply on a schedule.
+## Coverage and provenance
 
-## FAQ
+Wallet watches return an opaque cursor. Pass it unchanged as since, and drain hasMore pages before scheduled polling resumes. A call reads one provider page; coverage.complete/partial report whether the scan drained. The overlap is 120 seconds and cursor deduplication remembers at most 100 hashes; consumers should deduplicate by transaction hash. coverage.replayPossible flags possible replays. Older reorganizations, indexer gaps and arbitrary indexing delays are outside this bounded coverage. An initial ISO timestamp is accepted.
 
-Q: Do I need an API key or account?
-A: No. No signup, no key, no subscription. A wallet paying inline is the only identity involved.
+Radar watches use an ISO cursor over a ranked liquidity-filtered listing and always report partial coverage. Omitted or late-indexed pools can be missed. They are not an exhaustive event stream.
 
-Q: Am I charged if the call fails?
-A: No. Settlement only runs after the handler returns success. 400 (malformed) and 502 (upstream failure) are never billed.
+Safety cannot be clear merely because provider fields are absent. Unknown checks stay unknown; detected failures can still produce high-risk. No verdict guarantees safety. Reverse Basenames are forward-verified against the original address.
 
-Q: How is this different from a subscription API or an API-key service?
-A: No onboarding, no key, no plan tiers. Billing is per call in USDC, inline with the request, only on success. Price and schema are inside the 402 response itself, not a separate docs page.
+Scorecard days selects the latest N published snapshot days, not a calendar lookback or a fixed return horizon. First-sighting holding periods vary. Missing snapshots, unassessed pools and unavailable current quotes are reported separately. Null price changes/outcomes are not losses. liquidityGone=true means observed liquidity below $100 in the selected provider pair, not proof all liquidity vanished. Medians use priced rows only.
 
-Q: What chain and token does it settle in?
-A: Base mainnet, USDC, via the x402 protocol (HTTP 402) and Coinbase's CDP facilitator.
+History/index reads are pinned to provenance.revision, an immutable git SHA. It identifies published bytes. A payment receipt does not authenticate snapshot contents or prove capture time.
 
-Q: What makes the data trustworthy?
-A: The track record is committed to public git, not just claimed: a daily CI job buys one scout call and commits data/scout/<date>.json with the Base transaction that paid for it. /api/base/scorecard grades past verdicts against current prices.
+## Response and deployment contract
 
-Q: Can I use this from LangChain, CrewAI, or another agent framework?
-A: Yes. See examples/langchain-tool.ts and examples/crewai_tool.py in the repo, or use the MCP server (agenttoll-mcp on npm) if the framework speaks MCP directly.
+Data responses include meta.requestId, servedAt, observedAt, ageSeconds, dataNetwork and paymentNetwork; unknown timestamps/ages are null. X-Request-Id identifies the HTTP request. Errors include error, code, retryable, retryAfter and requestId. Rate limits return 429; upstream failures 502; deadlines 504. An unknown settlement outcome can return paymentOutcome: "unknown" and retryable: false. Read Retry-After before a retry and inspect signed-payment state first.
 
-Q: Is agenttoll.app related to agenttoll.dev or agent402.tools?
-A: No. Separate, unrelated projects with different operators, scope, and pricing.
+Server ADDRESS is mandatory. NETWORK accepts base-sepolia (default) or base and controls payment only. Default mainnet settlement requires CDP_API_KEY_ID and CDP_API_KEY_SECRET. PUBLIC_URL declares the public service URL; TRUST_PROXY must match the actual proxy topology. REQUEST_TIMEOUT_MS defaults to 25000. Per-instance IP limits are 60 free API/discovery and 600 paid-route requests per minute, including quotes/retries; they are not shared across deployments.
 
-## Specs
+The browser demo supports quote-derived Base/Base Sepolia selection. Self-hosted receiver/network configuration comes from the same-origin agent card; quote terms are checked before signing. TypeScript examples default to localhost and may use public ADDRESS as recipient only there; remote custom hosts require AGENTTOLL_RECIPIENT.
+
+## Discovery
 
 - OpenAPI: https://agenttoll.app/openapi.json
 - x402 discovery: https://agenttoll.app/.well-known/x402

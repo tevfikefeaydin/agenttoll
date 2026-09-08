@@ -1,4 +1,5 @@
 node_modules/
+playbooks/
 dist/
 __pycache__/
 .env
@@ -6,3 +7,6 @@ brand/out/
 SOCIAL.md
 *.log
 agenttoll-test-cuzdan.txt
+
+.vercel
+.env*

@@ -1,7 +1,7 @@
 ﻿name: Publish MCP to npm
 
 # Push a tag like mcp-v0.4.0 (after bumping mcp/package.json) and the package
-# ships itself. Requires the NPM_TOKEN repository secret (npm automation token).
+# ships itself. Requires the NPM repository secret (npm automation token).
 on:
   push:
     tags: ["mcp-v*"]
@@ -19,13 +19,17 @@ jobs:
           node-version: 22
           registry-url: "https://registry.npmjs.org"
       - run: npm ci
-        working-directory: mcp
-      - name: Debug token shape (never prints the token)
-        run: |
-          echo "token length: ${#NODE_AUTH_TOKEN}"
-          echo "starts with npm_: $([[ $NODE_AUTH_TOKEN == npm_* ]] && echo yes || echo no)"
+      - run: npm ci --prefix mcp
+      - name: Check release tag and generated package metadata
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          node -e "const p=require('./mcp/package.json'); if(process.env.RELEASE_TAG !== 'mcp-v'+p.version) throw new Error('Tag and package version differ')"
+          npm run check:generated
+      - run: npm test
+      - run: npm run typecheck
+      - run: npm run build --prefix mcp
+      - run: npm run smoke:mcp
       - name: Verify npm auth
         run: npm whoami
         env:

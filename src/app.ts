@@ -1,13 +1,13 @@
 import "dotenv/config";
-import express, { type Request, type Response } from "express";
+import express, { type Request, type Response, type NextFunction } from "express";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { paymentMiddlewareFromConfig } from "@x402/express";
-import { HTTPFacilitatorClient } from "@x402/core/server";
+import { HTTPFacilitatorClient, type FacilitatorClient } from "@x402/core/server";
+import { SettleError, VerifyError } from "@x402/core/types";
 import { ExactEvmScheme } from "@x402/evm/exact/server";
 import { facilitator as cdpFacilitator } from "@coinbase/x402";
 import { declareDiscoveryExtension } from "@x402/extensions/bazaar";
-import { DISCOVERY } from "./discovery.js";
 import { getPrice } from "./services/prices.js";
 import { getGas } from "./services/gas.js";
 import { getTrending } from "./services/trending.js";
@@ -18,7 +18,7 @@ import { getBaseTrending } from "./services/basetrending.js";
 import { getMarketBrief } from "./services/brief.js";
 import { getStats } from "./services/stats.js";
 import { getAddressActivity, getRadarSince, getPriceAlert } from "./services/watch.js";
-import { BadRequestError } from "./services/errors.js";
+import { errorResponse } from "./services/errors.js";
 import { resolveBasename } from "./services/basename.js";
 import { getNewTokenRadar } from "./services/radar.js";
 import { getPortfolio } from "./services/portfolio.js";
@@ -29,395 +29,221 @@ import { getRadarHistory, getScorecard } from "./services/history.js";
 import { getTryPremium } from "./services/trypremium.js";
 import { getTrySpread } from "./services/tryspread.js";
 
+import { randomUUID } from "node:crypto";
+import { readConfig } from "./config.js";
+import { ENDPOINTS } from "./endpoints.js";
+import { requestContext, withSignal, type RequestContext } from "./request-context.js";
+import { cached } from "./services/cache.js";
+import { baseRpc } from "./services/sources.js";
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-// payTo is a public address (where USDC revenue lands); env can override it.
-const PAY_TO = (process.env.ADDRESS ??
-  "0xe55359021a6a22d8385b827405991c56075f56f8") as `0x${string}`;
-export const NETWORK = process.env.NETWORK ?? "base-sepolia";
-const FACILITATOR_URL = process.env.FACILITATOR_URL ?? "https://x402.org/facilitator";
-
-// x402 v2 identifies networks by CAIP-2 rather than by name.
-const CHAIN: `${string}:${string}` = NETWORK === "base" ? "eip155:8453" : "eip155:84532";
-
-// Mainnet settles through the CDP facilitator (needs CDP_API_KEY_ID and
-// CDP_API_KEY_SECRET in the environment); testnet uses the public one.
-const facilitatorClient = new HTTPFacilitatorClient(
-  NETWORK === "base" ? cdpFacilitator : { url: FACILITATOR_URL },
-);
-
-/**
- * Every route is the same deal, only the price and the wording change.
- *
- * `route` is the key this config is filed under, which is also how we look up
- * the endpoint's schemas — declaring them here puts the request and response
- * shape inside the 402 quote itself, so an indexer that never manages to fetch
- * our OpenAPI spec still learns how to call the endpoint.
- */
-const paid = (route: string, price: string, description: string) => ({
-  accepts: { scheme: "exact", payTo: PAY_TO, price, network: CHAIN },
-  description,
-  extensions: declareDiscoveryExtension({
-    ...DISCOVERY[route],
-    output: { example: DISCOVERY[route].output },
-  }),
+const config = readConfig();
+const PAY_TO = config.payTo;
+export const NETWORK = config.network;
+export const PORT = config.port;
+const CHAIN = config.chain;
+const PUBLIC_BASE = config.publicUrl;
+const facilitatorHttp = new HTTPFacilitatorClient({
+  ...(config.useCdp ? cdpFacilitator : { url: config.facilitatorUrl }),
+  timeoutMs: Math.min(config.requestTimeoutMs, 8_000),
 });
 
-const app = express();
-app.set("trust proxy", true); // behind Vercel's proxy, keep https in quoted resource URLs
-app.disable("x-powered-by");
-app.use(express.json({ limit: "10kb" }));
+// The SDK's per-attempt timeout does not bound retries or the combined
+// verify/handler/settle operation. Reuse the request's remaining deadline.
+async function facilitatorCall<T>(load: () => Promise<T>, settling = false): Promise<T> {
+  const context = requestContext.getStore();
+  const signal = context?.signal ?? AbortSignal.timeout(config.requestTimeoutMs);
+  try {
+    signal.throwIfAborted();
+    if (context && settling) context.settlementStarted = true;
+    return await withSignal(Promise.resolve().then(load), signal);
+  } catch (error) {
+    // Structured payment declines belong to x402's 402 response path.
+    // Only transport/protocol failures should become sanitized upstream errors.
+    if (context && !(error instanceof VerifyError) && !(error instanceof SettleError)) {
+      context.facilitatorFailure = error;
+    }
+    throw error;
+  }
+}
+const facilitatorClient: FacilitatorClient = {
+  getSupported: () => facilitatorCall(() => facilitatorHttp.getSupported()),
+  verify: (payload, requirements) => facilitatorCall(() => facilitatorHttp.verify(payload, requirements)),
+  settle: (payload, requirements) => facilitatorCall(() => facilitatorHttp.settle(payload, requirements), true),
+};
 
-// Indexers and uptime probes use HEAD. Express answers HEAD from the GET route,
-// but the paywall is configured per "GET /path", so a HEAD probe skipped payment
-// entirely: it ran the handler (burning upstream quota for free) and returned
-// 200 where discovery crawlers expect a 402 challenge. Treating HEAD as GET puts
-// it back behind the paywall; Node decided not to send a body when the request
-// arrived, so the response stays header-only either way.
-app.use((req, _res, next) => {
+const app = express();
+app.set("trust proxy", config.trustProxy);
+app.disable("x-powered-by");
+const normalizedPath = (value: string) => value.toLowerCase().replace(/\/+$/, "") || "/";
+
+app.use((req, res, next) => {
+  const controller = new AbortController();
+  const context: RequestContext = { requestId: randomUUID(), signal: controller.signal, upstreamCalls: 0,
+    cacheHits: 0, cacheMisses: 0, coalescedLoads: 0 };
+  res.setHeader("X-Request-Id", context.requestId);
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  const originalJson = res.json.bind(res);
+  // x402 can send facilitator errors directly, without Express's error handler.
+  res.json = (body: unknown) => {
+    const upstreamFailure = context.facilitatorFailure ?? (context.signal.aborted ? context.signal.reason : undefined);
+    const structured = body && typeof body === "object" && "requestId" in body && body.requestId === context.requestId;
+    if (res.statusCode >= 400 && (upstreamFailure || (res.statusCode !== 402 && !structured))) {
+      const result = errorResponse(upstreamFailure ?? { status: res.statusCode }, context.requestId);
+      res.status(result.status);
+      if (result.body.retryAfter) res.setHeader("Retry-After", String(result.body.retryAfter));
+      body = result.body;
+      if (context.settlementStarted) {
+        res.removeHeader("Retry-After");
+        body = { ...result.body, error: "Payment settlement could not be confirmed; inspect your receipt and wallet before retrying", retryable: false, retryAfter: null, paymentOutcome: "unknown" };
+      }
+    }
+    return originalJson(body);
+  };
+  const started = Date.now();
+  const timer = setTimeout(() => controller.abort(new DOMException("Request deadline exceeded", "TimeoutError")), config.requestTimeoutMs);
+  timer.unref();
+  res.once("close", () => { clearTimeout(timer); if (!res.writableFinished) controller.abort(new DOMException("Client disconnected", "AbortError")); });
+  res.once("finish", () => {
+    clearTimeout(timer);
+    if (!normalizedPath(req.path).startsWith("/api/")) return;
+    console.log(JSON.stringify({ t: new Date().toISOString(), requestId: context.requestId,
+      method: req.method, path: normalizedPath(req.path), status: res.statusCode, ms: Date.now() - started,
+      paymentStage: res.hasHeader("payment-response") ? "settled" : res.statusCode === 402 ? "quote" : req.get("payment-signature") || req.get("x-payment") ? "submitted" : "none",
+      upstreamCalls: context.upstreamCalls, cacheHits: context.cacheHits,
+      cacheMisses: context.cacheMisses, coalescedLoads: context.coalescedLoads }));
+  });
+  requestContext.run(context, next);
+});
+
+// Keep CORS on error responses and support both x402 protocol generations.
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, PAYMENT-SIGNATURE, X-PAYMENT");
+  res.setHeader("Access-Control-Expose-Headers", "PAYMENT-REQUIRED, PAYMENT-RESPONSE, X-PAYMENT-RESPONSE, X-Request-Id, Retry-After");
+  if (req.method === "OPTIONS") { res.sendStatus(204); return; }
+  // Express serves HEAD via GET. Meter it and challenge it before any data load.
   if (req.method === "HEAD") req.method = "GET";
   next();
 });
 
-// Structured request log: one JSON line per API call (path, status, latency).
-// This is the audit trail — query it via Vercel runtime logs.
-app.use((req, res, next) => {
-  if (!req.path.startsWith("/api/")) return next();
-  const t0 = Date.now();
-  res.on("finish", () => {
-    console.log(
-      JSON.stringify({
-        t: new Date().toISOString(),
-        method: req.method,
-        path: req.path,
-        status: res.statusCode,
-        ms: Date.now() - t0,
-        ip: req.ip,
-        ua: req.get("user-agent")?.slice(0, 80) ?? null,
-      }),
-    );
-  });
-  next();
-});
-
-// Two per-IP ceilings a minute wide. Per-instance only — Vercel's platform
-// DDoS protection sits in front of this, and each serverless instance keeps its
-// own counter, so treat both numbers as an upper bound rather than a promise.
-//
-// Free endpoints get the tight one: they spend upstream quota and nobody paid
-// for the answer.
-//
-// Paid endpoints used to have no ceiling at all, on the reasoning that payment
-// is the gate. Payment is a gate, but a cheap one: at $0.001 a call, a few
-// dollars a minute is enough to exhaust the upstreams' free tiers
-// (GeckoTerminal allows us ~30 requests a minute), and then the callers paying
-// honestly get the degraded service. So paid traffic gets a ceiling too, set
-// far above what any real agent does — a caller who trips it is not using the
-// API, they are draining what it depends on.
-const FREE_PATHS = [
-  "/api/health",
-  "/api/catalog",
-  "/api/demo",
-  "/api/stats",
-  "/.well-known/x402",
-  "/.well-known/agent-card.json",
+const FREE_ENDPOINTS = [
+  { path: "/api/stats", description: "Onchain tolls and distinct paying wallets for this deployment's payment network and receiving address" },
+  { path: "/api/demo", description: "Static sample response shapes for every paid endpoint" },
+  { path: "/api/health", description: "Process liveness and configured networks" },
+  { path: "/api/ready", description: "Bounded facilitator and Base RPC readiness check" },
+  { path: "/api/catalog", description: "This catalog" },
 ];
-const FREE_PER_MINUTE = 60;
-const PAID_PER_MINUTE = 600;
-
+const FREE_PATHS = new Set([...FREE_ENDPOINTS.map(e => e.path), "/.well-known/x402", "/.well-known/agent-card.json"]);
 const hits = new Map<string, { n: number; reset: number }>();
-
-/** Counts one request against a per-minute bucket; true when it goes over. */
-function overLimit(key: string, max: number): boolean {
+app.use((req, res, next) => {
+  const pathname = normalizedPath(req.path);
+  if (!pathname.startsWith("/api/") && !pathname.startsWith("/.well-known/")) return next();
+  const free = FREE_PATHS.has(pathname);
+  const max = free ? 60 : 600;
   const now = Date.now();
-  const slot = hits.get(key);
-  if (!slot || slot.reset < now) {
-    if (hits.size > 5000) hits.clear();
-    hits.set(key, { n: 1, reset: now + 60_000 });
-    return false;
+  const key = `${free ? "free" : "paid"}:${req.ip ?? "?"}`;
+  let slot = hits.get(key);
+  if (!slot || slot.reset <= now) {
+    // Expire old buckets without clearing active clients' limits.
+    if (hits.size >= 5000) for (const [id, entry] of hits) if (entry.reset <= now) hits.delete(id);
+    if (hits.size >= 5000) { res.setHeader("Retry-After", "60"); res.status(503).json({ error: "Rate limiter at capacity", code: "OVERLOADED", retryable: true, retryAfter: 60, requestId: res.getHeader("X-Request-Id") }); return; }
+    slot = { n: 0, reset: now + 60_000 }; hits.set(key, slot);
   }
-  return ++slot.n > max;
-}
-
-app.use((req, res, next) => {
-  const metered = req.path.startsWith("/api/") || req.path.startsWith("/.well-known/");
-  if (!metered) return next();
-
-  const free = FREE_PATHS.includes(req.path);
-  const max = free ? FREE_PER_MINUTE : PAID_PER_MINUTE;
-  // Separate buckets, so a burst of free calls cannot lock out paid ones.
-  if (overLimit(`${free ? "free" : "paid"}:${req.ip ?? "?"}`, max)) {
-    res.setHeader("Retry-After", "60");
-    res.status(429).json({
-      error: `Rate limited — at most ${max} calls a minute per IP on this endpoint. Retry in a minute.`,
-    });
+  if (++slot.n > max) {
+    const retryAfter = Math.max(1, Math.ceil((slot.reset - now) / 1000));
+    res.setHeader("Retry-After", String(retryAfter));
+    res.status(429).json({ error: `Rate limited: at most ${max} calls a minute per IP`, code: "RATE_LIMITED", retryable: true, retryAfter, requestId: res.getHeader("X-Request-Id") });
     return;
   }
   next();
 });
+app.use(express.json({ limit: "10kb" }));
 
-// CORS: browser-based agents must be able to read 402 quotes and send payments.
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, X-PAYMENT");
-  res.setHeader("Access-Control-Expose-Headers", "X-PAYMENT-RESPONSE");
-  if (req.method === "OPTIONS") {
-    res.sendStatus(204);
-    return;
-  }
-  next();
-});
+// Prices, discovery, and client fee caps share this registry.
+app.use(paymentMiddlewareFromConfig(Object.fromEntries(ENDPOINTS.map(endpoint => [endpoint.route, {
+  accepts: { scheme: "exact", payTo: PAY_TO, price: endpoint.price, network: CHAIN },
+  description: endpoint.description,
+  extensions: declareDiscoveryExtension({ ...endpoint.discovery, output: { example: endpoint.discovery.output } }),
+}])), facilitatorClient, [{ network: CHAIN, server: new ExactEvmScheme() }]));
 
-// Everything under /api/* (except the free endpoints) requires an x402 payment.
-app.use(
-  paymentMiddlewareFromConfig(
-    {
-      "GET /api/price/:symbol": paid("GET /api/price/:symbol", "$0.001", "Token price lookup: spot price in USD and 24h change for a crypto asset, by ticker or CoinGecko id"),
-      "GET /api/gas": paid("GET /api/gas",
-        "$0.001",
-        "Base gas price check: the current gas price and latest block number; add ?gasLimit=150000 to also get what a transaction that size costs in ETH and USD",
-      ),
-      "GET /api/trending": paid("GET /api/trending",
-        "$0.002",
-        "Trending token scan: the tokens moving across the crypto market right now; ?limit=N trims the list",
-      ),
-      "GET /api/base/token/:address": paid("GET /api/base/token/:address",
-        "$0.001",
-        "Base token price lookup by contract address: the onchain USD price for any token on Base",
-      ),
-      "GET /api/base/address/:address": paid("GET /api/base/address/:address",
-        "$0.001",
-        "Base wallet lookup: an address's primary basename, ETH balance, transaction count, and whether it is a contract",
-      ),
-      "GET /api/feargreed": paid("GET /api/feargreed",
-        "$0.001",
-        "Crypto market sentiment check: the Fear and Greed index with yesterday's value; ?days=7 adds a daily history so you can see whether sentiment is turning",
-      ),
-      "GET /api/base/trending": paid("GET /api/base/trending",
-        "$0.002",
-        "Trending Base pool scan: the DEX pools moving on Base right now, with price, 24h volume and liquidity; ?limit=N sets how many",
-      ),
-      "GET /api/brief": paid("GET /api/brief",
-        "$0.005",
-        "Market brief in one call: prices (BTC, ETH and SOL by default, or ?symbols=eth,degen), Base gas, and market sentiment",
-      ),
-      "GET /api/base/radar": paid("GET /api/base/radar",
-        "$0.003",
-        "New token radar on Base with a liquidity floor: pools created in the last 24 hours that already hold real liquidity; ?minLiquidity sets the spam floor in USD, default 10000. Each pool carries its token address, so anything interesting can go straight to /api/base/safety",
-      ),
-      "GET /api/try/premium": paid("GET /api/try/premium",
-        "$0.002",
-        "Turkish lira crypto premium check: implied USD/TRY from a crypto cross-rate versus the official rate; ?asset=usdt is the reading desks quote",
-      ),
-      "GET /api/try/spread": paid("GET /api/try/spread",
-        "$0.002",
-        "Turkish exchange spread check: BTCTurk and Paribu's TRY quotes converted back to USD via the official rate and compared against the global price; ?asset=usdt is the pair with the deepest local volume",
-      ),
-      "GET /api/base/portfolio/:address": paid("GET /api/base/portfolio/:address",
-        "$0.003",
-        "Wallet portfolio on Base: everything an address holds valued in USD, ETH plus its ERC-20 tokens, largest first, with a spam floor you set",
-      ),
-      "GET /api/base/safety/:address": paid("GET /api/base/safety/:address",
-        "$0.003",
-        "Token safety check for a Base token before you buy - is it a honeypot, is it a rug: a simulated buy and sell, buy and sell tax, contract verification, owner privileges, holder concentration, whether anyone can still pull the liquidity, and who deployed the contract - a token shipped from a wallet with a handful of transactions is the shape most rugs share",
-      ),
-      "GET /api/base/scout": paid("GET /api/base/scout",
-        "$0.008",
-        "New token scan with a safety verdict attached: today's new Base pools above your liquidity floor, each already checked for honeypot, taxes and owner powers. One call instead of N+1",
-      ),
-      "GET /api/base/fresh": paid("GET /api/base/fresh",
-        "$0.004",
-        "New pair scan seconds after launch: Uniswap v4 pools read straight off Base before any indexer has them - the launched token address, whether anyone has funded it yet, and whether its hook is a launchpad's or bespoke code shipped with this token",
-      ),
-      "GET /api/base/radar/history": paid("GET /api/base/radar/history",
-        "$0.002",
-        "Past-day radar snapshot: a previous day's radar+safety result exactly as committed to the public git history the day it was taken - with the Base tx that paid for it. ?date=YYYY-MM-DD, default latest",
-      ),
-      "GET /api/base/scorecard": paid("GET /api/base/scorecard",
-        "$0.005",
-        "Radar track record: every token the radar surfaced in the last N days grouped by the verdict it got then, valued at what it trades for now - including the ones whose liquidity is gone",
-      ),
-      "GET /api/base/name/:nameOrAddress": paid("GET /api/base/name/:nameOrAddress",
-        "$0.001",
-        "Basename lookup both ways: a name returns its address and text records, an address returns its primary basename",
-      ),
-      "GET /api/watch/address/:address": paid("GET /api/watch/address/:address",
-        "$0.002",
-        "Wallet activity watch: new activity for a Base address since your cursor, so a scheduled agent only fetches what changed",
-      ),
-      "GET /api/watch/radar": paid("GET /api/watch/radar",
-        "$0.003",
-        "New pool watch: only the Base pools that appeared since your cursor, for agents polling on a schedule",
-      ),
-      "GET /api/watch/price/:symbol": paid("GET /api/watch/price/:symbol",
-        "$0.001",
-        "Price alert check: whether an asset moved past your threshold from a reference price",
-      ),
-    },
-    facilitatorClient,
-    [{ network: CHAIN, server: new ExactEvmScheme() }],
-  ),
-);
-
-// Express types path params and query values as string | string[]; the routes
-// below only ever want the single-value form.
 const one = (v: unknown): string => (Array.isArray(v) ? String(v[0]) : String(v ?? ""));
-const opt = (v: unknown): string | undefined =>
-  v === undefined ? undefined : one(v);
+const opt = (v: unknown): string | undefined => v === undefined ? undefined : one(v);
 
-// Wraps a data source so a caller mistake reports as 400 and only a genuine
-// upstream failure reports as 502. Either way x402 leaves the caller unbilled.
-const serve =
-  (load: (req: Request) => Promise<unknown>) =>
-  async (req: Request, res: Response) => {
-    try {
-      res.json(await load(req));
-    } catch (err) {
-      const status = err instanceof BadRequestError ? 400 : 502;
-      res.status(status).json({ error: (err as Error).message });
-    }
-  };
+const serve = (load: (req: Request) => Promise<unknown>) => async (req: Request, res: Response) => {
+  const context = requestContext.getStore()!;
+  try {
+    context.signal.throwIfAborted();
+    const value = await withSignal(Promise.resolve().then(() => load(req)), context.signal);
+    const data = value as Record<string, unknown>;
+    const at = typeof data?.at === "string" && Number.isFinite(Date.parse(data.at)) ? data.at : null;
+    res.json({ ...data, meta: { requestId: context.requestId, servedAt: new Date().toISOString(),
+      observedAt: at, ageSeconds: at ? Math.max(0, Math.floor((Date.now() - Date.parse(at)) / 1000)) : null,
+      dataNetwork: config.dataNetwork, paymentNetwork: NETWORK } });
+  } catch (error) {
+    if (res.destroyed) return;
+    const result = errorResponse(error, context.requestId);
+    if (result.body.retryAfter) res.setHeader("Retry-After", String(result.body.retryAfter));
+    res.status(result.status).json(result.body);
+  }
+};
 
-app.get("/api/health", (_req, res) => {
-  res.json({ ok: true, service: "agenttoll", network: NETWORK });
-});
-
-// Free sample responses so people can see data shapes without a wallet.
-//
-// Generated from the same declarations that go inside the 402 quotes, so this
-// covers every paid endpoint and cannot drift from what the quotes advertise.
-// It used to be a hand-kept list, which had quietly fallen to eleven of twenty.
-app.get("/api/demo", (_req, res) => {
-  res.json({
-    note: "Sample shapes with static values, one per paid endpoint. Pay per call for live data - see /api/catalog.",
-    samples: Object.fromEntries(
-      Object.entries(DISCOVERY).map(([route, d]) => [route.replace(/^GET /, ""), d.output]),
-    ),
+app.get("/api/health", (_req, res) => res.json({ ok: true, service: "agenttoll", network: NETWORK, dataNetwork: config.dataNetwork }));
+app.get("/api/ready", async (_req, res) => {
+  const checks = await cached(`ready:${NETWORK}:${PAY_TO}`, 15_000, async () => {
+    const parent = requestContext.getStore()!;
+    const signal = AbortSignal.any([parent.signal, AbortSignal.timeout(4_000)]);
+    return requestContext.run({ ...parent, signal }, async () => {
+      const results = await Promise.allSettled([
+        withSignal(facilitatorClient.getSupported().then(supported => {
+          if (!supported.kinds.some(kind => kind.network === CHAIN && kind.scheme === "exact" && kind.x402Version === 2)) throw new Error("Payment network unsupported");
+          return true;
+        }), signal),
+        withSignal(baseRpc<string>("eth_blockNumber").then(block => {
+          if (!/^0x[0-9a-f]+$/i.test(block) || BigInt(block) <= 0n) throw new Error("Invalid RPC head");
+          return true;
+        }), signal),
+      ]);
+      return { facilitator: results[0].status === "fulfilled", baseRpc: results[1].status === "fulfilled", checkedAt: new Date().toISOString() };
+    });
   });
+  const ready = checks.facilitator && checks.baseRpc;
+  if (!ready) res.setHeader("Retry-After", "15");
+  res.status(ready ? 200 : 503).json({ ok: ready, network: NETWORK, dataNetwork: config.dataNetwork, checks,
+    ...(ready ? {} : { code: "NOT_READY", retryable: true, retryAfter: 15 }), requestId: res.getHeader("X-Request-Id") });
 });
 
-// x402 discovery endpoint: the catalog in the emerging .well-known convention.
-// PUBLIC_URL lets the deployment switch domains without a code change.
-const PUBLIC_BASE = process.env.PUBLIC_URL ?? "https://agenttoll.app";
-app.get("/.well-known/x402", (_req, res) => {
-  res.json({
-    x402Version: 2,
-    name: "agenttoll",
-    identity: "agenttoll.base.eth",
-    network: NETWORK,
-    payTo: PAY_TO,
-    openapi: `${PUBLIC_BASE}/openapi.json`,
-    llms: `${PUBLIC_BASE}/llms.txt`,
-    mcp: "https://www.npmjs.com/package/agenttoll-mcp",
-    resources: [
-      { resource: `${PUBLIC_BASE}/api/price/{symbol}`, price: "$0.001", description: "Token price lookup: spot price in USD + 24h change for a crypto asset" },
-      { resource: `${PUBLIC_BASE}/api/gas`, price: "$0.001", description: "Base gas price check: gas price and latest block; ?gasLimit=N also costs a transaction that size" },
-      { resource: `${PUBLIC_BASE}/api/trending`, price: "$0.002", description: "Trending token scan: the tokens moving across the market right now; ?limit=N" },
-      { resource: `${PUBLIC_BASE}/api/base/token/{address}`, price: "$0.001", description: "Base token price lookup by contract address: onchain USD price for any Base token" },
-      { resource: `${PUBLIC_BASE}/api/base/address/{address}`, price: "$0.001", description: "Base wallet lookup: primary basename, ETH balance, tx count, contract or EOA" },
-      { resource: `${PUBLIC_BASE}/api/base/portfolio/{address}`, price: "$0.003", description: "Wallet portfolio on Base: everything an address holds valued in USD, ETH plus ERC-20 tokens; ?minValue=USD&limit=N" },
-      { resource: `${PUBLIC_BASE}/api/base/safety/{address}`, price: "$0.003", description: "Token safety check for a Base token - honeypot, rug and trap detection: simulated buy and sell, taxes, owner privileges, holder concentration, liquidity, deployer history" },
-      { resource: `${PUBLIC_BASE}/api/base/scout`, price: "$0.008", description: "New token scan with a safety verdict attached: new pools plus honeypot, tax and owner checks in one call; ?minLiquidity=USD&pools=N" },
-      { resource: `${PUBLIC_BASE}/api/base/fresh`, price: "$0.004", description: "New pair scan seconds after launch: pools read off the chain before indexers see them; ?minutes=1-60&fundedOnly=true" },
-      { resource: `${PUBLIC_BASE}/api/base/radar/history`, price: "$0.002", description: "Past-day radar snapshot, as committed to public git the day it was taken; ?date=YYYY-MM-DD" },
-      { resource: `${PUBLIC_BASE}/api/base/scorecard`, price: "$0.005", description: "Radar track record: verdicts then vs prices now, per cohort; ?days=1-30" },
-      { resource: `${PUBLIC_BASE}/api/base/name/{nameOrAddress}`, price: "$0.001", description: "Basename lookup both ways: name to address, or address to primary name" },
-      { resource: `${PUBLIC_BASE}/api/base/trending`, price: "$0.002", description: "Trending Base pool scan: price, volume, liquidity; ?limit=N" },
-      { resource: `${PUBLIC_BASE}/api/base/radar`, price: "$0.003", description: "New token radar on Base with a liquidity floor: fresh pools above the floor you set; ?minLiquidity=USD&limit=N" },
-      { resource: `${PUBLIC_BASE}/api/feargreed`, price: "$0.001", description: "Crypto market sentiment check: Fear & Greed index; ?days=1-30 adds daily history" },
-      { resource: `${PUBLIC_BASE}/api/brief`, price: "$0.005", description: "Market brief in one call: prices, Base gas, sentiment; ?symbols=eth,degen" },
-      { resource: `${PUBLIC_BASE}/api/try/premium`, price: "$0.002", description: "Turkish lira crypto premium check: implied vs official USD/TRY; ?asset=btc|eth|usdt|usdc" },
-      { resource: `${PUBLIC_BASE}/api/try/spread`, price: "$0.002", description: "Turkish exchange spread check: BTCTurk and Paribu TRY quotes vs the global USD price; ?asset=btc|usdt" },
-      { resource: `${PUBLIC_BASE}/api/watch/address/{address}`, price: "$0.002", description: "Wallet activity watch: new activity for a Base address since your cursor (stateless)" },
-      { resource: `${PUBLIC_BASE}/api/watch/radar`, price: "$0.003", description: "New pool watch: only the Base pools that appeared since your cursor" },
-      { resource: `${PUBLIC_BASE}/api/watch/price/{symbol}`, price: "$0.001", description: "Price alert check against your reference and threshold" },
-    ],
-  });
-});
-
-// One list feeds both the catalog and the agent card, so they cannot drift.
+app.get("/api/demo", (_req, res) => res.json({
+  note: "Static sample shapes, one per paid endpoint. See /api/catalog for live requests.",
+  samples: Object.fromEntries(ENDPOINTS.map(e => [e.route.replace(/^GET /, ""), e.discovery.output])),
+}));
 const CATALOG_ENDPOINTS = [
-      { path: "/api/price/{symbol}", method: "GET", price: "$0.001", description: "Token price lookup: spot price in USD + 24h change for a crypto asset" },
-      { path: "/api/gas?gasLimit={units}", method: "GET", price: "$0.001", description: "Base gas price check: gas price and latest block; with gasLimit, the ETH and USD cost of a transaction that size" },
-      { path: "/api/trending?limit={n}", method: "GET", price: "$0.002", description: "Trending token scan: the tokens moving across the market right now" },
-      { path: "/api/base/token/{address}", method: "GET", price: "$0.001", description: "Base token price lookup by contract address: onchain USD price for any Base token" },
-      { path: "/api/base/address/{address}", method: "GET", price: "$0.001", description: "Base wallet lookup: primary basename, ETH balance, tx count, contract or EOA" },
-      { path: "/api/base/portfolio/{address}?minValue={usd}&limit={n}", method: "GET", price: "$0.003", description: "Wallet portfolio on Base: everything an address holds valued in USD, ETH plus ERC-20 tokens, largest first, spam floor default $1" },
-      { path: "/api/base/safety/{address}", method: "GET", price: "$0.003", description: "Token safety check for a Base token - honeypot, rug and trap detection: simulated buy and sell, taxes, contract verification, owner privileges, holder concentration, liquidity withdrawal risk, deployer history" },
-      { path: "/api/base/scout?minLiquidity={usd}&pools={1-4}", method: "GET", price: "$0.008", description: "New token scan with a safety verdict attached: today's new pools above your floor, each already checked. One call instead of N+1" },
-      { path: "/api/base/fresh?minutes={1-60}&limit={n}&fundedOnly={bool}", method: "GET", price: "$0.004", description: "New pair scan seconds after launch: Uniswap v4 pools read straight off Base - launched token, funded yes/no, launchpad vs bespoke hook" },
-      { path: "/api/base/radar/history?date={YYYY-MM-DD}", method: "GET", price: "$0.002", description: "Past-day radar snapshot, exactly as committed to public git the day it was taken, with the Base tx that paid for it" },
-      { path: "/api/base/scorecard?days={1-30}", method: "GET", price: "$0.005", description: "Radar track record: tokens the radar surfaced, grouped by verdict then, valued at prices now - including the ones whose liquidity is gone" },
-      { path: "/api/base/name/{nameOrAddress}", method: "GET", price: "$0.001", description: "Basename lookup both ways: name to address (with text records), or address to primary name" },
-      { path: "/api/base/trending?limit={n}", method: "GET", price: "$0.002", description: "Trending Base pool scan: price, volume, liquidity" },
-      { path: "/api/feargreed?days={1-30}", method: "GET", price: "$0.001", description: "Crypto market sentiment check: Fear & Greed index with yesterday comparison, optionally with daily history" },
-      { path: "/api/brief?symbols={a,b,c}", method: "GET", price: "$0.005", description: "Market brief in one call: prices (BTC/ETH/SOL by default), Base gas, sentiment" },
-      { path: "/api/base/radar?minLiquidity={usd}&limit={n}", method: "GET", price: "$0.003", description: "New token radar on Base with a liquidity floor: fresh pools above your floor, default $10k" },
-      { path: "/api/try/premium?asset={btc|eth|usdt|usdc}", method: "GET", price: "$0.002", description: "Turkish lira crypto premium check: implied vs official USD/TRY via a crypto cross-rate" },
-      { path: "/api/try/spread?asset={btc|usdt}", method: "GET", price: "$0.002", description: "Turkish exchange spread check: BTCTurk and Paribu TRY quotes converted to USD vs the global price" },
-      { path: "/api/watch/address/{address}?since={iso}", method: "GET", price: "$0.002", description: "Wallet activity watch: new activity for a Base address since your cursor; reply carries the next cursor" },
-      { path: "/api/watch/radar?since={iso}", method: "GET", price: "$0.003", description: "New pool watch: only the Base pools that appeared since your cursor" },
-      { path: "/api/watch/price/{symbol}?ref={price}&pct={threshold}", method: "GET", price: "$0.001", description: "Price alert check: triggered true/false against your reference and threshold" },
-      { path: "/api/stats", method: "GET", price: "free", description: "Onchain-derived toll counter: calls collected and USDC revenue, and the same excluding the operator's own wallets" },
-      { path: "/api/demo", method: "GET", price: "free", description: "Sample response shapes for every paid endpoint" },
-      { path: "/api/health", method: "GET", price: "free", description: "Service status" },
-      { path: "/api/catalog", method: "GET", price: "free", description: "This catalog" },
+  ...ENDPOINTS.map(e => ({ path: e.path, method: "GET", price: e.price, description: e.description, tool: e.tool,
+    parameters: { path: e.discovery.pathParamsSchema ?? null, query: e.discovery.inputSchema } })),
+  ...FREE_ENDPOINTS.map(e => ({ ...e, method: "GET", price: "free" })),
 ];
-
-// Free machine-readable catalog so agents can discover what is for sale.
-app.get("/api/catalog", (_req, res) => {
-  res.json({
-    service: "agenttoll",
-    description:
-      "Base-native onchain data for AI agents, pay-per-call in USDC via x402. Open source (MIT).",
-    network: NETWORK,
-    payment: "x402",
-    endpoints: CATALOG_ENDPOINTS,
-  });
-});
-
-// Agent card in the loose .well-known convention several x402 services share.
-// Honest about what we are: an HTTP + MCP data service paid over x402 — not an
-// A2A task server, so no A2A endpoints are claimed.
-app.get("/.well-known/agent-card.json", (_req, res) => {
-  res.json({
-    name: "AgentToll",
-    description:
-      "Base-native onchain data for AI agents, pay-per-call in USDC via x402. Token prices, wallet portfolios, token safety checks, a new-token scout with verdicts attached, Basename resolution, and a git-committed track record. No API keys, no accounts; failed requests are never charged.",
-    url: PUBLIC_BASE,
-    provider: { organization: "AgentToll", url: PUBLIC_BASE },
-    version: "1.0.0",
-    identity: { basename: "agenttoll.base.eth", payTo: PAY_TO },
-    interfaces: {
-      http: {
-        type: "rest",
-        baseUrl: PUBLIC_BASE,
-        payment: { protocol: "x402", version: 2, network: "eip155:8453", asset: "USDC" },
-        openapi: `${PUBLIC_BASE}/openapi.json`,
-        discovery: `${PUBLIC_BASE}/.well-known/x402`,
-      },
-      mcp: {
-        type: "stdio",
-        package: "agenttoll-mcp",
-        install: "npx agenttoll-mcp",
-        registryUrl: "https://www.npmjs.com/package/agenttoll-mcp",
-      },
-    },
-    skills: CATALOG_ENDPOINTS.map((e) => ({
-      id: e.path.split("?")[0],
-      name: e.description.split(":")[0].slice(0, 60),
-      description: e.description,
-      price: e.price,
-      url: `${PUBLIC_BASE}${e.path}`,
-    })),
-    trust: {
-      openSource: "https://github.com/tevfikefeaydin/agenttoll",
-      onchainStats: `${PUBLIC_BASE}/api/stats`,
-      trackRecord: "https://github.com/tevfikefeaydin/agenttoll/tree/main/data/scout",
-      note: "Revenue is read from USDC transfers on Base, not self-reported; radar claims are dated git commits.",
-    },
-  });
-});
+app.get("/api/catalog", (_req, res) => res.json({ service: "agenttoll",
+  description: "Base onchain data for AI agents, pay per call in USDC via x402. Open source (MIT).",
+  network: NETWORK, dataNetwork: config.dataNetwork, payment: "x402", endpoints: CATALOG_ENDPOINTS }));
+app.get("/.well-known/x402", (_req, res) => res.json({ x402Version: 2, name: "agenttoll",
+  network: NETWORK, dataNetwork: config.dataNetwork, payTo: PAY_TO,
+  openapi: `${PUBLIC_BASE}/openapi.json`, llms: `${PUBLIC_BASE}/llms.txt`, mcp: "https://www.npmjs.com/package/agenttoll-mcp",
+  resources: ENDPOINTS.map(e => ({ resource: `${PUBLIC_BASE}${e.path}`, price: e.price, description: e.description })) }));
+app.get("/.well-known/agent-card.json", (_req, res) => res.json({ name: "AgentToll",
+  description: "HTTP and MCP data service: Base market data, verified Basenames, safety checks and versioned radar history, paid with USDC via x402.",
+  url: PUBLIC_BASE, provider: { organization: "AgentToll", url: PUBLIC_BASE }, version: "1.0.0",
+  identity: { payTo: PAY_TO }, dataNetwork: config.dataNetwork,
+  interfaces: {
+    http: { type: "rest", baseUrl: PUBLIC_BASE, payment: { protocol: "x402", version: 2, network: CHAIN, asset: "USDC" },
+      openapi: `${PUBLIC_BASE}/openapi.json`, discovery: `${PUBLIC_BASE}/.well-known/x402` },
+    mcp: { type: "stdio", package: "agenttoll-mcp", install: "npx agenttoll-mcp", registryUrl: "https://www.npmjs.com/package/agenttoll-mcp" },
+  },
+  skills: CATALOG_ENDPOINTS.map(e => ({ id: e.path, name: e.description.split(":")[0].slice(0, 60), description: e.description, price: e.price, url: `${PUBLIC_BASE}${e.path}` })),
+  trust: { openSource: "https://github.com/tevfikefeaydin/agenttoll", onchainStats: `${PUBLIC_BASE}/api/stats`,
+    trackRecord: "https://github.com/tevfikefeaydin/agenttoll/tree/main/data/scout",
+    note: "Statistics are scoped to the configured payment network and receiving address. Immutable git revisions identify radar snapshots; payment receipts do not bind snapshot content." },
+}));
 
 app.get("/api/price/:symbol", serve((req) => getPrice(one(req.params.symbol))));
 app.get("/api/gas", serve((req) => getGas(opt(req.query.gasLimit))));
@@ -451,7 +277,7 @@ app.get("/api/feargreed", serve((req) => getFearGreed(opt(req.query.days))));
 app.get("/api/brief", serve((req) => getMarketBrief(opt(req.query.symbols))));
 app.get("/api/try/premium", serve((req) => getTryPremium(opt(req.query.asset))));
 app.get("/api/try/spread", serve((req) => getTrySpread(opt(req.query.asset))));
-app.get("/api/stats", serve(() => getStats(PAY_TO)));
+app.get("/api/stats", serve(() => getStats(PAY_TO, NETWORK)));
 
 app.get(
   "/api/watch/address/:address",
@@ -467,5 +293,12 @@ app.get(
 
 // Local static serving; on Vercel the public/ folder is served by the CDN.
 app.use(express.static(path.join(__dirname, "..", "public")));
+
+app.use((error: unknown, _req: Request, res: Response, next: NextFunction) => {
+  if (res.headersSent) return next(error);
+  const result = errorResponse(error, String(res.getHeader("X-Request-Id") ?? ""));
+  if (result.body.retryAfter) res.setHeader("Retry-After", String(result.body.retryAfter));
+  res.status(result.status).json(result.body);
+});
 
 export default app;

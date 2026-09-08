@@ -18,8 +18,13 @@ import "dotenv/config";
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 import { payingFetch } from "../src/pay.js";
+import { pathToFileURL } from "node:url";
+import { realpathSync } from "node:fs";
 
-const BASE_URL = process.env.AGENTTOLL_URL ?? "http://localhost:4021";
+const BASE_URL = (process.env.AGENTTOLL_URL ?? "http://localhost:4021").replace(/\/+$/, "");
+const local = ["localhost", "127.0.0.1", "[::1]"].includes(new URL(BASE_URL).hostname);
+const network = process.env.AGENTTOLL_NETWORK ?? (local ? process.env.NETWORK ?? "base-sepolia" : "base");
+const recipient = process.env.AGENTTOLL_RECIPIENT ?? (local ? process.env.ADDRESS : undefined);
 const key = process.env.AGENT_PRIVATE_KEY;
 
 if (!key) {
@@ -27,11 +32,17 @@ if (!key) {
   process.exit(1);
 }
 
-const { fetchWithPayment } = payingFetch(key);
+const { fetchWithPayment } = payingFetch(key, network, {
+  baseUrl: BASE_URL,
+  recipient,
+  totalBudgetUsdc: process.env.AGENTTOLL_BUDGET_USDC,
+  maxPerCallUsdc: process.env.AGENTTOLL_MAX_PER_CALL_USDC,
+  timeoutMs: process.env.AGENTTOLL_TIMEOUT_MS === undefined ? undefined : Number(process.env.AGENTTOLL_TIMEOUT_MS),
+});
 
 export const getTokenPrice = tool(
-  async ({ symbol }: { symbol: string }) => {
-    const res = await fetchWithPayment(`${BASE_URL}/api/price/${symbol}`);
+  async ({ symbol }: { symbol: string }, config) => {
+    const res = await fetchWithPayment(`${BASE_URL}/api/price/${encodeURIComponent(symbol)}`, { signal: config?.signal });
     if (!res.ok) throw new Error(`AgentToll returned ${res.status}`);
     return JSON.stringify(await res.json());
   },
@@ -39,7 +50,7 @@ export const getTokenPrice = tool(
     name: "get_token_price",
     description:
       "Get the current USD price and 24h change for a crypto asset (e.g. eth, btc, sol). " +
-      "Costs $0.001, paid automatically in USDC on Base via x402 — no API key.",
+      "Costs at most $0.001 in USDC on the configured payment network, within a shared session budget (default $1).",
     schema: z.object({
       symbol: z.string().describe("Asset symbol, e.g. 'eth' or 'btc'"),
     }),
@@ -47,7 +58,7 @@ export const getTokenPrice = tool(
 );
 
 // Standalone smoke test — call it directly the way an agent would.
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && import.meta.url === pathToFileURL(realpathSync(process.argv[1])).href) {
   const result = await getTokenPrice.invoke({ symbol: "eth" });
   console.log(result);
 }

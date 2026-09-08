@@ -1,174 +1,127 @@
-/**
- * Wallet half of the browser demo. Bundled to public/demo.js by
- * `npm run build:web` and loaded on demand — the quote step in app.js is a
- * plain fetch, so nobody downloads this unless they choose to pay.
- *
- * Exposed as window.agentTollPay(); app.js calls it once the bundle lands.
- */
-import { createPublicClient, createWalletClient, custom, http, type EIP1193Provider } from "viem";
-import { base } from "viem/chains";
-import { wrapFetchWithPaymentFromConfig, decodePaymentResponseHeader } from "@x402/fetch";
-import { ExactEvmScheme, toClientEvmSigner } from "@x402/evm";
-
-const BASE_CHAIN_ID = "0x2105"; // 8453
+/** Browser wallet demo. public/app.js passes the quote the visitor inspected. */
+import { createWalletClient, custom, type EIP1193Provider } from "viem";
+import { base, baseSepolia } from "viem/chains";
+import { toClientEvmSigner } from "@x402/evm";
+import { decodePaymentResponseHeader } from "@x402/fetch";
+import { createPaymentClient, createPaymentDeadline, getNetworkConfig, registeredEndpoint } from "../src/payment-policy.js";
 
 type Show = (html: string, tone?: "quote" | "ok" | "err" | "wait") => void;
+interface BrowserPaymentOptions { quote?: unknown; recipient?: string; timeoutMs?: number; }
+const esc = (value: unknown) => String(value).replace(/[&<>"']/g, character =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character] as string,
+);
 
-const esc = (s: unknown) =>
-  String(s).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c] as string);
-
-/** Contract accounts sign via ERC-1271/6492, which changes what can go wrong. */
-async function isSmartWallet(provider: EIP1193Provider, address: string): Promise<boolean> {
-  try {
-    const code = (await provider.request({
-      method: "eth_getCode",
-      params: [address as `0x${string}`, "latest"],
-    })) as string;
-    return Boolean(code) && code !== "0x";
-  } catch {
-    return false;
-  }
-}
-
-async function pay(endpoint: string, show: Show) {
+async function pay(endpoint: string, show: Show, options: BrowserPaymentOptions = {}) {
   const provider = (window as unknown as { ethereum?: EIP1193Provider }).ethereum;
   if (!provider) {
-    show(
-      '<span class="bad">No browser wallet found.</span><p class="dim">Install a Base-compatible ' +
-        "wallet (Coinbase Wallet, MetaMask, Rabby…) and reload — or just call the API from your " +
-        "own code, which is what agents do anyway.</p>",
-      "err",
-    );
+    show('<span class="bad">No browser wallet found.</span><p class="dim">Install a Base-compatible wallet and reload, or call the API from your own code.</p>', "err");
     return;
   }
 
+  let address: `0x${string}` | undefined;
+  let networkName = "the quoted network";
+  let signed = false;
+  let deadline: ReturnType<typeof createPaymentDeadline> | undefined;
   try {
+    deadline = createPaymentDeadline(options.timeoutMs ?? 120_000);
+    const operation = deadline;
+    const url = new URL(endpoint, window.location.origin);
+    if (url.origin !== window.location.origin) throw new Error("The demo only pays its own API origin.");
+    registeredEndpoint(url.pathname);
+    let displayedQuote = options.quote;
+    if (displayedQuote === undefined) {
+      const response = await operation.run(() => fetch(url, { signal: operation.signal, redirect: "error" }));
+      if (response.status !== 402) throw new Error(`Expected a payment quote, received HTTP ${response.status}.`);
+      const header = response.headers.get("payment-required");
+      if (!header || header.length > 32_768) throw new Error("Missing or oversized payment quote.");
+      try { displayedQuote = JSON.parse(atob(header)); } catch { throw new Error("Unrecognized payment quote."); }
+    }
+    const quotedNetwork = (displayedQuote as { accepts?: { network?: string }[] } | null)?.accepts?.[0]?.network;
+    const network = quotedNetwork === "eip155:8453" ? "base" : quotedNetwork === "eip155:84532" ? "base-sepolia" : undefined;
+    if (!network) throw new Error("Unrecognized payment network; only Base and Base Sepolia are supported.");
+    const config = getNetworkConfig(network);
+    networkName = config.name;
+    const policyOptions = { baseUrl: url.origin, recipient: options.recipient, timeoutMs: options.timeoutMs ?? 120_000 };
+    // Validate and copy the displayed terms before the first wallet prompt.
+    const pinnedQuote = createPaymentClient(network, undefined, policyOptions).validateQuote(displayedQuote, url.href).quote;
+
     show('<span class="dim">Waiting for your wallet…</span>', "wait");
-    const [address] = (await provider.request({ method: "eth_requestAccounts" })) as string[];
-
-    // x402 settles on Base mainnet, so make sure the wallet is there.
-    let chainId = (await provider.request({ method: "eth_chainId" })) as string;
-    if (chainId !== BASE_CHAIN_ID) {
-      show('<span class="dim">Switching your wallet to Base…</span>', "wait");
-      await provider.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId: BASE_CHAIN_ID }],
-      });
-      // The switch resolves before some wallets finish, and signing on the
-      // wrong chain produces a valid-looking signature the facilitator then
-      // rejects. Confirm before we ask for anything.
-      chainId = (await provider.request({ method: "eth_chainId" })) as string;
+    const accounts = await operation.run(() => provider.request({ method: "eth_requestAccounts" }));
+    if (!Array.isArray(accounts) || !/^0x[0-9a-fA-F]{40}$/.test(String(accounts[0]))) throw new Error("The wallet did not return an account.");
+    address = accounts[0] as `0x${string}`;
+    const expectedChainId = `0x${config.chainId.toString(16)}`;
+    let chainId = await operation.run(() => provider.request({ method: "eth_chainId" }));
+    if (String(chainId).toLowerCase() !== expectedChainId) {
+      show('<span class="dim">Switching your wallet to ' + esc(config.name) + '…</span>', "wait");
+      await operation.run(() => provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: expectedChainId }] }));
+      chainId = await operation.run(() => provider.request({ method: "eth_chainId" }));
     }
-    if (chainId !== BASE_CHAIN_ID) {
-      show(
-        '<span class="bad">Your wallet is still not on Base.</span><p class="dim">Switch the ' +
-          "network to Base manually and try again — signing on another chain produces a payment " +
-          "the facilitator will reject.</p>",
-        "err",
-      );
-      return;
-    }
+    if (String(chainId).toLowerCase() !== expectedChainId) throw new Error(`Your wallet is still not on ${config.name}. Switch the network manually and try again.`);
 
-    const wallet = createWalletClient({
-      account: address as `0x${string}`,
-      chain: base,
-      transport: custom(provider),
-    });
-
-    show('<span class="dim">Sign the USDC authorization in your wallet…</span>', "wait");
-    const publicClient = createPublicClient({ chain: base, transport: http() });
-    // toClientEvmSigner wants an account-shaped signer: a top-level `address`
-    // plus signTypedData. A WalletClient keeps its address one level down at
-    // wallet.account.address, so passing the client straight through leaves
-    // signer.address undefined and the USDC authorization is built for
-    // address "undefined". This adapter is the browser-wallet equivalent of
-    // the privateKeyToAccount object our Node clients pass.
-    const signer = toClientEvmSigner(
-      {
-        address: address as `0x${string}`,
-        signTypedData: (message) =>
-          wallet.signTypedData({
-            account: address as `0x${string}`,
-            ...message,
-          } as Parameters<typeof wallet.signTypedData>[0]),
+    const payer = address;
+    const wallet = createWalletClient({ account: payer, chain: network === "base" ? base : baseSepolia, transport: custom(provider, { retryCount: 0 }) });
+    const signer = toClientEvmSigner({
+      address: payer,
+      async signTypedData(message) {
+        operation.check();
+        // A wallet can change networks while the live quote is being fetched.
+        const currentChain = await operation.run(() => provider.request({ method: "eth_chainId" }));
+        if (String(currentChain).toLowerCase() !== expectedChainId) throw new Error(`Your wallet changed network; switch back to ${config.name}.`);
+        operation.check();
+        show('<span class="dim">Sign the USDC authorization in your wallet…</span>', "wait");
+        const signature = await wallet.signTypedData({ account: payer, ...message } as Parameters<typeof wallet.signTypedData>[0]);
+        signed = true;
+        return signature;
       },
-      publicClient,
-    );
-    const pay = wrapFetchWithPaymentFromConfig(fetch, {
-      schemes: [{ network: "eip155:8453", client: new ExactEvmScheme(signer) }],
     });
-    const res = await pay(endpoint);
-
-    // The wrapper returns the final response either way, so a payment that
-    // failed to settle comes back as a 402 with an empty body — which this
-    // demo used to dress up as "paid & delivered". Read the verdict instead:
-    // the facilitator's reason travels in the PAYMENT-REQUIRED header.
-    if (!res.ok) {
+    const client = createPaymentClient(network, signer, policyOptions);
+    const response = await operation.run(() => client.fetchWithPayment(url, { signal: operation.signal }, pinnedQuote));
+    if (!response.ok) {
       let reason = "";
       try {
-        const quote = res.headers.get("payment-required");
-        reason = quote ? ((JSON.parse(atob(quote)) as { error?: string }).error ?? "") : "";
-      } catch {
-        /* no decodable header — fall through to the generic message */
-      }
+        const header = response.headers.get("payment-required");
+        reason = header ? String((JSON.parse(atob(header)) as { error?: string }).error ?? "") : "";
+      } catch { /* Fall back to the HTTP status. */ }
       const noFunds = /reverted|insufficient|exceeds balance/i.test(reason);
-      show(
-        '<span class="bad">Payment did not settle — nothing was charged.</span>' +
-          (noFunds
-            ? '<p class="dim">This wallet has no USDC on <b>Base mainnet</b>. USDC on another ' +
-              "network (Ethereum, Solana, an exchange balance…) cannot pay here — bridge or " +
-              "withdraw about a cent of USDC to Base first.</p>"
-            : '<p class="dim">The facilitator said: <code>' + esc(reason || `HTTP ${res.status}`) + "</code></p>"),
-        "err",
-      );
+      show('<span class="bad">Payment did not complete.</span><p class="dim">' +
+        (noFunds ? `This wallet needs USDC on ${esc(config.name)}. USDC on another network cannot pay this quote.` :
+          'The server returned: <code>' + esc(reason || `HTTP ${response.status}`) + '</code>. Check your wallet before retrying an authorized payment.') + '</p>', "err");
       return;
     }
-
-    const data = await res.json();
-
-    const header = res.headers.get("payment-response");
-    const tx = header
-      ? (decodePaymentResponseHeader(header) as { transaction?: string })?.transaction
-      : null;
-
-    show(
-      '<div class="line"><span class="tag good">HTTP ' + res.status + '</span> paid &amp; delivered</div>' +
-        '<pre class="mini">' +
-        esc(JSON.stringify(data, null, 2)) +
-        "</pre>" +
-        (tx
-          ? '<div class="kv"><span>settled</span><b><a href="https://basescan.org/tx/' +
-            esc(tx) +
-            '" target="_blank" rel="noopener">view on BaseScan ↗</a></b></div>'
-          : ""),
-      "ok",
-    );
-  } catch (err) {
-    const msg = (err as Error)?.message ?? String(err);
-    let friendly = msg;
+    const data = await operation.run(() => response.json());
+    let tx: string | undefined;
+    try {
+      const header = response.headers.get("payment-response");
+      const candidate = header ? (decodePaymentResponseHeader(header) as { transaction?: string }).transaction : undefined;
+      if (candidate && /^0x[0-9a-fA-F]{64}$/.test(candidate)) tx = candidate;
+    } catch { /* Delivered data remains usable if settlement metadata is malformed. */ }
+    show('<div class="line"><span class="tag good">HTTP ' + response.status + '</span> ' + (signed ? 'paid &amp; delivered' : 'delivered') + '</div>' +
+      '<pre class="mini">' + esc(JSON.stringify(data, null, 2)) + '</pre>' +
+      (tx ? '<div class="kv"><span>settled</span><b><a href="' + config.explorer + '/tx/' + tx + '" target="_blank" rel="noopener">view on BaseScan ↗</a></b></div>' : ''), "ok");
+  } catch (error) {
+    const message = (error as Error)?.message ?? String(error);
+    let friendly = message;
     let hint = "";
-
-    if (/rejected|denied|4001/i.test(msg)) {
-      friendly = "You rejected the signature — nothing was charged.";
-    } else if (/insufficient|balance|transfer amount exceeds/i.test(msg)) {
-      friendly = "That wallet has no USDC on Base. It needs about a cent.";
-    } else if (/invalid_payload|invalid_signature|verify/i.test(msg)) {
+    if (/rejected|denied|4001/i.test(message) && !/invalid_signature/i.test(message)) {
+      friendly = signed ? "The wallet request was rejected. Check your wallet before retrying the authorized payment." : "You rejected the wallet request; no payment was submitted.";
+    } else if (/insufficient|balance|transfer amount exceeds/i.test(message)) {
+      friendly = `That wallet needs USDC on ${networkName}.`;
+    } else if (/invalid_payload|invalid_signature|verify/i.test(message)) {
       friendly = "The facilitator rejected the signature.";
-      // Smart-contract wallets sign via ERC-1271/6492 rather than a plain
-      // ECDSA signature, and not every facilitator accepts that for the
-      // EIP-3009 authorization this flow uses. Say so instead of guessing.
-      const isContract = await isSmartWallet(provider, wallet.account.address);
+      // The selected address lives outside try so diagnostics cannot mask the original error.
+      let isContract = false;
+      if (address && deadline && !deadline.signal.aborted) {
+        try {
+          const code = await deadline.run(() => provider.request({ method: "eth_getCode", params: [address!, "latest"] }));
+          isContract = typeof code === "string" && code !== "0x";
+        } catch { /* Diagnostics are optional. */ }
+      }
       hint = isContract
-        ? "<p class=\"dim\">This wallet is a smart contract account (Base Account, Safe, …). " +
-          "Those sign differently and the facilitator does not always accept it for this " +
-          "payment type yet. A regular EOA wallet works — or just call the API from code, " +
-          "which is the path agents use.</p>"
-        : "<p class=\"dim\">Nothing was charged. If this keeps happening, please open an " +
-          '<a href="https://github.com/tevfikefeaydin/agenttoll/issues">issue</a> — the demo ' +
-          "reports the facilitator's own wording above.</p>";
+        ? '<p class="dim">This is a smart contract wallet. The facilitator may not support its signature format; try a regular EOA wallet.</p>'
+        : '<p class="dim">Check the wallet and the server error before retrying. If this persists, report it on <a href="https://github.com/tevfikefeaydin/agenttoll/issues">GitHub</a>.</p>';
     }
-    show('<span class="bad">' + esc(friendly) + "</span>" + hint, "err");
-  }
+    show('<span class="bad">' + esc(friendly) + '</span>' + hint, "err");
+  } finally { deadline?.close(); }
 }
 
 (window as unknown as { agentTollPay?: typeof pay }).agentTollPay = pay;

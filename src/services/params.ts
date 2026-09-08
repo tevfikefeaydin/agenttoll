@@ -10,6 +10,14 @@ import { badRequest } from "./errors.js";
 
 const missing = (raw: string | undefined) => raw === undefined || raw.trim() === "";
 
+export function optionalBoolean(name: string, raw: string | undefined): boolean | undefined {
+  if (raw === undefined) return undefined;
+  const value = raw.trim().toLowerCase();
+  if (value === 'true') return true;
+  if (value === 'false') return false;
+  badRequest(`Invalid '${name}' — expected true or false`);
+}
+
 export function optionalNumber(
   name: string,
   raw: string | undefined,

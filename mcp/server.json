@@ -1,31 +1,66 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.tevfikefeaydin/agenttoll",
-  "description": "Pay-per-call market and Base onchain data for AI agents - prices, gas, trending pools, new-token radar, market briefs. Each call paid automatically in USDC on Base via x402 ($0.001-$0.005). No API keys.",
+  "description": "21 paid data tools plus free quote/budget inspection, with bounded USDC payments on Base.",
   "repository": {
     "url": "https://github.com/tevfikefeaydin/agenttoll",
     "source": "github"
   },
-  "version": "0.12.0",
+  "version": "0.13.0",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "agenttoll-mcp",
-      "version": "0.12.0",
+      "version": "0.13.0",
       "transport": {
         "type": "stdio"
       },
       "environmentVariables": [
         {
           "name": "AGENT_PRIVATE_KEY",
-          "description": "EVM private key of the wallet that pays per call (needs USDC on Base)",
-          "isRequired": true,
+          "description": "Optional paying-wallet EVM private key; omit for free quote/budget inspection.",
+          "isRequired": false,
           "format": "string",
           "isSecret": true
         },
         {
           "name": "AGENTTOLL_URL",
-          "description": "API base URL (default: https://agenttoll.app)",
+          "description": "API origin (default https://agenttoll.app); custom origins require AGENTTOLL_RECIPIENT.",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": false
+        },
+        {
+          "name": "AGENTTOLL_NETWORK",
+          "description": "Payment network: base (default) or base-sepolia. Base data always uses mainnet.",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": false
+        },
+        {
+          "name": "AGENTTOLL_RECIPIENT",
+          "description": "Trusted receiving address; required for a custom API origin.",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": false
+        },
+        {
+          "name": "AGENTTOLL_BUDGET_USDC",
+          "description": "Finite session USDC budget (default 1); maximum six decimal places.",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": false
+        },
+        {
+          "name": "AGENTTOLL_MAX_PER_CALL_USDC",
+          "description": "Optional lower USDC ceiling; registered endpoint prices remain the upper limit.",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": false
+        },
+        {
+          "name": "AGENTTOLL_TIMEOUT_MS",
+          "description": "Total quote/sign/retry/body timeout in milliseconds (default 30000; 1–300000).",
           "isRequired": false,
           "format": "string",
           "isSecret": false

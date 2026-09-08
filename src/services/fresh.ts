@@ -1,6 +1,6 @@
 import { decodeEventLog, parseAbiItem, toEventSelector } from "viem";
 import { cached } from "./cache.js";
-import { optionalInt } from "./params.js";
+import { optionalInt, optionalBoolean } from "./params.js";
 import { baseRpc } from "./sources.js";
 
 /**
@@ -290,7 +290,7 @@ export async function getFreshPools(
 ) {
   const minutes = optionalInt("minutes", minutesRaw, { min: 1, max: MAX_MINUTES }) ?? DEFAULT_MINUTES;
   const limit = optionalInt("limit", limitRaw, { min: 1, max: 50 }) ?? DEFAULT_LIMIT;
-  const fundedOnly = fundedOnlyRaw === undefined ? false : fundedOnlyRaw !== "false";
+  const fundedOnly = optionalBoolean('fundedOnly', fundedOnlyRaw) ?? false;
 
   // Short TTL: this endpoint's whole point is that the answer is seconds old.
   const window = await cached("fresh", 30_000, readWindow);

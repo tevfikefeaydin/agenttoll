@@ -9,13 +9,22 @@ import { blockscoutFetch, fromSources } from "./sources.js";
 //   2. The chain itself — a committed baseline plus eth_getLogs for the blocks
 //      since. Slower, but it only depends on a public RPC, and Blockscout has
 //      now gone down (500s, then timeouts) three times in a month.
-const MAINNET = (process.env.NETWORK ?? "base-sepolia") === "base";
-const BLOCKSCOUT = MAINNET
-  ? "https://base.blockscout.com/api/v2"
-  : "https://base-sepolia.blockscout.com/api/v2";
-const USDC = MAINNET
-  ? "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
-  : "0x036CbD53842c5426634e7929541eC2318f3dCF7e";
+export type StatsNetwork = "base" | "base-sepolia";
+const NETWORKS = {
+  base: { blockscout: "https://base.blockscout.com/api/v2", usdc: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", rpcs: ["https://mainnet.base.org", "https://base.drpc.org"] },
+  "base-sepolia": { blockscout: "https://base-sepolia.blockscout.com/api/v2", usdc: "0x036CbD53842c5426634e7929541eC2318f3dCF7e", rpcs: ["https://sepolia.base.org"] },
+} as const;
+
+function defaultNetwork(): StatsNetwork {
+  const network = process.env.NETWORK ?? "base-sepolia";
+  if (network !== "base" && network !== "base-sepolia") throw new Error("Unsupported stats network");
+  return network;
+}
+
+function recipient(payTo: string): string {
+  if (!/^0x[0-9a-fA-F]{40}$/.test(payTo)) throw new Error("Invalid stats recipient address");
+  return payTo.toLowerCase();
+}
 const MAX_PAGES = 20; // 50 transfers/page; raise when the tollbooth gets busy
 // Tolls are micro-payments; anything bigger is the owner funding the wallet.
 const MAX_TOLL_UNITS = 50_000n; // $0.05
@@ -49,7 +58,8 @@ interface TransferPage {
   next_page_params: Record<string, string | number> | null;
 }
 
-async function fromBlockscout(payTo: string): Promise<Tally> {
+async function fromBlockscout(payTo: string, network: StatsNetwork): Promise<Tally> {
+  const { blockscout, usdc } = NETWORKS[network];
   const payers = new Map<string, { calls: number; usdc: bigint }>();
   let truncated = false;
   let params = "";
@@ -60,7 +70,7 @@ async function fromBlockscout(payTo: string): Promise<Tally> {
     // This feeds the homepage counter, so do not let an unhealthy upstream
     // keep a visitor staring at "reading the chain..." indefinitely.
     const res = await blockscoutFetch(
-      `${BLOCKSCOUT}/addresses/${payTo}/token-transfers?type=ERC-20&filter=to&token=${USDC}${params}`,
+      `${blockscout}/addresses/${payTo}/token-transfers?type=ERC-20&filter=to&token=${usdc}${params}`,
       { headers: { Accept: "application/json" } },
       STATS_UPSTREAM_TIMEOUT_MS,
       // One try only: reading the chain below is faster than a second attempt
@@ -71,7 +81,7 @@ async function fromBlockscout(payTo: string): Promise<Tally> {
 
     for (const item of json.items) {
       const value = BigInt(item.total?.value ?? "0");
-      if (value === 0n || value > MAX_TOLL_UNITS) continue;
+      if (value <= 0n || value > MAX_TOLL_UNITS) continue;
 
       const from = item.from?.hash?.toLowerCase();
       if (from) {
@@ -114,7 +124,6 @@ const TRANSFER_TOPIC = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a
 // 10–50 blocks or gate archive reads behind a token. base.org is the dependable
 // one; drpc is a last-ditch that often times out on its free tier, and costs
 // nothing to list because fromSources only reaches it if base.org fails.
-const LOG_RPCS = ["https://mainnet.base.org", "https://base.drpc.org"];
 const CHUNK = 10_000; // every provider that works caps the range here
 const MAX_CHUNKS = 60; // ~12 days of catching up on a stale baseline
 const SCAN_BUDGET_MS = 9_000; // stay under the platform's own request timeout
@@ -123,6 +132,8 @@ const hex = (n: number) => `0x${n.toString(16)}`;
 const topicAddress = (addr: string) => `0x${addr.slice(2).toLowerCase().padStart(64, "0")}`;
 
 interface BaselineFile {
+  network: StatsNetwork;
+  payTo: string;
   block: number;
   firstTollAt: string | null;
   lastTollAt: string | null;
@@ -142,10 +153,10 @@ export interface TollLog {
   block: number;
 }
 
-async function logsRpc<T>(method: string, params: unknown[] = []): Promise<T> {
+async function logsRpc<T>(network: StatsNetwork, method: string, params: unknown[] = []): Promise<T> {
   return fromSources<T>(
-    `base rpc ${method}`,
-    LOG_RPCS.map((url) => ({
+    `${network} rpc ${method}`,
+    NETWORKS[network].rpcs.map((url) => ({
       name: new URL(url).host,
       load: async () => {
         const res = await fetchWithTimeout(url, {
@@ -164,11 +175,17 @@ async function logsRpc<T>(method: string, params: unknown[] = []): Promise<T> {
 }
 
 /** The chain's own head block. */
-export const latestBlock = async () => parseInt(await logsRpc<string>("eth_blockNumber"), 16);
+export async function latestBlock(network: StatsNetwork = defaultNetwork()): Promise<number> {
+  const result = await logsRpc<string>(network, "eth_blockNumber");
+  if (!/^0x[0-9a-f]+$/i.test(result)) throw new Error("Invalid head block");
+  const block = parseInt(result, 16);
+  if (!Number.isSafeInteger(block) || block < 0) throw new Error("Invalid head block");
+  return block;
+}
 
 /** When a block was mined, as an ISO string. */
-export async function blockMinedAt(block: number): Promise<string> {
-  const b = await logsRpc<{ timestamp: string }>("eth_getBlockByNumber", [hex(block), false]);
+export async function blockMinedAt(block: number, network: StatsNetwork = defaultNetwork()): Promise<string> {
+  const b = await logsRpc<{ timestamp: string }>(network, "eth_getBlockByNumber", [hex(block), false]);
   return new Date(parseInt(b.timestamp, 16) * 1000).toISOString();
 }
 
@@ -181,20 +198,22 @@ export async function scanTollLogs(
   payTo: string,
   fromBlock: number,
   toBlock: number,
+  network: StatsNetwork = defaultNetwork(),
 ): Promise<TollLog[]> {
-  const logs = await logsRpc<RpcLog[]>("eth_getLogs", [
+  const address = recipient(payTo);
+  const logs = await logsRpc<RpcLog[]>(network, "eth_getLogs", [
     {
       fromBlock: hex(fromBlock),
       toBlock: hex(toBlock),
-      address: USDC,
-      topics: [TRANSFER_TOPIC, null, topicAddress(payTo)],
+      address: NETWORKS[network].usdc,
+      topics: [TRANSFER_TOPIC, null, topicAddress(address)],
     },
   ]);
 
   const tolls: TollLog[] = [];
   for (const log of logs) {
     const value = BigInt(log.data);
-    if (value === 0n || value > MAX_TOLL_UNITS) continue;
+    if (value <= 0n || value > MAX_TOLL_UNITS) continue;
     tolls.push({
       sender: `0x${log.topics[1].slice(26)}`.toLowerCase(),
       value,
@@ -211,22 +230,37 @@ export const LOG_CHUNK = CHUNK;
  * CI. Scanning the whole history live would be ~150 sequential getLogs calls
  * and grows with the chain; this keeps the live part to the last day or so.
  */
-const baseline = () =>
-  cached("stats:baseline", 600_000, async () => {
+const baseline = (payTo: string, network: StatsNetwork) =>
+  cached(`stats:baseline:${network}:${payTo}`, 600_000, async () => {
     const res = await fetchWithTimeout(RAW_BASELINE);
     if (!res.ok) throw new Error(`Baseline store returned ${res.status}`);
-    return (await res.json()) as BaselineFile;
+    const base = (await res.json()) as BaselineFile;
+    if (!base || base.network !== network || typeof base.payTo !== "string" || base.payTo.toLowerCase() !== payTo) {
+      throw new Error(`No compatible stats baseline for network ${network} and recipient ${payTo}`);
+    }
+    if (!Number.isSafeInteger(base.block) || base.block < 0 || !base.payers || typeof base.payers !== "object" || Array.isArray(base.payers)
+      || ![base.firstTollAt, base.lastTollAt].every((value) => value === null || (typeof value === "string" && Number.isFinite(Date.parse(value))))) {
+      throw new Error("Invalid stats baseline");
+    }
+    for (const [addr, p] of Object.entries(base.payers)) {
+      if (!/^0x[0-9a-fA-F]{40}$/.test(addr) || !p || !Number.isSafeInteger(p.calls) || p.calls < 0
+        || typeof p.usdcUnits !== "string" || !/^\d+$/.test(p.usdcUnits)
+        || BigInt(p.usdcUnits) > BigInt(p.calls) * MAX_TOLL_UNITS) throw new Error("Invalid stats baseline payer");
+    }
+    return base;
   });
 
-export async function fromChain(payTo: string): Promise<Tally> {
-  const base = await baseline();
+export async function fromChain(payTo: string, network: StatsNetwork = defaultNetwork()): Promise<Tally> {
+  payTo = recipient(payTo);
+  const base = await baseline(payTo, network);
   const payers = new Map(
     Object.entries(base.payers).map(
       ([addr, p]) => [addr.toLowerCase(), { calls: p.calls, usdc: BigInt(p.usdcUnits) }] as const,
     ),
   );
 
-  const head = await latestBlock();
+  const head = await latestBlock(network);
+  if (head < base.block) throw new Error("Stats baseline is ahead of the current network head");
   const started = Date.now();
   let from = base.block + 1;
   let scannedThrough = base.block;
@@ -240,7 +274,7 @@ export async function fromChain(payTo: string): Promise<Tally> {
       break;
     }
     const to = Math.min(from + CHUNK - 1, head);
-    for (const toll of await scanTollLogs(payTo, from, to)) {
+    for (const toll of await scanTollLogs(payTo, from, to, network)) {
       const seen = payers.get(toll.sender) ?? { calls: 0, usdc: 0n };
       payers.set(toll.sender, { calls: seen.calls + 1, usdc: seen.usdc + toll.value });
       newestBlock = Math.max(newestBlock, toll.block);
@@ -253,14 +287,14 @@ export async function fromChain(payTo: string): Promise<Tally> {
 
   // One extra call buys the only timestamp the response needs; dating every
   // log would cost a request per block for a field nobody reads per-payer.
-  const lastAt = newestBlock > 0 ? await blockMinedAt(newestBlock) : base.lastTollAt;
+  const lastAt = newestBlock > 0 ? await blockMinedAt(newestBlock, network) : base.lastTollAt;
 
   return {
     payers,
     firstAt: base.firstTollAt,
     lastAt,
     partial,
-    source: `onchain (USDC Transfer logs via ${new URL(LOG_RPCS[0]).host}, from the committed baseline at block ${base.block})`,
+    source: `onchain (USDC Transfer logs via ${new URL(NETWORKS[network].rpcs[0]).host}, from the compatible baseline at block ${base.block})`,
     note: partial
       ? `Blocks after ${scannedThrough} were not scanned — the baseline is further behind than one request can catch up. Counts are a floor, not a total.`
       : undefined,
@@ -277,10 +311,10 @@ export async function fromChain(payTo: string): Promise<Tally> {
  * Best effort: if the baseline itself is unreachable, that is no reason to
  * reject an answer we have nothing to contradict.
  */
-async function assertNotBehindBaseline(tally: Tally): Promise<void> {
+async function assertNotBehindBaseline(tally: Tally, payTo: string, network: StatsNetwork): Promise<void> {
   let base: BaselineFile;
   try {
-    base = await baseline();
+    base = await baseline(payTo, network);
   } catch {
     return;
   }
@@ -297,7 +331,7 @@ async function assertNotBehindBaseline(tally: Tally): Promise<void> {
 
 // --- shared shape ----------------------------------------------------------
 
-function summarise(t: Tally) {
+function summarise(t: Tally, payTo: string, network: StatsNetwork) {
   let count = 0;
   let revenue = 0n;
   for (const p of t.payers.values()) {
@@ -330,26 +364,29 @@ function summarise(t: Tally) {
     lastTollAt: t.lastAt,
     truncated: t.truncated ?? false,
     ...(t.partial ? { partial: true, note: t.note } : {}),
-    network: MAINNET ? "base" : "base-sepolia",
+    network,
+    payTo,
     source: t.source,
     at: new Date().toISOString(),
   };
 }
 
-export async function getStats(payTo: string) {
-  return cached("stats", 300_000, async () =>
+export async function getStats(payTo: string, network: StatsNetwork = defaultNetwork()) {
+  payTo = recipient(payTo);
+  return cached(`stats:${network}:${payTo}`, 300_000, async () =>
     summarise(
       await fromSources<Tally>("stats", [
         {
           name: "blockscout",
           load: async () => {
-            const tally = await fromBlockscout(payTo);
-            await assertNotBehindBaseline(tally);
+            const tally = await fromBlockscout(payTo, network);
+            await assertNotBehindBaseline(tally, payTo, network);
             return tally;
           },
         },
-        { name: "onchain-logs", load: () => fromChain(payTo) },
+        { name: "onchain-logs", load: () => fromChain(payTo, network) },
       ]),
+      payTo, network,
     ),
   );
 }

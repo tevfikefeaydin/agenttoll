@@ -1,9 +1,4 @@
-name: Surfaces agree
-
-# The same fact is stated in the paywall config, the catalog, the manifest, the
-# OpenAPI spec, the MCP tool list and the site copy. Every hand-kept one of them
-# has fallen behind at least once without breaking anything, which is why the
-# drift survived so long. This makes a stale count fail the build instead.
+name: Verify code and generated surfaces
 
 on:
   push:
@@ -11,8 +6,6 @@ on:
   pull_request:
   workflow_dispatch:
 
-# This job only reads the checkout and runs two scripts over it. Pull requests
-# run untrusted code by definition, so don't hand them a token that can write.
 permissions:
   contents: read
 
@@ -24,8 +17,25 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            mcp/package-lock.json
       - run: npm ci
-      - name: Counts and prices agree across surfaces
-        run: node scripts/consistency.mjs
-      - name: OpenAPI examples match the declarations
-        run: npx tsx scripts/openapi-examples.mjs --check
+      - run: npm ci --prefix mcp
+      - name: Offline regression tests (no wallet secrets or real settlement)
+        run: npm test
+      - name: API, browser, MCP, examples and tests typecheck
+        run: npm run typecheck
+      - name: Generated metadata, MCP mapping and committed browser bundle
+        run: npm run check:generated
+      - name: Build API, browser and standalone MCP package
+        run: |
+          npm run build
+          npm run build --prefix mcp
+      - name: Check standalone MCP package contents
+        run: npm run smoke:mcp
+      - name: Dependency advisories
+        run: |
+          npm audit --audit-level=moderate
+          npm audit --prefix mcp --audit-level=moderate

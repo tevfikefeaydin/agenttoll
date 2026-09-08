@@ -1,79 +1,38 @@
-/**
- * Fills the OpenAPI spec's 200 responses from the same declarations that feed
- * the 402 quotes and /api/demo.
- *
- * The spec described twenty endpoints without saying what any of them returned:
- * every 200 was a bare description like "Gas data". A developer reading
- * /openapi.json learned the price and the parameters but not the answer's
- * shape. That data already existed in src/discovery.ts — it just was not
- * reaching this surface.
- *
- * Kept out of the request path on purpose: the spec is a static file Vercel
- * serves directly, so this runs at author time rather than per request.
- *
- *   node scripts/openapi-examples.mjs          # rewrite public/openapi.json
- *   node scripts/openapi-examples.mjs --check  # fail if it would change
- *
- * Run it after touching DISCOVERY; --check is the guard that says you forgot.
- */
+// Run with node --import tsx. Canonical descriptions, prices, parameters and examples.
 import { readFileSync, writeFileSync } from "node:fs";
-import path from "node:path";
-
-const ROOT = path.join(path.dirname(new URL(import.meta.url).pathname).replace(/^\/([A-Za-z]:)/, "$1"), "..");
-const SPEC = path.join(ROOT, "public", "openapi.json");
-const CHECK = process.argv.includes("--check");
-
-const { DISCOVERY } = await import(new URL("../src/discovery.ts", import.meta.url).href);
-
-/** "GET /api/price/:symbol" -> "/api/price/{symbol}" */
-const toSpecPath = (route) =>
-  route.replace(/^GET\s+/, "").replace(/:([A-Za-z]+)/g, "{$1}");
-
-const spec = JSON.parse(readFileSync(SPEC, "utf8"));
-const before = JSON.stringify(spec);
-
-const missing = [];
-let filled = 0;
-
-for (const [route, decl] of Object.entries(DISCOVERY)) {
-  const p = toSpecPath(route);
-  const op = spec.paths[p]?.get;
-  if (!op) {
-    missing.push(p);
-    continue;
+import { ENDPOINTS } from "../src/endpoints.ts";
+const file = new URL("../public/openapi.json", import.meta.url);
+const current = readFileSync(file, "utf8");
+const spec = JSON.parse(current);
+for (const endpoint of ENDPOINTS) {
+  const operation = (spec.paths[endpoint.path] ??= {}).get ??= {};
+  operation.summary = endpoint.description;
+  operation.operationId = endpoint.tool;
+  operation["x-payment-info"] ??= { price: { currency: "USD", mode: "fixed" } };
+  operation["x-payment-info"].price.amount = endpoint.price.slice(1);
+  operation.parameters = [];
+  for (const [location, schema, examples] of [
+    ["path", endpoint.discovery.pathParamsSchema, endpoint.discovery.pathParams],
+    ["query", endpoint.discovery.inputSchema, endpoint.discovery.input],
+  ]) for (const [name, property] of Object.entries(schema?.properties ?? {})) {
+    operation.parameters.push({ name, in: location, required: location === "path" || Boolean(schema.required?.includes(name)), schema: property,
+      ...(examples?.[name] === undefined ? {} : { example: examples[name] }) });
   }
-  const res = (op.responses ??= {})["200"] ?? (op.responses["200"] = {});
-  // Keep whatever description the spec already had; it is hand-written and
-  // often says more than the example can.
-  res.description ??= "Success";
-  res.content = { "application/json": { example: decl.output } };
-  filled++;
+  const responses = operation.responses ??= {};
+  responses["200"] = { description: "Success. meta describes response freshness and configured networks.",
+    content: { "application/json": { example: { ...endpoint.discovery.output, meta: { requestId: "example-request", servedAt: endpoint.discovery.output.at ?? "2026-08-19T12:00:00.000Z", observedAt: endpoint.discovery.output.at ?? null, ageSeconds: endpoint.discovery.output.at ? 0 : null, dataNetwork: "base", paymentNetwork: "base" } } } } };
+  responses["402"] = { description: "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.", headers: { "PAYMENT-REQUIRED": { schema: { type: "string" } } } };
+  for (const [status, description] of [[400, "Invalid input"], [429, "Rate limited"], [502, "Upstream unavailable"], [504, "Request deadline exceeded"]]) {
+    responses[status] = { description, content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } } };
+  }
 }
-
-// The reverse direction matters too: a paid operation the declarations do not
-// cover would silently keep its empty 200.
-const paid = Object.entries(spec.paths).filter(
-  ([p, ops]) => ops.get && !/\/api\/(health|catalog|demo|stats)$/.test(p),
-);
-const uncovered = paid.filter(([, ops]) => !ops.get.responses?.["200"]?.content).map(([p]) => p);
-
-const after = JSON.stringify(spec, null, 2) + "\n";
-
-if (missing.length) console.error(`declared but absent from the spec: ${missing.join(", ")}`);
-if (uncovered.length) console.error(`paid operations still without a 200 example: ${uncovered.join(", ")}`);
-
-if (CHECK) {
-  // Compare content, not line endings. Git hands Windows checkouts CRLF while
-  // this script writes LF, so a byte comparison called every Windows working
-  // copy out of date and would have failed for a difference that does not
-  // exist once the file is parsed.
-  const norm = (s) => s.replace(/\r\n/g, "\n");
-  const current = readFileSync(SPEC, "utf8");
-  const drifted = norm(current) !== norm(after);
-  console.log(drifted ? "openapi.json is out of date — run scripts/openapi-examples.mjs" : `openapi.json is current (${filled} examples)`);
-  process.exit(drifted || missing.length || uncovered.length ? 1 : 0);
-}
-
-writeFileSync(SPEC, after);
-console.log(`filled ${filled} response examples${before === JSON.stringify(spec) ? " (no change)" : ""}`);
-process.exit(missing.length || uncovered.length ? 1 : 0);
+spec.paths["/api/ready"] = { get: { summary: "Facilitator and Base RPC readiness (free, cached for 15 seconds)", security: [], responses: { "200": { description: "Both dependencies ready" }, "503": { description: "A required dependency is unavailable" } } } };
+spec.components ??= {};
+spec.components.schemas ??= {};
+spec.components.schemas.ApiError = { type: "object", required: ["error", "code", "retryable", "retryAfter", "requestId"], properties: { error: { type: "string" }, code: { type: "string" }, retryable: { type: "boolean" }, retryAfter: { type: "integer", nullable: true }, requestId: { type: "string" } } };
+spec.info.description = "Base mainnet data with x402 payments. Hosted prices: $0.001-$0.008 USDC. Self-hosted payment network and recipient are configured at startup; inspect /api/catalog and /.well-known/agent-card.json. PAYMENT-SIGNATURE sends authorization; PAYMENT-REQUIRED and PAYMENT-RESPONSE carry the quote and receipt.";
+const result = JSON.stringify(spec, null, 2) + "\n";
+if (process.argv.includes("--check")) {
+  if (current.replace(/\r\n/g, "\n") !== result) { console.error("OpenAPI is stale; run npm run generate"); process.exitCode = 1; }
+  else console.log(`OpenAPI agrees with ${ENDPOINTS.length} registered endpoints.`);
+} else { writeFileSync(file, result); console.log(`Generated ${ENDPOINTS.length} OpenAPI operations.`); }

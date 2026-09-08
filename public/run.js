@@ -1,7 +1,8 @@
 (function () {
   "use strict";
 
-  // The captured run, verbatim. Each entry is [text, className, pauseAfterMs].
+  // Captured transaction/data values; current explanatory copy and endpoint count.
+  // Each entry is [text, className, pauseAfterMs].
   var RAW = [
     ["──────────────────────────────────────────────────────────────────", "l-rule", 0],
     ["  1. There is no API key. There is a price.", "l-beat", 0],
@@ -28,7 +29,7 @@
     ["            https://basescan.org/tx/0x497b3a3cf839872d046a8fd9822ab9557d3dcd64cb78166a2f631d1ebd9668cf", "link", 320],
     ["", "", 0],
     ["  That is the whole business model. No account was created, no key", "l-note", 0],
-    ["  was issued, and nothing is charged when a request fails.", "l-note", 1500],
+    ["  was issued. After a signed timeout, check the wallet before retrying.", "l-note", 1500],
     ["", "", 0],
     ["──────────────────────────────────────────────────────────────────", "l-rule", 0],
     ["  3. What we sell: seeing a pool before the indexers do.", "l-beat", 0],
@@ -76,12 +77,12 @@
     ["", "", 0],
     ["  https://github.com/tevfikefeaydin/agenttoll/tree/main/data/scout", "link", 320],
     ["", "", 0],
-    ["  So a verdict cannot be quietly rewritten after the fact. Anyone can", "l-note", 0],
-    ["  check what we flagged, on the date we flagged it, and what happened", "l-note", 0],
-    ["  to it since. Nobody else in this ecosystem publishes that.", "l-note", 1500],
+    ["  A commit SHA pins published bytes. A payment receipt does not prove", "l-note", 0],
+    ["  their contents or capture time. The scorecard compares selected", "l-note", 0],
+    ["  snapshots with current quotes over varying holding periods.", "l-note", 1500],
     ["", "", 0],
     ["──────────────────────────────────────────────────────────────────", "l-rule", 0],
-    ["  20 paid endpoints. $0.001 to $0.008 a call. USDC on Base, via x402.", "l-key", 0],
+    ["  21 paid endpoints. $0.001 to $0.008 a call. USDC on Base, via x402.", "l-key", 0],
     ["  Open source, MIT. MCP server on npm as agenttoll-mcp.", "", 0],
     ["  https://agenttoll.app", "link", 0],
     ["──────────────────────────────────────────────────────────────────", "l-rule", 0]

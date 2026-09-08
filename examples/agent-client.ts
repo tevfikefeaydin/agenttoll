@@ -8,7 +8,7 @@
  *   3. Run this client:   npm run example:client
  *
  * The wrapped fetch automatically: reads the 402 quote, signs a USDC
- * authorization for the amount asked, retries with the payment header, and
+ * authorization within the registered price and session budget, retries with PAYMENT-SIGNATURE, and
  * receives the data. No gas needed on the client — the facilitator settles.
  *
  * Hosted API: https://agenttoll.app
@@ -17,7 +17,10 @@ import "dotenv/config";
 import { decodePaymentResponseHeader } from "@x402/fetch";
 import { payingFetch } from "../src/pay.js";
 
-const BASE_URL = process.env.AGENTTOLL_URL ?? "http://localhost:4021";
+const BASE_URL = (process.env.AGENTTOLL_URL ?? "http://localhost:4021").replace(/\/+$/, "");
+const local = ["localhost", "127.0.0.1", "[::1]"].includes(new URL(BASE_URL).hostname);
+const network = process.env.AGENTTOLL_NETWORK ?? (local ? process.env.NETWORK ?? "base-sepolia" : "base");
+const recipient = process.env.AGENTTOLL_RECIPIENT ?? (local ? process.env.ADDRESS : undefined);
 const key = process.env.AGENT_PRIVATE_KEY;
 
 if (!key) {
@@ -25,9 +28,16 @@ if (!key) {
   process.exit(1);
 }
 
-const { fetchWithPayment, address } = payingFetch(key);
+const { fetchWithPayment, address, getPaymentBudget } = payingFetch(key, network, {
+  baseUrl: BASE_URL,
+  recipient,
+  totalBudgetUsdc: process.env.AGENTTOLL_BUDGET_USDC,
+  maxPerCallUsdc: process.env.AGENTTOLL_MAX_PER_CALL_USDC,
+  timeoutMs: process.env.AGENTTOLL_TIMEOUT_MS === undefined ? undefined : Number(process.env.AGENTTOLL_TIMEOUT_MS),
+});
 
 console.log(`Agent wallet: ${address}`);
+console.log("Payment budget:", getPaymentBudget());
 console.log(`Calling ${BASE_URL}/api/price/eth (price: $0.001) ...`);
 
 const res = await fetchWithPayment(`${BASE_URL}/api/price/eth`, { method: "GET" });
@@ -41,7 +51,7 @@ if (header) {
   const tx = (receipt as { transaction?: string }).transaction;
   if (tx) {
     const explorer =
-      (process.env.NETWORK ?? "base") === "base"
+      network === "base"
         ? "https://basescan.org"
         : "https://sepolia.basescan.org";
     console.log(`BaseScan: ${explorer}/tx/${tx}`);

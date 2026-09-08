@@ -1,6 +1,7 @@
 import { baseRpc } from "./sources.js";
 import { getPrice } from "./prices.js";
 import { optionalInt } from "./params.js";
+import { cached } from "./cache.js";
 
 /**
  * Current Base gas price and head block. Pass a gasLimit to also price a
@@ -11,23 +12,25 @@ import { optionalInt } from "./params.js";
 export async function getGas(gasLimitRaw?: string) {
   const gasLimit = optionalInt("gasLimit", gasLimitRaw, { min: 21_000, max: 30_000_000 });
 
-  const [gasPriceHex, blockNumberHex] = await Promise.all([
-    baseRpc<string>("eth_gasPrice"),
-    baseRpc<string>("eth_blockNumber"),
-  ]);
-  const gasPriceWei = BigInt(gasPriceHex);
-  const gas = {
-    chain: "base",
-    gasPriceWei: gasPriceWei.toString(),
-    gasPriceGwei: Number(gasPriceWei) / 1e9,
-    latestBlock: Number(BigInt(blockNumberHex)),
-    at: new Date().toISOString(),
-  };
+  const gas = await cached("gas:base", 5_000, async () => {
+    const [gasPriceHex, blockNumberHex] = await Promise.all([
+      baseRpc<string>("eth_gasPrice"),
+      baseRpc<string>("eth_blockNumber"),
+    ]);
+    const gasPriceWei = BigInt(gasPriceHex);
+    return {
+      chain: "base",
+      gasPriceWei: gasPriceWei.toString(),
+      gasPriceGwei: Number(gasPriceWei) / 1e9,
+      latestBlock: Number(BigInt(blockNumberHex)),
+      at: new Date().toISOString(),
+    };
+  });
   if (gasLimit === undefined) return gas;
 
   // Costing the transaction needs an ETH price, so only fetch one when asked.
   const eth = await getPrice("eth");
-  const ethCost = (Number(gasPriceWei) * gasLimit) / 1e18;
+  const ethCost = (Number(gas.gasPriceWei) * gasLimit) / 1e18;
   return {
     ...gas,
     estimate: {

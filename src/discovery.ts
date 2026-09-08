@@ -32,7 +32,7 @@ const address: Pick<Discovery, "pathParams" | "pathParamsSchema"> = {
 
 const since: Params = {
   properties: {
-    since: { type: "string", description: "ISO cursor from the previous reply" },
+    since: { type: "string", description: "Echo the previous reply cursor unchanged; wallet cursors are opaque, radar cursors are ISO timestamps" },
   },
 };
 
@@ -53,12 +53,14 @@ export const DISCOVERY: Record<string, Discovery> = {
       required: ["symbol"],
     },
     output: {
-      symbol: "eth",
-      id: "ethereum",
-      usd: 1867.28,
-      change24h: -0.1,
-      source: "coingecko",
-      at: "2026-08-05T13:31:57.070Z",
+      "symbol": "eth",
+      "id": "ethereum",
+      "usd": 1867.28,
+      "change24h": -0.1,
+      "source": "coingecko",
+      "at": "2026-08-05T13:31:57.070Z",
+      "quoteCurrency": "USD",
+      "assumptions": []
     },
   },
 
@@ -210,14 +212,52 @@ export const DISCOVERY: Record<string, Discovery> = {
       },
     },
     output: {
-      chain: "base",
-      date: "2026-08-06",
-      at: "2026-08-06T10:57:00.000Z",
-      settlement: "0x9c41...b02a",
-      summary: { found: 3, checked: 3, unchecked: 0, highRisk: 1, caution: 2, insufficientData: 0, clear: 0 },
-      pools: [{ name: "openhuman / WETH", pool: "0x74bb...dc77", token: "0x74bb95da6692c34ee9755ac87ea10366653dbc77", createdAt: "2026-08-05T13:02:05Z", priceUsd: 0.0000047, liquidityUsd: 68437, volume24hUsd: 5.4, safety: { verdict: "high-risk", failed: ["liquidity"], warnings: ["creator-stake"], unchecked: [] } }],
-      provenance: { commit: "https://github.com/tevfikefeaydin/agenttoll/commits/main/data/scout/2026-08-06.json", raw: "https://raw.githubusercontent.com/.../2026-08-06.json", paidWith: "https://basescan.org/tx/0x9c41...b02a" },
-      availableDates: { first: "2026-08-06", last: "2026-08-06", count: 1 },
+      "chain": "base",
+      "date": "2026-08-06",
+      "at": "2026-08-06T10:57:00.000Z",
+      "settlement": "0x9c41...b02a",
+      "summary": {
+        "found": 3,
+        "checked": 3,
+        "unchecked": 0,
+        "highRisk": 1,
+        "caution": 2,
+        "insufficientData": 0,
+        "clear": 0
+      },
+      "pools": [
+        {
+          "name": "openhuman / WETH",
+          "pool": "0x74bb...dc77",
+          "token": "0x74bb95da6692c34ee9755ac87ea10366653dbc77",
+          "createdAt": "2026-08-05T13:02:05Z",
+          "priceUsd": 0.0000047,
+          "liquidityUsd": 68437,
+          "volume24hUsd": 5.4,
+          "safety": {
+            "verdict": "high-risk",
+            "failed": [
+              "liquidity"
+            ],
+            "warnings": [
+              "creator-stake"
+            ],
+            "unchecked": []
+          }
+        }
+      ],
+      "provenance": {
+        "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "commit": "https://github.com/tevfikefeaydin/agenttoll/commit/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "raw": "https://raw.githubusercontent.com/tevfikefeaydin/agenttoll/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/data/scout/2026-08-06.json",
+        "paidWith": null,
+        "integrity": "Git revision pins the published bytes. A payment transaction does not authenticate a snapshot hash or its capture time."
+      },
+      "availableDates": {
+        "first": "2026-08-06",
+        "last": "2026-08-06",
+        "count": 1
+      }
     },
   },
 
@@ -225,50 +265,262 @@ export const DISCOVERY: Record<string, Discovery> = {
     input: { days: 7 },
     inputSchema: {
       properties: {
-        days: { type: "integer", minimum: 1, maximum: 30, description: "Optional. Window in days, default 7" },
+        days: { type: "integer", minimum: 1, maximum: 30, description: "Optional. Latest published snapshots to compare, default 7; elapsed holding periods vary" },
       },
     },
     output: {
-      chain: "base",
-      windowDays: 7,
-      trackRecord: { daysCovered: 7, firstSnapshot: "2026-08-06", lastSnapshot: "2026-08-12" },
-      cohorts: {
-        "high-risk": { count: 5, liquidityGone: 4, medianChangePct: -97.2 },
-        caution: { count: 9, liquidityGone: 2, medianChangePct: -41.5 },
-        "insufficient-data": { count: 2, liquidityGone: 0, medianChangePct: -12.3 },
-        clear: { count: 1, liquidityGone: 0, medianChangePct: 8.4 },
+      "chain": "base",
+      "windowDays": 7,
+      "trackRecord": {
+        "daysCovered": 7,
+        "firstSnapshot": "2026-08-06",
+        "lastSnapshot": "2026-08-12"
       },
-      tokens: [{ token: "0x74bb...dc77", name: "openhuman / WETH", flaggedOn: "2026-08-06", verdictThen: "high-risk", liquidityThenUsd: 68437, liquidityNowUsd: 3, priceChangePct: -99.1, liquidityGone: true }],
-      methodology: "Each token judged from its first appearance: verdict and price then, deepest-pool price now. Snapshots are dated git commits.",
-      disclaimer: "A track record, not investment advice.",
-      at: "2026-08-12T10:00:00.000Z",
+      "cohorts": {
+        "high-risk": {
+          "count": 1,
+          "priced": 0,
+          "unavailable": 0,
+          "liquidityGone": 1,
+          "medianChangePct": null
+        },
+        "caution": {
+          "count": 0,
+          "priced": 0,
+          "unavailable": 0,
+          "liquidityGone": 0,
+          "medianChangePct": null
+        },
+        "insufficient-data": {
+          "count": 0,
+          "priced": 0,
+          "unavailable": 0,
+          "liquidityGone": 0,
+          "medianChangePct": null
+        },
+        "clear": {
+          "count": 0,
+          "priced": 0,
+          "unavailable": 0,
+          "liquidityGone": 0,
+          "medianChangePct": null
+        },
+        "unassessed": {
+          "count": 0,
+          "priced": 0,
+          "unavailable": 0,
+          "liquidityGone": 0,
+          "medianChangePct": null
+        }
+      },
+      "tokens": [
+        {
+          "token": "0x74bb...dc77",
+          "name": "openhuman / WETH",
+          "flaggedOn": "2026-08-06",
+          "verdictThen": "high-risk",
+          "liquidityThenUsd": 68437,
+          "liquidityNowUsd": 3,
+          "priceChangePct": null,
+          "liquidityGone": true,
+          "outcome": "low-observed-liquidity"
+        }
+      ],
+      "methodology": "First sightings in published samples; current deepest observed pool. liquidityGone is null when unavailable; true only for observed liquidity below $100. Medians use available quotes and varying holding periods.",
+      "disclaimer": "A track record, not investment advice.",
+      "at": "2026-08-12T10:00:00.000Z",
+      "coverage": {
+        "requestedDays": 7,
+        "windowBasis": "latest-published-snapshots",
+        "snapshotsListed": 7,
+        "snapshotsLoaded": 7,
+        "missingSnapshotDates": [],
+        "windowFirstSnapshot": "2026-08-06",
+        "windowLastSnapshot": "2026-08-12",
+        "poolsObserved": 1,
+        "poolsWithoutSafety": 0,
+        "poolsWithoutToken": 0,
+        "tokensObserved": 1,
+        "tokensPriced": 0,
+        "priceBatchesFailed": 0,
+        "complete": false,
+        "note": "Published radar samples with variable holding periods; missing quotes are not losses."
+      },
+      "provenance": {
+        "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "commit": "https://github.com/tevfikefeaydin/agenttoll/commit/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "index": "https://raw.githubusercontent.com/tevfikefeaydin/agenttoll/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/data/scout/index.json",
+        "integrity": "Git revision pins the published bytes. A payment transaction does not authenticate a snapshot hash or its capture time."
+      }
     },
   },
 
   "GET /api/base/safety/:address": {
     ...address,
     output: {
-      chain: "base",
-      token: "0x940181a94a35a4569e4529a3cdfb74e38fd98631",
-      name: "Aerodrome",
-      symbol: "AERO",
-      verdict: "caution",
-      failed: [],
-      warnings: ["owner-powers", "liquidity"],
-      unchecked: [],
-      checks: [
-        { id: "honeypot", status: "pass", detail: "A simulated buy and sell both succeeded" },
-        { id: "taxes", status: "pass", detail: "Buy tax 0%, sell tax 0%" },
-        { id: "owner-powers", status: "warn", detail: "Owner can: owner can mint new supply" },
-        { id: "deployer", status: "pass", detail: "The deployer is a wallet with 731 transactions and holds 0.12094 ETH" },
+      "chain": "base",
+      "token": "0x940181a94a35a4569e4529a3cdfb74e38fd98631",
+      "name": "Example Token",
+      "symbol": "EXAMPLE",
+      "verdict": "caution",
+      "failed": [],
+      "warnings": [
+        "owner-powers",
+        "liquidity"
       ],
-      deployer: { address: "0xe83f922c34a1...", basis: "contract-creator", isContract: false, txCount: 731, balanceEth: 0.12094, firstSeen: null, ageHours: null, flaggedScam: false },
-      holderCount: 748566,
-      listedOnCex: ["Coinbase"],
-      sources: ["goplus", "honeypot.is"],
-      disclaimer:
-        "Automated checks against public data, not investment advice. Passing every check does not make a token safe.",
-      at: "2026-08-05T13:31:58.678Z",
+      "unchecked": [
+        "concentration",
+        "liquidity",
+        "creator-stake",
+        "deployer"
+      ],
+      "checks": [
+        {
+          "id": "honeypot",
+          "status": "pass",
+          "detail": "Simulated buy and sell succeeded",
+          "complete": true,
+          "sources": [
+            "goplus"
+          ],
+          "missing": [],
+          "conflicts": []
+        },
+        {
+          "id": "taxes",
+          "status": "pass",
+          "detail": "Both taxes measured at 0%",
+          "complete": true,
+          "sources": [
+            "goplus"
+          ],
+          "missing": [],
+          "conflicts": []
+        },
+        {
+          "id": "verified",
+          "status": "pass",
+          "detail": "Source code verified",
+          "complete": true,
+          "sources": [
+            "goplus"
+          ],
+          "missing": [],
+          "conflicts": []
+        },
+        {
+          "id": "owner-powers",
+          "status": "warn",
+          "detail": "Owner can mint",
+          "complete": true,
+          "sources": [
+            "goplus"
+          ],
+          "missing": [],
+          "conflicts": []
+        },
+        {
+          "id": "concentration",
+          "status": "unknown",
+          "detail": "Holder shares unavailable",
+          "complete": false,
+          "sources": [
+            "goplus"
+          ],
+          "missing": [
+            "holders"
+          ],
+          "conflicts": []
+        },
+        {
+          "id": "liquidity",
+          "status": "warn",
+          "detail": "Some removable liquidity detected; incomplete ownership",
+          "complete": false,
+          "sources": [
+            "goplus"
+          ],
+          "missing": [
+            "liquidity-share-total"
+          ],
+          "conflicts": []
+        },
+        {
+          "id": "creator-stake",
+          "status": "unknown",
+          "detail": "Creator share unavailable",
+          "complete": false,
+          "sources": [
+            "goplus"
+          ],
+          "missing": [
+            "creator_percent"
+          ],
+          "conflicts": []
+        },
+        {
+          "id": "deployer",
+          "status": "unknown",
+          "detail": "Explorer scam flag unavailable",
+          "complete": false,
+          "sources": [
+            "goplus"
+          ],
+          "missing": [
+            "flaggedScam"
+          ],
+          "conflicts": []
+        }
+      ],
+      "deployer": {
+        "address": "0xe83f922c34a1...",
+        "basis": "contract-creator",
+        "isContract": false,
+        "txCount": 731,
+        "balanceEth": 0.12094,
+        "firstSeen": null,
+        "ageHours": null,
+        "flaggedScam": null
+      },
+      "holderCount": 748566,
+      "listedOnCex": [
+        "Coinbase"
+      ],
+      "sources": [
+        "goplus",
+        "honeypot.is"
+      ],
+      "disclaimer": "Automated checks against public data, not investment advice. Passing every check does not make a token safe.",
+      "at": "2026-08-05T13:31:58.678Z",
+      "coverage": {
+        "complete": false,
+        "completedChecks": 4,
+        "totalChecks": 8
+      },
+      "sourceStatus": {
+        "goplus": {
+          "status": "partial",
+          "fetchedAt": "2026-08-05T13:31:58.678Z",
+          "durationMs": 100,
+          "issues": [
+            "creator_percent"
+          ]
+        },
+        "honeypot.is": {
+          "status": "ok",
+          "fetchedAt": "2026-08-05T13:31:58.678Z",
+          "durationMs": 100,
+          "issues": []
+        },
+        "blockscout+rpc": {
+          "status": "partial",
+          "fetchedAt": "2026-08-05T13:31:58.678Z",
+          "durationMs": 100,
+          "issues": [
+            "flaggedScam"
+          ]
+        }
+      }
     },
   },
 
@@ -280,7 +532,15 @@ export const DISCOVERY: Record<string, Discovery> = {
       },
       required: ["nameOrAddress"],
     },
-    output: { query: "agenttoll.base.eth", name: "agenttoll.base.eth", address: "0xe553...56f8", resolver: "0x426fA03f...", records: {}, at: "2026-08-05T13:31:58.678Z" },
+    output: {
+      "query": "agenttoll.base.eth",
+      "name": "agenttoll.base.eth",
+      "address": "0xe553...56f8",
+      "resolver": "0x426fA03f...",
+      "records": {},
+      "at": "2026-08-05T13:31:58.678Z",
+      "registered": true
+    },
   },
 
   "GET /api/base/trending": {
@@ -386,13 +646,33 @@ export const DISCOVERY: Record<string, Discovery> = {
     input: { since: "2026-08-05T08:40:01Z" },
     inputSchema: since,
     output: {
-      chain: "base",
-      address: "0xe553...56f8",
-      since: "2026-08-05T08:40:01Z",
-      count: 1,
-      events: [{ hash: "0x4893...3c91", at: "2026-08-05T12:10:44Z", direction: "in", counterparty: "0x5f87...6f78", ethValue: 0, method: "transferWithAuthorization" }],
-      cursor: "2026-08-05T12:10:44Z",
-      at: "2026-08-05T13:31:58.678Z",
+      "chain": "base",
+      "address": "0xe553...56f8",
+      "since": "2026-08-05T08:40:01Z",
+      "count": 1,
+      "events": [
+        {
+          "hash": "0x4893...3c91",
+          "at": "2026-08-05T12:10:44Z",
+          "direction": "in",
+          "counterparty": "0x5f87...6f78",
+          "ethValue": 0,
+          "method": "transferWithAuthorization"
+        }
+      ],
+      "cursor": "w1.<opaque-example-returned-by-server>",
+      "at": "2026-08-05T13:31:58.678Z",
+      "hasMore": false,
+      "partial": false,
+      "coverage": {
+        "complete": true,
+        "scope": "indexed-confirmed-transactions",
+        "pagesRead": 1,
+        "overlapSeconds": 120,
+        "deduplicationLimit": 100,
+        "replayPossible": false,
+        "note": "Drain hasMore pages, then echo the cursor when polling. Deduplicate by hash; indexer gaps and older reorganizations are outside this coverage."
+      }
     },
   },
 
@@ -400,12 +680,30 @@ export const DISCOVERY: Record<string, Discovery> = {
     input: { since: "2026-08-05T08:40:01Z" },
     inputSchema: since,
     output: {
-      chain: "base",
-      since: "2026-08-05T08:40:01Z",
-      count: 1,
-      pools: [{ name: "BASED / ETH 1%", pool: "0x2acb...cac0", token: "0xb6bb786056c690e41b20a587573fd77aade2eb07", createdAt: "2026-08-05T13:01:33Z", priceUsd: 0.0000156, volume24hUsd: 19071.46, liquidityUsd: 14246.1 }],
-      cursor: "2026-08-05T13:01:33Z",
-      at: "2026-08-05T13:31:58.678Z",
+      "chain": "base",
+      "since": "2026-08-05T08:40:01Z",
+      "count": 1,
+      "pools": [
+        {
+          "name": "BASED / ETH 1%",
+          "pool": "0x2acb...cac0",
+          "token": "0xb6bb786056c690e41b20a587573fd77aade2eb07",
+          "createdAt": "2026-08-05T13:01:33Z",
+          "priceUsd": 0.0000156,
+          "volume24hUsd": 19071.46,
+          "liquidityUsd": 14246.1
+        }
+      ],
+      "cursor": "2026-08-05T13:01:33Z",
+      "at": "2026-08-05T13:31:58.678Z",
+      "partial": true,
+      "coverage": {
+        "complete": false,
+        "scope": "ranked-radar-listing",
+        "source": "geckoterminal-new-pools",
+        "observedAt": "2026-08-05T13:31:58.678Z",
+        "note": "Limited ranked listing, not an exhaustive pool event stream."
+      }
     },
   },
 
@@ -424,14 +722,18 @@ export const DISCOVERY: Record<string, Discovery> = {
       required: ["ref"],
     },
     output: {
-      symbol: "eth",
-      usd: 1867.28,
-      ref: 1900,
-      changePct: -1.7221,
-      thresholdPct: 2,
-      triggered: false,
-      direction: "down",
-      at: "2026-08-05T13:31:58.678Z",
+      "symbol": "eth",
+      "usd": 1867.28,
+      "ref": 1900,
+      "changePct": -1.7221,
+      "thresholdPct": 2,
+      "triggered": false,
+      "direction": "down",
+      "at": "2026-08-05T13:31:58.678Z",
+      "quoteCurrency": "USD",
+      "assumptions": [],
+      "source": "coingecko",
+      "priceObservedAt": "2026-08-05T13:31:58.678Z"
     },
   },
 };

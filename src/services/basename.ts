@@ -12,16 +12,51 @@ import { base } from "viem/chains";
 import { cached } from "./cache.js";
 import { badRequest } from "./errors.js";
 
-// Basenames is ENS-shaped, deployed on Base. Resolution is read-only, so a
-// plain public client over the same RPC set the rest of the service uses.
-const client = createPublicClient({
-  chain: base,
-  transport: fallback([
-    http("https://mainnet.base.org"),
-    http("https://base-rpc.publicnode.com"),
-    http("https://base.meowrpc.com"),
-  ]),
-});
+const RPC_TIMEOUT_MS = 1_500;
+const LOOKUP_TIMEOUT_MS = 6_000;
+
+// One deadline covers every stage of a lookup, including response bodies and
+// parallel text records. Each provider gets one attempt; fallback itself must
+// not repeat the entire provider list after those attempts fail.
+function resolverClient(signal: AbortSignal) {
+  return createPublicClient({
+    chain: base,
+    transport: fallback(
+      ["https://mainnet.base.org", "https://base-rpc.publicnode.com", "https://base.meowrpc.com"].map((url) =>
+        http(url, {
+          timeout: RPC_TIMEOUT_MS,
+          retryCount: 0,
+          fetchFn: (input, init) => {
+            const combined = init?.signal ? AbortSignal.any([signal, init.signal]) : signal;
+            combined.throwIfAborted();
+            return fetch(input, { ...init, signal: combined });
+          },
+        }),
+      ),
+      { retryCount: 0 },
+    ),
+  });
+}
+
+type ResolverClient = ReturnType<typeof resolverClient>;
+
+async function withResolverDeadline<T>(load: (client: ResolverClient) => Promise<T>): Promise<T> {
+  const controller = new AbortController();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_resolve, reject) => {
+    timer = setTimeout(() => {
+      const error = new Error("Basename resolution timed out");
+      controller.abort(error);
+      reject(error);
+    }, LOOKUP_TIMEOUT_MS);
+  });
+  try {
+    return await Promise.race([load(resolverClient(controller.signal)), timeout]);
+  } finally {
+    clearTimeout(timer);
+    controller.abort();
+  }
+}
 
 const REGISTRY = "0xB94704422c2a1E396835A571837Aa5AE53285a95" as Address;
 const ZERO = "0x0000000000000000000000000000000000000000";
@@ -87,6 +122,8 @@ export interface BasenameResult {
   registered?: boolean;
   /** Set on address lookups: does the address have a primary name. */
   hasPrimaryName?: boolean;
+  /** Reverse claims are shown only after a matching forward read on Base. */
+  verification?: "verified" | "mismatch" | "unavailable" | "invalid-name" | "no-name";
   records?: Record<string, string>;
   resolver?: string;
   at: string;
@@ -102,7 +139,7 @@ function normalize(name: string): string {
   return trimmed.endsWith(".base.eth") ? trimmed : `${trimmed}.base.eth`;
 }
 
-async function resolverFor(node: `0x${string}`) {
+async function resolverFor(client: ResolverClient, node: `0x${string}`) {
   const resolver = await client.readContract({
     address: REGISTRY,
     abi: registryAbi,
@@ -112,10 +149,10 @@ async function resolverFor(node: `0x${string}`) {
   return resolver === ZERO ? null : resolver;
 }
 
-async function forward(input: string): Promise<BasenameResult> {
+async function forward(input: string, client: ResolverClient): Promise<BasenameResult> {
   const name = normalize(input);
   const node = namehash(name);
-  const resolver = await resolverFor(node);
+  const resolver = await resolverFor(client, node);
   if (!resolver) {
     return { query: input, name, address: null, registered: false, at: new Date().toISOString() };
   }
@@ -152,24 +189,40 @@ async function forward(input: string): Promise<BasenameResult> {
   };
 }
 
-async function reverse(address: string): Promise<BasenameResult> {
+async function reverse(address: string, client: ResolverClient): Promise<BasenameResult> {
   const addr = address.toLowerCase();
   const label = keccak256(stringToBytes(addr.slice(2)));
   const node = keccak256(encodePacked(["bytes32", "bytes32"], [BASE_REVERSE_NODE, label]));
-  const resolver = await resolverFor(node);
+  const result = (name: string | null, verification: NonNullable<BasenameResult["verification"]>): BasenameResult => ({
+    query: address, address: addr, name, hasPrimaryName: name !== null, verification, at: new Date().toISOString(),
+  });
+  const resolver = await resolverFor(client, node);
   if (!resolver) {
-    return { query: address, address: addr, name: null, hasPrimaryName: false, at: new Date().toISOString() };
+    return result(null, "no-name");
   }
   const name = await client
     .readContract({ address: resolver, abi: resolverAbi, functionName: "name", args: [node] })
     .catch(() => null);
-  return {
-    query: address,
-    address: addr,
-    name: name || null,
-    hasPrimaryName: Boolean(name),
-    at: new Date().toISOString(),
-  };
+  if (name === null) return result(null, "unavailable");
+  if (!name) return result(null, "no-name");
+  // Do not append a suffix to a reverse claim: that would verify a different
+  // name from the one returned by the reverse resolver.
+  if (!/^[a-z0-9-]+(?:\.[a-z0-9-]+)*\.base\.eth$/.test(name) || name.length > 255) {
+    return result(null, "invalid-name");
+  }
+  try {
+    const forwardNode = namehash(name);
+    const forwardResolver = await resolverFor(client, forwardNode);
+    if (!forwardResolver) return result(null, "mismatch");
+    const resolved = await client.readContract({
+      address: forwardResolver, abi: resolverAbi, functionName: "addr", args: [forwardNode],
+    });
+    return resolved !== ZERO && resolved.toLowerCase() === addr
+      ? result(name, "verified")
+      : result(null, "mismatch");
+  } catch {
+    return result(null, "unavailable");
+  }
 }
 
 /**
@@ -179,16 +232,21 @@ async function reverse(address: string): Promise<BasenameResult> {
 export async function resolveBasename(query: string): Promise<BasenameResult> {
   if (!query?.trim()) badRequest("Pass a basename or an address");
   const isAddress = /^0x[0-9a-fA-F]{40}$/.test(query.trim());
-  return cached<BasenameResult>(`basename:${query.trim().toLowerCase()}`, 60_000, () =>
-    isAddress ? reverse(query.trim()) : forward(query),
+  const normalized = isAddress ? query.trim().toLowerCase() : normalize(query);
+  // Classification and identity are both part of the key: a name resembling
+  // an address must never populate the cache used for verified reverse reads.
+  return cached<BasenameResult>(`basename:${isAddress ? "reverse" : "forward"}:${normalized}`, 60_000, () =>
+    withResolverDeadline((client) => isAddress ? reverse(query.trim(), client) : forward(query, client)),
   );
 }
 
 /** Primary basename for an address, or null. Used to enrich other endpoints. */
 export async function primaryName(address: string): Promise<string | null> {
   try {
-    const result = await reverse(address);
-    return result.name ?? null;
+    if (!/^0x[0-9a-fA-F]{40}$/.test(address)) return null;
+    const result = await resolveBasename(address);
+    return result.hasPrimaryName === true && result.verification === "verified" &&
+      result.address?.toLowerCase() === address.toLowerCase() ? result.name ?? null : null;
   } catch {
     return null;
   }

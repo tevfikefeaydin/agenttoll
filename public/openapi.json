@@ -3,7 +3,7 @@
   "info": {
     "title": "AgentToll",
     "version": "0.15.0",
-    "description": "Pay-per-call data APIs for AI agents. Paid endpoints return HTTP 402 with an x402 quote; pay $0.001-$0.008 in USDC on Base mainnet per call. No API keys. Onchain identity: agenttoll.base.eth.",
+    "description": "Base mainnet data with x402 payments. Hosted prices: $0.001-$0.008 USDC. Self-hosted payment network and recipient are configured at startup; inspect /api/catalog and /.well-known/agent-card.json. PAYMENT-SIGNATURE sends authorization; PAYMENT-REQUIRED and PAYMENT-RESPONSE carry the quote and receipt.",
     "contact": {
       "name": "AgentToll",
       "url": "https://github.com/tevfikefeaydin/agenttoll/issues",
@@ -66,7 +66,7 @@
     },
     "/api/price/{symbol}": {
       "get": {
-        "summary": "Token price lookup: spot price in USD + 24h change for a crypto asset",
+        "summary": "Token price lookup: spot price in USD and 24h change for a crypto asset, by ticker or CoinGecko id",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -93,17 +93,14 @@
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9-]{0,31}$",
-              "minLength": 1,
-              "maxLength": 32
+              "description": "Ticker or CoinGecko id"
             },
-            "example": "eth",
-            "description": "Ticker (eth, btc, sol, usdc, aero, degen...) or any CoinGecko id, e.g. degen-base"
+            "example": "eth"
           }
         ],
         "responses": {
           "200": {
-            "description": "Price data",
+            "description": "Success. meta describes response freshness and configured networks.",
             "content": {
               "application/json": {
                 "example": {
@@ -112,23 +109,78 @@
                   "usd": 1867.28,
                   "change24h": -0.1,
                   "source": "coingecko",
-                  "at": "2026-08-05T13:31:57.070Z"
+                  "at": "2026-08-05T13:31:57.070Z",
+                  "quoteCurrency": "USD",
+                  "assumptions": [],
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-05T13:31:57.070Z",
+                    "observedAt": "2026-08-05T13:31:57.070Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
                 }
               }
             }
           },
           "400": {
-            "description": "Invalid path or query parameter (not charged)"
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           },
           "402": {
-            "description": "x402 payment quote"
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           }
-        }
+        },
+        "operationId": "get_price"
       }
     },
     "/api/gas": {
       "get": {
-        "summary": "Base gas price check: gas price and latest block, optionally costed for a transaction size",
+        "summary": "Base gas price check: the current gas price and latest block number; add ?gasLimit=150000 to also get what a transaction that size costs in ETH and USD",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -156,15 +208,15 @@
             "schema": {
               "type": "integer",
               "minimum": 21000,
-              "maximum": 30000000
+              "maximum": 30000000,
+              "description": "Optional. Also price a transaction of this gas size"
             },
-            "example": 150000,
-            "description": "Optional. Price a transaction of this gas size: the reply gains estimate.ethCost and estimate.usdCost. 21000 is a plain transfer, ~65000 an ERC-20 transfer, 150000-300000 a swap."
+            "example": 150000
           }
         ],
         "responses": {
           "200": {
-            "description": "Gas data",
+            "description": "Success. meta describes response freshness and configured networks.",
             "content": {
               "application/json": {
                 "example": {
@@ -178,23 +230,76 @@
                     "usdCost": 0.001692,
                     "ethUsd": 1867.28
                   },
-                  "at": "2026-08-05T13:32:13.596Z"
+                  "at": "2026-08-05T13:32:13.596Z",
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-05T13:32:13.596Z",
+                    "observedAt": "2026-08-05T13:32:13.596Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
                 }
               }
             }
           },
           "400": {
-            "description": "Invalid query parameter (not charged)"
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           },
           "402": {
-            "description": "x402 payment quote"
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           }
-        }
+        },
+        "operationId": "get_base_gas"
       }
     },
     "/api/trending": {
       "get": {
-        "summary": "Trending token scan: the tokens moving across the market right now",
+        "summary": "Trending token scan: the tokens moving across the crypto market right now; ?limit=N trims the list",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -222,15 +327,15 @@
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 25
+              "maximum": 25,
+              "description": "Optional. Top N only"
             },
-            "example": 5,
-            "description": "Optional. Return only the top N tokens. Defaults to the provider's full list."
+            "example": 5
           }
         ],
         "responses": {
           "200": {
-            "description": "Trending tokens",
+            "description": "Success. meta describes response freshness and configured networks.",
             "content": {
               "application/json": {
                 "example": {
@@ -245,23 +350,76 @@
                     }
                   ],
                   "source": "coingecko",
-                  "at": "2026-08-05T13:31:58.678Z"
+                  "at": "2026-08-05T13:31:58.678Z",
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-05T13:31:58.678Z",
+                    "observedAt": "2026-08-05T13:31:58.678Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
                 }
               }
             }
           },
           "400": {
-            "description": "Invalid query parameter (not charged)"
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           },
           "402": {
-            "description": "x402 payment quote"
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           }
-        }
+        },
+        "operationId": "get_trending"
       }
     },
     "/api/base/token/{address}": {
       "get": {
-        "summary": "Base token price lookup by contract address: onchain USD price for any Base token",
+        "summary": "Base token price lookup by contract address: the onchain USD price for any token on Base",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -289,12 +447,13 @@
             "schema": {
               "type": "string",
               "pattern": "^0x[0-9a-fA-F]{40}$"
-            }
+            },
+            "example": "0x4200000000000000000000000000000000000006"
           }
         ],
         "responses": {
           "200": {
-            "description": "Token price",
+            "description": "Success. meta describes response freshness and configured networks.",
             "content": {
               "application/json": {
                 "example": {
@@ -302,23 +461,76 @@
                   "token": "0x4200000000000000000000000000000000000006",
                   "usd": 1867.28,
                   "source": "geckoterminal",
-                  "at": "2026-08-05T13:31:58.678Z"
+                  "at": "2026-08-05T13:31:58.678Z",
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-05T13:31:58.678Z",
+                    "observedAt": "2026-08-05T13:31:58.678Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
                 }
               }
             }
           },
           "400": {
-            "description": "Invalid path or query parameter (not charged)"
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           },
           "402": {
-            "description": "x402 payment quote"
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           }
-        }
+        },
+        "operationId": "get_base_token_price"
       }
     },
     "/api/base/address/{address}": {
       "get": {
-        "summary": "Base wallet lookup: primary basename, ETH balance, tx count, contract or EOA",
+        "summary": "Base wallet lookup: an address's primary basename, ETH balance, transaction count, and whether it is a contract",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -346,12 +558,13 @@
             "schema": {
               "type": "string",
               "pattern": "^0x[0-9a-fA-F]{40}$"
-            }
+            },
+            "example": "0x4200000000000000000000000000000000000006"
           }
         ],
         "responses": {
           "200": {
-            "description": "Address info",
+            "description": "Success. meta describes response freshness and configured networks.",
             "content": {
               "application/json": {
                 "example": {
@@ -361,23 +574,76 @@
                   "ethBalance": 0.0019,
                   "txCount": 42,
                   "isContract": false,
-                  "at": "2026-08-05T13:31:58.678Z"
+                  "at": "2026-08-05T13:31:58.678Z",
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-05T13:31:58.678Z",
+                    "observedAt": "2026-08-05T13:31:58.678Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
                 }
               }
             }
           },
           "400": {
-            "description": "Invalid path or query parameter (not charged)"
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           },
           "402": {
-            "description": "x402 payment quote"
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           }
-        }
+        },
+        "operationId": "get_base_address_info"
       }
     },
     "/api/base/trending": {
       "get": {
-        "summary": "Trending Base pool scan: price, volume, liquidity",
+        "summary": "Trending Base pool scan: the DEX pools moving on Base right now, with price, 24h volume and liquidity; ?limit=N sets how many",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -406,15 +672,14 @@
               "type": "integer",
               "minimum": 1,
               "maximum": 20,
-              "default": 10
+              "description": "Optional. How many pools, default 10"
             },
-            "example": 5,
-            "description": "Optional. How many pools to return."
+            "example": 5
           }
         ],
         "responses": {
           "200": {
-            "description": "Trending pools",
+            "description": "Success. meta describes response freshness and configured networks.",
             "content": {
               "application/json": {
                 "example": {
@@ -430,23 +695,76 @@
                     }
                   ],
                   "source": "geckoterminal-trending",
-                  "at": "2026-08-05T13:31:58.678Z"
+                  "at": "2026-08-05T13:31:58.678Z",
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-05T13:31:58.678Z",
+                    "observedAt": "2026-08-05T13:31:58.678Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
                 }
               }
             }
           },
           "400": {
-            "description": "Invalid query parameter (not charged)"
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           },
           "402": {
-            "description": "x402 payment quote"
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           }
-        }
+        },
+        "operationId": "get_base_trending_pools"
       }
     },
     "/api/base/radar": {
       "get": {
-        "summary": "New token radar on Base with a liquidity floor: fresh pools that already hold real liquidity, spam filtered",
+        "summary": "New token radar on Base with a liquidity floor: pools created in the last 24 hours that already hold real liquidity; ?minLiquidity sets the spam floor in USD, default 10000. Each pool carries its token address, so anything interesting can go straight to /api/base/safety",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -474,11 +792,9 @@
             "schema": {
               "type": "number",
               "minimum": 0,
-              "maximum": 1000000000,
-              "default": 10000
+              "description": "Optional. Liquidity floor in USD, default 10000"
             },
-            "example": 50000,
-            "description": "Optional. Liquidity floor in USD. Raise it to cut more spam, lower it to see everything new."
+            "example": 50000
           },
           {
             "name": "limit",
@@ -488,15 +804,14 @@
               "type": "integer",
               "minimum": 1,
               "maximum": 30,
-              "default": 15
+              "description": "Optional. How many pools, default 15"
             },
-            "example": 5,
-            "description": "Optional. How many pools to return, busiest first."
+            "example": 5
           }
         ],
         "responses": {
           "200": {
-            "description": "New pools, each carrying its token address so it can be passed straight to /api/base/safety",
+            "description": "Success. meta describes response freshness and configured networks.",
             "content": {
               "application/json": {
                 "example": {
@@ -515,23 +830,76 @@
                   "minLiquidityUsd": 10000,
                   "count": 1,
                   "source": "geckoterminal-new-pools",
-                  "at": "2026-08-05T13:31:58.678Z"
+                  "at": "2026-08-05T13:31:58.678Z",
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-05T13:31:58.678Z",
+                    "observedAt": "2026-08-05T13:31:58.678Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
                 }
               }
             }
           },
           "400": {
-            "description": "Invalid query parameter (not charged)"
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           },
           "402": {
-            "description": "x402 payment quote"
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           }
-        }
+        },
+        "operationId": "get_new_token_radar"
       }
     },
     "/api/feargreed": {
       "get": {
-        "summary": "Crypto market sentiment check: Fear & Greed index with yesterday comparison and optional daily history",
+        "summary": "Crypto market sentiment check: the Fear and Greed index with yesterday's value; ?days=7 adds a daily history so you can see whether sentiment is turning",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -559,15 +927,15 @@
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 30
+              "maximum": 30,
+              "description": "Optional. Add this many days of daily history"
             },
-            "example": 7,
-            "description": "Optional. Add a daily history array covering this many days, so you can see whether sentiment is turning."
+            "example": 7
           }
         ],
         "responses": {
           "200": {
-            "description": "Index",
+            "description": "Success. meta describes response freshness and configured networks.",
             "content": {
               "application/json": {
                 "example": {
@@ -582,23 +950,76 @@
                       "classification": "Fear"
                     }
                   ],
-                  "at": "2026-08-05T13:32:14.339Z"
+                  "at": "2026-08-05T13:32:14.339Z",
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-05T13:32:14.339Z",
+                    "observedAt": "2026-08-05T13:32:14.339Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
                 }
               }
             }
           },
           "400": {
-            "description": "Invalid query parameter (not charged)"
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           },
           "402": {
-            "description": "x402 payment quote"
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           }
-        }
+        },
+        "operationId": "get_fear_greed"
       }
     },
     "/api/brief": {
       "get": {
-        "summary": "Market brief in one call: prices, Base gas, sentiment",
+        "summary": "Market brief in one call: prices (BTC, ETH and SOL by default, or ?symbols=eth,degen), Base gas, and market sentiment",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -625,15 +1046,14 @@
             "required": false,
             "schema": {
               "type": "string",
-              "default": "btc,eth,sol"
+              "description": "Optional. Comma-separated tickers, up to 6. Default btc,eth,sol"
             },
-            "example": "eth,degen,aero",
-            "description": "Optional. Comma-separated tickers or CoinGecko ids to price instead of the default majors, up to 6. Same flat price either way."
+            "example": "eth,degen,aero"
           }
         ],
         "responses": {
           "200": {
-            "description": "Brief",
+            "description": "Success. meta describes response freshness and configured networks.",
             "content": {
               "application/json": {
                 "example": {
@@ -654,23 +1074,76 @@
                     "classification": "Fear",
                     "yesterday": 25
                   },
-                  "at": "2026-08-05T13:31:59.006Z"
+                  "at": "2026-08-05T13:31:59.006Z",
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-05T13:31:59.006Z",
+                    "observedAt": "2026-08-05T13:31:59.006Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
                 }
               }
             }
           },
           "400": {
-            "description": "Invalid query parameter (not charged)"
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           },
           "402": {
-            "description": "x402 payment quote"
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           }
-        }
+        },
+        "operationId": "get_market_brief"
       }
     },
     "/api/try/premium": {
       "get": {
-        "summary": "Turkish lira crypto premium check: implied vs official USD/TRY via a crypto cross-rate",
+        "summary": "Turkish lira crypto premium check: implied USD/TRY from a crypto cross-rate versus the official rate; ?asset=usdt is the reading desks quote",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -703,15 +1176,14 @@
                 "usdt",
                 "usdc"
               ],
-              "default": "btc"
+              "description": "Optional. Cross-rate asset, default btc"
             },
-            "example": "usdt",
-            "description": "Optional. Which asset carries the cross-rate. USDT is the reading desks quote, because it is what actually changes hands."
+            "example": "usdt"
           }
         ],
         "responses": {
           "200": {
-            "description": "Premium",
+            "description": "Success. meta describes response freshness and configured networks.",
             "content": {
               "application/json": {
                 "example": {
@@ -721,23 +1193,76 @@
                   "impliedUsdTry": 47.5624,
                   "officialUsdTry": 47.2891,
                   "premiumPct": 0.578,
-                  "at": "2026-08-05T13:31:58.678Z"
+                  "at": "2026-08-05T13:31:58.678Z",
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-05T13:31:58.678Z",
+                    "observedAt": "2026-08-05T13:31:58.678Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
                 }
               }
             }
           },
           "400": {
-            "description": "Invalid query parameter (not charged)"
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           },
           "402": {
-            "description": "x402 payment quote"
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           }
-        }
+        },
+        "operationId": "get_try_premium"
       }
     },
     "/api/try/spread": {
       "get": {
-        "summary": "Turkish exchange spread check: BTCTurk and Paribu TRY quotes converted to USD vs the global price",
+        "summary": "Turkish exchange spread check: BTCTurk and Paribu's TRY quotes converted back to USD via the official rate and compared against the global price; ?asset=usdt is the pair with the deepest local volume",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -768,15 +1293,14 @@
                 "btc",
                 "usdt"
               ],
-              "default": "btc"
+              "description": "Optional. Cross-rate asset, default btc"
             },
-            "example": "usdt",
-            "description": "Optional. Which pair to check, default btc."
+            "example": "usdt"
           }
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "Success. meta describes response freshness and configured networks.",
             "content": {
               "application/json": {
                 "example": {
@@ -799,23 +1323,76 @@
                       "unavailable": false
                     }
                   ],
-                  "at": "2026-08-05T13:31:58.678Z"
+                  "at": "2026-08-05T13:31:58.678Z",
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-05T13:31:58.678Z",
+                    "observedAt": "2026-08-05T13:31:58.678Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
                 }
               }
             }
           },
           "400": {
-            "description": "Invalid query parameter (not charged)"
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           },
           "402": {
-            "description": "x402 payment quote"
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           }
-        }
+        },
+        "operationId": "get_try_spread"
       }
     },
     "/api/base/portfolio/{address}": {
       "get": {
-        "summary": "Wallet portfolio on Base: everything an address holds valued in USD, ETH plus its ERC-20 tokens, largest first",
+        "summary": "Wallet portfolio on Base: everything an address holds valued in USD, ETH plus its ERC-20 tokens, largest first, with a spam floor you set",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -843,7 +1420,8 @@
             "schema": {
               "type": "string",
               "pattern": "^0x[0-9a-fA-F]{40}$"
-            }
+            },
+            "example": "0x4200000000000000000000000000000000000006"
           },
           {
             "name": "minValue",
@@ -852,11 +1430,9 @@
             "schema": {
               "type": "number",
               "minimum": 0,
-              "maximum": 1000000000,
-              "default": 1
+              "description": "Optional. USD floor per holding, default 1"
             },
-            "example": 100,
-            "description": "Optional. USD floor per holding, which is what keeps airdropped spam out of the answer."
+            "example": 100
           },
           {
             "name": "limit",
@@ -866,15 +1442,14 @@
               "type": "integer",
               "minimum": 1,
               "maximum": 50,
-              "default": 20
+              "description": "Optional. How many holdings to list, default 20"
             },
-            "example": 10,
-            "description": "Optional. How many holdings to list. The total always covers everything above the floor, listed or not."
+            "example": 10
           }
         ],
         "responses": {
           "200": {
-            "description": "Holdings, totals, and how many were hidden or could not be priced",
+            "description": "Success. meta describes response freshness and configured networks.",
             "content": {
               "application/json": {
                 "example": {
@@ -904,23 +1479,76 @@
                   "unpriced": 0,
                   "minValueUsd": 10000,
                   "source": "blockscout",
-                  "at": "2026-08-05T13:31:58.678Z"
+                  "at": "2026-08-05T13:31:58.678Z",
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-05T13:31:58.678Z",
+                    "observedAt": "2026-08-05T13:31:58.678Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
                 }
               }
             }
           },
           "400": {
-            "description": "Invalid path or query parameter (not charged)"
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           },
           "402": {
-            "description": "x402 payment quote"
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           }
-        }
+        },
+        "operationId": "get_base_portfolio"
       }
     },
     "/api/base/safety/{address}": {
       "get": {
-        "summary": "Token safety check for a Base token - honeypot, rug and trap detection: simulated buy and sell, taxes, owner privileges, holder concentration, liquidity, deployer history",
+        "summary": "Token safety check for a Base token before you buy - is it a honeypot, is it a rug: a simulated buy and sell, buy and sell tax, contract verification, owner privileges, holder concentration, whether anyone can still pull the liquidity, and who deployed the contract - a token shipped from a wallet with a handful of transactions is the shape most rugs share",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -949,47 +1577,127 @@
               "type": "string",
               "pattern": "^0x[0-9a-fA-F]{40}$"
             },
-            "example": "0x940181a94A35A4569E4529A3CDfB74e38FD98631",
-            "description": "Token contract address on Base"
+            "example": "0x4200000000000000000000000000000000000006"
           }
         ],
         "responses": {
           "200": {
-            "description": "Verdict (clear, caution, high-risk or insufficient-data) plus every individual check",
+            "description": "Success. meta describes response freshness and configured networks.",
             "content": {
               "application/json": {
                 "example": {
                   "chain": "base",
                   "token": "0x940181a94a35a4569e4529a3cdfb74e38fd98631",
-                  "name": "Aerodrome",
-                  "symbol": "AERO",
+                  "name": "Example Token",
+                  "symbol": "EXAMPLE",
                   "verdict": "caution",
                   "failed": [],
                   "warnings": [
                     "owner-powers",
                     "liquidity"
                   ],
-                  "unchecked": [],
+                  "unchecked": [
+                    "concentration",
+                    "liquidity",
+                    "creator-stake",
+                    "deployer"
+                  ],
                   "checks": [
                     {
                       "id": "honeypot",
                       "status": "pass",
-                      "detail": "A simulated buy and sell both succeeded"
+                      "detail": "Simulated buy and sell succeeded",
+                      "complete": true,
+                      "sources": [
+                        "goplus"
+                      ],
+                      "missing": [],
+                      "conflicts": []
                     },
                     {
                       "id": "taxes",
                       "status": "pass",
-                      "detail": "Buy tax 0%, sell tax 0%"
+                      "detail": "Both taxes measured at 0%",
+                      "complete": true,
+                      "sources": [
+                        "goplus"
+                      ],
+                      "missing": [],
+                      "conflicts": []
+                    },
+                    {
+                      "id": "verified",
+                      "status": "pass",
+                      "detail": "Source code verified",
+                      "complete": true,
+                      "sources": [
+                        "goplus"
+                      ],
+                      "missing": [],
+                      "conflicts": []
                     },
                     {
                       "id": "owner-powers",
                       "status": "warn",
-                      "detail": "Owner can: owner can mint new supply"
+                      "detail": "Owner can mint",
+                      "complete": true,
+                      "sources": [
+                        "goplus"
+                      ],
+                      "missing": [],
+                      "conflicts": []
+                    },
+                    {
+                      "id": "concentration",
+                      "status": "unknown",
+                      "detail": "Holder shares unavailable",
+                      "complete": false,
+                      "sources": [
+                        "goplus"
+                      ],
+                      "missing": [
+                        "holders"
+                      ],
+                      "conflicts": []
+                    },
+                    {
+                      "id": "liquidity",
+                      "status": "warn",
+                      "detail": "Some removable liquidity detected; incomplete ownership",
+                      "complete": false,
+                      "sources": [
+                        "goplus"
+                      ],
+                      "missing": [
+                        "liquidity-share-total"
+                      ],
+                      "conflicts": []
+                    },
+                    {
+                      "id": "creator-stake",
+                      "status": "unknown",
+                      "detail": "Creator share unavailable",
+                      "complete": false,
+                      "sources": [
+                        "goplus"
+                      ],
+                      "missing": [
+                        "creator_percent"
+                      ],
+                      "conflicts": []
                     },
                     {
                       "id": "deployer",
-                      "status": "pass",
-                      "detail": "The deployer is a wallet with 731 transactions and holds 0.12094 ETH"
+                      "status": "unknown",
+                      "detail": "Explorer scam flag unavailable",
+                      "complete": false,
+                      "sources": [
+                        "goplus"
+                      ],
+                      "missing": [
+                        "flaggedScam"
+                      ],
+                      "conflicts": []
                     }
                   ],
                   "deployer": {
@@ -1000,7 +1708,7 @@
                     "balanceEth": 0.12094,
                     "firstSeen": null,
                     "ageHours": null,
-                    "flaggedScam": false
+                    "flaggedScam": null
                   },
                   "holderCount": 748566,
                   "listedOnCex": [
@@ -1011,23 +1719,105 @@
                     "honeypot.is"
                   ],
                   "disclaimer": "Automated checks against public data, not investment advice. Passing every check does not make a token safe.",
-                  "at": "2026-08-05T13:31:58.678Z"
+                  "at": "2026-08-05T13:31:58.678Z",
+                  "coverage": {
+                    "complete": false,
+                    "completedChecks": 4,
+                    "totalChecks": 8
+                  },
+                  "sourceStatus": {
+                    "goplus": {
+                      "status": "partial",
+                      "fetchedAt": "2026-08-05T13:31:58.678Z",
+                      "durationMs": 100,
+                      "issues": [
+                        "creator_percent"
+                      ]
+                    },
+                    "honeypot.is": {
+                      "status": "ok",
+                      "fetchedAt": "2026-08-05T13:31:58.678Z",
+                      "durationMs": 100,
+                      "issues": []
+                    },
+                    "blockscout+rpc": {
+                      "status": "partial",
+                      "fetchedAt": "2026-08-05T13:31:58.678Z",
+                      "durationMs": 100,
+                      "issues": [
+                        "flaggedScam"
+                      ]
+                    }
+                  },
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-05T13:31:58.678Z",
+                    "observedAt": "2026-08-05T13:31:58.678Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
                 }
               }
             }
           },
           "400": {
-            "description": "Invalid path or query parameter (not charged)"
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           },
           "402": {
-            "description": "x402 payment quote"
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           }
-        }
+        },
+        "operationId": "check_token_safety"
       }
     },
     "/api/base/name/{nameOrAddress}": {
       "get": {
-        "summary": "Basename lookup both ways: a name returns its address, owner and text records; a 0x address returns its primary basename",
+        "summary": "Basename lookup both ways: a name returns its address and text records, an address returns its primary basename",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -1053,15 +1843,15 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "description": "A basename (.base.eth optional) or a 0x address"
             },
-            "example": "agenttoll.base.eth",
-            "description": "A basename (the .base.eth suffix is optional) or a 0x address"
+            "example": "agenttoll.base.eth"
           }
         ],
         "responses": {
           "200": {
-            "description": "Resolution result",
+            "description": "Success. meta describes response freshness and configured networks.",
             "content": {
               "application/json": {
                 "example": {
@@ -1070,23 +1860,77 @@
                   "address": "0xe553...56f8",
                   "resolver": "0x426fA03f...",
                   "records": {},
-                  "at": "2026-08-05T13:31:58.678Z"
+                  "at": "2026-08-05T13:31:58.678Z",
+                  "registered": true,
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-05T13:31:58.678Z",
+                    "observedAt": "2026-08-05T13:31:58.678Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
                 }
               }
             }
           },
           "400": {
-            "description": "Invalid path or query parameter (not charged)"
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           },
           "402": {
-            "description": "x402 payment quote"
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           }
-        }
+        },
+        "operationId": "resolve_basename"
       }
     },
     "/api/watch/address/{address}": {
       "get": {
-        "summary": "Wallet activity watch: new activity for a Base address since your cursor. The reply's `cursor` is what you pass as `since` next time.",
+        "summary": "Wallet activity watch: new activity for a Base address since your cursor, so a scheduled agent only fetches what changed",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -1114,7 +1958,8 @@
             "schema": {
               "type": "string",
               "pattern": "^0x[0-9a-fA-F]{40}$"
-            }
+            },
+            "example": "0x4200000000000000000000000000000000000006"
           },
           {
             "name": "since",
@@ -1122,14 +1967,14 @@
             "required": false,
             "schema": {
               "type": "string",
-              "format": "date-time"
+              "description": "Echo the previous reply cursor unchanged; wallet cursors are opaque, radar cursors are ISO timestamps"
             },
-            "description": "ISO timestamp cursor from the previous reply"
+            "example": "2026-08-05T08:40:01Z"
           }
         ],
         "responses": {
           "200": {
-            "description": "Events since the cursor",
+            "description": "Success. meta describes response freshness and configured networks.",
             "content": {
               "application/json": {
                 "example": {
@@ -1147,24 +1992,88 @@
                       "method": "transferWithAuthorization"
                     }
                   ],
-                  "cursor": "2026-08-05T12:10:44Z",
-                  "at": "2026-08-05T13:31:58.678Z"
+                  "cursor": "w1.<opaque-example-returned-by-server>",
+                  "at": "2026-08-05T13:31:58.678Z",
+                  "hasMore": false,
+                  "partial": false,
+                  "coverage": {
+                    "complete": true,
+                    "scope": "indexed-confirmed-transactions",
+                    "pagesRead": 1,
+                    "overlapSeconds": 120,
+                    "deduplicationLimit": 100,
+                    "replayPossible": false,
+                    "note": "Drain hasMore pages, then echo the cursor when polling. Deduplicate by hash; indexer gaps and older reorganizations are outside this coverage."
+                  },
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-05T13:31:58.678Z",
+                    "observedAt": "2026-08-05T13:31:58.678Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
                 }
               }
             }
           },
           "400": {
-            "description": "Invalid path or query parameter (not charged)"
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           },
           "402": {
-            "description": "x402 payment quote"
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           }
-        }
+        },
+        "operationId": "watch_base_address"
       }
     },
     "/api/watch/radar": {
       "get": {
-        "summary": "New pool watch: only the Base pools that appeared since your cursor",
+        "summary": "New pool watch within a limited ranked radar listing. Returns an ISO cursor and explicit partial coverage; the listing can omit pools",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -1191,14 +2100,14 @@
             "required": false,
             "schema": {
               "type": "string",
-              "format": "date-time"
+              "description": "Echo the previous reply cursor unchanged; wallet cursors are opaque, radar cursors are ISO timestamps"
             },
-            "description": "ISO timestamp cursor from the previous reply"
+            "example": "2026-08-05T08:40:01Z"
           }
         ],
         "responses": {
           "200": {
-            "description": "New pools since the cursor",
+            "description": "Success. meta describes response freshness and configured networks.",
             "content": {
               "application/json": {
                 "example": {
@@ -1217,23 +2126,84 @@
                     }
                   ],
                   "cursor": "2026-08-05T13:01:33Z",
-                  "at": "2026-08-05T13:31:58.678Z"
+                  "at": "2026-08-05T13:31:58.678Z",
+                  "partial": true,
+                  "coverage": {
+                    "complete": false,
+                    "scope": "ranked-radar-listing",
+                    "source": "geckoterminal-new-pools",
+                    "observedAt": "2026-08-05T13:31:58.678Z",
+                    "note": "Limited ranked listing, not an exhaustive pool event stream."
+                  },
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-05T13:31:58.678Z",
+                    "observedAt": "2026-08-05T13:31:58.678Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
                 }
               }
             }
           },
           "400": {
-            "description": "Invalid path or query parameter (not charged)"
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           },
           "402": {
-            "description": "x402 payment quote"
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           }
-        }
+        },
+        "operationId": "watch_new_tokens"
       }
     },
     "/api/watch/price/{symbol}": {
       "get": {
-        "summary": "Price alert check: has the asset moved past your threshold from your reference price?",
+        "summary": "Price alert check: whether an asset moved past your threshold from a reference price",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -1259,7 +2229,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "description": "Ticker or CoinGecko id"
             },
             "example": "eth"
           },
@@ -1268,9 +2239,10 @@
             "in": "query",
             "required": true,
             "schema": {
-              "type": "number"
+              "type": "number",
+              "description": "Reference price in USD to compare against"
             },
-            "description": "Reference price in USD"
+            "example": 1900
           },
           {
             "name": "pct",
@@ -1278,14 +2250,14 @@
             "required": false,
             "schema": {
               "type": "number",
-              "default": 2
+              "description": "Threshold in percent, default 2"
             },
-            "description": "Threshold in percent"
+            "example": 2
           }
         ],
         "responses": {
           "200": {
-            "description": "Alert state",
+            "description": "Success. meta describes response freshness and configured networks.",
             "content": {
               "application/json": {
                 "example": {
@@ -1296,23 +2268,80 @@
                   "thresholdPct": 2,
                   "triggered": false,
                   "direction": "down",
-                  "at": "2026-08-05T13:31:58.678Z"
+                  "at": "2026-08-05T13:31:58.678Z",
+                  "quoteCurrency": "USD",
+                  "assumptions": [],
+                  "source": "coingecko",
+                  "priceObservedAt": "2026-08-05T13:31:58.678Z",
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-05T13:31:58.678Z",
+                    "observedAt": "2026-08-05T13:31:58.678Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
                 }
               }
             }
           },
           "400": {
-            "description": "Invalid path or query parameter (not charged)"
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           },
           "402": {
-            "description": "x402 payment quote"
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           }
-        }
+        },
+        "operationId": "watch_price_alert"
       }
     },
     "/api/base/scout": {
       "get": {
-        "summary": "New token scan with a safety verdict attached: today’s new Base pools above your liquidity floor, each already checked",
+        "summary": "New token scan with a safety verdict attached: today's new Base pools above your liquidity floor, each already checked for honeypot, taxes and owner powers. One call instead of N+1",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -1340,11 +2369,9 @@
             "schema": {
               "type": "number",
               "minimum": 0,
-              "maximum": 1000000000,
-              "default": 15000
+              "description": "Optional. Liquidity floor in USD, default 15000"
             },
-            "example": 25000,
-            "description": "Optional. Liquidity floor in USD."
+            "example": 25000
           },
           {
             "name": "pools",
@@ -1354,15 +2381,14 @@
               "type": "integer",
               "minimum": 1,
               "maximum": 4,
-              "default": 3
+              "description": "Optional. How many pools to check, default 3"
             },
-            "example": 3,
-            "description": "Optional. How many of the top pools to safety-check."
+            "example": 3
           }
         ],
         "responses": {
           "200": {
-            "description": "New pools with safety verdicts and a summary",
+            "description": "Success. meta describes response freshness and configured networks.",
             "content": {
               "application/json": {
                 "example": {
@@ -1400,23 +2426,76 @@
                   },
                   "source": "geckoterminal-new-pools",
                   "disclaimer": "Automated checks against public data, not investment advice.",
-                  "at": "2026-08-06T10:00:00.000Z"
+                  "at": "2026-08-06T10:00:00.000Z",
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-06T10:00:00.000Z",
+                    "observedAt": "2026-08-06T10:00:00.000Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
                 }
               }
             }
           },
           "400": {
-            "description": "Invalid query parameter (not charged)"
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           },
           "402": {
-            "description": "x402 payment quote"
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           }
-        }
+        },
+        "operationId": "scout_new_tokens"
       }
     },
     "/api/base/radar/history": {
       "get": {
-        "summary": "Past-day radar snapshot: exactly as committed to public git the day it was taken, with the Base tx that paid for it",
+        "summary": "Published radar snapshot pinned to an immutable git revision. The payment receipt proves payment, not snapshot content or capture time. ?date=YYYY-MM-DD, default latest",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -1443,15 +2522,15 @@
             "required": false,
             "schema": {
               "type": "string",
-              "pattern": "^d{4}-d{2}-d{2}$"
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "description": "Optional. Snapshot day, default latest. History begins 2026-08-06"
             },
-            "example": "2026-08-06",
-            "description": "Optional. Snapshot day, default latest. History begins 2026-08-06."
+            "example": "2026-08-06"
           }
         ],
         "responses": {
           "200": {
-            "description": "The snapshot plus provenance links (git commit, raw file, settlement tx)",
+            "description": "Success. meta describes response freshness and configured networks.",
             "content": {
               "application/json": {
                 "example": {
@@ -1490,31 +2569,86 @@
                     }
                   ],
                   "provenance": {
-                    "commit": "https://github.com/tevfikefeaydin/agenttoll/commits/main/data/scout/2026-08-06.json",
-                    "raw": "https://raw.githubusercontent.com/.../2026-08-06.json",
-                    "paidWith": "https://basescan.org/tx/0x9c41...b02a"
+                    "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "commit": "https://github.com/tevfikefeaydin/agenttoll/commit/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "raw": "https://raw.githubusercontent.com/tevfikefeaydin/agenttoll/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/data/scout/2026-08-06.json",
+                    "paidWith": null,
+                    "integrity": "Git revision pins the published bytes. A payment transaction does not authenticate a snapshot hash or its capture time."
                   },
                   "availableDates": {
                     "first": "2026-08-06",
                     "last": "2026-08-06",
                     "count": 1
+                  },
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-06T10:57:00.000Z",
+                    "observedAt": "2026-08-06T10:57:00.000Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
                   }
                 }
               }
             }
           },
           "400": {
-            "description": "Invalid or unavailable date (not charged)"
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           },
           "402": {
-            "description": "x402 payment quote"
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           }
-        }
+        },
+        "operationId": "get_radar_history"
       }
     },
     "/api/base/scorecard": {
       "get": {
-        "summary": "Radar track record: tokens it surfaced grouped by the verdict they got then, valued at what they trade for now",
+        "summary": "Radar sample scorecard: first sightings across the latest N published snapshots, grouped by original verdict and compared to current quotes. Missing outcomes stay null; observed liquidity below $100 is reported separately; holding periods vary",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -1543,15 +2677,14 @@
               "type": "integer",
               "minimum": 1,
               "maximum": 30,
-              "default": 7
+              "description": "Optional. Latest published snapshots to compare, default 7; elapsed holding periods vary"
             },
-            "example": 7,
-            "description": "Optional. How many trailing snapshot days to cover."
+            "example": 7
           }
         ],
         "responses": {
           "200": {
-            "description": "Cohort stats and per-token rows, each verifiable against a dated git commit",
+            "description": "Success. meta describes response freshness and configured networks.",
             "content": {
               "application/json": {
                 "example": {
@@ -1564,24 +2697,39 @@
                   },
                   "cohorts": {
                     "high-risk": {
-                      "count": 5,
-                      "liquidityGone": 4,
-                      "medianChangePct": -97.2
+                      "count": 1,
+                      "priced": 0,
+                      "unavailable": 0,
+                      "liquidityGone": 1,
+                      "medianChangePct": null
                     },
                     "caution": {
-                      "count": 9,
-                      "liquidityGone": 2,
-                      "medianChangePct": -41.5
+                      "count": 0,
+                      "priced": 0,
+                      "unavailable": 0,
+                      "liquidityGone": 0,
+                      "medianChangePct": null
                     },
                     "insufficient-data": {
-                      "count": 2,
+                      "count": 0,
+                      "priced": 0,
+                      "unavailable": 0,
                       "liquidityGone": 0,
-                      "medianChangePct": -12.3
+                      "medianChangePct": null
                     },
                     "clear": {
-                      "count": 1,
+                      "count": 0,
+                      "priced": 0,
+                      "unavailable": 0,
                       "liquidityGone": 0,
-                      "medianChangePct": 8.4
+                      "medianChangePct": null
+                    },
+                    "unassessed": {
+                      "count": 0,
+                      "priced": 0,
+                      "unavailable": 0,
+                      "liquidityGone": 0,
+                      "medianChangePct": null
                     }
                   },
                   "tokens": [
@@ -1592,29 +2740,106 @@
                       "verdictThen": "high-risk",
                       "liquidityThenUsd": 68437,
                       "liquidityNowUsd": 3,
-                      "priceChangePct": -99.1,
-                      "liquidityGone": true
+                      "priceChangePct": null,
+                      "liquidityGone": true,
+                      "outcome": "low-observed-liquidity"
                     }
                   ],
-                  "methodology": "Each token judged from its first appearance: verdict and price then, deepest-pool price now. Snapshots are dated git commits.",
+                  "methodology": "First sightings in published samples; current deepest observed pool. liquidityGone is null when unavailable; true only for observed liquidity below $100. Medians use available quotes and varying holding periods.",
                   "disclaimer": "A track record, not investment advice.",
-                  "at": "2026-08-12T10:00:00.000Z"
+                  "at": "2026-08-12T10:00:00.000Z",
+                  "coverage": {
+                    "requestedDays": 7,
+                    "windowBasis": "latest-published-snapshots",
+                    "snapshotsListed": 7,
+                    "snapshotsLoaded": 7,
+                    "missingSnapshotDates": [],
+                    "windowFirstSnapshot": "2026-08-06",
+                    "windowLastSnapshot": "2026-08-12",
+                    "poolsObserved": 1,
+                    "poolsWithoutSafety": 0,
+                    "poolsWithoutToken": 0,
+                    "tokensObserved": 1,
+                    "tokensPriced": 0,
+                    "priceBatchesFailed": 0,
+                    "complete": false,
+                    "note": "Published radar samples with variable holding periods; missing quotes are not losses."
+                  },
+                  "provenance": {
+                    "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "commit": "https://github.com/tevfikefeaydin/agenttoll/commit/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "index": "https://raw.githubusercontent.com/tevfikefeaydin/agenttoll/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/data/scout/index.json",
+                    "integrity": "Git revision pins the published bytes. A payment transaction does not authenticate a snapshot hash or its capture time."
+                  },
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-12T10:00:00.000Z",
+                    "observedAt": "2026-08-12T10:00:00.000Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
                 }
               }
             }
           },
           "400": {
-            "description": "Invalid query parameter (not charged)"
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           },
           "402": {
-            "description": "x402 payment quote"
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           }
-        }
+        },
+        "operationId": "get_radar_scorecard"
       }
     },
     "/api/base/fresh": {
       "get": {
-        "summary": "New pair scan seconds after launch: Uniswap v4 pools read straight off Base before any indexer has them",
+        "summary": "New pair scan seconds after launch: Uniswap v4 pools read straight off Base before any indexer has them - the launched token address, whether anyone has funded it yet, and whether its hook is a launchpad's or bespoke code shipped with this token",
         "x-payment-info": {
           "price": {
             "currency": "USD",
@@ -1643,10 +2868,9 @@
               "type": "integer",
               "minimum": 1,
               "maximum": 60,
-              "default": 10
+              "description": "Optional. How far back to look, default 10"
             },
-            "example": 10,
-            "description": "Optional. How far back to look."
+            "example": 10
           },
           {
             "name": "limit",
@@ -1656,10 +2880,8 @@
               "type": "integer",
               "minimum": 1,
               "maximum": 50,
-              "default": 15
-            },
-            "example": 15,
-            "description": "Optional. How many pools to return, youngest first."
+              "description": "Optional. How many pools to return, default 15"
+            }
           },
           {
             "name": "fundedOnly",
@@ -1667,15 +2889,14 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "default": false
+              "description": "Optional. Drop pools nobody has added liquidity to yet"
             },
-            "example": true,
-            "description": "Optional. Drop pools nobody has added liquidity to yet."
+            "example": true
           }
         ],
         "responses": {
           "200": {
-            "description": "Pools with the launched token, funding status, and hook provenance",
+            "description": "Success. meta describes response freshness and configured networks.",
             "content": {
               "application/json": {
                 "example": {
@@ -1715,16 +2936,115 @@
                   },
                   "method": "Read from the Uniswap v4 PoolManager's own Initialize log on Base...",
                   "notMeasured": "USD liquidity - v4 keeps every pool's tokens in one singleton...",
-                  "at": "2026-08-07T09:41:26.000Z"
+                  "at": "2026-08-07T09:41:26.000Z",
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-07T09:41:26.000Z",
+                    "observedAt": "2026-08-07T09:41:26.000Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
                 }
               }
             }
           },
           "400": {
-            "description": "Invalid query parameter (not charged)"
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           },
           "402": {
-            "description": "x402 payment quote"
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get_fresh_pools"
+      }
+    },
+    "/api/ready": {
+      "get": {
+        "summary": "Facilitator and Base RPC readiness (free, cached for 15 seconds)",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Both dependencies ready"
+          },
+          "503": {
+            "description": "A required dependency is unavailable"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ApiError": {
+        "type": "object",
+        "required": [
+          "error",
+          "code",
+          "retryable",
+          "retryAfter",
+          "requestId"
+        ],
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "retryable": {
+            "type": "boolean"
+          },
+          "retryAfter": {
+            "type": "integer",
+            "nullable": true
+          },
+          "requestId": {
+            "type": "string"
           }
         }
       }
