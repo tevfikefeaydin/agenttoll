@@ -11,7 +11,7 @@ import { blockscoutFetch, fromSources } from "./sources.js";
 //      now gone down (500s, then timeouts) three times in a month.
 export type StatsNetwork = "base" | "base-sepolia";
 const NETWORKS = {
-  base: { blockscout: "https://base.blockscout.com/api/v2", usdc: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", rpcs: ["https://mainnet.base.org", "https://base.drpc.org"] },
+  base: { blockscout: "https://base.blockscout.com/api/v2", usdc: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", rpcs: ["https://mainnet.base.org", "https://base-rpc.publicnode.com"] },
   "base-sepolia": { blockscout: "https://base-sepolia.blockscout.com/api/v2", usdc: "0x036CbD53842c5426634e7929541eC2318f3dCF7e", rpcs: ["https://sepolia.base.org"] },
 } as const;
 
@@ -121,11 +121,17 @@ const RAW_BASELINE =
 // keccak("Transfer(address,address,uint256)")
 const TRANSFER_TOPIC = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
 // Public RPCs that actually answer eth_getLogs over a useful range: most cap at
-// 10–50 blocks or gate archive reads behind a token. base.org is the dependable
-// one; drpc is a last-ditch that often times out on its free tier, and costs
-// nothing to list because fromSources only reaches it if base.org fails.
-const CHUNK = 10_000; // every provider that works caps the range here
-const MAX_CHUNKS = 60; // ~12 days of catching up on a stale baseline
+// 10–50 blocks or gate archive reads behind a token. base.org cut its own
+// ceiling to 2,000 blocks and answers HTTP 413 above it, which took this reading
+// down entirely until the chunk size followed; publicnode holds the same range
+// and is the second opinion, though only a shallow one: it answers 403 beyond
+// roughly half a day back, so it covers the newest chunks and nothing older.
+// drpc used to have that slot and no longer earns it — its free tier stops at
+// 50 blocks, short of even one chunk. Nothing else free reads Base logs this
+// far back at all, so base.org failing is the case worth degrading well for.
+const CHUNK = 2_000; // the ceiling both remaining public providers enforce
+const LANES = 3; // measured: three concurrent getLogs are clean, six draw 429s
+const MAX_CHUNKS = 90; // ~4 days of catching up on a stale baseline
 const SCAN_BUDGET_MS = 9_000; // stay under the platform's own request timeout
 
 const hex = (n: number) => `0x${n.toString(16)}`;
@@ -259,44 +265,89 @@ export async function fromChain(payTo: string, network: StatsNetwork = defaultNe
     ),
   );
 
-  const head = await latestBlock(network);
+  let stopped: "budget" | "upstream" | null = null;
+  // Asking for the head is itself an RPC call, and a dead provider fails here
+  // before there is anything to scan. Leaving the head at the baseline block
+  // skips the loop and reports the baseline as the floor it honestly is.
+  let head = base.block;
+  try {
+    head = await latestBlock(network);
+  } catch {
+    stopped = "upstream";
+  }
   if (head < base.block) throw new Error("Stats baseline is ahead of the current network head");
   const started = Date.now();
   let from = base.block + 1;
   let scannedThrough = base.block;
   let newestBlock = 0;
   let chunks = 0;
-  let partial = false;
 
   while (from <= head) {
     if (chunks >= MAX_CHUNKS || Date.now() - started > SCAN_BUDGET_MS) {
-      partial = true;
+      stopped = "budget";
       break;
     }
-    const to = Math.min(from + CHUNK - 1, head);
-    for (const toll of await scanTollLogs(payTo, from, to, network)) {
-      const seen = payers.get(toll.sender) ?? { calls: 0, usdc: 0n };
-      payers.set(toll.sender, { calls: seen.calls + 1, usdc: seen.usdc + toll.value });
-      newestBlock = Math.max(newestBlock, toll.block);
+    // At 2,000 blocks a request, a day of drift is twenty-odd calls, so they go
+    // out in small parallel lanes. The whole lane has to land before
+    // scannedThrough moves: counting a later chunk while an earlier one is
+    // still missing would leave a hole nothing downstream could see.
+    const lane: Promise<TollLog[]>[] = [];
+    let next = from;
+    while (lane.length < LANES && next <= head) {
+      const to = Math.min(next + CHUNK - 1, head);
+      lane.push(scanTollLogs(payTo, next, to, network));
+      next = to + 1;
     }
 
-    scannedThrough = to;
-    chunks += 1;
-    from = to + 1;
+    let landed: TollLog[][];
+    try {
+      landed = await Promise.all(lane);
+    } catch {
+      // One provider can read this far back, so its bad minute used to take the
+      // whole answer down. The baseline plus the chunks that did land is a
+      // floor: less than the truth, and far more than a 502.
+      stopped = "upstream";
+      break;
+    }
+
+    for (const tolls of landed) {
+      for (const toll of tolls) {
+        const seen = payers.get(toll.sender) ?? { calls: 0, usdc: 0n };
+        payers.set(toll.sender, { calls: seen.calls + 1, usdc: seen.usdc + toll.value });
+        newestBlock = Math.max(newestBlock, toll.block);
+      }
+    }
+
+    scannedThrough = next - 1;
+    chunks += lane.length;
+    from = next;
   }
 
   // One extra call buys the only timestamp the response needs; dating every
-  // log would cost a request per block for a field nobody reads per-payer.
-  const lastAt = newestBlock > 0 ? await blockMinedAt(newestBlock, network) : base.lastTollAt;
+  // log would cost a request per block for a field nobody reads per-payer. If
+  // even that call cannot be made, the baseline's own timestamp is the last one
+  // we can stand behind.
+  let lastAt = base.lastTollAt;
+  if (newestBlock > 0) {
+    try {
+      lastAt = await blockMinedAt(newestBlock, network);
+    } catch {
+      stopped ??= "upstream";
+    }
+  }
 
   return {
     payers,
     firstAt: base.firstTollAt,
     lastAt,
-    partial,
-    source: `onchain (USDC Transfer logs via ${new URL(NETWORKS[network].rpcs[0]).host}, from the compatible baseline at block ${base.block})`,
-    note: partial
-      ? `Blocks after ${scannedThrough} were not scanned — the baseline is further behind than one request can catch up. Counts are a floor, not a total.`
+    partial: stopped !== null,
+    source: `onchain (USDC Transfer logs via public ${network} RPC, from the compatible baseline at block ${base.block})`,
+    note: stopped
+      ? `Blocks after ${scannedThrough} were not scanned — ${
+        stopped === "budget"
+          ? "the baseline is further behind than one request can catch up"
+          : "the chain RPC would not answer"
+      }. Counts are a floor, not a total.`
       : undefined,
   };
 }
