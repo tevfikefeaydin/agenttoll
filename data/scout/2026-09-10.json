@@ -1,0 +1,113 @@
+{
+  "date": "2026-09-10",
+  "at": "2026-09-10T12:17:38.070Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x9520a27f83c59c8a6c968aa23aa6f9372e056b6a734c0b39dde8ffd50ad8553e",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 0,
+    "caution": 4,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "Laptop / ETH",
+      "pool": "0x514fab75fdf551ebd9ae91cb5edbe156894fdae039836857246cc3fd13e45638",
+      "token": "0xbfdbec98f48303ce28467eba98cb01c010adb181",
+      "createdAt": "2026-09-10T12:04:01Z",
+      "priceUsd": 0.000275186877532541,
+      "volume24hUsd": 613549.574326055,
+      "liquidityUsd": 22237.7714,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "FYC / ETH 0.3%",
+      "pool": "0xc7420f433895cea13a846844ff35008b233ae6e1b1fec937407009a6613ed2aa",
+      "token": "0xb200000000000000000000627402876e4966c111",
+      "createdAt": "2026-09-10T12:02:17Z",
+      "priceUsd": 0.0000286366716805051,
+      "volume24hUsd": 13703.8440864887,
+      "liquidityUsd": 21910.0318,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "owner-powers",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "QUOTRON / ETH 0.3%",
+      "pool": "0x351dfeb148f11befc9f5b0178a588c154e096b9b35e431a6f41a91330d3fbcdf",
+      "token": "0xb2000000000000000000007ad265b4c5773401fa",
+      "createdAt": "2026-09-10T12:01:49Z",
+      "priceUsd": 0.0000222673391836813,
+      "volume24hUsd": 10214.5107604897,
+      "liquidityUsd": 19216.4274,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "owner-powers",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "Tony / WETH",
+      "pool": "0xd31475235640719e8342b8d190bd2060e9b1fc3f",
+      "token": "0x42a6920eb6fb4aee9fba6c0e92e672f45261d139",
+      "createdAt": "2026-09-10T11:55:17Z",
+      "priceUsd": 0.00000484524985520108,
+      "volume24hUsd": 4376.8550802464,
+      "liquidityUsd": 82514.0419,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity"
+        ]
+      }
+    }
+  ]
+}
