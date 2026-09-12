@@ -36,3 +36,21 @@ test('browser demo does not enable payment for a quote that disagrees with deplo
   assert.equal(demo.elements.get('demo-pay')!.hidden, true);
   assert.match(demo.elements.get('demo-out')!.innerHTML, /recipient|configuration/i);
 });
+
+test('homepage statistics separate operator transfers and show incomplete coverage', async () => {
+  const counter = { innerHTML: '', textContent: '', title: '' };
+  runInNewContext(readFileSync(new URL('../public/app.js', import.meta.url), 'utf8'), {
+    fetch: async () => Response.json({ tollsCollected: 309, revenueUsdc: 0.891,
+      externalPayers: 21, externalTolls: 168, partial: true }),
+    document: { getElementById: (id: string) => id === 'toll-counter' ? counter : null,
+      querySelectorAll: () => [], documentElement: { classList: { add() {} } } },
+    window: { scrollY: 0 }, addEventListener() {}, matchMedia: () => ({ matches: true }), navigator: {}, innerWidth: 400,
+    setTimeout, atob, AbortSignal,
+  });
+  await new Promise(resolve => setImmediate(resolve));
+  assert.match(counter.innerHTML, /168/);
+  assert.doesNotMatch(counter.innerHTML, /309/);
+  assert.match(counter.innerHTML, /external|outside/i);
+  assert.match(counter.innerHTML, /partial/i);
+  assert.match(counter.title, /operator|test/i);
+});

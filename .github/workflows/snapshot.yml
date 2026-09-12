@@ -7,26 +7,46 @@ on:
   schedule:
     - cron: "23 7 * * *" # 07:23 UTC daily
   workflow_dispatch:
+    inputs:
+      mode:
+        description: "dry-run is offline; quote-only checks an unsigned quote; pay captures and commits"
+        type: choice
+        options: [dry-run, quote-only, pay]
+        default: dry-run
 
 permissions:
   contents: write
 
+concurrency:
+  group: daily-scout-snapshot
+  cancel-in-progress: false
+
 jobs:
   snapshot:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      AGENTTOLL_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.mode || 'pay' }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: ${{ env.AGENTTOLL_MODE == 'pay' }}
       - uses: actions/setup-node@v4
         with:
           node-version: 22
       - run: npm ci
       - run: npm run build
-      - name: Buy today's snapshot
+      - name: Inspect or capture today's snapshot
         run: node scripts/snapshot.mjs
         env:
-          AGENT_PRIVATE_KEY: ${{ secrets.AGENT_WALLET_KEY }}
+          AGENT_PRIVATE_KEY: ${{ env.AGENTTOLL_MODE == 'pay' && secrets.AGENT_WALLET_KEY || '' }}
           AGENTTOLL_URL: https://agenttoll.app
+          AGENTTOLL_NETWORK: base
+          AGENTTOLL_BUDGET_USDC: "0.008"
+          AGENTTOLL_MAX_PER_CALL_USDC: "0.008"
+          AGENTTOLL_TIMEOUT_MS: "30000"
       - name: Commit it
+        if: env.AGENTTOLL_MODE == 'pay'
         run: |
           git config user.name "Tevfik Efe Aydin"
           git config user.email "tevfikefe.aydin@gmail.com"

@@ -366,12 +366,12 @@
     <div class="two" style="margin-top:34px;">
       <div class="rv">
 <pre><span class="c"># free — status, catalog, and a sample of every shape</span>
-curl agenttoll.app/api/health
-curl agenttoll.app/api/catalog
-curl agenttoll.app/api/demo
+curl https://agenttoll.app/api/health
+curl https://agenttoll.app/api/catalog
+curl https://agenttoll.app/api/demo
 
 <span class="c"># a paid endpoint, unpaid: you get the quote</span>
-curl -i agenttoll.app/api/base/fresh
+curl -i https://agenttoll.app/api/base/fresh
 <span class="y">HTTP/1.1 402 Payment Required</span>
 <span class="c">PAYMENT-REQUIRED: &lt;base64&gt;
   price   $0.004 USDC
@@ -380,18 +380,18 @@ curl -i agenttoll.app/api/base/fresh
     so no second fetch is needed</span></pre>
       </div>
       <div class="rv">
-<pre><span class="c">// npm i @x402/fetch @x402/evm viem</span>
-<span class="k">const</span> pay = wrapFetchWithPaymentFromConfig(fetch, {
-  schemes: [{ network: <span class="s">"eip155:8453"</span>,
-    client: <span class="k">new</span> ExactEvmScheme(signer) }],
-});
+<pre><span class="c">// In the cloned repository: npm install &amp;&amp; npm run build</span>
+<span class="k">import</span> { createPaymentClient }
+  <span class="k">from</span> <span class="s">"./dist/payment-policy.js"</span>;
 
-<span class="k">const</span> res = <span class="k">await</span> pay(
-  <span class="s">"https://agenttoll.app/api/base/fresh"</span>);
+<span class="k">const</span> client = createPaymentClient(<span class="s">"base"</span>, undefined,
+  { totalBudgetUsdc: <span class="s">"0"</span> });
 
-console.log(<span class="k">await</span> res.json());
-<span class="c">// pools: [{ token, ageSeconds: 14,
-//   funded: true, hookPools: 21 }, …]</span></pre>
+console.log(<span class="k">await</span> client.getPaymentQuote(
+  <span class="s">"/api/base/fresh"</span>));
+<span class="c">// Validates price, network, asset and recipient.
+// No wallet and no payment. Use the MCP setup below
+// when you want to enable bounded paid calls.</span></pre>
       </div>
     </div>
   </div>
@@ -414,7 +414,7 @@ console.log(<span class="k">await</span> res.json());
           <tr><td><code>GET /api/base/fresh</code></td><td>Pools read straight off Base seconds after they exist, before indexers see them</td><td class="price">$0.004</td></tr>
           <tr><td><code>GET /api/base/radar/history</code></td><td>A past day's snapshot, exactly as committed to public git the day it was taken</td><td class="price">$0.002</td></tr>
           <tr><td><code>GET /api/base/scorecard</code></td><td>The radar's track record: verdicts then vs prices now, per cohort</td><td class="price">$0.005</td></tr>
-          <tr><td><code>GET /api/base/portfolio/:address</code></td><td>Everything an address holds on Base, valued in USD: ETH + ERC-20s, largest first</td><td class="price">$0.003</td></tr>
+          <tr><td><code>GET /api/base/portfolio/:address</code></td><td>Observed Base holdings valued in USD, largest first, with coverage limits</td><td class="price">$0.003</td></tr>
           <tr><td><code>GET /api/base/radar</code></td><td>New-token radar: fresh Base pools that already have real liquidity</td><td class="price">$0.003</td></tr>
           <tr><td><code>GET /api/base/trending</code></td><td>Trending DEX pools on Base: price, volume, liquidity</td><td class="price">$0.002</td></tr>
           <tr><td><code>GET /api/base/token/:address</code></td><td>Onchain USD price for any Base token by contract address</td><td class="price">$0.001</td></tr>
@@ -432,16 +432,17 @@ console.log(<span class="k">await</span> res.json());
           <tr><td><code>GET /api/watch/price/:symbol</code></td><td>Price alert check against your reference and threshold</td><td class="price">$0.001</td></tr>
           <tr><td><code>GET /api/catalog</code></td><td>Machine-readable catalog of everything for sale</td><td class="price free">free</td></tr>
           <tr><td><code>GET /api/demo</code></td><td>Sample response shapes for every paid endpoint</td><td class="price free">free</td></tr>
-          <tr><td><code>GET /api/stats</code></td><td>Onchain-derived toll counter: calls and USDC revenue</td><td class="price free">free</td></tr>
+          <tr><td><code>GET /api/stats</code></td><td>Qualifying small USDC transfers, with known operator activity reported separately</td><td class="price free">free</td></tr>
           <tr><td><code>GET /api/health</code></td><td>Service status</td><td class="price free">free</td></tr>
+          <tr><td><code>GET /api/ready</code></td><td>Payment provider and Base RPC readiness</td><td class="price free">free</td></tr>
         </tbody>
       </table>
       </div>
     </div>
-    <p class="sub rv" style="margin-top:20px; font-size:.9rem;">Responses come from a
-      short-lived cache (15–300s) to keep upstream sources happy. Every paid call still
-      settles onchain — and <strong style="color:var(--text);">failed requests are never
-      charged</strong>: payment only settles when the endpoint actually returns your data.</p>
+    <p class="sub rv" style="margin-top:20px; font-size:.9rem;">Selected responses are cached;
+      lifetimes vary by source. Handler failures before settlement are not billed.
+      If a signed request times out or its response is lost, inspect the receipt and
+      wallet before retrying: settlement may already have happened.</p>
   </div>
 </section>
 
@@ -450,17 +451,20 @@ console.log(<span class="k">await</span> res.json());
     <p class="kicker rv">Watch endpoints</p>
     <h2 class="rv">Ask only for what changed</h2>
     <p class="sub rv">A snapshot is useful once. Agents that run on a schedule want the diff.
-      Every <code>/api/watch/*</code> reply carries a <strong>cursor</strong> — send it back
-      as <code>?since=</code> and you get only the new events. Your agent holds the cursor,
-      so we still store nothing about you: stateful for you, stateless for us.</p>
+      Address and radar watches return a <strong>cursor</strong>; send it back as
+      <code>?since=</code>. Drain address pages while <code>hasMore</code> is true and
+      deduplicate transaction hashes. Radar coverage is partial; the price watch
+      checks a threshold and has no cursor.</p>
     <div class="rv">
-<pre><span class="c"># first call — everything recent, plus a cursor</span>
-curl <span class="s">"https://agenttoll.app/api/watch/radar"</span>
-<span class="c">→ { "count": 9, "pools": […], "cursor": "2026-08-05T08:40:01Z" }</span>
+<pre><span class="c"># inspect the quote — no wallet or payment</span>
+curl -i <span class="s">"https://agenttoll.app/api/watch/radar"</span>
+<span class="y">HTTP/1.1 402 Payment Required</span>
 
-<span class="c"># ten minutes later — only what appeared since</span>
-curl <span class="s">"https://agenttoll.app/api/watch/radar?since=2026-08-05T08:40:01Z"</span>
-<span class="c">→ { "count": 0, "pools": [] }   </span><span class="y">// nothing new. cheap poll, no wasted work.</span></pre>
+<span class="c"># after payment via the bounded client or MCP tool,
+# pass the returned cursor unchanged to the next call:
+# /api/watch/radar?since=&lt;returned-cursor&gt;
+# Each paid poll costs $0.003, including an empty result.
+# Results cover the current ranked listing, not every pool.</span></pre>
     </div>
   </div>
 </section>
@@ -491,23 +495,22 @@ curl <span class="s">"https://agenttoll.app/api/watch/radar?since=2026-08-05T08:
     <p class="kicker rv">MCP</p>
     <h2 class="rv">Plug it straight into Claude</h2>
     <p class="sub rv">AgentToll ships an MCP server. Add it to Claude Desktop or Claude Code
-      and all twenty-one endpoints become native tools — your agent pays per call automatically
-      from its own wallet.</p>
+      and use 21 data tools plus two free quote and budget tools. Start without a wallet;
+      add a dedicated wallet and a finite session budget when you want to pay.</p>
     <div class="two">
       <div class="rv">
 <pre>{
   <span class="s">"mcpServers"</span>: {
     <span class="s">"agenttoll"</span>: {
       <span class="s">"command"</span>: <span class="s">"npx"</span>,
-      <span class="s">"args"</span>: [<span class="s">"-y"</span>, <span class="s">"agenttoll-mcp"</span>],
-      <span class="s">"env"</span>: { <span class="s">"AGENT_PRIVATE_KEY"</span>: <span class="s">"0x…"</span> }
+      <span class="s">"args"</span>: [<span class="s">"-y"</span>, <span class="s">"agenttoll-mcp"</span>]
     }
   }
 }</pre>
       </div>
       <div class="card rv">
         <div class="ico">🧰</div>
-        <h3>21 tools, zero setup</h3>
+        <h3>23 tools, start with a free quote</h3>
         <p><code>get_price</code>, <code>get_base_gas</code>, <code>get_trending</code>,
           <code>get_base_token_price</code>, <code>get_base_address_info</code>,
           <code>get_fear_greed</code>, <code>get_base_trending_pools</code>,
@@ -516,7 +519,11 @@ curl <span class="s">"https://agenttoll.app/api/watch/radar?since=2026-08-05T08:
           <code>check_token_safety</code>, <code>get_fresh_pools</code>, <code>scout_new_tokens</code>,
           <code>get_radar_scorecard</code>, <code>get_radar_history</code>, <code>resolve_basename</code>,
           <code>watch_base_address</code>, <code>watch_new_tokens</code>,
-          <code>watch_price_alert</code>.</p>
+          <code>watch_price_alert</code>, <code>get_payment_quote</code> and
+          <code>get_payment_budget</code>.</p>
+        <p style="margin-top:12px;">To enable payments, set <code>AGENT_PRIVATE_KEY</code> and
+          <code>AGENTTOLL_BUDGET_USDC</code>. The budget applies to one running MCP instance;
+          a restart does not cancel previously signed authorizations.</p>
         <p style="margin-top:12px;"><a href="https://www.npmjs.com/package/agenttoll-mcp">agenttoll-mcp on npm →</a></p>
       </div>
     </div>

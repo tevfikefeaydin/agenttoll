@@ -20,7 +20,9 @@
     "generate": "node --import tsx scripts/sync-shared.mjs && node --import tsx scripts/openapi-examples.mjs",
     "check:generated": "node --import tsx scripts/sync-shared.mjs --check && node --import tsx scripts/openapi-examples.mjs --check && node --import tsx scripts/consistency.mjs && node scripts/check-web.mjs",
     "typecheck:tests": "tsc -p tsconfig.tests.json",
-    "smoke:mcp": "node scripts/mcp-package-smoke.mjs"
+    "smoke:mcp": "node scripts/mcp-package-smoke.mjs",
+    "ops:report": "node --import tsx scripts/ops-report.mjs",
+    "ops:check": "node --import tsx scripts/ops-check.mjs"
   },
   "keywords": [
     "x402",
@@ -45,13 +47,13 @@
   },
   "devDependencies": {
     "@langchain/core": "^1.2.9",
+    "@modelcontextprotocol/sdk": "^1.30.0",
     "@types/express": "^5.0.6",
     "@types/node": "^26.1.2",
-    "sharp": "^0.35.3",
-    "tsx": "^4.23.1",
-    "typescript": "^5.9.3",
     "esbuild": "^0.28.1",
-    "@modelcontextprotocol/sdk": "^1.30.0"
+    "sharp": "^0.35.4",
+    "tsx": "^4.23.1",
+    "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">=22"

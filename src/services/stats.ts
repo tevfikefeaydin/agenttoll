@@ -1,15 +1,17 @@
 import { cached, fetchWithTimeout } from "./cache.js";
 import { blockscoutFetch, fromSources } from "./sources.js";
+import { requestContext, withSignal } from "../request-context.js";
+import { MAX_TOLL_UNITS, parseStatsBaseline, type StatsBaseline, type StatsNetwork } from "./stats-baseline.js";
+export type { StatsNetwork } from "./stats-baseline.js";
 
-// Toll stats derived straight from the chain: every payment is a USDC Transfer
-// to the payTo address, so the counter cannot lie and needs no database.
+// Counts of small USDC transfers to payTo. These include tests and unsolicited
+// transfers; the chain alone cannot prove an API call or organic customer sale.
 //
 // Two independent readings of the same truth, tried in order:
 //   1. Blockscout's indexer — one paginated query, fast when it is healthy.
 //   2. The chain itself — a committed baseline plus eth_getLogs for the blocks
 //      since. Slower, but it only depends on a public RPC, and Blockscout has
 //      now gone down (500s, then timeouts) three times in a month.
-export type StatsNetwork = "base" | "base-sepolia";
 const NETWORKS = {
   base: { blockscout: "https://base.blockscout.com/api/v2", usdc: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", rpcs: ["https://mainnet.base.org", "https://base-rpc.publicnode.com"] },
   "base-sepolia": { blockscout: "https://base-sepolia.blockscout.com/api/v2", usdc: "0x036CbD53842c5426634e7929541eC2318f3dCF7e", rpcs: ["https://sepolia.base.org"] },
@@ -26,8 +28,6 @@ function recipient(payTo: string): string {
   return payTo.toLowerCase();
 }
 const MAX_PAGES = 20; // 50 transfers/page; raise when the tollbooth gets busy
-// Tolls are micro-payments; anything bigger is the owner funding the wallet.
-const MAX_TOLL_UNITS = 50_000n; // $0.05
 // Blockscout normally answers this query in about 4–5s. Leave enough headroom
 // for a healthy response while keeping the homepage counter bounded on outages.
 const STATS_UPSTREAM_TIMEOUT_MS = 8_000;
@@ -58,7 +58,7 @@ interface TransferPage {
   next_page_params: Record<string, string | number> | null;
 }
 
-async function fromBlockscout(payTo: string, network: StatsNetwork): Promise<Tally> {
+async function fromBlockscout(payTo: string, network: StatsNetwork, signal: AbortSignal): Promise<Tally> {
   const { blockscout, usdc } = NETWORKS[network];
   const payers = new Map<string, { calls: number; usdc: bigint }>();
   let truncated = false;
@@ -71,7 +71,7 @@ async function fromBlockscout(payTo: string, network: StatsNetwork): Promise<Tal
     // keep a visitor staring at "reading the chain..." indefinitely.
     const res = await blockscoutFetch(
       `${blockscout}/addresses/${payTo}/token-transfers?type=ERC-20&filter=to&token=${usdc}${params}`,
-      { headers: { Accept: "application/json" } },
+      { headers: { Accept: "application/json" }, signal },
       STATS_UPSTREAM_TIMEOUT_MS,
       // One try only: reading the chain below is faster than a second attempt
       // against an indexer that just failed, and halves the wait on an outage.
@@ -137,15 +137,6 @@ const SCAN_BUDGET_MS = 9_000; // stay under the platform's own request timeout
 const hex = (n: number) => `0x${n.toString(16)}`;
 const topicAddress = (addr: string) => `0x${addr.slice(2).toLowerCase().padStart(64, "0")}`;
 
-interface BaselineFile {
-  network: StatsNetwork;
-  payTo: string;
-  block: number;
-  firstTollAt: string | null;
-  lastTollAt: string | null;
-  payers: Record<string, { calls: number; usdcUnits: string }>;
-}
-
 interface RpcLog {
   data: string;
   topics: string[];
@@ -159,16 +150,19 @@ export interface TollLog {
   block: number;
 }
 
-async function logsRpc<T>(network: StatsNetwork, method: string, params: unknown[] = []): Promise<T> {
-  return fromSources<T>(
+async function logsRpc<T>(network: StatsNetwork, method: string, params: unknown[] = [], signal?: AbortSignal): Promise<T> {
+  signal?.throwIfAborted();
+  const reading = fromSources<T>(
     `${network} rpc ${method}`,
     NETWORKS[network].rpcs.map((url) => ({
       name: new URL(url).host,
       load: async () => {
+        signal?.throwIfAborted();
         const res = await fetchWithTimeout(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
+          signal,
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = (await res.json()) as { result?: T; error?: { message: string } };
@@ -178,11 +172,12 @@ async function logsRpc<T>(network: StatsNetwork, method: string, params: unknown
       },
     })),
   );
+  return signal ? withSignal(reading, signal) : reading;
 }
 
 /** The chain's own head block. */
-export async function latestBlock(network: StatsNetwork = defaultNetwork()): Promise<number> {
-  const result = await logsRpc<string>(network, "eth_blockNumber");
+export async function latestBlock(network: StatsNetwork = defaultNetwork(), signal?: AbortSignal): Promise<number> {
+  const result = await logsRpc<string>(network, "eth_blockNumber", [], signal);
   if (!/^0x[0-9a-f]+$/i.test(result)) throw new Error("Invalid head block");
   const block = parseInt(result, 16);
   if (!Number.isSafeInteger(block) || block < 0) throw new Error("Invalid head block");
@@ -190,9 +185,21 @@ export async function latestBlock(network: StatsNetwork = defaultNetwork()): Pro
 }
 
 /** When a block was mined, as an ISO string. */
-export async function blockMinedAt(block: number, network: StatsNetwork = defaultNetwork()): Promise<string> {
-  const b = await logsRpc<{ timestamp: string }>(network, "eth_getBlockByNumber", [hex(block), false]);
+export async function blockMinedAt(block: number, network: StatsNetwork = defaultNetwork(), signal?: AbortSignal): Promise<string> {
+  const b = await logsRpc<{ timestamp: string }>(network, "eth_getBlockByNumber", [hex(block), false], signal);
   return new Date(parseInt(b.timestamp, 16) * 1000).toISOString();
+}
+
+/** A canonical block boundary for resumable snapshots; finalized avoids the live tip. */
+export async function blockCheckpoint(block: number | "finalized", network: StatsNetwork = defaultNetwork(), signal?: AbortSignal) {
+  const result = await logsRpc<{ number: string; hash: string; timestamp: string }>(
+    network, "eth_getBlockByNumber", [block === "finalized" ? block : hex(block), false], signal,
+  );
+  if (!result || !/^0x[0-9a-f]+$/i.test(result.number) || !/^0x[0-9a-f]{64}$/i.test(result.hash)
+    || !/^0x[0-9a-f]+$/i.test(result.timestamp)) throw new Error("Invalid stats block checkpoint");
+  const number = parseInt(result.number, 16);
+  if (!Number.isSafeInteger(number) || (typeof block === "number" && number !== block)) throw new Error("Invalid stats block checkpoint number");
+  return { block: number, hash: result.hash.toLowerCase(), at: new Date(parseInt(result.timestamp, 16) * 1000).toISOString() };
 }
 
 /**
@@ -205,6 +212,7 @@ export async function scanTollLogs(
   fromBlock: number,
   toBlock: number,
   network: StatsNetwork = defaultNetwork(),
+  signal?: AbortSignal,
 ): Promise<TollLog[]> {
   const address = recipient(payTo);
   const logs = await logsRpc<RpcLog[]>(network, "eth_getLogs", [
@@ -214,7 +222,7 @@ export async function scanTollLogs(
       address: NETWORKS[network].usdc,
       topics: [TRANSFER_TOPIC, null, topicAddress(address)],
     },
-  ]);
+  ], signal);
 
   const tolls: TollLog[] = [];
   for (const log of logs) {
@@ -236,29 +244,36 @@ export const LOG_CHUNK = CHUNK;
  * CI. Scanning the whole history live would be ~150 sequential getLogs calls
  * and grows with the chain; this keeps the live part to the last day or so.
  */
-const baseline = (payTo: string, network: StatsNetwork) =>
-  cached(`stats:baseline:${network}:${payTo}`, 600_000, async () => {
-    const res = await fetchWithTimeout(RAW_BASELINE);
+const baseline = (payTo: string, network: StatsNetwork, signal?: AbortSignal) => {
+  const reading = cached(`stats:baseline:${network}:${payTo}`, 600_000, async () => {
+    const res = await fetchWithTimeout(RAW_BASELINE, { signal });
     if (!res.ok) throw new Error(`Baseline store returned ${res.status}`);
-    const base = (await res.json()) as BaselineFile;
-    if (!base || base.network !== network || typeof base.payTo !== "string" || base.payTo.toLowerCase() !== payTo) {
-      throw new Error(`No compatible stats baseline for network ${network} and recipient ${payTo}`);
-    }
-    if (!Number.isSafeInteger(base.block) || base.block < 0 || !base.payers || typeof base.payers !== "object" || Array.isArray(base.payers)
-      || ![base.firstTollAt, base.lastTollAt].every((value) => value === null || (typeof value === "string" && Number.isFinite(Date.parse(value))))) {
-      throw new Error("Invalid stats baseline");
-    }
-    for (const [addr, p] of Object.entries(base.payers)) {
-      if (!/^0x[0-9a-fA-F]{40}$/.test(addr) || !p || !Number.isSafeInteger(p.calls) || p.calls < 0
-        || typeof p.usdcUnits !== "string" || !/^\d+$/.test(p.usdcUnits)
-        || BigInt(p.usdcUnits) > BigInt(p.calls) * MAX_TOLL_UNITS) throw new Error("Invalid stats baseline payer");
-    }
-    return base;
+    return parseStatsBaseline(await res.json(), payTo, network);
   });
+  return signal ? withSignal(reading, signal) : reading;
+};
+
+/** One deadline covers pagination/failover/body reads, not one timer per fetch. */
+async function withinBudget<T>(ms: number, read: (signal: AbortSignal) => Promise<T>): Promise<T> {
+  const deadline = new AbortController();
+  const timer = setTimeout(() => deadline.abort(new DOMException("Stats budget expired", "TimeoutError")), ms);
+  const callerSignal = requestContext.getStore()?.signal;
+  const signal = callerSignal ? AbortSignal.any([deadline.signal, callerSignal]) : deadline.signal;
+  try {
+    return await read(signal);
+  } finally {
+    clearTimeout(timer);
+    deadline.abort(); // Stop any discarded sibling requests from a failed lane.
+  }
+}
 
 export async function fromChain(payTo: string, network: StatsNetwork = defaultNetwork()): Promise<Tally> {
   payTo = recipient(payTo);
-  const base = await baseline(payTo, network);
+  return withinBudget(SCAN_BUDGET_MS, (signal) => chainTally(payTo, network, signal));
+}
+
+async function chainTally(payTo: string, network: StatsNetwork, signal: AbortSignal): Promise<Tally> {
+  const base = await baseline(payTo, network, signal);
   const payers = new Map(
     Object.entries(base.payers).map(
       ([addr, p]) => [addr.toLowerCase(), { calls: p.calls, usdc: BigInt(p.usdcUnits) }] as const,
@@ -271,19 +286,19 @@ export async function fromChain(payTo: string, network: StatsNetwork = defaultNe
   // skips the loop and reports the baseline as the floor it honestly is.
   let head = base.block;
   try {
-    head = await latestBlock(network);
+    head = await latestBlock(network, signal);
   } catch {
-    stopped = "upstream";
+    stopped = signal.aborted ? "budget" : "upstream";
   }
   if (head < base.block) throw new Error("Stats baseline is ahead of the current network head");
-  const started = Date.now();
   let from = base.block + 1;
   let scannedThrough = base.block;
   let newestBlock = 0;
+  let oldestBlock = Infinity;
   let chunks = 0;
 
   while (from <= head) {
-    if (chunks >= MAX_CHUNKS || Date.now() - started > SCAN_BUDGET_MS) {
+    if (chunks >= MAX_CHUNKS || signal.aborted) {
       stopped = "budget";
       break;
     }
@@ -295,7 +310,7 @@ export async function fromChain(payTo: string, network: StatsNetwork = defaultNe
     let next = from;
     while (lane.length < LANES && next <= head) {
       const to = Math.min(next + CHUNK - 1, head);
-      lane.push(scanTollLogs(payTo, next, to, network));
+      lane.push(scanTollLogs(payTo, next, to, network, signal));
       next = to + 1;
     }
 
@@ -306,7 +321,7 @@ export async function fromChain(payTo: string, network: StatsNetwork = defaultNe
       // One provider can read this far back, so its bad minute used to take the
       // whole answer down. The baseline plus the chunks that did land is a
       // floor: less than the truth, and far more than a 502.
-      stopped = "upstream";
+      stopped = signal.aborted ? "budget" : "upstream";
       break;
     }
 
@@ -315,6 +330,7 @@ export async function fromChain(payTo: string, network: StatsNetwork = defaultNe
         const seen = payers.get(toll.sender) ?? { calls: 0, usdc: 0n };
         payers.set(toll.sender, { calls: seen.calls + 1, usdc: seen.usdc + toll.value });
         newestBlock = Math.max(newestBlock, toll.block);
+        oldestBlock = Math.min(oldestBlock, toll.block);
       }
     }
 
@@ -323,58 +339,60 @@ export async function fromChain(payTo: string, network: StatsNetwork = defaultNe
     from = next;
   }
 
-  // One extra call buys the only timestamp the response needs; dating every
-  // log would cost a request per block for a field nobody reads per-payer. If
-  // even that call cannot be made, the baseline's own timestamp is the last one
-  // we can stand behind.
+  // Date only the bounds. A new undated transfer makes lastAt unknown; the
+  // baseline's older timestamp would falsely describe it as the latest one.
+  let firstAt = base.firstTollAt;
   let lastAt = base.lastTollAt;
+  let timestampsMissing = false;
   if (newestBlock > 0) {
+    lastAt = null;
     try {
-      lastAt = await blockMinedAt(newestBlock, network);
+      lastAt = await blockMinedAt(newestBlock, network, signal);
+      if (Object.keys(base.payers).length === 0) {
+        firstAt = oldestBlock === newestBlock ? lastAt : await blockMinedAt(oldestBlock, network, signal);
+      }
     } catch {
-      stopped ??= "upstream";
+      timestampsMissing = true;
     }
   }
 
+  const notes: string[] = [];
+  if (stopped) notes.push(`Blocks after ${scannedThrough} were not scanned — ${
+    stopped === "budget" ? "the request's time or chunk budget was exhausted" : "the chain RPC would not answer"
+  }. Counts are a floor, not a total.`);
+  if (timestampsMissing) notes.push("Some transfer timestamps are unavailable; unknown bounds are null.");
+
   return {
     payers,
-    firstAt: base.firstTollAt,
+    firstAt,
     lastAt,
-    partial: stopped !== null,
+    partial: stopped !== null || timestampsMissing,
     source: `onchain (USDC Transfer logs via public ${network} RPC, from the compatible baseline at block ${base.block})`,
-    note: stopped
-      ? `Blocks after ${scannedThrough} were not scanned — ${
-        stopped === "budget"
-          ? "the baseline is further behind than one request can catch up"
-          : "the chain RPC would not answer"
-      }. Counts are a floor, not a total.`
-      : undefined,
+    note: notes.length ? notes.join(" ") : undefined,
   };
 }
 
 /**
- * History cannot shrink. A wallet that had paid 37 tolls by the baseline block
- * has 37 forever, so an indexer reporting fewer is serving an incomplete view
- * rather than a smaller truth — which is exactly what Blockscout did for days
- * after its September outage, answering 200 OK while quietly missing a dozen
- * calls. Failing here hands the request to the chain reading instead.
+ * An indexer reporting less than our committed baseline may be incomplete.
+ * Fall back to RPC rather than silently reducing the displayed history.
+ * A legacy baseline is trusted historical input, not a reorg-proof receipt.
  *
  * Best effort: if the baseline itself is unreachable, that is no reason to
  * reject an answer we have nothing to contradict.
  */
-async function assertNotBehindBaseline(tally: Tally, payTo: string, network: StatsNetwork): Promise<void> {
-  let base: BaselineFile;
+async function assertNotBehindBaseline(tally: Tally, payTo: string, network: StatsNetwork, signal: AbortSignal): Promise<void> {
+  let base: StatsBaseline;
   try {
-    base = await baseline(payTo, network);
+    base = await baseline(payTo, network, signal);
   } catch {
     return;
   }
 
   for (const [addr, recorded] of Object.entries(base.payers)) {
     const seen = tally.payers.get(addr.toLowerCase());
-    if (!seen || seen.calls < recorded.calls) {
+    if (!seen || seen.calls < recorded.calls || seen.usdc < BigInt(recorded.usdcUnits)) {
       throw new Error(
-        `behind the committed baseline (${addr.slice(0, 10)}…: ${seen?.calls ?? 0} < ${recorded.calls})`,
+        `behind the committed baseline (${addr.slice(0, 10)}…: transfer count or USDC units are missing)`,
       );
     }
   }
@@ -398,7 +416,8 @@ function summarise(t: Tally, payTo: string, network: StatsNetwork) {
     tollsCollected: count,
     revenueUsdc: Number(revenue) / 1e6,
     uniquePayers: t.payers.size,
-    // Everything above minus our own test wallet: the honest adoption signal.
+    // Excludes only known test wallets. Other wallets can also be tests or
+    // unsolicited senders, so these fields are not verified customer sales.
     externalPayers: external.length,
     externalTolls: externalCalls,
     externalRevenueUsdc: Number(externalRevenue) / 1e6,
@@ -429,11 +448,11 @@ export async function getStats(payTo: string, network: StatsNetwork = defaultNet
       await fromSources<Tally>("stats", [
         {
           name: "blockscout",
-          load: async () => {
-            const tally = await fromBlockscout(payTo, network);
-            await assertNotBehindBaseline(tally, payTo, network);
+          load: () => withinBudget(STATS_UPSTREAM_TIMEOUT_MS, (signal) => withSignal((async () => {
+            const tally = await fromBlockscout(payTo, network, signal);
+            await assertNotBehindBaseline(tally, payTo, network, signal);
             return tally;
-          },
+          })(), signal)),
         },
         { name: "onchain-logs", load: () => fromChain(payTo, network) },
       ]),
