@@ -1,0 +1,72 @@
+{
+  "at": "2026-09-12T22:41:44.577503+00:00",
+  "current": {
+    "sha": "c83262b68141a1451ff1fd4ab884ac60c449decd",
+    "container": "agenttoll-r-20260912t223818z-c83262b68141",
+    "upstream": "agenttoll-r-20260912t223818z-c83262b68141:4021",
+    "image": "agenttoll:20260912T223818Z-c83262b68141",
+    "directory": "/opt/agenttoll/releases/20260912T223818Z-c83262b68141",
+    "fingerprint": "8fb66b5ea50dde757f781ffa2d188baf107d4f4faddbcb697a47189554cda5df",
+    "attempt": "34723036404:1",
+    "ci_url": "https://github.com/tevfikefeaydin/agenttoll/actions/runs/34723036404",
+    "created_at": "2026-09-12T22:38:56.766505+00:00",
+    "image_id": "sha256:fe0634bc2017fd80666834a0100d7fd00ddd33cda86ee6e093e73f6937fc972f"
+  },
+  "previous": {
+    "sha": "6a40554f991b",
+    "container": "agenttoll-agenttoll-1",
+    "upstream": "agenttoll-api:4021",
+    "image": "agenttoll:20260912T204138Z-6a40554f991b-hetzner",
+    "image_id": "sha256:ba4e1a69d97f09f6b9a580e7ef397adfb1445a36cdfb82583d1f9e0d4352b56c",
+    "directory": "/opt/agenttoll/releases/20260912T204138Z-6a40554f991b-hetzner",
+    "attempt": "migration-bootstrap",
+    "fingerprint": null
+  },
+  "state": {
+    "pending": null,
+    "cleanup": null,
+    "failed": null
+  },
+  "current_link": "/opt/agenttoll/releases/20260912T223818Z-c83262b68141",
+  "active_upstreams": [
+    "agenttoll-r-20260912t223818z-c83262b68141:4021"
+  ],
+  "container": {
+    "id": "b26f01499fe1bda4eefa6a26a222da3b10fd8650a3d0496fa5a6c5ad42080656",
+    "image_id": "sha256:fe0634bc2017fd80666834a0100d7fd00ddd33cda86ee6e093e73f6937fc972f",
+    "healthy": true,
+    "started_at": "2026-09-12T22:38:57.299912349Z",
+    "restart_count": 0,
+    "user": "node",
+    "read_only": true,
+    "port_bindings": {},
+    "memory_limit": 805306368
+  },
+  "runtime_values_match_previous": true,
+  "old_container": {
+    "running": false,
+    "exit_code": 0,
+    "finished_at": "2026-09-12T22:39:08.917474141Z",
+    "shutdown_events": [
+      {
+        "event": "shutdown_started",
+        "signal": "SIGTERM",
+        "timeoutMs": 30000
+      },
+      {
+        "event": "shutdown_complete",
+        "ok": true
+      }
+    ]
+  },
+  "caddy": {
+    "id": "d288ed8f0b15a2f4257558dcdc739fe8d5fdf90bfeca11c0ad30cd46657000c0",
+    "started_at": "2026-09-12T21:06:01.722537366Z",
+    "restarts": 0,
+    "shared_file_sha256": "09992271f0022b69fae513ccba4fa1540443da263dc86242adc75708fba9e8df"
+  },
+  "timer_enabled": "enabled",
+  "timer_active": "active",
+  "service_result": "success",
+  "ok": true
+}

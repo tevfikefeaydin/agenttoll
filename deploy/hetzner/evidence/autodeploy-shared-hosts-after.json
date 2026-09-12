@@ -1,0 +1,48 @@
+{
+  "at": "2026-09-12T22:41:51.417Z",
+  "ok": true,
+  "checks": [
+    {
+      "host": "tevfikefe.com",
+      "status": 200,
+      "expected": 200,
+      "ok": true
+    },
+    {
+      "host": "www.tevfikefe.com",
+      "status": 200,
+      "expected": 200,
+      "ok": true
+    },
+    {
+      "host": "efar.group",
+      "status": 200,
+      "expected": 200,
+      "ok": true
+    },
+    {
+      "host": "www.efar.group",
+      "status": 301,
+      "expected": 301,
+      "ok": true
+    },
+    {
+      "host": "arac.167-233-31-87.sslip.io",
+      "status": 302,
+      "expected": 302,
+      "ok": true
+    },
+    {
+      "host": "persona.167-233-31-87.sslip.io",
+      "status": 200,
+      "expected": 200,
+      "ok": true
+    },
+    {
+      "host": "gozcu.167-233-31-87.sslip.io",
+      "status": 404,
+      "expected": 404,
+      "ok": true
+    }
+  ]
+}

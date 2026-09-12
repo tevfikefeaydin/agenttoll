@@ -1,0 +1,187 @@
+{
+  "ok": false,
+  "checkedAt": "2026-09-12T22:41:47.949Z",
+  "origin": "https://agenttoll.app",
+  "scope": "Liveness, readiness, catalog and unsigned quotes only; paid data and settlement are not exercised.",
+  "checks": [
+    {
+      "path": "/api/health",
+      "ok": true,
+      "status": 200,
+      "ms": 461
+    },
+    {
+      "path": "/api/ready",
+      "ok": true,
+      "status": 200,
+      "ms": 218
+    },
+    {
+      "path": "/api/catalog",
+      "ok": true,
+      "status": 200,
+      "ms": 140
+    },
+    {
+      "path": "/api/price/{symbol}",
+      "ok": true,
+      "status": 402,
+      "ms": 269
+    },
+    {
+      "path": "/api/gas",
+      "ok": true,
+      "status": 402,
+      "ms": 4
+    },
+    {
+      "path": "/api/trending",
+      "ok": true,
+      "status": 402,
+      "ms": 132
+    },
+    {
+      "path": "/api/base/token/{address}",
+      "ok": true,
+      "status": 402,
+      "ms": 9
+    },
+    {
+      "path": "/api/base/address/{address}",
+      "ok": true,
+      "status": 402,
+      "ms": 142
+    },
+    {
+      "path": "/api/feargreed",
+      "ok": true,
+      "status": 402,
+      "ms": 3
+    },
+    {
+      "path": "/api/base/trending",
+      "ok": true,
+      "status": 402,
+      "ms": 131
+    },
+    {
+      "path": "/api/brief",
+      "ok": true,
+      "status": 402,
+      "ms": 3
+    },
+    {
+      "path": "/api/base/radar",
+      "ok": true,
+      "status": 402,
+      "ms": 125
+    },
+    {
+      "path": "/api/try/premium",
+      "ok": true,
+      "status": 402,
+      "ms": 3
+    },
+    {
+      "path": "/api/try/spread",
+      "ok": true,
+      "status": 402,
+      "ms": 126
+    },
+    {
+      "path": "/api/base/portfolio/{address}",
+      "ok": true,
+      "status": 402,
+      "ms": 3
+    },
+    {
+      "path": "/api/base/safety/{address}",
+      "ok": true,
+      "status": 402,
+      "ms": 122
+    },
+    {
+      "path": "/api/base/scout",
+      "ok": true,
+      "status": 402,
+      "ms": 3
+    },
+    {
+      "path": "/api/base/fresh",
+      "ok": true,
+      "status": 402,
+      "ms": 127
+    },
+    {
+      "path": "/api/base/radar/history",
+      "ok": true,
+      "status": 402,
+      "ms": 4
+    },
+    {
+      "path": "/api/base/scorecard",
+      "ok": true,
+      "status": 402,
+      "ms": 130
+    },
+    {
+      "path": "/api/base/name/{nameOrAddress}",
+      "ok": true,
+      "status": 402,
+      "ms": 5
+    },
+    {
+      "path": "/api/watch/address/{address}",
+      "ok": true,
+      "status": 402,
+      "ms": 129
+    },
+    {
+      "path": "/api/watch/radar",
+      "ok": true,
+      "status": 402,
+      "ms": 4
+    },
+    {
+      "path": "/api/watch/price/{symbol}",
+      "ok": true,
+      "status": 402,
+      "ms": 122
+    }
+  ],
+  "budget": {
+    "totalUsdc": "0.000000",
+    "spentUsdc": "0.000000",
+    "reservedUsdc": "0.000000",
+    "remainingUsdc": "0.000000",
+    "network": "eip155:8453",
+    "recipient": "0xe55359021a6a22d8385b827405991c56075f56f8",
+    "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    "apiOrigin": "https://agenttoll.app",
+    "timeoutMs": 5000,
+    "maxPerCallUsdc": null,
+    "canSign": false
+  },
+  "tls": [
+    {
+      "hostname": "agenttoll.app",
+      "resolvedAddress": "167.233.31.87",
+      "remoteAddress": "167.233.31.87",
+      "authorized": true,
+      "status": 200,
+      "fingerprint256": "B8:5C:27:EB:98:74:6B:5C:1D:89:E6:B4:7F:3A:F3:FF:A5:96:9F:23:80:BD:93:0D:8C:58:77:85:30:28:5F:C9",
+      "validTo": "Dec 11 20:26:56 2026 GMT",
+      "ok": true
+    },
+    {
+      "hostname": "www.agenttoll.app",
+      "resolvedAddress": "167.233.31.87",
+      "remoteAddress": "64.29.17.1",
+      "authorized": true,
+      "status": 307,
+      "fingerprint256": "82:BF:EE:3F:8D:45:63:C1:21:DD:E7:62:2D:84:49:FC:71:A9:BA:CF:53:52:8B:9B:4C:58:7D:4A:36:40:FE:C3",
+      "validTo": "Nov  3 05:40:13 2026 GMT",
+      "ok": false
+    }
+  ]
+}

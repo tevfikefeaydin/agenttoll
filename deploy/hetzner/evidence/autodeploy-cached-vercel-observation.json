@@ -1,0 +1,98 @@
+{
+  "startedAt": "2026-09-12T22:37:02.249Z",
+  "endedAt": "2026-09-12T22:38:07.015Z",
+  "ok": false,
+  "checks": [
+    {
+      "at": "2026-09-12T22:37:02.251Z",
+      "status": 200,
+      "ms": 688,
+      "remoteAddress": "216.198.79.1",
+      "ok": false
+    },
+    {
+      "at": "2026-09-12T22:37:07.946Z",
+      "status": 200,
+      "ms": 311,
+      "remoteAddress": "216.198.79.1",
+      "ok": false
+    },
+    {
+      "at": "2026-09-12T22:37:13.273Z",
+      "status": 200,
+      "ms": 320,
+      "remoteAddress": "216.198.79.1",
+      "ok": false
+    },
+    {
+      "at": "2026-09-12T22:37:18.597Z",
+      "status": 200,
+      "ms": 422,
+      "remoteAddress": "216.198.79.1",
+      "ok": false
+    },
+    {
+      "at": "2026-09-12T22:37:24.023Z",
+      "status": 200,
+      "ms": 443,
+      "remoteAddress": "216.198.79.1",
+      "ok": false
+    },
+    {
+      "at": "2026-09-12T22:37:29.475Z",
+      "status": 200,
+      "ms": 340,
+      "remoteAddress": "216.198.79.1",
+      "ok": false
+    },
+    {
+      "at": "2026-09-12T22:37:34.817Z",
+      "status": 200,
+      "ms": 307,
+      "remoteAddress": "216.198.79.1",
+      "ok": false
+    },
+    {
+      "at": "2026-09-12T22:37:40.126Z",
+      "status": 200,
+      "ms": 297,
+      "remoteAddress": "216.198.79.1",
+      "ok": false
+    },
+    {
+      "at": "2026-09-12T22:37:45.438Z",
+      "status": 200,
+      "ms": 326,
+      "remoteAddress": "216.198.79.1",
+      "ok": false
+    },
+    {
+      "at": "2026-09-12T22:37:50.778Z",
+      "status": 200,
+      "ms": 290,
+      "remoteAddress": "216.198.79.1",
+      "ok": false
+    },
+    {
+      "at": "2026-09-12T22:37:56.074Z",
+      "status": 200,
+      "ms": 301,
+      "remoteAddress": "216.198.79.1",
+      "ok": false
+    },
+    {
+      "at": "2026-09-12T22:38:01.380Z",
+      "status": 200,
+      "ms": 328,
+      "remoteAddress": "216.198.79.1",
+      "ok": false
+    },
+    {
+      "at": "2026-09-12T22:38:06.717Z",
+      "status": 200,
+      "ms": 298,
+      "remoteAddress": "216.198.79.1",
+      "ok": false
+    }
+  ]
+}

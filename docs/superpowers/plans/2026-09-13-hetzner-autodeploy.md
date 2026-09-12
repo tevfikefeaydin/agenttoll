@@ -17,9 +17,9 @@ root key export, unrelated user changes, Vercel deletion or broad resource pruni
   instructions. Review the final code independently before enabling production.
 - [x] Run local application checks and isolated Linux deployment failure tests;
   install the controller, builder and restricted shared runtime environment.
-- [ ] Commit only migration/automation changes, push to main, observe CI and a
+- [x] Commit only migration/automation changes, push to main, observe CI and a
   genuine automatic release, then verify API/proxy and unrelated hosts.
-- [ ] Record live evidence and recovery commands; obtain independent final review.
+- [x] Record live evidence and recovery commands; obtain independent final review.
 
 Pre-activation review: migration_review accepted the code and rehearsal evidence.
 27 deployment tests, 211 application tests, typechecks, generated/build/MCP
@@ -27,3 +27,11 @@ checks and both audits passed. Six isolated Linux cases include SIGKILL and
 in-flight request drain. Canonical candidate 24/24 and bootstrap public 49/49
 passed. Review revisions centralized cleanup/rollback semantics; source changes
 were followed by focused regressions rather than repeated unmodified runs.
+
+Completed: CI run 34723036404 passed for c83262b68141; the 22:38 UTC timer
+published it at 22:39:09 UTC. Live candidate/public checks, healthy immutable
+container, graceful old stop, clean state, 45 HTTP samples and seven other hosts
+were verified. Independent final review accepted the automatic release.
+The separately scheduled 01:40 UTC post-DNS-TTL observation remains pending;
+the activation report preserves the early cached-www result without calling it
+a passed post-TTL check.

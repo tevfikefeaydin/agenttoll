@@ -4,6 +4,8 @@ Push code to `tevfikefeaydin/agenttoll`'s `main` branch. The existing
 [verification workflow](https://github.com/tevfikefeaydin/agenttoll/actions/workflows/consistency.yml)
 must succeed. Hetzner checks every five minutes, then builds and verifies the
 new version before routing traffic to it. No deploy key or GitHub token is used.
+The first real automatic release and its checks are recorded in
+[the activation report](AUTODEPLOY-VALIDATION.md).
 
 The controller accepts only this repository's main push/manual CI runs. It
 matches release inputs against current main again immediately before promotion.
