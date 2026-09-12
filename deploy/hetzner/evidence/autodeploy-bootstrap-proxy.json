@@ -1,0 +1,219 @@
+{
+  "ok": true,
+  "checkedAt": "2026-09-12T22:29:43.864Z",
+  "origin": "https://agenttoll.app",
+  "targetIp": "167.233.31.87",
+  "scope": "TLS verified; static content (CRLF normalized), security headers, discovery, redirects, CORS and unsigned payment challenge",
+  "checks": [
+    {
+      "name": "/",
+      "ok": true,
+      "ms": 26,
+      "status": 200,
+      "sha256": "1e052f5216f8662ab518f3682537abcf3ce48d20e80aa0c7e2f370157c32a477",
+      "bytesMatch": true,
+      "contentMatches": true
+    },
+    {
+      "name": "/run",
+      "ok": true,
+      "ms": 3,
+      "status": 200,
+      "sha256": "f5d99a55fa6aa7545e3b7f024f2d6eebb960aa8f6b9aeb7995b60d07b36022e7",
+      "bytesMatch": true,
+      "contentMatches": true
+    },
+    {
+      "name": "/terms",
+      "ok": true,
+      "ms": 1,
+      "status": 200,
+      "sha256": "405ecdaccae2d4000c7fbc7d35314c269fb691283b1162fb5d87a205dee7f18a",
+      "bytesMatch": true,
+      "contentMatches": true
+    },
+    {
+      "name": "/legal",
+      "ok": true,
+      "ms": 2,
+      "status": 200,
+      "sha256": "405ecdaccae2d4000c7fbc7d35314c269fb691283b1162fb5d87a205dee7f18a",
+      "bytesMatch": true,
+      "contentMatches": true
+    },
+    {
+      "name": "/legal-notice",
+      "ok": true,
+      "ms": 2,
+      "status": 200,
+      "sha256": "405ecdaccae2d4000c7fbc7d35314c269fb691283b1162fb5d87a205dee7f18a",
+      "bytesMatch": true,
+      "contentMatches": true
+    },
+    {
+      "name": "/imprint",
+      "ok": true,
+      "ms": 1,
+      "status": 200,
+      "sha256": "405ecdaccae2d4000c7fbc7d35314c269fb691283b1162fb5d87a205dee7f18a",
+      "bytesMatch": true,
+      "contentMatches": true
+    },
+    {
+      "name": "/privacy",
+      "ok": true,
+      "ms": 2,
+      "status": 200,
+      "sha256": "e531f01d19d98b68f16712a37efb9391dd1f7a850db419cda2bfdcf5f1732fb0",
+      "bytesMatch": true,
+      "contentMatches": true
+    },
+    {
+      "name": "/privacy-policy",
+      "ok": true,
+      "ms": 3,
+      "status": 200,
+      "sha256": "e531f01d19d98b68f16712a37efb9391dd1f7a850db419cda2bfdcf5f1732fb0",
+      "bytesMatch": true,
+      "contentMatches": true
+    },
+    {
+      "name": "/favicon.ico",
+      "ok": true,
+      "ms": 2,
+      "status": 200,
+      "sha256": "b9141f5ec91dc19605e2285ec1bcb850c7264d3ee385b86107fe1a4aa222c3db",
+      "bytesMatch": true,
+      "contentMatches": true
+    },
+    {
+      "name": "/app.js",
+      "ok": true,
+      "ms": 2,
+      "status": 200,
+      "sha256": "1ae19feaf167264714e782f7eb445b888d4ccf895590df94e455314afeaaa41c",
+      "bytesMatch": true,
+      "contentMatches": true
+    },
+    {
+      "name": "/demo.js",
+      "ok": true,
+      "ms": 5,
+      "status": 200,
+      "sha256": "680b260f8e05a838c1d019735d1eb90625e8514ef96e40ba557fd9f32769bf0f",
+      "bytesMatch": true,
+      "contentMatches": true
+    },
+    {
+      "name": "/run.js",
+      "ok": true,
+      "ms": 2,
+      "status": 200,
+      "sha256": "e45f921ad4176773a6f607665717a3d377cab4f251576bbee44b622ad6fe91a0",
+      "bytesMatch": true,
+      "contentMatches": true
+    },
+    {
+      "name": "/openapi.json",
+      "ok": true,
+      "ms": 3,
+      "status": 200,
+      "sha256": "85d125db5b7e758155cf458011ae2c12d823cdcdf06d4149ac7d4091a69d10a6",
+      "bytesMatch": true,
+      "contentMatches": true
+    },
+    {
+      "name": "/llms.txt",
+      "ok": true,
+      "ms": 2,
+      "status": 200,
+      "sha256": "1e3bb1a70a7a30a3562378d8db9753d8befc086b09cbc4e36cbca40fb73b9339",
+      "bytesMatch": true,
+      "contentMatches": true
+    },
+    {
+      "name": "/robots.txt",
+      "ok": true,
+      "ms": 1,
+      "status": 200,
+      "sha256": "e12b78f0b0698ca511e55d8a8681621027bb74273ecbcf04d56384cc01f68bd1",
+      "bytesMatch": true,
+      "contentMatches": true
+    },
+    {
+      "name": "/sitemap.xml",
+      "ok": true,
+      "ms": 1,
+      "status": 200,
+      "sha256": "822a92cf57ba5b51702172c1dcb9f985bbada049bce7d549cf6ddea40eb61d27",
+      "bytesMatch": true,
+      "contentMatches": true
+    },
+    {
+      "name": "/icon.png",
+      "ok": true,
+      "ms": 3,
+      "status": 200,
+      "sha256": "b9141f5ec91dc19605e2285ec1bcb850c7264d3ee385b86107fe1a4aa222c3db",
+      "bytesMatch": true,
+      "contentMatches": true
+    },
+    {
+      "name": "/hero-poster.jpg",
+      "ok": true,
+      "ms": 40,
+      "status": 200,
+      "sha256": "630221548a4de2b2c08365fbaab53b69be55037c23fc5ec40c82fcf1eb7dff32",
+      "bytesMatch": true,
+      "contentMatches": true
+    },
+    {
+      "name": "/og.png",
+      "ok": true,
+      "ms": 4,
+      "status": 200,
+      "sha256": "7a8884229fd44489aaf8caf9fc67959843fecd06dd9393cf0b69ca015dbd2d9d",
+      "bytesMatch": true,
+      "contentMatches": true
+    },
+    {
+      "name": "Video range request",
+      "ok": true,
+      "ms": 2,
+      "status": 206,
+      "totalBytes": 209138
+    },
+    {
+      "name": "/.well-known/x402",
+      "ok": true,
+      "ms": 2,
+      "status": 200
+    },
+    {
+      "name": "/.well-known/agent-card.json",
+      "ok": true,
+      "ms": 1,
+      "status": 200
+    },
+    {
+      "name": "www redirect retains path and query",
+      "ok": true,
+      "ms": 8,
+      "status": 301,
+      "location": "https://agenttoll.app/run?migration=1"
+    },
+    {
+      "name": "CORS preflight",
+      "ok": true,
+      "ms": 1,
+      "status": 204
+    },
+    {
+      "name": "Unsigned payment challenge over HTTPS",
+      "ok": true,
+      "ms": 2,
+      "status": 402,
+      "resourceUrl": "https://agenttoll.app/api/gas"
+    }
+  ]
+}

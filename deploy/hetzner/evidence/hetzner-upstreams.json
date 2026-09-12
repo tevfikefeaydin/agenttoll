@@ -1,0 +1,61 @@
+{
+  "checkedAt": "2026-09-12T21:12:05.724Z",
+  "scope": "Direct internal read-only service functions; no HTTP payment gate or settlement",
+  "checks": [
+    {
+      "name": "price",
+      "ok": true,
+      "ms": 328,
+      "source": "coingecko",
+      "fields": [
+        "symbol",
+        "id",
+        "usd",
+        "change24h",
+        "source",
+        "quoteCurrency",
+        "assumptions",
+        "at"
+      ]
+    },
+    {
+      "name": "gas",
+      "ok": true,
+      "ms": 151,
+      "source": null,
+      "fields": [
+        "chain",
+        "gasPriceWei",
+        "gasPriceGwei",
+        "latestBlock",
+        "at"
+      ]
+    },
+    {
+      "name": "trending",
+      "ok": true,
+      "ms": 53,
+      "source": "coingecko",
+      "fields": [
+        "coins",
+        "source",
+        "at"
+      ]
+    },
+    {
+      "name": "scout",
+      "ok": true,
+      "ms": 1488,
+      "source": "geckoterminal-new-pools",
+      "fields": [
+        "chain",
+        "minLiquidityUsd",
+        "pools",
+        "summary",
+        "source",
+        "disclaimer",
+        "at"
+      ]
+    }
+  ]
+}

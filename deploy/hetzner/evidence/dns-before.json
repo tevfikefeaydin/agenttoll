@@ -1,0 +1,149 @@
+{
+  "checkedAt": "2026-09-12T21:16:27.361297+00:00",
+  "records": [
+    {
+      "nameserver": "nsd1.squarespacedns.com",
+      "host": "agenttoll.app",
+      "type": "A",
+      "answer": "agenttoll.app.\t\t14400\tIN\tA\t216.198.79.1"
+    },
+    {
+      "nameserver": "nsd1.squarespacedns.com",
+      "host": "agenttoll.app",
+      "type": "AAAA",
+      "answer": ""
+    },
+    {
+      "nameserver": "nsd1.squarespacedns.com",
+      "host": "agenttoll.app",
+      "type": "CAA",
+      "answer": ""
+    },
+    {
+      "nameserver": "nsd1.squarespacedns.com",
+      "host": "www.agenttoll.app",
+      "type": "CNAME",
+      "answer": "www.agenttoll.app.\t14400\tIN\tCNAME\ta2e78d0e63b91668.vercel-dns-017.com."
+    },
+    {
+      "nameserver": "nsd1.squarespacedns.com",
+      "host": "www.agenttoll.app",
+      "type": "AAAA",
+      "answer": "www.agenttoll.app.\t14400\tIN\tCNAME\ta2e78d0e63b91668.vercel-dns-017.com."
+    },
+    {
+      "nameserver": "nsd1.squarespacedns.com",
+      "host": "www.agenttoll.app",
+      "type": "CAA",
+      "answer": "www.agenttoll.app.\t14400\tIN\tCNAME\ta2e78d0e63b91668.vercel-dns-017.com."
+    },
+    {
+      "nameserver": "nsd2.squarespacedns.com",
+      "host": "agenttoll.app",
+      "type": "A",
+      "answer": "agenttoll.app.\t\t14400\tIN\tA\t216.198.79.1"
+    },
+    {
+      "nameserver": "nsd2.squarespacedns.com",
+      "host": "agenttoll.app",
+      "type": "AAAA",
+      "answer": ""
+    },
+    {
+      "nameserver": "nsd2.squarespacedns.com",
+      "host": "agenttoll.app",
+      "type": "CAA",
+      "answer": ""
+    },
+    {
+      "nameserver": "nsd2.squarespacedns.com",
+      "host": "www.agenttoll.app",
+      "type": "CNAME",
+      "answer": "www.agenttoll.app.\t14400\tIN\tCNAME\ta2e78d0e63b91668.vercel-dns-017.com."
+    },
+    {
+      "nameserver": "nsd2.squarespacedns.com",
+      "host": "www.agenttoll.app",
+      "type": "AAAA",
+      "answer": "www.agenttoll.app.\t14400\tIN\tCNAME\ta2e78d0e63b91668.vercel-dns-017.com."
+    },
+    {
+      "nameserver": "nsd2.squarespacedns.com",
+      "host": "www.agenttoll.app",
+      "type": "CAA",
+      "answer": "www.agenttoll.app.\t14400\tIN\tCNAME\ta2e78d0e63b91668.vercel-dns-017.com."
+    },
+    {
+      "nameserver": "nsd3.squarespacedns.com",
+      "host": "agenttoll.app",
+      "type": "A",
+      "answer": "agenttoll.app.\t\t14400\tIN\tA\t216.198.79.1"
+    },
+    {
+      "nameserver": "nsd3.squarespacedns.com",
+      "host": "agenttoll.app",
+      "type": "AAAA",
+      "answer": ""
+    },
+    {
+      "nameserver": "nsd3.squarespacedns.com",
+      "host": "agenttoll.app",
+      "type": "CAA",
+      "answer": ""
+    },
+    {
+      "nameserver": "nsd3.squarespacedns.com",
+      "host": "www.agenttoll.app",
+      "type": "CNAME",
+      "answer": "www.agenttoll.app.\t14400\tIN\tCNAME\ta2e78d0e63b91668.vercel-dns-017.com."
+    },
+    {
+      "nameserver": "nsd3.squarespacedns.com",
+      "host": "www.agenttoll.app",
+      "type": "AAAA",
+      "answer": "www.agenttoll.app.\t14400\tIN\tCNAME\ta2e78d0e63b91668.vercel-dns-017.com."
+    },
+    {
+      "nameserver": "nsd3.squarespacedns.com",
+      "host": "www.agenttoll.app",
+      "type": "CAA",
+      "answer": "www.agenttoll.app.\t14400\tIN\tCNAME\ta2e78d0e63b91668.vercel-dns-017.com."
+    },
+    {
+      "nameserver": "nsd4.squarespacedns.com",
+      "host": "agenttoll.app",
+      "type": "A",
+      "answer": "agenttoll.app.\t\t14400\tIN\tA\t216.198.79.1"
+    },
+    {
+      "nameserver": "nsd4.squarespacedns.com",
+      "host": "agenttoll.app",
+      "type": "AAAA",
+      "answer": ""
+    },
+    {
+      "nameserver": "nsd4.squarespacedns.com",
+      "host": "agenttoll.app",
+      "type": "CAA",
+      "answer": ""
+    },
+    {
+      "nameserver": "nsd4.squarespacedns.com",
+      "host": "www.agenttoll.app",
+      "type": "CNAME",
+      "answer": "www.agenttoll.app.\t14400\tIN\tCNAME\ta2e78d0e63b91668.vercel-dns-017.com."
+    },
+    {
+      "nameserver": "nsd4.squarespacedns.com",
+      "host": "www.agenttoll.app",
+      "type": "AAAA",
+      "answer": "www.agenttoll.app.\t14400\tIN\tCNAME\ta2e78d0e63b91668.vercel-dns-017.com."
+    },
+    {
+      "nameserver": "nsd4.squarespacedns.com",
+      "host": "www.agenttoll.app",
+      "type": "CAA",
+      "answer": "www.agenttoll.app.\t14400\tIN\tCNAME\ta2e78d0e63b91668.vercel-dns-017.com."
+    }
+  ]
+}

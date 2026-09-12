@@ -1,0 +1,30 @@
+{
+  "ok": true,
+  "checks": [
+    {
+      "name": "candidate failure restores actual old HTTP service",
+      "ok": true
+    },
+    {
+      "name": "reload failure restores actual old HTTP service",
+      "ok": true
+    },
+    {
+      "name": "public failure restores actual old HTTP service",
+      "ok": true
+    },
+    {
+      "name": "in-flight request completes while failed candidate drains",
+      "ok": true
+    },
+    {
+      "name": "SIGKILL after switch and boot file recovery restores old service",
+      "ok": true
+    },
+    {
+      "name": "successful release actually serves new HTTP and preserves shared file",
+      "ok": true
+    }
+  ],
+  "scope": "Isolated Docker processes and proxy; no production credentials or payments"
+}

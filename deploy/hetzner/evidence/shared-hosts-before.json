@@ -1,0 +1,40 @@
+{
+  "checkedAt": "2026-09-12T21:12:38.055799+00:00",
+  "checks": [
+    {
+      "host": "tevfikefe.com",
+      "status": "200",
+      "curlExit": 0
+    },
+    {
+      "host": "www.tevfikefe.com",
+      "status": "200",
+      "curlExit": 0
+    },
+    {
+      "host": "efar.group",
+      "status": "200",
+      "curlExit": 0
+    },
+    {
+      "host": "www.efar.group",
+      "status": "301",
+      "curlExit": 0
+    },
+    {
+      "host": "arac.167-233-31-87.sslip.io",
+      "status": "302",
+      "curlExit": 0
+    },
+    {
+      "host": "persona.167-233-31-87.sslip.io",
+      "status": "200",
+      "curlExit": 0
+    },
+    {
+      "host": "gozcu.167-233-31-87.sslip.io",
+      "status": "404",
+      "curlExit": 0
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "checkedAt": "2026-09-12T21:28:52.379Z",
+  "targetIp": "167.233.31.87",
+  "checks": [
+    {
+      "host": "agenttoll.app",
+      "authorized": true,
+      "protocol": "TLSv1.3",
+      "subject": {
+        "CN": "agenttoll.app"
+      },
+      "issuer": {
+        "C": "US",
+        "O": "Let's Encrypt",
+        "CN": "YE2"
+      },
+      "subjectAltName": "DNS:agenttoll.app",
+      "validFrom": "Sep 12 20:26:57 2026 GMT",
+      "validTo": "Dec 11 20:26:56 2026 GMT",
+      "fingerprint256": "B8:5C:27:EB:98:74:6B:5C:1D:89:E6:B4:7F:3A:F3:FF:A5:96:9F:23:80:BD:93:0D:8C:58:77:85:30:28:5F:C9",
+      "matchesManagedCertificate": true,
+      "status": 200
+    },
+    {
+      "host": "www.agenttoll.app",
+      "authorized": true,
+      "protocol": "TLSv1.3",
+      "subject": {
+        "CN": "www.agenttoll.app"
+      },
+      "issuer": {
+        "C": "US",
+        "O": "Let's Encrypt",
+        "CN": "YE2"
+      },
+      "subjectAltName": "DNS:www.agenttoll.app",
+      "validFrom": "Sep 12 20:26:57 2026 GMT",
+      "validTo": "Dec 11 20:26:56 2026 GMT",
+      "fingerprint256": "34:99:40:27:FB:4E:01:52:0F:D5:CF:EB:CC:68:8D:F7:C9:ED:25:A3:A0:EB:15:7D:1C:F3:23:22:66:D2:97:BF",
+      "matchesManagedCertificate": true,
+      "status": 301
+    }
+  ]
+}

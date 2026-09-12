@@ -1,0 +1,77 @@
+{
+  "checkedAt": "2026-09-12T21:30:17.150684+00:00",
+  "checks": {
+    "agenttoll-agenttoll-1": {
+      "id": "536e7610acaa7f3a23eaca1ef5c3990f762ff056cb4e1a2ceb0e5a146ff770b3",
+      "image": "sha256:ba4e1a69d97f09f6b9a580e7ef397adfb1445a36cdfb82583d1f9e0d4352b56c",
+      "startedAt": "2026-09-12T21:04:08.13555718Z",
+      "status": "running",
+      "health": "healthy",
+      "restartCount": 0,
+      "restartPolicy": {
+        "Name": "unless-stopped",
+        "MaximumRetryCount": 0
+      },
+      "readOnlyRootfs": true,
+      "memoryLimit": 805306368,
+      "publishedPorts": {
+        "4021/tcp": null
+      }
+    },
+    "altyapi-caddy-1": {
+      "id": "d288ed8f0b15a2f4257558dcdc739fe8d5fdf90bfeca11c0ad30cd46657000c0",
+      "image": "sha256:cfeb0b281bc44a5a51fecde39e9e577c60d863c0b6196e6bbdf58fd00960887f",
+      "startedAt": "2026-09-12T21:06:01.722537366Z",
+      "status": "running",
+      "health": null,
+      "restartCount": 0,
+      "restartPolicy": {
+        "Name": "unless-stopped",
+        "MaximumRetryCount": 0
+      },
+      "readOnlyRootfs": false,
+      "memoryLimit": 0,
+      "publishedPorts": {
+        "2019/tcp": null,
+        "443/tcp": [
+          {
+            "HostIp": "0.0.0.0",
+            "HostPort": "443"
+          },
+          {
+            "HostIp": "::",
+            "HostPort": "443"
+          }
+        ],
+        "443/udp": null,
+        "80/tcp": [
+          {
+            "HostIp": "0.0.0.0",
+            "HostPort": "80"
+          },
+          {
+            "HostIp": "::",
+            "HostPort": "80"
+          }
+        ]
+      }
+    },
+    "originalCaddyPrefixPreserved": true,
+    "runtimeEnvMode": "0o600",
+    "currentRelease": "/opt/agenttoll/releases/20260912T204138Z-6a40554f991b-hetzner",
+    "stats": [
+      "altyapi-caddy-1|28.42MiB / 3.73GiB|0.06%",
+      "agenttoll-agenttoll-1|69.8MiB / 768MiB|0.00%",
+      "efar-group-web|11.06MiB / 128MiB|0.00%",
+      "deploy-ota-1|43.34MiB / 3.73GiB|0.17%",
+      "deploy-backend-1|106.3MiB / 3.73GiB|0.17%",
+      "altyapi-personaforge-1|33.86MiB / 3.73GiB|0.00%"
+    ],
+    "trafficSinceDns": {
+      "requests": 51,
+      "serverErrors": 0,
+      "settled": 0,
+      "unknownPaymentOutcomes": 0
+    }
+  }
+}

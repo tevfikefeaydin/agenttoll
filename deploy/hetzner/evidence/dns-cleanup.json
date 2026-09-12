@@ -1,0 +1,46 @@
+{
+  "checkedAt": "2026-09-12T21:34:00.135430+00:00",
+  "temporaryRecordsRemoved": true,
+  "checks": [
+    {
+      "nameserver": "nsd1.squarespacedns.com",
+      "host": "_acme-challenge.agenttoll.app",
+      "TXT": ""
+    },
+    {
+      "nameserver": "nsd1.squarespacedns.com",
+      "host": "_acme-challenge.www.agenttoll.app",
+      "TXT": ""
+    },
+    {
+      "nameserver": "nsd2.squarespacedns.com",
+      "host": "_acme-challenge.agenttoll.app",
+      "TXT": ""
+    },
+    {
+      "nameserver": "nsd2.squarespacedns.com",
+      "host": "_acme-challenge.www.agenttoll.app",
+      "TXT": ""
+    },
+    {
+      "nameserver": "nsd3.squarespacedns.com",
+      "host": "_acme-challenge.agenttoll.app",
+      "TXT": ""
+    },
+    {
+      "nameserver": "nsd3.squarespacedns.com",
+      "host": "_acme-challenge.www.agenttoll.app",
+      "TXT": ""
+    },
+    {
+      "nameserver": "nsd4.squarespacedns.com",
+      "host": "_acme-challenge.agenttoll.app",
+      "TXT": ""
+    },
+    {
+      "nameserver": "nsd4.squarespacedns.com",
+      "host": "_acme-challenge.www.agenttoll.app",
+      "TXT": ""
+    }
+  ]
+}

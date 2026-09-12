@@ -13,8 +13,8 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
           cache: npm
@@ -25,6 +25,8 @@ jobs:
       - run: npm ci --prefix mcp
       - name: Offline regression tests (no wallet secrets or real settlement)
         run: npm test
+      - name: Deployment selection, atomic routing and rollback regressions
+        run: python3 -m unittest discover -s deploy/hetzner -p 'test_*.py'
       - name: API, browser, MCP, examples and tests typecheck
         run: npm run typecheck
       - name: Generated metadata, MCP mapping and committed browser bundle

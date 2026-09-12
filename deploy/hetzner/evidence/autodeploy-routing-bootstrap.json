@@ -1,0 +1,9 @@
+{
+  "ok": true,
+  "at": "20260912T222941Z",
+  "upstream": "agenttoll-api:4021",
+  "shared_inode_preserved": true,
+  "before_sha256": "94d567da49182f4e8de198753439f65d5d6e9b79100abe25630412c027d53dd8",
+  "after_sha256": "09992271f0022b69fae513ccba4fa1540443da263dc86242adc75708fba9e8df",
+  "backup": "/opt/agenttoll/deployer/Caddyfile.before-autodeploy-20260912T222941Z"
+}

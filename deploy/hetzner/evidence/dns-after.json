@@ -1,0 +1,185 @@
+{
+  "checkedAt": "2026-09-12T21:24:35.996112+00:00",
+  "records": [
+    {
+      "nameserver": "nsd1.squarespacedns.com",
+      "host": "agenttoll.app",
+      "type": "A",
+      "answer": "167.233.31.87"
+    },
+    {
+      "nameserver": "nsd1.squarespacedns.com",
+      "host": "agenttoll.app",
+      "type": "AAAA",
+      "answer": ""
+    },
+    {
+      "nameserver": "nsd1.squarespacedns.com",
+      "host": "agenttoll.app",
+      "type": "CAA",
+      "answer": ""
+    },
+    {
+      "nameserver": "nsd1.squarespacedns.com",
+      "host": "www.agenttoll.app",
+      "type": "CNAME",
+      "answer": "agenttoll.app."
+    },
+    {
+      "nameserver": "nsd1.squarespacedns.com",
+      "host": "www.agenttoll.app",
+      "type": "AAAA",
+      "answer": "agenttoll.app."
+    },
+    {
+      "nameserver": "nsd2.squarespacedns.com",
+      "host": "agenttoll.app",
+      "type": "A",
+      "answer": "167.233.31.87"
+    },
+    {
+      "nameserver": "nsd2.squarespacedns.com",
+      "host": "agenttoll.app",
+      "type": "AAAA",
+      "answer": ""
+    },
+    {
+      "nameserver": "nsd2.squarespacedns.com",
+      "host": "agenttoll.app",
+      "type": "CAA",
+      "answer": ""
+    },
+    {
+      "nameserver": "nsd2.squarespacedns.com",
+      "host": "www.agenttoll.app",
+      "type": "CNAME",
+      "answer": "agenttoll.app."
+    },
+    {
+      "nameserver": "nsd2.squarespacedns.com",
+      "host": "www.agenttoll.app",
+      "type": "AAAA",
+      "answer": "agenttoll.app."
+    },
+    {
+      "nameserver": "nsd3.squarespacedns.com",
+      "host": "agenttoll.app",
+      "type": "A",
+      "answer": "167.233.31.87"
+    },
+    {
+      "nameserver": "nsd3.squarespacedns.com",
+      "host": "agenttoll.app",
+      "type": "AAAA",
+      "answer": ""
+    },
+    {
+      "nameserver": "nsd3.squarespacedns.com",
+      "host": "agenttoll.app",
+      "type": "CAA",
+      "answer": ""
+    },
+    {
+      "nameserver": "nsd3.squarespacedns.com",
+      "host": "www.agenttoll.app",
+      "type": "CNAME",
+      "answer": "agenttoll.app."
+    },
+    {
+      "nameserver": "nsd3.squarespacedns.com",
+      "host": "www.agenttoll.app",
+      "type": "AAAA",
+      "answer": "agenttoll.app."
+    },
+    {
+      "nameserver": "nsd4.squarespacedns.com",
+      "host": "agenttoll.app",
+      "type": "A",
+      "answer": "167.233.31.87"
+    },
+    {
+      "nameserver": "nsd4.squarespacedns.com",
+      "host": "agenttoll.app",
+      "type": "AAAA",
+      "answer": ""
+    },
+    {
+      "nameserver": "nsd4.squarespacedns.com",
+      "host": "agenttoll.app",
+      "type": "CAA",
+      "answer": ""
+    },
+    {
+      "nameserver": "nsd4.squarespacedns.com",
+      "host": "www.agenttoll.app",
+      "type": "CNAME",
+      "answer": "agenttoll.app."
+    },
+    {
+      "nameserver": "nsd4.squarespacedns.com",
+      "host": "www.agenttoll.app",
+      "type": "AAAA",
+      "answer": "agenttoll.app."
+    },
+    {
+      "nameserver": "1.1.1.1",
+      "host": "agenttoll.app",
+      "type": "A",
+      "answer": "167.233.31.87"
+    },
+    {
+      "nameserver": "1.1.1.1",
+      "host": "agenttoll.app",
+      "type": "AAAA",
+      "answer": ""
+    },
+    {
+      "nameserver": "1.1.1.1",
+      "host": "agenttoll.app",
+      "type": "CAA",
+      "answer": ""
+    },
+    {
+      "nameserver": "1.1.1.1",
+      "host": "www.agenttoll.app",
+      "type": "CNAME",
+      "answer": "agenttoll.app."
+    },
+    {
+      "nameserver": "1.1.1.1",
+      "host": "www.agenttoll.app",
+      "type": "AAAA",
+      "answer": "agenttoll.app."
+    },
+    {
+      "nameserver": "8.8.8.8",
+      "host": "agenttoll.app",
+      "type": "A",
+      "answer": "167.233.31.87"
+    },
+    {
+      "nameserver": "8.8.8.8",
+      "host": "agenttoll.app",
+      "type": "AAAA",
+      "answer": ""
+    },
+    {
+      "nameserver": "8.8.8.8",
+      "host": "agenttoll.app",
+      "type": "CAA",
+      "answer": ""
+    },
+    {
+      "nameserver": "8.8.8.8",
+      "host": "www.agenttoll.app",
+      "type": "CNAME",
+      "answer": "agenttoll.app."
+    },
+    {
+      "nameserver": "8.8.8.8",
+      "host": "www.agenttoll.app",
+      "type": "AAAA",
+      "answer": "agenttoll.app."
+    }
+  ]
+}

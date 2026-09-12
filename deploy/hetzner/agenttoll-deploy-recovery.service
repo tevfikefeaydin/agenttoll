@@ -1,0 +1,16 @@
+[Unit]
+Description=Restore interrupted AgentToll routing before Docker starts
+DefaultDependencies=no
+After=local-fs.target
+Before=docker.service
+RequiresMountsFor=/opt/agenttoll /var/lib/docker/volumes/altyapi_caddy_data/_data
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /opt/agenttoll/deployer/autodeploy.py --recover-files
+UMask=0077
+TimeoutStartSec=30s
+NoNewPrivileges=true
+
+[Install]
+WantedBy=docker.service

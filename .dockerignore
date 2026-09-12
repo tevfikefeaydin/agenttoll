@@ -1,0 +1,20 @@
+# Allow only build inputs; wallet files, env files, reports and local tools
+# must never enter the Docker build context.
+**
+!package.json
+!package-lock.json
+!tsconfig.json
+!src/
+!src/**
+!web/
+!web/**
+!scripts/
+!scripts/**
+!public/
+!public/**
+!mcp/
+!mcp/package.json
+!mcp/server.json
+**/.env*
+**/node_modules
+**/*.log

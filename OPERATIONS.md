@@ -2,6 +2,14 @@
 
 The service, scheduled data jobs and standalone MCP package have separate checks. A healthy process or a valid 402 quote does not establish that a paid data request will settle successfully.
 
+The canonical service moved to Hetzner (`167.233.31.87`) on 2026-09-12 at
+approximately 21:24 UTC. Runtime, proxy, certificates, release identity and
+rollback instructions are in the [Hetzner runbook](deploy/hetzner/README.md).
+Application logs come from the container recorded in
+`/opt/agenttoll/deployer/state/current.json`. Main code passing CI is published
+by the [automatic deployment controller](deploy/hetzner/AUTODEPLOY.md).
+Vercel remains available as the migration rollback origin.
+
 ## Checks that do not pay
 
 ```bash
@@ -52,6 +60,22 @@ The manual `full_rebuild` workflow input or `node --import tsx scripts/stats-sna
 
 Before an approved release, run `npm test`, `npm run typecheck`, `npm run check:generated`, `npm run build`, `npm run build --prefix mcp`, `npm run smoke:mcp`, and audits for both npm trees. CI uses Node 22; the configured production runtime is Node 24. The packaged smoke test starts the actual tarball with 23 MCP tools and no wallet.
 
-Record the current production deployment and commit before publishing. The audited production deployment was `dpl_8RBcfMBx7tB9WAe2jvU9epLE6w2y` at `2976dc2295d42ef13829f1463013cba6b8bd143f`. Merge/push and Vercel production promotion require the user's approval. This change does not require an MCP version bump or npm publication because its shipped MCP implementation is unchanged.
+Record the current production image, release directory and source revision
+before publishing. Read the active release from the controller's `state/current.json`;
+the original migration release was
+`20260912T204138Z-6a40554f991b-hetzner`; its full identity and checks are in
+[the migration record](deploy/hetzner/VALIDATION.md). The retained Vercel rollback
+deployment is `dpl_9uvkZdUSuif9GfBfojU8XDrF44jG` at
+`897b4ca103c3be82243401c31d37c0d93516f5a6`. Follow the user's release authorization.
+The Hetzner timer publishes successful main CI revisions with staged checks and
+automatic failure rollback. Vercel Git integration remains separate. This host
+migration does not require an MCP version bump or npm publication.
 
-After an approved deployment, run the unsigned check, inspect fresh canonical request logs, check daily workflow results and confirm the legacy baseline migration. Keep production payment verification as a separately authorized test with a dedicated funded wallet. If the new version regresses, restore the previously recorded Vercel deployment and revert the affected code change through review. Keep the last good published data snapshot; code rollback does not undo a settled payment. Vercel rollback does not revert GitHub workflow files, so handle a workflow regression in the repository as well.
+After an approved deployment, run the unsigned check, inspect fresh canonical
+request logs and check daily workflow results. Keep production payment
+verification as a separately authorized test with a dedicated funded wallet.
+If a Docker release regresses, restore the previous validated image and
+environment; the migration runbook also records the DNS rollback to Vercel.
+Keep the last good published data snapshot; code rollback does not undo a
+settled payment. Runtime rollback does not revert GitHub workflow files, so
+handle a workflow regression in the repository as well.

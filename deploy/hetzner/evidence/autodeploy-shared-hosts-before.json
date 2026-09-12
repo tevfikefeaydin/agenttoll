@@ -1,0 +1,33 @@
+{
+  "at": "2026-09-12T22:30:35.484Z",
+  "checks": [
+    {
+      "host": "tevfikefe.com",
+      "status": 200
+    },
+    {
+      "host": "www.tevfikefe.com",
+      "status": 200
+    },
+    {
+      "host": "efar.group",
+      "status": 200
+    },
+    {
+      "host": "www.efar.group",
+      "status": 301
+    },
+    {
+      "host": "arac.167-233-31-87.sslip.io",
+      "status": 302
+    },
+    {
+      "host": "persona.167-233-31-87.sslip.io",
+      "status": 200
+    },
+    {
+      "host": "gozcu.167-233-31-87.sslip.io",
+      "status": 404
+    }
+  ]
+}

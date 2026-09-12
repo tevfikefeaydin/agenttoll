@@ -1,0 +1,44 @@
+{
+  "checkedAt": "2026-09-12T21:38:03.488Z",
+  "targetIp": "167.233.31.87",
+  "checks": [
+    {
+      "path": "/api/demo",
+      "status": 200,
+      "ok": true,
+      "ms": 256,
+      "fields": [
+        "note",
+        "samples"
+      ],
+      "sampleCount": 21
+    },
+    {
+      "path": "/api/stats",
+      "status": 200,
+      "ok": true,
+      "ms": 3457,
+      "fields": [
+        "tollsCollected",
+        "revenueUsdc",
+        "uniquePayers",
+        "externalPayers",
+        "externalTolls",
+        "externalRevenueUsdc",
+        "topPayers",
+        "firstTollAt",
+        "lastTollAt",
+        "truncated",
+        "network",
+        "payTo",
+        "source",
+        "at",
+        "meta"
+      ],
+      "metaNetworks": {
+        "dataNetwork": "base",
+        "paymentNetwork": "base"
+      }
+    }
+  ]
+}

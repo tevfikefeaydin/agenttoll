@@ -1,0 +1,44 @@
+name: agenttoll
+
+services:
+  agenttoll:
+    image: agenttoll:${AGENTTOLL_RELEASE:?Set AGENTTOLL_RELEASE}
+    build:
+      context: .
+    env_file:
+      - .env.production
+    environment:
+      NODE_ENV: production
+      PORT: "4021"
+      PUBLIC_URL: https://agenttoll.app
+      ADDRESS: "0xe55359021a6a22d8385b827405991c56075f56f8"
+      NETWORK: base
+      # Caddy is the one public-facing proxy on the trusted Docker network.
+      TRUST_PROXY: "1"
+    networks:
+      proxy:
+        aliases:
+          - agenttoll-api
+    init: true
+    restart: unless-stopped
+    stop_grace_period: 135s
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 768m
+    cpus: 1.0
+    pids_limit: 128
+    logging:
+      driver: local
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  proxy:
+    external: true
+    name: ${PROXY_NETWORK:-altyapi_default}

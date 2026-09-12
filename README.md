@@ -90,6 +90,8 @@ The free /api/health endpoint reports liveness. /api/ready checks facilitator su
 
 ## Run your own server
 
+The hosted service runs on Hetzner with Docker/Caddy. Code pushed to `main` deploys automatically after GitHub CI succeeds and the candidate passes API and proxy checks. See the [automatic deployment runbook](deploy/hetzner/AUTODEPLOY.md) and [migration validation record](deploy/hetzner/VALIDATION.md).
+
 Requires Node.js 22 or newer.
 
 ```bash
