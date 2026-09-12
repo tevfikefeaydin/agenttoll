@@ -2,7 +2,7 @@ import "dotenv/config";
 import express, { type Request, type Response, type NextFunction } from "express";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { paymentMiddlewareFromConfig } from "@x402/express";
+import { ExpressAdapter, paymentMiddlewareFromHTTPServer, x402ResourceServer, x402HTTPResourceServer } from "@x402/express";
 import { HTTPFacilitatorClient, type FacilitatorClient } from "@x402/core/server";
 import { SettleError, VerifyError } from "@x402/core/types";
 import { ExactEvmScheme } from "@x402/evm/exact/server";
@@ -35,6 +35,7 @@ import { ENDPOINTS } from "./endpoints.js";
 import { requestContext, withSignal, type RequestContext } from "./request-context.js";
 import { cached } from "./services/cache.js";
 import { baseRpc } from "./services/sources.js";
+import { canonicalRoute } from "./telemetry.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const config = readConfig();
@@ -78,6 +79,9 @@ app.disable("x-powered-by");
 const normalizedPath = (value: string) => value.toLowerCase().replace(/\/+$/, "") || "/";
 
 app.use((req, res, next) => {
+  const method = req.method;
+  const paymentSubmitted = Boolean(req.get("payment-signature") || req.get("x-payment"));
+  let responseCode: string | null = null;
   const controller = new AbortController();
   const context: RequestContext = { requestId: randomUUID(), signal: controller.signal, upstreamCalls: 0,
     cacheHits: 0, cacheMisses: 0, coalescedLoads: 0 };
@@ -98,6 +102,7 @@ app.use((req, res, next) => {
         body = { ...result.body, error: "Payment settlement could not be confirmed; inspect your receipt and wallet before retrying", retryable: false, retryAfter: null, paymentOutcome: "unknown" };
       }
     }
+    if (body && typeof body === "object" && "code" in body && typeof body.code === "string") responseCode = body.code;
     return originalJson(body);
   };
   const started = Date.now();
@@ -106,10 +111,15 @@ app.use((req, res, next) => {
   res.once("close", () => { clearTimeout(timer); if (!res.writableFinished) controller.abort(new DOMException("Client disconnected", "AbortError")); });
   res.once("finish", () => {
     clearTimeout(timer);
-    if (!normalizedPath(req.path).startsWith("/api/")) return;
-    console.log(JSON.stringify({ t: new Date().toISOString(), requestId: context.requestId,
-      method: req.method, path: normalizedPath(req.path), status: res.statusCode, ms: Date.now() - started,
-      paymentStage: res.hasHeader("payment-response") ? "settled" : res.statusCode === 402 ? "quote" : req.get("payment-signature") || req.get("x-payment") ? "submitted" : "none",
+    if (!/^\/(api|\.well-known)\//i.test(req.path)) return;
+    const settled = res.statusCode >= 200 && res.statusCode < 300 && res.hasHeader("payment-response");
+    const paymentStage = settled ? "settled" : res.statusCode === 402 ? (paymentSubmitted ? "rejected" : "quote") :
+      context.settlementStarted ? "unknown" : paymentSubmitted ? "submitted" : "none";
+    const route = canonicalRoute(req.path);
+    const log = res.statusCode >= 500 ? console.error : console.log;
+    log(JSON.stringify({ schemaVersion: 1, t: new Date().toISOString(), requestId: context.requestId,
+      method, path: route, route, status: res.statusCode, ms: Date.now() - started,
+      paymentStage, paymentSubmitted, errorCode: responseCode,
       upstreamCalls: context.upstreamCalls, cacheHits: context.cacheHits,
       cacheMisses: context.cacheMisses, coalescedLoads: context.coalescedLoads }));
   });
@@ -161,12 +171,40 @@ app.use((req, res, next) => {
 });
 app.use(express.json({ limit: "10kb" }));
 
-// Prices, discovery, and client fee caps share this registry.
-app.use(paymentMiddlewareFromConfig(Object.fromEntries(ENDPOINTS.map(endpoint => [endpoint.route, {
+// Build the SDK gate without starting network work at module load. Vercel can
+// suspend that eager work after a free/static request, leaving the next caller
+// with a stale initialization rejection. Only paid routes initialize now.
+const paymentServer = new x402HTTPResourceServer(
+  new x402ResourceServer(facilitatorClient).register(CHAIN, new ExactEvmScheme()),
+  Object.fromEntries(ENDPOINTS.map(endpoint => [endpoint.route, {
   accepts: { scheme: "exact", payTo: PAY_TO, price: endpoint.price, network: CHAIN },
   description: endpoint.description,
   extensions: declareDiscoveryExtension({ ...endpoint.discovery, output: { example: endpoint.discovery.output } }),
-}])), facilitatorClient, [{ network: CHAIN, server: new ExactEvmScheme() }]));
+}])));
+const paymentGate = paymentMiddlewareFromHTTPServer(paymentServer, undefined, undefined, false);
+let paymentInitialized = false;
+let paymentInitialization: Promise<void> | undefined;
+app.use(async (req, res, next) => {
+  const adapter = new ExpressAdapter(req);
+  if (!paymentServer.requiresPayment({ adapter, path: req.path, method: req.method })) return next();
+  try {
+    const signal = requestContext.getStore()!.signal;
+    signal.throwIfAborted();
+    if (!paymentInitialized) {
+      // Shared initialization has its own bounded facilitator deadline. One
+      // disconnected caller must not cancel initialization for other callers.
+      paymentInitialization ??= requestContext.exit(() => paymentServer.initialize())
+        .then(() => { paymentInitialized = true; })
+        .finally(() => { paymentInitialization = undefined; });
+      await withSignal(paymentInitialization, signal);
+    }
+    await paymentGate(req, res, next);
+  } catch (error) {
+    // The SDK wraps initialization failures; preserve timeout classification
+    // while the common responder keeps provider diagnostics out of the body.
+    next(error instanceof Error && error.cause ? error.cause : error);
+  }
+});
 
 const one = (v: unknown): string => (Array.isArray(v) ? String(v[0]) : String(v ?? ""));
 const opt = (v: unknown): string | undefined => v === undefined ? undefined : one(v);

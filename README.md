@@ -199,6 +199,8 @@ npm run brand:png        # brand exports
 
 Development checks use mocked external data/payment boundaries. They do not send real payments or deploy changes. Root and MCP are separate dependency trees; audit both. See [SECURITY.md](SECURITY.md) for credentials, trust boundaries and known limits.
 
+Use `npm run ops:check` for a bounded, unsigned health/catalog/quote check, and `npm run ops:report -- --input requests.ndjson` for an offline usage/error/latency summary. Keep-warm and scout snapshot scripts support explicit `--dry-run` and `--quote-only` modes after a build. The stats snapshot job resumes verified finalized checkpoints and rebuilds a legacy baseline once. See [OPERATIONS.md](OPERATIONS.md) for limits, metric definitions, scheduled jobs and the approval-dependent release/rollback procedure.
+
 After changing the MCP package version, run npm run generate from the repository root. An authorized release tag must match mcp-v<package version>; the workflow checks both dependency trees, generated artifacts, tests and types, then builds and smoke-tests the npm tarball before publishing.
 
 MIT. This repository is the independent AgentToll project at agenttoll.app, not similarly named services operated elsewhere.

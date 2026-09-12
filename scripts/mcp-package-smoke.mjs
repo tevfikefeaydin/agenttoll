@@ -21,7 +21,11 @@ try {
   const [metadata] = JSON.parse(packed.stdout);
   for (const file of ['dist/server.js', 'dist/payment-policy.js', 'dist/endpoint-manifest.js', 'dist/version.js']) assert.ok(metadata.files.some(entry => entry.path === file), `Missing ${file}`);
   assert.ok(metadata.files.every(entry => !entry.path.startsWith('/') && !entry.path.split('/').includes('..')), 'Unsafe archive member');
-  const extracted = spawnSync('tar', ['-xf', path.join(sandbox, metadata.filename), '-C', sandbox], { encoding: 'utf8' });
+  // Windows tar can mis-decode Unicode absolute arguments (e.g. Çalışma Alanı).
+  // Node sets the working directory with the native Unicode API; keep tar's
+  // archive argument relative to that directory and avoid a second path decode.
+  assert.equal(path.basename(metadata.filename), metadata.filename, 'Unsafe archive filename');
+  const extracted = spawnSync('tar', ['-xf', metadata.filename], { cwd: sandbox, encoding: 'utf8' });
   if (extracted.status !== 0) throw new Error(extracted.stderr || 'tar extraction failed');
   const transport = new StdioClientTransport({ command: process.execPath,
     args: [path.join(sandbox, 'package', 'dist', 'server.js')],

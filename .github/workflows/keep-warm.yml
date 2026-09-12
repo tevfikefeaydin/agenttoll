@@ -15,23 +15,46 @@ on:
       path:
         description: "Catalogue path to warm instead of today's turn, e.g. /api/base/scorecard"
         required: false
+      mode:
+        description: "dry-run is offline; quote-only checks an unsigned quote; pay spends USDC"
+        type: choice
+        options: [dry-run, quote-only, pay]
+        default: dry-run
+
+permissions:
+  contents: read
+
+concurrency:
+  group: keep-bazaar-warm
+  cancel-in-progress: false
 
 jobs:
   keep-warm:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      AGENTTOLL_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.mode || 'pay' }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 22
       - run: npm ci
       # The script reads the endpoint catalogue rather than a list of its own.
       - run: npm run build
-      - name: Pay for one endpoint
+      - name: Inspect or warm one endpoint
         run: node scripts/keep-warm.mjs
         env:
-          AGENT_PRIVATE_KEY: ${{ secrets.AGENT_WALLET_KEY }}
+          AGENT_PRIVATE_KEY: ${{ env.AGENTTOLL_MODE == 'pay' && secrets.AGENT_WALLET_KEY || '' }}
           AGENTTOLL_URL: https://agenttoll.app
+          AGENTTOLL_NETWORK: base
+          # Scout is the catalogue's highest-priced endpoint. The client also
+          # enforces the selected endpoint's own (usually lower) price ceiling.
+          AGENTTOLL_BUDGET_USDC: "0.008"
+          AGENTTOLL_MAX_PER_CALL_USDC: "0.008"
+          AGENTTOLL_TIMEOUT_MS: "30000"
           # Through the environment, not the command line: a dispatch input is
           # untrusted text and must never reach a shell as syntax.
           WARM_PATH: ${{ inputs.path }}

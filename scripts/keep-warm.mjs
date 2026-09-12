@@ -17,16 +17,13 @@
  * Costs about $0.002 a day. Run it from a scheduled task:
  *   node scripts/keep-warm.mjs
  *   node scripts/keep-warm.mjs --path=/api/base/scorecard   # repair one now
+ *   node scripts/keep-warm.mjs --dry-run                  # no HTTP or wallet
+ *   node scripts/keep-warm.mjs --quote-only               # unsigned quote only
  */
 import "dotenv/config";
-import { createPublicClient, http } from "viem";
-import { base } from "viem/chains";
-import { privateKeyToAccount } from "viem/accounts";
-import { wrapFetchWithPaymentFromConfig } from "@x402/fetch";
-import { ExactEvmScheme, toClientEvmSigner } from "@x402/evm";
+import { decodePaymentResponseHeader } from "@x402/fetch";
 import { ENDPOINTS } from "../dist/endpoints.js";
-
-const BASE = process.env.AGENTTOLL_URL ?? "https://agenttoll.app";
+import { automationOptions, automationPayment, previewAutomation, automationFailure } from "./automation-payment.mjs";
 
 // Which endpoints get warmed is the catalogue's business; how each one is
 // called cheaply is this file's. A route's price is fixed, so nothing here
@@ -66,40 +63,24 @@ const concrete = (endpoint) => {
 
 // A manual run can name one endpoint, so a listing that has already lapsed is
 // repaired today instead of waiting for its turn in the rotation.
-const asked = process.env.WARM_PATH?.trim() || process.argv.find((a) => a.startsWith("--path="))?.slice(7);
-let path;
-if (asked) {
-  const endpoint = ENDPOINTS.find((e) => e.path === asked || concrete(e) === asked);
-  if (!endpoint) {
-    console.error(`No such endpoint: ${asked}\nCatalogue:\n${ENDPOINTS.map((e) => `  ${e.path}`).join("\n")}`);
-    process.exit(1);
-  }
-  path = concrete(endpoint);
-} else {
-  // Rotate by day so a daily run covers the whole catalogue every three weeks.
-  path = concrete(ENDPOINTS[Math.floor(Date.now() / 86_400_000) % ENDPOINTS.length]);
-}
-
-const key = process.env.AGENT_PRIVATE_KEY;
-if (!key) {
-  // Naming the path still makes this a useful dry run: it proves the catalogue
-  // resolved to something callable without needing a funded wallet to find out.
-  console.error(`AGENT_PRIVATE_KEY missing — would have paid for ${path}`);
-  process.exit(1);
-}
-
-const account = privateKeyToAccount(key);
-const publicClient = createPublicClient({ chain: base, transport: http() });
-const pay = wrapFetchWithPaymentFromConfig(fetch, {
-  schemes: [{ network: "eip155:8453", client: new ExactEvmScheme(toClientEvmSigner(account, publicClient)) }],
-});
-
+let client;
 try {
+  const options = automationOptions({ allowPath: true });
+  const asked = process.env.WARM_PATH?.trim() || options.path;
+  const endpoint = asked
+    ? ENDPOINTS.find((e) => e.path === asked || concrete(e) === asked)
+    // Rotate by day so a daily run covers the whole catalogue every three weeks.
+    : ENDPOINTS[Math.floor(Date.now() / 86_400_000) % ENDPOINTS.length];
+  if (!endpoint) throw new Error(`No such endpoint: ${asked}`);
+  const path = concrete(endpoint);
+  client = automationPayment(path, options.mode);
+  if (await previewAutomation(client)) process.exit(0);
+
   const started = Date.now();
-  const res = await pay(`${BASE}${path}`, { method: "GET" });
+  const res = await client.fetchWithPayment(client.url, { method: "GET" });
   const receipt = res.headers.get("payment-response");
   const tx = receipt
-    ? JSON.parse(Buffer.from(receipt, "base64").toString("utf8")).transaction
+    ? (decodePaymentResponseHeader(receipt)?.transaction ?? null)
     : null;
   console.log(
     JSON.stringify({
@@ -108,11 +89,11 @@ try {
       status: res.status,
       ms: Date.now() - started,
       tx,
-      wallet: account.address,
+      wallet: client.address,
+      budget: client.getPaymentBudget(),
     }),
   );
   process.exit(res.ok ? 0 : 1);
 } catch (err) {
-  console.error(JSON.stringify({ ok: false, path, error: String(err.message).slice(0, 200) }));
-  process.exit(1);
+  automationFailure(err, client);
 }

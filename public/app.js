@@ -6,22 +6,26 @@ fetch("/api/stats")
     if (!el) return;
     // An error body (upstream indexer hiccup) has no tollsCollected — fall
     // back to the static line instead of leaving "reading the chain…" stuck.
-    if (typeof s.tollsCollected !== "number") {
-      el.textContent = "Live on Base mainnet";
+    const count = (value) => Number.isSafeInteger(value) && value >= 0;
+    if (!count(s.tollsCollected)) {
+      el.textContent = "Onchain statistics temporarily unavailable";
       return;
     }
     const n = (v) => "<strong>" + v.toLocaleString("en-US") + "</strong>";
-    // Count distinct paying wallets; an address does not establish an agent identity.
-    el.innerHTML = s.externalPayers
-      ? n(s.externalPayers) +
-        (s.externalPayers === 1 ? " wallet has paid · " : " wallets have paid · ") +
-        n(s.tollsCollected) +
-        " tolls settled onchain"
-      : n(s.tollsCollected) + " tolls · <strong>$" + s.revenueUsdc.toFixed(3) + "</strong> USDC settled onchain";
+    // Both figures use the same scope. Transfers alone do not prove API sales.
+    const external = count(s.externalPayers) && count(s.externalTolls);
+    el.innerHTML = external
+      ? n(s.externalPayers) + (s.externalPayers === 1 ? " external wallet · " : " external wallets · ") +
+        n(s.externalTolls) + " qualifying transfers"
+      : n(s.tollsCollected) + " qualifying USDC transfers";
+    if (s.partial || s.truncated) el.innerHTML += " (partial)";
+    el.title = external
+      ? "Excludes known operator test wallets. Small USDC transfers are not authenticated API sales or unique people."
+      : "Includes operator activity. Small USDC transfers are not authenticated API sales or unique people.";
   })
   .catch(() => {
     const el = document.getElementById("toll-counter");
-    if (el) el.textContent = "Live on Base mainnet";
+    if (el) el.textContent = "Onchain statistics temporarily unavailable";
   });
 
 // Border appears on the nav once the hero starts scrolling away.
