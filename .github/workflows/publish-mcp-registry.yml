@@ -30,6 +30,7 @@ jobs:
       id-token: write
     env:
       RELEASE_TAG: ${{ inputs.release_tag }}
+      NPM_CONFIG_PREFER_ONLINE: 'true'
     steps:
       - name: Validate release tag before checkout
         shell: bash
@@ -38,6 +39,13 @@ jobs:
             echo 'Expected an existing mcp-v<version> release tag'
             exit 1
           fi
+      - name: Check out the reviewed workflow helper revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+      - name: Preserve read-only wait helper for older release tags
+        run: cp scripts/mcp-package-wait.mjs "$RUNNER_TEMP/mcp-package-wait.mjs"
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.release_tag }}
@@ -51,6 +59,7 @@ jobs:
           VERSION=$(node -p "require('./mcp/package.json').version")
           test "$RELEASE_TAG" = "mcp-v$VERSION"
           test "$(git rev-parse HEAD)" = "$(git rev-parse "refs/tags/$RELEASE_TAG^{commit}")"
+          node "$RUNNER_TEMP/mcp-package-wait.mjs" --version "$VERSION"
           npm run smoke:mcp -- --registry-version "$VERSION" --artifact-dir "$RUNNER_TEMP/mcp-registry-consumer"
       - name: Publish official Registry record with short-lived GitHub OIDC
         run: node scripts/mcp-registry-publish.mjs --evidence "$RUNNER_TEMP/mcp-registry-consumer" --output "$RUNNER_TEMP/mcp-registry-verification.json"

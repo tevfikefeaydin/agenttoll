@@ -54,6 +54,7 @@ jobs:
       - name: Verify public registry integrity and actual consumer behavior
         run: |
           VERSION=$(node -p "require('./mcp/package.json').version")
+          node scripts/mcp-package-wait.mjs --version "$VERSION" --expected-artifact "$RUNNER_TEMP/mcp-release"
           npm run smoke:mcp -- --registry-version "$VERSION" --expected-artifact "$RUNNER_TEMP/mcp-release" --artifact-dir "$RUNNER_TEMP/mcp-published"
       - name: Retain published consumer evidence
         uses: actions/upload-artifact@v4

@@ -64,7 +64,7 @@ if (values['--verify-artifact']) {
       tarball = path.resolve(values['--tarball']);
     } else {
       const source = values['--registry-version'] ? `agenttoll-mcp@${version}` : '.';
-      [metadata] = JSON.parse(npm(['pack', source, '--json', '--ignore-scripts', '--registry=https://registry.npmjs.org', '--pack-destination', sandbox], values['--registry-version'] ? sandbox : path.join(root, 'mcp')));
+      [metadata] = JSON.parse(npm(['pack', source, '--json', '--ignore-scripts', '--prefer-online', '--registry=https://registry.npmjs.org', '--pack-destination', sandbox], values['--registry-version'] ? sandbox : path.join(root, 'mcp')));
       assert.equal(metadata.version, version);
       assert.equal(path.basename(metadata.filename), metadata.filename);
       for (const file of ['dist/server.js', 'dist/payment-policy.js', 'dist/endpoint-manifest.js', 'dist/version.js']) {

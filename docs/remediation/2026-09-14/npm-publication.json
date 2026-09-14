@@ -1,0 +1,60 @@
+{
+  "sourceRevision": "68e19a53019339f6eb95e40de67f6d1149a02399",
+  "tag": "mcp-v0.14.0",
+  "workflow": "https://github.com/tevfikefeaydin/agenttoll/actions/runs/34870475829",
+  "jobId": 104064840116,
+  "publishStep": "success",
+  "immediatePublicVerification": "failed: ETARGET during npm processing",
+  "registryStep": "skipped",
+  "artifactId": 10358741140,
+  "artifactZipSha256": "e6ccd67793b1f062bf42bbd6c61c86eb11e9241e7030b1bc8f66920191c5e276",
+  "tarballIntegrity": "sha512-/O0JPa9AKEDGqj2gDc+RjvJviWPmriFKfWkq02lg8fycWcXqKRWV4dDRXOp0rPKUpQNBa2a2J6wHi/NIZ70dhA==",
+  "logExcerpt": [
+    "2026-09-14T16:45:41.2465251Z Verified immutable agenttoll-mcp@0.14.0: sha512-/O0JPa9AKEDGqj2gDc+RjvJviWPmriFKfWkq02lg8fycWcXqKRWV4dDRXOp0rPKUpQNBa2a2J6wHi/NIZ70dhA==",
+    "2026-09-14T16:45:42.4325209Z npm notice publish Provenance statement published to transparency log: https://search.sigstore.dev/?logIndex=2833148569",
+    "2026-09-14T16:45:44.0017953Z npm notice Your package is being processed and may take a few minutes to become available.",
+    "2026-09-14T16:45:44.0019972Z + agenttoll-mcp@0.14.0",
+    "2026-09-14T16:45:44.5153091Z Error: npm pack failed: npm error code ETARGET",
+    "2026-09-14T16:45:44.5153582Z npm error notarget No matching version found for agenttoll-mcp@0.14.0."
+  ],
+  "recovery": "Public npm downloaded and independently installed successfully; Registry-only workflow remains pending. npm publish was not retried.",
+  "publicVerifiedAt": "2026-09-14T16:49:53.447Z",
+  "publicIntegrityMatchesCiArtifact": true,
+  "publicConsumerCases": [
+    {
+      "mode": "keyless",
+      "tools": 23,
+      "signedRetries": 0
+    },
+    {
+      "mode": "zero-budget",
+      "tools": 23,
+      "signedRetries": 0
+    },
+    {
+      "mode": "recipient",
+      "tools": 23,
+      "signedRetries": 0
+    },
+    {
+      "mode": "overcharge",
+      "tools": 23,
+      "signedRetries": 0
+    },
+    {
+      "mode": "timeout",
+      "tools": 23,
+      "signedRetries": 0
+    },
+    {
+      "mode": "cancellation",
+      "tools": 23,
+      "signedRetries": 0
+    },
+    {
+      "mode": "normal",
+      "tools": 23,
+      "signedRetries": 1
+    }
+  ]
+}
