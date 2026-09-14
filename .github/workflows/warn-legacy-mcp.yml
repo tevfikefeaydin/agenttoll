@@ -1,0 +1,62 @@
+name: Warn installers of audited MCP 0.13.0
+
+# Reversible npm metadata warning for the one directly audited legacy version.
+# Does not remove a package, change tags, publish a version or sign a payment.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  warn:
+    if: github.repository == 'tevfikefeaydin/agenttoll'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NPM_CONFIG_PREFER_ONLINE: 'true'
+      LEGACY_NOTICE: 'Upgrade to agenttoll-mcp@0.14.0 and restart your client. Version 0.13.0 does not enforce the documented session budget, trusted recipient, endpoint price and cancellation controls; 0.14.0 also supports keyless startup and 23 tools.'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      - name: Independently verify the available replacement before adding a warning
+        run: |
+          node scripts/mcp-package-wait.mjs --version 0.14.0
+          npm run smoke:mcp -- --registry-version 0.14.0 --artifact-dir "$RUNNER_TEMP/mcp-replacement"
+          node --input-type=module -e "import fs from 'node:fs'; import assert from 'node:assert/strict'; const expected=JSON.parse(fs.readFileSync('docs/remediation/2026-09-14/ci-mcp-artifact/verification.json')); const actual=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/mcp-replacement/verification.json')); assert.equal(actual.version,'0.14.0'); assert.equal(actual.integrity,expected.integrity);"
+      - name: Add the fixed warning to only the audited 0.13.0 version
+        run: npm deprecate agenttoll-mcp@0.13.0 "$LEGACY_NOTICE" --registry=https://registry.npmjs.org
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM }}
+      - name: Verify public warning without repeating the write
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const deadline = Date.now() + 300000;
+          for (;;) {
+            if (Date.now() >= deadline) throw new Error('Public legacy warning visibility deadline exceeded');
+            const r = await fetch('https://registry.npmjs.org/agenttoll-mcp/0.13.0', {redirect:'error', signal:AbortSignal.timeout(Math.min(15000,deadline-Date.now())), headers:{'Cache-Control':'no-cache'}});
+            if (!r.ok) throw new Error('Legacy metadata HTTP '+r.status);
+            const p = await r.json();
+            if (p.name !== 'agenttoll-mcp' || p.version !== '0.13.0') throw new Error('Unexpected legacy identity');
+            if (p.deprecated === process.env.LEGACY_NOTICE) {
+              fs.writeFileSync(process.env.RUNNER_TEMP+'/legacy-warning.json', JSON.stringify({version:p.version,notice:p.deprecated,verifiedAt:new Date().toISOString()},null,2)+'\n');
+              console.log('Public npm warning verified for agenttoll-mcp@0.13.0');
+              break;
+            }
+            await new Promise(resolve=>setTimeout(resolve,Math.min(3000,Math.max(1,deadline-Date.now()))));
+          }
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: audited-mcp-legacy-warning
+          path: |
+            ${{ runner.temp }}/legacy-warning.json
+            ${{ runner.temp }}/mcp-replacement/verification.json
+          if-no-files-found: error
