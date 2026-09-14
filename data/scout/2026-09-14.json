@@ -1,0 +1,98 @@
+{
+  "date": "2026-09-14",
+  "at": "2026-09-14T14:16:59.961Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x507084859d42c2e8582230417e1ef2c6f84e4d1ae44dbc591eafd50feb0c2ca9",
+  "summary": {
+    "found": 4,
+    "checked": 3,
+    "unchecked": 1,
+    "highRisk": 0,
+    "caution": 3,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "STKLYNX / ETH",
+      "pool": "0x6c3d6d03a4c34803825300240603f2a2cee019cb61c8c560175d65e332b971c8",
+      "token": "0x7afef20cb0bd3dec510c05d9e7b8542b74dc6093",
+      "createdAt": "2026-09-14T14:06:51Z",
+      "priceUsd": 0.000221257457533303,
+      "volume24hUsd": 125982.826239372,
+      "liquidityUsd": 19154.329,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "AICAT / ETH",
+      "pool": "0x822ceec017af4178a55de2f4f2b1ee7ae98c8bc3ac467c5eb77aa542169a9add",
+      "token": "0x203c6d355eb4354409b036f44da717b34df89ce4",
+      "createdAt": "2026-09-14T14:10:41Z",
+      "priceUsd": 0.000179974791594413,
+      "volume24hUsd": 95857.5562783051,
+      "liquidityUsd": 17614.7977792727,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "7Stock / ETH 1%",
+      "pool": "0x18d957c4bd4be5deb7f9f1f971b14936c668fc1b8e7d4b9362f1827efca60436",
+      "token": "0x98ce80acd6178291a52f789c5d15f7733f21ec29",
+      "createdAt": "2026-09-14T14:09:23Z",
+      "priceUsd": 0.0000713670608515762,
+      "volume24hUsd": 38229.2310333092,
+      "liquidityUsd": 16406.4728,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "COBIELOL / ETH 0.05%",
+      "pool": "0x5bb34f693b7876c1da9f1f46f502aba0ded4a76e599d64dcb6fb768ae390bade",
+      "token": "0xb200000000000000000000f7200de91e11dd7ecd",
+      "createdAt": "2026-09-14T14:09:03Z",
+      "priceUsd": 4.56580741289833e-7,
+      "volume24hUsd": 29448.2795755276,
+      "liquidityUsd": 22375.6155,
+      "safety": null
+    }
+  ]
+}
