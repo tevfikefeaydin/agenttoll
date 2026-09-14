@@ -3,6 +3,7 @@ import { setTimeout as delay } from "node:timers/promises";
 import { test, type TestContext } from "node:test";
 import { decodeFunctionData, encodeAbiParameters, namehash, parseAbi } from "viem";
 import { primaryName, resolveBasename } from "../src/services/basename.js";
+import { requestContext, type RequestContext } from "../src/request-context.js";
 
 const ZERO = "0x0000000000000000000000000000000000000000";
 const RESOLVER = "0x2222222222222222222222222222222222222222";
@@ -66,6 +67,44 @@ test("a reverse name is displayed when its forward address matches", async (t) =
   assert.equal(result.hasPrimaryName, true);
   assert.equal(result.verification, "verified");
   assert.deepEqual(calls, ["resolver", "name", "resolver", "addr"]);
+});
+
+test("Basename counts actual RPC attempts and a cache hit performs no upstream work", async (t) => {
+  const queried = address();
+  const calls = rpc(t, { name: "metered.base.eth", address: queried });
+  const context: RequestContext = { requestId: "basename-metering", signal: new AbortController().signal,
+    upstreamCalls: 0, cacheHits: 0, cacheMisses: 0, coalescedLoads: 0 };
+  await requestContext.run(context, () => resolveBasename(queried));
+  assert.equal(context.upstreamCalls, calls.length);
+  assert.ok(context.upstreamCalls > 0);
+  const count = context.upstreamCalls;
+  await requestContext.run(context, () => resolveBasename(queried));
+  assert.equal(context.upstreamCalls, count);
+  assert.equal(context.cacheHits, 1);
+});
+
+test("caller cancellation stops the underlying Basename RPC and further fallback attempts", async (t) => {
+  const caller = new AbortController();
+  let started!: () => void;
+  const running = new Promise<void>(resolve => { started = resolve; });
+  let attempts = 0;
+  let aborted = false;
+  t.mock.method(globalThis, "fetch", async (_input: unknown, init?: RequestInit) => {
+    attempts++;
+    started();
+    return new Promise<Response>((_resolve, reject) => {
+      init!.signal!.addEventListener("abort", () => { aborted = true; reject(init!.signal!.reason); }, { once: true });
+    });
+  });
+  const context: RequestContext = { requestId: "basename-cancel", signal: caller.signal,
+    upstreamCalls: 0, cacheHits: 0, cacheMisses: 0, coalescedLoads: 0 };
+  const lookup = requestContext.run(context, () => resolveBasename(address()));
+  await running;
+  caller.abort(new DOMException("Caller disconnected", "AbortError"));
+  await assert.rejects(lookup, /Caller disconnected/);
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(aborted, true, "The network operation must stop with the request");
+  assert.equal(attempts, 1);
 });
 
 test("forward name lookups still return the address and optional records", async (t) => {

@@ -27,7 +27,7 @@
 <div class="wrap">
   <p class="meta"><a href="/">← AgentToll</a></p>
   <h1>Privacy</h1>
-  <p class="meta">Last updated 5 August 2026</p>
+  <p class="meta">Last updated 14 September 2026</p>
 
   <p>AgentToll has <strong>no accounts, no API keys and no sessions</strong>, so there is very
   little about you for us to hold in the first place. This page describes exactly what exists.</p>
@@ -42,28 +42,43 @@
 
   <h2>What does exist</h2>
   <ul>
-    <li><strong>Server logs.</strong> Each API request writes one line containing the time, path,
-      HTTP status, response time, requesting IP address and user-agent. These are kept by our
-      hosting provider (Vercel) for a short retention window and are used only to debug faults,
-      spot abuse and keep the service up.</li>
+    <li><strong>Server logs.</strong> Completed and interrupted API requests record their time,
+      request ID, route template, HTTP outcome, duration, data-source counters and payment
+      failure stage/reason. Recognized client names and numeric versions may be retained as
+      self-reported diagnostics. Application request logs omit IP addresses, raw user-agent
+      text, query strings, requested wallet/name values and payment authorization payloads.
+      After successful facilitator verification or settlement, logs may include the verified
+      public paying address and transaction hash to diagnose payment faults. We do not record
+      signatures or private keys.</li>
+    <li><strong>Log retention.</strong> The application runs on Hetzner. Its Docker log files
+      rotate by size (three files of up to 10 MB each), so the time retained varies with
+      traffic. Operational reports may preserve selected diagnostic records while a fault
+      is investigated. Hosting/network providers can maintain separate operational logs.</li>
     <li><strong>Onchain payments.</strong> x402 payments settle on Base, a public blockchain. The
-      paying address, amount and timestamp are public by nature — recorded by the network, not by
-      us. Our <code>/api/stats</code> counter simply reads those public transfers.</li>
-    <li><strong>Short-lived caches.</strong> Upstream responses are cached in memory for 15–300
-      seconds. Caches are keyed by the data requested (for example a token address), never by who
-      requested it.</li>
+      paying address, amount and timestamp are public on the network. Our
+      <code>/api/stats</code> counter reads those public transfers; verified payer and receipt
+      identifiers may also appear in the diagnostic logs described above.</li>
+    <li><strong>In-memory caches and rate limits.</strong> Data responses are cached for a
+      route-specific period; immutable historical snapshots can remain cached for six hours.
+      Cache keys describe requested data, not the paying identity. Per-IP counters enforce
+      one-minute request limits; they are separate from application request logs. Watch
+      cursors stay with the caller.</li>
   </ul>
 
   <h2>Third parties</h2>
-  <p>Requests reach us through Vercel (hosting) and payments are verified through Coinbase's CDP
-  x402 facilitator. Endpoint data comes from public sources such as CoinGecko, GeckoTerminal,
-  Blockscout, alternative.me and Base RPC. Those providers see our server's requests, not yours.</p>
+  <p>The canonical website and API are hosted on Hetzner; Vercel is retained as a deployment
+  fallback. Coinbase's CDP x402 facilitator verifies and settles payments and receives their
+  authorization data. Endpoint data comes from sources including CoinGecko, GeckoTerminal,
+  DexScreener, Blockscout, alternative.me, GitHub and Base RPC. Those data providers receive our
+  server's queries, including requested public token/address identifiers where needed.</p>
 
   <h2>Your choices</h2>
   <p>Because we hold no account data, there is no profile to export or delete. If you want a
   server log line removed, or have any privacy question, open an issue at
   <a href="https://github.com/tevfikefeaydin/agenttoll/issues">github.com/tevfikefeaydin/agenttoll</a>
-  with the approximate timestamp.</p>
+  with the approximate timestamp and request ID. Issues are public: do not post private keys,
+  signatures or payment authorization payloads. Public blockchain records cannot be removed
+  by AgentToll.</p>
 
   <hr>
   <p class="meta">AgentToll · agenttoll.base.eth · <a href="/terms.html">Terms</a></p>

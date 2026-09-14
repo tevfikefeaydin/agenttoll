@@ -14,6 +14,8 @@ Vercel remains available as the migration rollback origin.
 
 ```bash
 npm run ops:check
+npm run ops:data
+npm run ops:data -- --strict
 npm run ops:report -- --input requests.ndjson
 
 npm run build
@@ -23,15 +25,27 @@ node scripts/snapshot.mjs --dry-run
 node scripts/snapshot.mjs --quote-only
 ```
 
-`ops:check` checks liveness, readiness, the catalog and all 21 registered payment quotes. It creates a client with no signer and a zero budget; it never reads a private key, follows a redirect, or sends a signed request. Default limits are five seconds per check and sixty seconds overall. Exit 1 means one or more checks failed. Each invocation creates real unsigned traffic; account for monitoring calls when interpreting usage. This release does not enable a new background monitoring schedule.
+`ops:check` checks liveness, readiness, the catalog and all 21 registered payment quotes. It creates a client with no signer and a zero budget; it never reads a private key, follows a redirect, or sends a signed request. Default limits are five seconds per check and sixty seconds overall. Exit 1 means one or more checks failed. Each invocation creates real unsigned traffic; account for monitoring calls when interpreting usage. The hourly unsigned monitor is described below.
 
 Set `AGENTTOLL_URL`, `AGENTTOLL_NETWORK` and an explicitly trusted `AGENTTOLL_RECIPIENT` to check a self-hosted instance. The hosted default is `https://agenttoll.app` on Base. Setting a testnet network cannot change the hosted payment network. No `.env` file is loaded by the operations commands.
 
-`ops:report` reads at most 20 MiB of newline-delimited application JSON (direct request records, or JSON objects with a `message` containing the record). It makes no network calls. It outputs status counts, server errors, nearest-rank p50/p95 latency, instrumented data-provider/cache totals, payment outcomes and canonical endpoint groups. An empty/unusable export exits 1. Duplicate request IDs and invalid lines are reported separately. It describes only the supplied records; it cannot restore events lost to retention or sampling.
+`ops:report` reads at most 20 MiB of newline-delimited application JSON (direct request records, or JSON objects with a `message` containing the record). It makes no network calls. It outputs status counts, server errors, nearest-rank p50/p95 latency, instrumented data-provider/cache totals, payment outcomes, canonical endpoint groups, payment phases/reasons and facilitator timing. An empty/unusable export exits 1. Duplicate request IDs and invalid lines are reported separately. It describes only the supplied records; it cannot restore events lost to retention or sampling.
+
+`ops:data` calls read-only public data services directly: the latest immutable scout snapshot, seven-snapshot scorecard and a USDC safety benchmark. It has one 25-second deadline and never loads a wallet key or payment client. Snapshot age is measured from its actual `at` timestamp; more than 30 hours is stale. `captureDelaySeconds` compares the capture to the existing 07:23 UTC daily scout schedule. A successful GitHub job alone does not establish fresh data. Invalid/future timestamps and summary/row inconsistencies fail validation.
+
+The data report keeps `ok` (availability/freshness) separate from `degraded` (partial coverage). It records priced, low-observed-liquidity and unavailable token counts plus completed safety checks. A low-liquidity observation does not establish that every pool disappeared; unknown checks stay unknown. Default exit 1 means unavailable/stale; `--strict` additionally exits 2 for partial coverage. This benchmark does not inspect every endpoint/token and does not exercise the public payment gate.
+
+The independently installed `agenttoll-monitor.timer` runs these unsigned API and data checks hourly on Hetzner, outside the serving process. The latest report is `/opt/agenttoll/monitor/latest.json`; history is in `journalctl -u agenttoll-monitor.service`. It records the active source revision, calls no paying endpoint with a signature, sends no notifications and changes no payment schedule. See [monitor setup](deploy/hetzner/README.md#read-only-monitoring). Expected third-party partial coverage remains visible without turning it into a process outage. A stale/unavailable result fails the service run for inspection.
 
 ## Request and payment evidence
 
-Request logs have `schemaVersion: 1`, UTC `t`, `requestId`, original HTTP `method`, canonical `path`/`route`, `status`, `ms`, `errorCode`, `paymentSubmitted`, `paymentStage` and data-provider/cache counters. `paymentSubmitted` means a payment header was present; it does not establish a valid signature. Dynamic wallet/name/symbol values and query strings are not included. Discovery requests are logged too. HTTP 5xx records go to stderr.
+New request logs have `schemaVersion: 2`; the report still reads version 1. Logs include UTC `t`, `requestId`, original HTTP `method`, canonical `path`/`route`, `status`, `ms`, allowlisted `errorCode`, `paymentSubmitted`, `paymentStage` and data-provider/cache counters. Exactly one `terminal: finish|abort` record is emitted. Aborts use local status marker 499, not a response sent to the client, and `abortReason: client_disconnected|request_timeout`. Discovery requests are logged too. HTTP 5xx records go to stderr.
+
+Payment diagnostics include `paymentHeader` (header name/generation only), `protocolVersion` (decoded, unverified), `paymentPhase` (initialize/parse/match/verify/handler/settle), a fixed allowlisted `paymentReason`, and verify/settle invocation counts and waiting milliseconds. Shared `/supported` initialization and its SDK retries are excluded. In-flight duration is captured up to abort; late results do not rewrite a terminal record. Basename RPCs now participate in the separate data-provider counters and obey caller cancellation.
+
+`paymentSubmitted` means a payment header was present, not that a valid signature was verified. Logs omit signatures, authorization payloads, private keys, raw user-agent strings, IPs, query values and requested wallet/name/symbol values. `client` accepts only known product names and numeric versions from `X-AgentToll-Client` or User-Agent; it is self-reported, not identity. `verifiedPayer` comes only from a successful SDK-validated facilitator verification response; `settlementTransaction` only from a successful facilitator settlement with a valid hash shape. They are public payment identifiers, not unique customers or an independent chain recheck. Unverified or rejected payer claims are never retained. The public [privacy notice](public/privacy.html) describes this policy and size-based Docker log rotation (3 × 10 MB).
+
+An x402 2.21 SDK diagnostic can print arbitrary nested fields from `EXTENSION-RESPONSES`. A narrowly scoped adapter suppresses only its exact diagnostic prefix while inside payment request context. Ordinary logging is preserved. Review the adapter and its real SDK regression whenever upgrading x402. `X-PAYMENT`/v1 callers receive `PAYMENT_UPGRADE_REQUIRED` with v2 instructions; malformed input receives `MALFORMED_PAYMENT`. Neither is forwarded for verification or charged.
 
 | Payment stage | Meaning |
 | --- | --- |
@@ -39,7 +53,7 @@ Request logs have `schemaVersion: 1`, UTC `t`, `requestId`, original HTTP `metho
 | `quote` | Unsigned request returned 402 |
 | `rejected` | A request carrying a payment header returned 402, including invalid payloads and failed settlement receipts |
 | `submitted` | A request carrying a payment header completed without a confirmed settlement response |
-| `settled` | Successful HTTP response with a payment receipt |
+| `settled` | Confirmed successful facilitator settlement; delivery can still abort afterward, recorded separately in `terminal` |
 | `unknown` | Settlement was attempted but its outcome cannot be confirmed |
 
 An unsigned quote and its signed retry are two requests. Do not count 402 as a server error or divide unrelated signed/unsigned requests into a customer conversion rate. Legacy logs could label rejected payments as quotes or unsuccessful receipts as settled; the report retains their status/latency but excludes them from verified payment-stage counts. Data-provider counters do not include facilitator calls. Vercel routing/static logs and these application records cover different surfaces.
@@ -58,7 +72,9 @@ The manual `full_rebuild` workflow input or `node --import tsx scripts/stats-sna
 
 ## Release and rollback
 
-Before an approved release, run `npm test`, `npm run typecheck`, `npm run check:generated`, `npm run build`, `npm run build --prefix mcp`, `npm run smoke:mcp`, and audits for both npm trees. CI uses Node 22; the configured production runtime is Node 24. The packaged smoke test starts the actual tarball with 23 MCP tools and no wallet.
+Before a release, run `npm test`, `npm run typecheck`, `npm run check:generated`, `npm run build`, `npm run build --prefix mcp`, `npm run smoke:mcp`, both dependency audits, and `python -m unittest discover -s deploy/hetzner -p 'test_*.py'`. CI uses Node 22; production uses Node 24. The packaged smoke installs the actual tarball with freshly resolved dependencies outside the repository, starts its real stdio process and checks all 23 tools, keyless quotes, schema validation and payment guardrails with blocked network and ephemeral unfunded keys.
+
+MCP 0.14.0 is the first corrected release artifact. A local version string is not publication evidence: tag `mcp-v<version>` only after review, publish the same verified tarball, then download the explicit public npm version, compare SHA-512 and repeat consumer tests. The workflow retains both pre/postpublication evidence. Install examples pin the tested version; existing long-running or explicitly pinned older MCP clients require an upgrade and restart.
 
 Record the current production image, release directory and source revision
 before publishing. Read the active release from the controller's `state/current.json`;

@@ -1,0 +1,3322 @@
+{
+  "at": "2026-09-14T16:11:55.525Z",
+  "pools": [
+    {
+      "name": "BODEN / WETH 0.01%",
+      "pool": "0xcdd64afa264951381c574713ebe655e41d907efbeb75bdf804587e791f9a7bfa",
+      "token": "0xaf46d9d552b3b05b6eabb3342c0a070ed850ce47",
+      "createdAt": "2026-09-08T12:00:23Z",
+      "priceUsd": 0.00012634671852865,
+      "volume24hUsd": 77653.4590679259,
+      "liquidityUsd": 40303.3691,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "verified"
+        ],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "owner-powers",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "NOVA / WETH",
+      "pool": "0xcfbdc70dbe1f8401f411dfb439b3551c0e1e5065",
+      "token": "0xa9f98c77b0d1b88d754d015d11ce1679cbc32d60",
+      "createdAt": "2026-09-08T11:34:19Z",
+      "priceUsd": 0.00000899974412299776,
+      "volume24hUsd": 7300.5657180132,
+      "liquidityUsd": 88518.0979,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "NOVA / ETH 0.3%",
+      "pool": "0xfd07731fd4643c60bbf9ef73f1561d4f673e9943ca93ba961f32e6c613c9a759",
+      "token": "0xb2000000000000000000006ff9dc5cc75cf35562",
+      "createdAt": "2026-09-08T12:01:39Z",
+      "priceUsd": 0.0000152353361731296,
+      "volume24hUsd": 5039.6099702907,
+      "liquidityUsd": 16138.251,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "owner-powers",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "1KTO100M / WETH",
+      "pool": "0xea8f5db2516b8dd1c50fe0f920ca512a478ba428",
+      "token": "0x28617dc3971fcefb7669d1ae87f980cc580d3470",
+      "createdAt": "2026-09-08T12:00:11Z",
+      "priceUsd": 0.00000241411191341329,
+      "volume24hUsd": 3819.6181481941,
+      "liquidityUsd": 18965.0902,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "verified"
+        ],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "verified",
+          "owner-powers",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "LAPTOP / USDC 22.22%",
+      "pool": "0xcdcbb49ff7dd85384f1661ee744ba48ba870bde3494214e4afbb4bf9f2b71433",
+      "token": "0xb095274743941e953c746f9c228da9c18bb6ec29",
+      "createdAt": "2026-09-09T12:14:31Z",
+      "priceUsd": 93.4957936015979,
+      "volume24hUsd": 11303.2119688773,
+      "liquidityUsd": 32147.678,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "liquidity"
+        ],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "JAIL / WETH",
+      "pool": "0x5ca254507b0ade9b53d8fe019e2aa38b3a6337a2",
+      "token": "0x5c40212d8a2ab3842f13da2618234f925b8b6bed",
+      "createdAt": "2026-09-09T12:16:39Z",
+      "priceUsd": 0.0000085483862571651,
+      "volume24hUsd": 0.05500503476,
+      "liquidityUsd": 74999.997,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "Laptop / ETH",
+      "pool": "0x514fab75fdf551ebd9ae91cb5edbe156894fdae039836857246cc3fd13e45638",
+      "token": "0xbfdbec98f48303ce28467eba98cb01c010adb181",
+      "createdAt": "2026-09-10T12:04:01Z",
+      "priceUsd": 0.000275186877532541,
+      "volume24hUsd": 613549.574326055,
+      "liquidityUsd": 22237.7714,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "FYC / ETH 0.3%",
+      "pool": "0xc7420f433895cea13a846844ff35008b233ae6e1b1fec937407009a6613ed2aa",
+      "token": "0xb200000000000000000000627402876e4966c111",
+      "createdAt": "2026-09-10T12:02:17Z",
+      "priceUsd": 0.0000286366716805051,
+      "volume24hUsd": 13703.8440864887,
+      "liquidityUsd": 21910.0318,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "owner-powers",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "QUOTRON / ETH 0.3%",
+      "pool": "0x351dfeb148f11befc9f5b0178a588c154e096b9b35e431a6f41a91330d3fbcdf",
+      "token": "0xb2000000000000000000007ad265b4c5773401fa",
+      "createdAt": "2026-09-10T12:01:49Z",
+      "priceUsd": 0.0000222673391836813,
+      "volume24hUsd": 10214.5107604897,
+      "liquidityUsd": 19216.4274,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "owner-powers",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "Tony / WETH",
+      "pool": "0xd31475235640719e8342b8d190bd2060e9b1fc3f",
+      "token": "0x42a6920eb6fb4aee9fba6c0e92e672f45261d139",
+      "createdAt": "2026-09-10T11:55:17Z",
+      "priceUsd": 0.00000484524985520108,
+      "volume24hUsd": 4376.8550802464,
+      "liquidityUsd": 82514.0419,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "BABYSTONK / ETH",
+      "pool": "0x90cce7db98120e5906433c32699fe8259e0b756c4281b02c4974c86ec11695d6",
+      "token": "0xfbc5f0ec119389935f4ac9594a532ece5f6693d9",
+      "createdAt": "2026-09-11T11:55:39Z",
+      "priceUsd": 0.000280601208356318,
+      "volume24hUsd": 454692.966063151,
+      "liquidityUsd": 21954.7194,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "Flybook / ETH 0.3%",
+      "pool": "0x6b08c1fad2f6260e10127a1905e8cf27a0f87a3f7a11d174593118cca0431874",
+      "token": "0xb2000000000000000000005caa4a1572236b418b",
+      "createdAt": "2026-09-11T12:01:53Z",
+      "priceUsd": 0.0000315685529931794,
+      "volume24hUsd": 14494.3696810452,
+      "liquidityUsd": 23837.2366,
+      "safety": null
+    },
+    {
+      "name": "Loinbase / ETH 0.3%",
+      "pool": "0x0d42646ff48564f182918b718426b73e9cc50823c8be2507c3312edd136cc6dc",
+      "token": "0xb200000000000000000000cec38196d6d657d76d",
+      "createdAt": "2026-09-11T12:01:47Z",
+      "priceUsd": 0.0000174922812492609,
+      "volume24hUsd": 8914.8892316242,
+      "liquidityUsd": 16632.985,
+      "safety": null
+    },
+    {
+      "name": "Flybook / WETH",
+      "pool": "0x7c32e6fb5e75a518622c5f6c52440072f01f482e",
+      "token": "0x512adccbe2e9093b810d04e5e5b60c303f3de418",
+      "createdAt": "2026-09-11T12:07:09Z",
+      "priceUsd": 0.00000417853393993011,
+      "volume24hUsd": 1531.577634883,
+      "liquidityUsd": 76000.2614,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "LAPTOP / ETH",
+      "pool": "0x13431db722be7f8b94e64228bf319a3531cc65c96be6ae471155fca39edd21ad",
+      "token": "0xde1305ab4d75e6f676414abcade519ae7917b466",
+      "createdAt": "2026-09-12T11:23:59Z",
+      "priceUsd": 0.000335148441992149,
+      "volume24hUsd": 889356.444767331,
+      "liquidityUsd": 24534.1055,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "S&amp;P 500 / ETH",
+      "pool": "0xf50c8bb37855b564384e8036095ca66e6f2e1a8da44f28f2b589ea6f41fb4f78",
+      "token": "0x94b118a0c7f873583e0a1116490ddbb542b20513",
+      "createdAt": "2026-09-12T11:23:31Z",
+      "priceUsd": 0.000306245700295409,
+      "volume24hUsd": 560200.181174161,
+      "liquidityUsd": 23557.1804,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "egg / ETH 0.05%",
+      "pool": "0x176f9e7649da6d0786d7750a0b0f27948eafdcb0df7e9a731562ab09e9540591",
+      "token": "0xb2000000000000000000000576ef52de9167d463",
+      "createdAt": "2026-09-12T11:22:57Z",
+      "priceUsd": 0.00000130493651639062,
+      "volume24hUsd": 50068.8616306961,
+      "liquidityUsd": 23108.2283,
+      "safety": null
+    },
+    {
+      "name": "CMC / ETH 1%",
+      "pool": "0xd50bd4f314f94d5987a2b784d68ea6059e776cb560c08728ab73712aa52fd9a1",
+      "token": "0x22f79d449ea1201f4875956c45f1330a983fec29",
+      "createdAt": "2026-09-12T11:29:07Z",
+      "priceUsd": 0.0000993847768836514,
+      "volume24hUsd": 49092.9023478983,
+      "liquidityUsd": 17921.8309,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "LAPTOP / ETH",
+      "pool": "0x25ad2285af0e784918b0091a02e4aaf05e709a5b0784c89177ead094a58835c1",
+      "token": "0xbae67daa9237a2df03a353b1c9039cb313b13224",
+      "createdAt": "2026-09-13T12:33:01Z",
+      "priceUsd": 0.000289552723031681,
+      "volume24hUsd": 932191.222747069,
+      "liquidityUsd": 22293.9483,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "LAPTOP / ETH",
+      "pool": "0xa109923f5b43cf457ecaeda3a8ee96f8b4d8f5e0f64165ac1926aff0a8d72281",
+      "token": "0xa919eb467383721b5b3d4e741221b942ad55802b",
+      "createdAt": "2026-09-13T12:30:37Z",
+      "priceUsd": 0.000344307567246756,
+      "volume24hUsd": 491412.512715694,
+      "liquidityUsd": 25711.3425,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "liquidity"
+        ],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration"
+        ]
+      }
+    },
+    {
+      "name": "ACAT / ETH 1%",
+      "pool": "0x177f12f49af0e89790298f9b6820330e17595fd57798b07f51198b2e390468eb",
+      "token": "0xada6523cfd5d15b9feef5e923bd58755dfccec29",
+      "createdAt": "2026-09-13T12:39:21Z",
+      "priceUsd": 0.0000878598247829878,
+      "volume24hUsd": 37862.7852220416,
+      "liquidityUsd": 16244.2758,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "ACAT / ETH 1%",
+      "pool": "0xd6ced335752862e652fbf5afeb5f674e7b434d6a8a933916fc968cff64a22ece",
+      "token": "0x15f839ba3dfe7ab0293526d388ca108aad14ec29",
+      "createdAt": "2026-09-13T12:31:55Z",
+      "priceUsd": 0.0000889724092772234,
+      "volume24hUsd": 35570.3053522227,
+      "liquidityUsd": 16159.8682,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "STKLYNX / ETH",
+      "pool": "0x6c3d6d03a4c34803825300240603f2a2cee019cb61c8c560175d65e332b971c8",
+      "token": "0x7afef20cb0bd3dec510c05d9e7b8542b74dc6093",
+      "createdAt": "2026-09-14T14:06:51Z",
+      "priceUsd": 0.000221257457533303,
+      "volume24hUsd": 125982.826239372,
+      "liquidityUsd": 19154.329,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "AICAT / ETH",
+      "pool": "0x822ceec017af4178a55de2f4f2b1ee7ae98c8bc3ac467c5eb77aa542169a9add",
+      "token": "0x203c6d355eb4354409b036f44da717b34df89ce4",
+      "createdAt": "2026-09-14T14:10:41Z",
+      "priceUsd": 0.000179974791594413,
+      "volume24hUsd": 95857.5562783051,
+      "liquidityUsd": 17614.7977792727,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "7Stock / ETH 1%",
+      "pool": "0x18d957c4bd4be5deb7f9f1f971b14936c668fc1b8e7d4b9362f1827efca60436",
+      "token": "0x98ce80acd6178291a52f789c5d15f7733f21ec29",
+      "createdAt": "2026-09-14T14:09:23Z",
+      "priceUsd": 0.0000713670608515762,
+      "volume24hUsd": 38229.2310333092,
+      "liquidityUsd": 16406.4728,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "COBIELOL / ETH 0.05%",
+      "pool": "0x5bb34f693b7876c1da9f1f46f502aba0ded4a76e599d64dcb6fb768ae390bade",
+      "token": "0xb200000000000000000000f7200de91e11dd7ecd",
+      "createdAt": "2026-09-14T14:09:03Z",
+      "priceUsd": 4.56580741289833e-7,
+      "volume24hUsd": 29448.2795755276,
+      "liquidityUsd": 22375.6155,
+      "safety": null
+    }
+  ],
+  "raw": [
+    {
+      "url": "https://api.dexscreener.com/tokens/v1/base/0xaf46d9d552b3b05b6eabb3342c0a070ed850ce47,0xa9f98c77b0d1b88d754d015d11ce1679cbc32d60,0xb2000000000000000000006ff9dc5cc75cf35562,0x28617dc3971fcefb7669d1ae87f980cc580d3470,0xb095274743941e953c746f9c228da9c18bb6ec29,0x5c40212d8a2ab3842f13da2618234f925b8b6bed,0xbfdbec98f48303ce28467eba98cb01c010adb181,0xb200000000000000000000627402876e4966c111,0xb2000000000000000000007ad265b4c5773401fa,0x42a6920eb6fb4aee9fba6c0e92e672f45261d139,0xfbc5f0ec119389935f4ac9594a532ece5f6693d9,0xb2000000000000000000005caa4a1572236b418b,0xb200000000000000000000cec38196d6d657d76d,0x512adccbe2e9093b810d04e5e5b60c303f3de418,0xde1305ab4d75e6f676414abcade519ae7917b466,0x94b118a0c7f873583e0a1116490ddbb542b20513,0xb2000000000000000000000576ef52de9167d463,0x22f79d449ea1201f4875956c45f1330a983fec29,0xbae67daa9237a2df03a353b1c9039cb313b13224,0xa919eb467383721b5b3d4e741221b942ad55802b,0xada6523cfd5d15b9feef5e923bd58755dfccec29,0x15f839ba3dfe7ab0293526d388ca108aad14ec29,0x7afef20cb0bd3dec510c05d9e7b8542b74dc6093,0x203c6d355eb4354409b036f44da717b34df89ce4,0x98ce80acd6178291a52f789c5d15f7733f21ec29,0xb200000000000000000000f7200de91e11dd7ecd",
+      "status": 200,
+      "data": [
+        {
+          "chainId": "base",
+          "dexId": "aerodrome",
+          "url": "https://dexscreener.com/base/0x99cf3e8bfb02c300312c53aac5d0b082e3d5975c",
+          "pairAddress": "0x99cf3E8bfB02c300312c53Aac5D0B082e3D5975C",
+          "baseToken": {
+            "address": "0xB095274743941e953c746F9C228DA9c18Bb6ec29",
+            "name": "LAPTOP",
+            "symbol": "LAPTOP"
+          },
+          "quoteToken": {
+            "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+            "name": "USD Coin",
+            "symbol": "USDC"
+          },
+          "priceNative": "0.2171",
+          "priceUsd": "0.2171",
+          "txns": {
+            "m5": {
+              "buys": 2,
+              "sells": 9
+            },
+            "h1": {
+              "buys": 28,
+              "sells": 78
+            },
+            "h6": {
+              "buys": 467,
+              "sells": 668
+            },
+            "h24": {
+              "buys": 3293,
+              "sells": 3205
+            }
+          },
+          "volume": {
+            "h24": 821540.81,
+            "h6": 120340.77,
+            "h1": 14900.78,
+            "m5": 1200.47
+          },
+          "priceChange": {
+            "m5": -0.13,
+            "h1": -2.08,
+            "h6": -2.34,
+            "h24": -23.14
+          },
+          "liquidity": {
+            "usd": 1574824.23,
+            "base": 4679942,
+            "quote": 558571
+          },
+          "fdv": 214979236,
+          "marketCap": 76002760,
+          "info": {
+            "imageUrl": "https://cdn.dexscreener.com/cms/images/SlCNDwj-QJYvrJW6?width=800&height=800&quality=95&format=auto",
+            "header": "https://cdn.dexscreener.com/cms/images/mChUMhmnZG2uFTFN?width=1500&height=500&quality=95&format=auto",
+            "openGraph": "https://cdn.dexscreener.com/token-images/og/base/0xb095274743941e953c746f9c228da9c18bb6ec29?timestamp=1789402200000",
+            "websites": [
+              {
+                "url": "https://www.laptoptoken.com/",
+                "label": "Website"
+              }
+            ],
+            "socials": [
+              {
+                "url": "https://x.com/HunterBiden/status/2097853144596381759",
+                "type": "twitter"
+              }
+            ]
+          }
+        },
+        {
+          "chainId": "base",
+          "dexId": "uniswap",
+          "url": "https://dexscreener.com/base/0x6c3d6d03a4c34803825300240603f2a2cee019cb61c8c560175d65e332b971c8",
+          "pairAddress": "0x6c3d6d03a4c34803825300240603f2a2cee019cb61c8c560175d65e332b971c8",
+          "labels": [
+            "v4"
+          ],
+          "baseToken": {
+            "address": "0x7aFEF20CB0bd3DeC510c05D9e7B8542b74Dc6093",
+            "name": "Stonklynx",
+            "symbol": "STKLYNX"
+          },
+          "quoteToken": {
+            "address": "0x0000000000000000000000000000000000000000",
+            "name": "Ether",
+            "symbol": "ETH"
+          },
+          "priceNative": "0.00000008941",
+          "priceUsd": "0.0002247",
+          "txns": {
+            "m5": {
+              "buys": 0,
+              "sells": 0
+            },
+            "h1": {
+              "buys": 0,
+              "sells": 0
+            },
+            "h6": {
+              "buys": 142,
+              "sells": 101
+            },
+            "h24": {
+              "buys": 142,
+              "sells": 101
+            }
+          },
+          "volume": {
+            "h24": 134395.13,
+            "h6": 134395.13,
+            "h1": 0,
+            "m5": 0
+          },
+          "priceChange": {
+            "h6": 155,
+            "h24": 155
+          },
+          "liquidity": {
+            "usd": 20033.8,
+            "base": 44560091,
+            "quote": 3.9841
+          },
+          "fdv": 224795,
+          "marketCap": 224795,
+          "pairCreatedAt": 1789394811000
+        },
+        {
+          "chainId": "base",
+          "dexId": "uniswap",
+          "url": "https://dexscreener.com/base/0x822ceec017af4178a55de2f4f2b1ee7ae98c8bc3ac467c5eb77aa542169a9add",
+          "pairAddress": "0x822ceec017af4178a55de2f4f2b1ee7ae98c8bc3ac467c5eb77aa542169a9add",
+          "labels": [
+            "v4"
+          ],
+          "baseToken": {
+            "address": "0x203C6d355eb4354409B036f44dA717B34df89Ce4",
+            "name": "Artificial Cat",
+            "symbol": "AICAT "
+          },
+          "quoteToken": {
+            "address": "0x0000000000000000000000000000000000000000",
+            "name": "Ether",
+            "symbol": "ETH"
+          },
+          "priceNative": "0.00000008852",
+          "priceUsd": "0.0002213",
+          "txns": {
+            "m5": {
+              "buys": 0,
+              "sells": 0
+            },
+            "h1": {
+              "buys": 0,
+              "sells": 0
+            },
+            "h6": {
+              "buys": 161,
+              "sells": 128
+            },
+            "h24": {
+              "buys": 161,
+              "sells": 128
+            }
+          },
+          "volume": {
+            "h24": 129341.65,
+            "h6": 129341.65,
+            "h1": 0,
+            "m5": 0
+          },
+          "priceChange": {
+            "h6": 151,
+            "h24": 151
+          },
+          "liquidity": {
+            "usd": 19828.13,
+            "base": 45211865,
+            "quote": 3.9264
+          },
+          "fdv": 221378,
+          "marketCap": 221378,
+          "pairCreatedAt": 1789395041000
+        },
+        {
+          "chainId": "base",
+          "dexId": "uniswap",
+          "url": "https://dexscreener.com/base/0x18d957c4bd4be5deb7f9f1f971b14936c668fc1b8e7d4b9362f1827efca60436",
+          "pairAddress": "0x18d957c4bd4be5deb7f9f1f971b14936c668fc1b8e7d4b9362f1827efca60436",
+          "labels": [
+            "v4"
+          ],
+          "baseToken": {
+            "address": "0x98CE80AcD6178291a52F789C5d15F7733F21ec29",
+            "name": "7Stock",
+            "symbol": "7Stock"
+          },
+          "quoteToken": {
+            "address": "0x0000000000000000000000000000000000000000",
+            "name": "Ether",
+            "symbol": "ETH"
+          },
+          "priceNative": "0.00000003178",
+          "priceUsd": "0.00007992",
+          "txns": {
+            "m5": {
+              "buys": 0,
+              "sells": 0
+            },
+            "h1": {
+              "buys": 0,
+              "sells": 0
+            },
+            "h6": {
+              "buys": 83,
+              "sells": 64
+            },
+            "h24": {
+              "buys": 83,
+              "sells": 64
+            }
+          },
+          "volume": {
+            "h24": 43710.19,
+            "h6": 43710.19,
+            "h1": 0,
+            "m5": 0
+          },
+          "priceChange": {
+            "h6": 325,
+            "h24": 325
+          },
+          "liquidity": {
+            "usd": 15545.06,
+            "base": 93173638,
+            "quote": 3.2197
+          },
+          "fdv": 17265,
+          "marketCap": 17265,
+          "pairCreatedAt": 1789394963000
+        },
+        {
+          "chainId": "base",
+          "dexId": "uniswap",
+          "url": "https://dexscreener.com/base/0x5bb34f693b7876c1da9f1f46f502aba0ded4a76e599d64dcb6fb768ae390bade",
+          "pairAddress": "0x5bb34f693b7876c1da9f1f46f502aba0ded4a76e599d64dcb6fb768ae390bade",
+          "labels": [
+            "v4"
+          ],
+          "baseToken": {
+            "address": "0xB200000000000000000000F7200dE91E11dd7ecD",
+            "name": "Cobie League of Legends",
+            "symbol": "COBIELOL"
+          },
+          "quoteToken": {
+            "address": "0x0000000000000000000000000000000000000000",
+            "name": "Ether",
+            "symbol": "ETH"
+          },
+          "priceNative": "0.0000000003153",
+          "priceUsd": "0.0000007900",
+          "txns": {
+            "m5": {
+              "buys": 0,
+              "sells": 0
+            },
+            "h1": {
+              "buys": 0,
+              "sells": 0
+            },
+            "h6": {
+              "buys": 99,
+              "sells": 34
+            },
+            "h24": {
+              "buys": 99,
+              "sells": 34
+            }
+          },
+          "volume": {
+            "h24": 48831.92,
+            "h6": 48831.92,
+            "h1": 0,
+            "m5": 0
+          },
+          "priceChange": {
+            "h6": 1475,
+            "h24": 1475
+          },
+          "liquidity": {
+            "usd": 29868.89,
+            "base": 17036203459,
+            "quote": 6.5508
+          },
+          "fdv": 79000,
+          "marketCap": 79000,
+          "pairCreatedAt": 1789394943000
+        }
+      ]
+    },
+    {
+      "url": "https://api.geckoterminal.com/api/v2/networks/base/pools/multi/0xcdd64afa264951381c574713ebe655e41d907efbeb75bdf804587e791f9a7bfa,0xcfbdc70dbe1f8401f411dfb439b3551c0e1e5065,0xfd07731fd4643c60bbf9ef73f1561d4f673e9943ca93ba961f32e6c613c9a759,0xea8f5db2516b8dd1c50fe0f920ca512a478ba428,0xcdcbb49ff7dd85384f1661ee744ba48ba870bde3494214e4afbb4bf9f2b71433,0x5ca254507b0ade9b53d8fe019e2aa38b3a6337a2,0x514fab75fdf551ebd9ae91cb5edbe156894fdae039836857246cc3fd13e45638,0xc7420f433895cea13a846844ff35008b233ae6e1b1fec937407009a6613ed2aa,0x351dfeb148f11befc9f5b0178a588c154e096b9b35e431a6f41a91330d3fbcdf,0xd31475235640719e8342b8d190bd2060e9b1fc3f,0x90cce7db98120e5906433c32699fe8259e0b756c4281b02c4974c86ec11695d6,0x6b08c1fad2f6260e10127a1905e8cf27a0f87a3f7a11d174593118cca0431874,0x0d42646ff48564f182918b718426b73e9cc50823c8be2507c3312edd136cc6dc,0x7c32e6fb5e75a518622c5f6c52440072f01f482e,0x13431db722be7f8b94e64228bf319a3531cc65c96be6ae471155fca39edd21ad,0xf50c8bb37855b564384e8036095ca66e6f2e1a8da44f28f2b589ea6f41fb4f78,0x176f9e7649da6d0786d7750a0b0f27948eafdcb0df7e9a731562ab09e9540591,0xd50bd4f314f94d5987a2b784d68ea6059e776cb560c08728ab73712aa52fd9a1,0x25ad2285af0e784918b0091a02e4aaf05e709a5b0784c89177ead094a58835c1,0xa109923f5b43cf457ecaeda3a8ee96f8b4d8f5e0f64165ac1926aff0a8d72281,0x177f12f49af0e89790298f9b6820330e17595fd57798b07f51198b2e390468eb,0xd6ced335752862e652fbf5afeb5f674e7b434d6a8a933916fc968cff64a22ece,0x6c3d6d03a4c34803825300240603f2a2cee019cb61c8c560175d65e332b971c8,0x822ceec017af4178a55de2f4f2b1ee7ae98c8bc3ac467c5eb77aa542169a9add,0x18d957c4bd4be5deb7f9f1f971b14936c668fc1b8e7d4b9362f1827efca60436,0x5bb34f693b7876c1da9f1f46f502aba0ded4a76e599d64dcb6fb768ae390bade",
+      "status": 200,
+      "data": {
+        "data": [
+          {
+            "id": "base_0xcdd64afa264951381c574713ebe655e41d907efbeb75bdf804587e791f9a7bfa",
+            "type": "pool",
+            "attributes": {
+              "base_token_price_usd": "0.0000462137364873228",
+              "base_token_price_native_currency": "0.0000000175904744088115",
+              "quote_token_price_usd": "2470.48",
+              "quote_token_price_native_currency": "1.0",
+              "base_token_price_quote_token": "0.00000001759047441",
+              "quote_token_price_base_token": "56848949.9918817",
+              "address": "0xcdd64afa264951381c574713ebe655e41d907efbeb75bdf804587e791f9a7bfa",
+              "name": "BODEN / WETH 0.01%",
+              "pool_name": "BODEN / WETH",
+              "pool_fee_percentage": "0.01",
+              "pool_created_at": "2026-09-08T12:00:23Z",
+              "fdv_usd": "46213.73649",
+              "market_cap_usd": null,
+              "price_change_percentage": {
+                "m5": "0",
+                "m15": "0",
+                "m30": "0",
+                "h1": "0",
+                "h6": "0",
+                "h24": "0"
+              },
+              "transactions": {
+                "m5": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m15": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m30": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h1": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h6": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h24": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                }
+              },
+              "volume_usd": {
+                "m5": "0.0",
+                "m15": "0.0",
+                "m30": "0.0",
+                "h1": "0.0",
+                "h6": "0.0",
+                "h24": "0.0"
+              },
+              "reserve_in_usd": "103.0551",
+              "locked_liquidity_percentage": null
+            },
+            "relationships": {
+              "base_token": {
+                "data": {
+                  "id": "base_0xaf46d9d552b3b05b6eabb3342c0a070ed850ce47",
+                  "type": "token"
+                }
+              },
+              "quote_token": {
+                "data": {
+                  "id": "base_0x4200000000000000000000000000000000000006",
+                  "type": "token"
+                }
+              },
+              "dex": {
+                "data": {
+                  "id": "uniswap-v4-base",
+                  "type": "dex"
+                }
+              }
+            }
+          },
+          {
+            "id": "base_0xcfbdc70dbe1f8401f411dfb439b3551c0e1e5065",
+            "type": "pool",
+            "attributes": {
+              "base_token_price_usd": "0.0000000008976547073",
+              "base_token_price_native_currency": "0.000000000000362469972904002",
+              "quote_token_price_usd": "2479.37",
+              "quote_token_price_native_currency": "1.0",
+              "base_token_price_quote_token": "0.0000000000003624699729",
+              "quote_token_price_base_token": "2758849214428.15",
+              "address": "0xcfbdc70dbe1f8401f411dfb439b3551c0e1e5065",
+              "name": "NOVA / WETH",
+              "pool_name": "NOVA / WETH",
+              "pool_fee_percentage": null,
+              "pool_created_at": "2026-09-08T11:34:19Z",
+              "fdv_usd": "5.2961627731",
+              "market_cap_usd": null,
+              "price_change_percentage": {
+                "m5": "0",
+                "m15": "0",
+                "m30": "0",
+                "h1": "0",
+                "h6": "0",
+                "h24": "0"
+              },
+              "transactions": {
+                "m5": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m15": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m30": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h1": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h6": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h24": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                }
+              },
+              "volume_usd": {
+                "m5": "0.0",
+                "m15": "0.0",
+                "m30": "0.0",
+                "h1": "0.0",
+                "h6": "0.0",
+                "h24": "0.0"
+              },
+              "reserve_in_usd": "0.03987181467",
+              "locked_liquidity_percentage": null
+            },
+            "relationships": {
+              "base_token": {
+                "data": {
+                  "id": "base_0xa9f98c77b0d1b88d754d015d11ce1679cbc32d60",
+                  "type": "token"
+                }
+              },
+              "quote_token": {
+                "data": {
+                  "id": "base_0x4200000000000000000000000000000000000006",
+                  "type": "token"
+                }
+              },
+              "dex": {
+                "data": {
+                  "id": "uniswap-v2-base",
+                  "type": "dex"
+                }
+              }
+            }
+          },
+          {
+            "id": "base_0xfd07731fd4643c60bbf9ef73f1561d4f673e9943ca93ba961f32e6c613c9a759",
+            "type": "pool",
+            "attributes": {
+              "base_token_price_usd": "0.00002327815117",
+              "base_token_price_native_currency": "0.00000000916479838667965",
+              "quote_token_price_usd": "2473.01",
+              "quote_token_price_native_currency": "1.0",
+              "base_token_price_quote_token": "0.000000009164798387",
+              "quote_token_price_base_token": "109113147.699291",
+              "address": "0xfd07731fd4643c60bbf9ef73f1561d4f673e9943ca93ba961f32e6c613c9a759",
+              "name": "NOVA / ETH 0.3%",
+              "pool_name": "NOVA / ETH",
+              "pool_fee_percentage": "0.3",
+              "pool_created_at": "2026-09-08T12:01:39Z",
+              "fdv_usd": "23278.15117",
+              "market_cap_usd": null,
+              "price_change_percentage": {
+                "m5": "0",
+                "m15": "0",
+                "m30": "0",
+                "h1": "0",
+                "h6": "0",
+                "h24": "0"
+              },
+              "transactions": {
+                "m5": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m15": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m30": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h1": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h6": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h24": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                }
+              },
+              "volume_usd": {
+                "m5": "0.0",
+                "m15": "0.0",
+                "m30": "0.0",
+                "h1": "0.0",
+                "h6": "0.0",
+                "h24": "0.0"
+              },
+              "reserve_in_usd": "73.1566",
+              "locked_liquidity_percentage": null
+            },
+            "relationships": {
+              "base_token": {
+                "data": {
+                  "id": "base_0xb2000000000000000000006ff9dc5cc75cf35562",
+                  "type": "token"
+                }
+              },
+              "quote_token": {
+                "data": {
+                  "id": "base_0x0000000000000000000000000000000000000000",
+                  "type": "token"
+                }
+              },
+              "dex": {
+                "data": {
+                  "id": "uniswap-v4-base",
+                  "type": "dex"
+                }
+              }
+            }
+          },
+          {
+            "id": "base_0xea8f5db2516b8dd1c50fe0f920ca512a478ba428",
+            "type": "pool",
+            "attributes": {
+              "base_token_price_usd": "0.0000000001134131976",
+              "base_token_price_native_currency": "0.0000000000000462952757552365",
+              "quote_token_price_usd": "2442.84",
+              "quote_token_price_native_currency": "1.0",
+              "base_token_price_quote_token": "0.00000000000004629527576",
+              "quote_token_price_base_token": "21600476154133.1",
+              "address": "0xea8f5db2516b8dd1c50fe0f920ca512a478ba428",
+              "name": "1KTO100M / WETH",
+              "pool_name": "1KTO100M / WETH",
+              "pool_fee_percentage": null,
+              "pool_created_at": "2026-09-08T12:00:11Z",
+              "fdv_usd": "0.6351139066",
+              "market_cap_usd": null,
+              "price_change_percentage": {
+                "m5": "0",
+                "m15": "0",
+                "m30": "0",
+                "h1": "0",
+                "h6": "0",
+                "h24": "0"
+              },
+              "transactions": {
+                "m5": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m15": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m30": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h1": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h6": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h24": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                }
+              },
+              "volume_usd": {
+                "m5": "0.0",
+                "m15": "0.0",
+                "m30": "0.0",
+                "h1": "0.0",
+                "h6": "0.0",
+                "h24": "0.0"
+              },
+              "reserve_in_usd": "0.0150297289895463",
+              "locked_liquidity_percentage": null
+            },
+            "relationships": {
+              "base_token": {
+                "data": {
+                  "id": "base_0x28617dc3971fcefb7669d1ae87f980cc580d3470",
+                  "type": "token"
+                }
+              },
+              "quote_token": {
+                "data": {
+                  "id": "base_0x4200000000000000000000000000000000000006",
+                  "type": "token"
+                }
+              },
+              "dex": {
+                "data": {
+                  "id": "uniswap-v2-base",
+                  "type": "dex"
+                }
+              }
+            }
+          },
+          {
+            "id": "base_0xcdcbb49ff7dd85384f1661ee744ba48ba870bde3494214e4afbb4bf9f2b71433",
+            "type": "pool",
+            "attributes": {
+              "base_token_price_usd": "93.4957936016",
+              "base_token_price_native_currency": "0.0384350833779588",
+              "quote_token_price_usd": "1.0027752313",
+              "quote_token_price_native_currency": "0.000401142183890822",
+              "base_token_price_quote_token": "95.814115098",
+              "quote_token_price_base_token": "0.0104368756",
+              "address": "0xcdcbb49ff7dd85384f1661ee744ba48ba870bde3494214e4afbb4bf9f2b71433",
+              "name": "LAPTOP / USDC 22.22%",
+              "pool_name": "LAPTOP / USDC",
+              "pool_fee_percentage": "22.22",
+              "pool_created_at": "2026-09-09T12:14:31Z",
+              "fdv_usd": "93495793601.599",
+              "market_cap_usd": "32723527760.56",
+              "price_change_percentage": {
+                "m5": "0",
+                "m15": "0",
+                "m30": "0",
+                "h1": "0",
+                "h6": "0",
+                "h24": "0"
+              },
+              "transactions": {
+                "m5": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m15": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m30": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h1": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h6": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h24": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                }
+              },
+              "volume_usd": {
+                "m5": "0.0",
+                "m15": "0.0",
+                "m30": "0.0",
+                "h1": "0.0",
+                "h6": "0.0",
+                "h24": "0.0"
+              },
+              "reserve_in_usd": "3020.587",
+              "locked_liquidity_percentage": null
+            },
+            "relationships": {
+              "base_token": {
+                "data": {
+                  "id": "base_0xb095274743941e953c746f9c228da9c18bb6ec29",
+                  "type": "token"
+                }
+              },
+              "quote_token": {
+                "data": {
+                  "id": "base_0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+                  "type": "token"
+                }
+              },
+              "dex": {
+                "data": {
+                  "id": "uniswap-v4-base",
+                  "type": "dex"
+                }
+              }
+            }
+          },
+          {
+            "id": "base_0x5ca254507b0ade9b53d8fe019e2aa38b3a6337a2",
+            "type": "pool",
+            "attributes": {
+              "base_token_price_usd": "0.000000001095779773",
+              "base_token_price_native_currency": "0.000000000000443220047925738",
+              "quote_token_price_usd": "2474.88",
+              "quote_token_price_native_currency": "1.0",
+              "base_token_price_quote_token": "0.0000000000004432200479",
+              "quote_token_price_base_token": "2256215630768.47",
+              "address": "0x5ca254507b0ade9b53d8fe019e2aa38b3a6337a2",
+              "name": "JAIL / WETH",
+              "pool_name": "JAIL / WETH",
+              "pool_fee_percentage": null,
+              "pool_created_at": "2026-09-09T12:16:39Z",
+              "fdv_usd": "4.8214310012",
+              "market_cap_usd": null,
+              "price_change_percentage": {
+                "m5": "0",
+                "m15": "0",
+                "m30": "0",
+                "h1": "0",
+                "h6": "0",
+                "h24": "0"
+              },
+              "transactions": {
+                "m5": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m15": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m30": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h1": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h6": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h24": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                }
+              },
+              "volume_usd": {
+                "m5": "0.0",
+                "m15": "0.0",
+                "m30": "0.0",
+                "h1": "0.0",
+                "h6": "0.0",
+                "h24": "0.0"
+              },
+              "reserve_in_usd": "0.0379308469338393",
+              "locked_liquidity_percentage": null
+            },
+            "relationships": {
+              "base_token": {
+                "data": {
+                  "id": "base_0x5c40212d8a2ab3842f13da2618234f925b8b6bed",
+                  "type": "token"
+                }
+              },
+              "quote_token": {
+                "data": {
+                  "id": "base_0x4200000000000000000000000000000000000006",
+                  "type": "token"
+                }
+              },
+              "dex": {
+                "data": {
+                  "id": "uniswap-v2-base",
+                  "type": "dex"
+                }
+              }
+            }
+          },
+          {
+            "id": "base_0x514fab75fdf551ebd9ae91cb5edbe156894fdae039836857246cc3fd13e45638",
+            "type": "pool",
+            "attributes": {
+              "base_token_price_usd": "0.0003313638177",
+              "base_token_price_native_currency": "0.000000134786532313476",
+              "quote_token_price_usd": "2457.87",
+              "quote_token_price_native_currency": "1.0",
+              "base_token_price_quote_token": "0.0000001347865323",
+              "quote_token_price_base_token": "7419138.86228839",
+              "address": "0x514fab75fdf551ebd9ae91cb5edbe156894fdae039836857246cc3fd13e45638",
+              "name": "Laptop / ETH",
+              "pool_name": "Laptop / ETH",
+              "pool_fee_percentage": null,
+              "pool_created_at": "2026-09-10T12:04:01Z",
+              "fdv_usd": "331363.8177",
+              "market_cap_usd": null,
+              "price_change_percentage": {
+                "m5": "0",
+                "m15": "0",
+                "m30": "0",
+                "h1": "0",
+                "h6": "0",
+                "h24": "0"
+              },
+              "transactions": {
+                "m5": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m15": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m30": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h1": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h6": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h24": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                }
+              },
+              "volume_usd": {
+                "m5": "0.0",
+                "m15": "0.0",
+                "m30": "0.0",
+                "h1": "0.0",
+                "h6": "0.0",
+                "h24": "0.0"
+              },
+              "reserve_in_usd": "0.5067",
+              "locked_liquidity_percentage": null
+            },
+            "relationships": {
+              "base_token": {
+                "data": {
+                  "id": "base_0xbfdbec98f48303ce28467eba98cb01c010adb181",
+                  "type": "token"
+                }
+              },
+              "quote_token": {
+                "data": {
+                  "id": "base_0x0000000000000000000000000000000000000000",
+                  "type": "token"
+                }
+              },
+              "dex": {
+                "data": {
+                  "id": "uniswap-v4-base",
+                  "type": "dex"
+                }
+              }
+            }
+          },
+          {
+            "id": "base_0xc7420f433895cea13a846844ff35008b233ae6e1b1fec937407009a6613ed2aa",
+            "type": "pool",
+            "attributes": {
+              "base_token_price_usd": "0.00003866666435",
+              "base_token_price_native_currency": "0.0000000160649967290595",
+              "quote_token_price_usd": "2448.08",
+              "quote_token_price_native_currency": "1.0",
+              "base_token_price_quote_token": "0.00000001606499673",
+              "quote_token_price_base_token": "62247133.7445796",
+              "address": "0xc7420f433895cea13a846844ff35008b233ae6e1b1fec937407009a6613ed2aa",
+              "name": "FYC / ETH 0.3%",
+              "pool_name": "FYC / ETH",
+              "pool_fee_percentage": "0.3",
+              "pool_created_at": "2026-09-10T12:02:17Z",
+              "fdv_usd": "38666.66435",
+              "market_cap_usd": null,
+              "price_change_percentage": {
+                "m5": "0",
+                "m15": "0",
+                "m30": "0",
+                "h1": "0",
+                "h6": "0",
+                "h24": "0"
+              },
+              "transactions": {
+                "m5": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m15": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m30": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h1": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h6": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h24": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                }
+              },
+              "volume_usd": {
+                "m5": "0.0",
+                "m15": "0.0",
+                "m30": "0.0",
+                "h1": "0.0",
+                "h6": "0.0",
+                "h24": "0.0"
+              },
+              "reserve_in_usd": "112.534",
+              "locked_liquidity_percentage": null
+            },
+            "relationships": {
+              "base_token": {
+                "data": {
+                  "id": "base_0xb200000000000000000000627402876e4966c111",
+                  "type": "token"
+                }
+              },
+              "quote_token": {
+                "data": {
+                  "id": "base_0x0000000000000000000000000000000000000000",
+                  "type": "token"
+                }
+              },
+              "dex": {
+                "data": {
+                  "id": "uniswap-v4-base",
+                  "type": "dex"
+                }
+              }
+            }
+          },
+          {
+            "id": "base_0x351dfeb148f11befc9f5b0178a588c154e096b9b35e431a6f41a91330d3fbcdf",
+            "type": "pool",
+            "attributes": {
+              "base_token_price_usd": "0.00002495680177",
+              "base_token_price_native_currency": "0.0000000106286704453838",
+              "quote_token_price_usd": "2448.08",
+              "quote_token_price_native_currency": "1.0",
+              "base_token_price_quote_token": "0.00000001062867045",
+              "quote_token_price_base_token": "94085144.998951",
+              "address": "0x351dfeb148f11befc9f5b0178a588c154e096b9b35e431a6f41a91330d3fbcdf",
+              "name": "QUOTRON / ETH 0.3%",
+              "pool_name": "QUOTRON / ETH",
+              "pool_fee_percentage": "0.3",
+              "pool_created_at": "2026-09-10T12:01:49Z",
+              "fdv_usd": "24956.80177",
+              "market_cap_usd": null,
+              "price_change_percentage": {
+                "m5": "0",
+                "m15": "0",
+                "m30": "0",
+                "h1": "0",
+                "h6": "0",
+                "h24": "0"
+              },
+              "transactions": {
+                "m5": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m15": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m30": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h1": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h6": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h24": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                }
+              },
+              "volume_usd": {
+                "m5": "0.0",
+                "m15": "0.0",
+                "m30": "0.0",
+                "h1": "0.0",
+                "h6": "0.0",
+                "h24": "0.0"
+              },
+              "reserve_in_usd": "69.7001",
+              "locked_liquidity_percentage": null
+            },
+            "relationships": {
+              "base_token": {
+                "data": {
+                  "id": "base_0xb2000000000000000000007ad265b4c5773401fa",
+                  "type": "token"
+                }
+              },
+              "quote_token": {
+                "data": {
+                  "id": "base_0x0000000000000000000000000000000000000000",
+                  "type": "token"
+                }
+              },
+              "dex": {
+                "data": {
+                  "id": "uniswap-v4-base",
+                  "type": "dex"
+                }
+              }
+            }
+          },
+          {
+            "id": "base_0xd31475235640719e8342b8d190bd2060e9b1fc3f",
+            "type": "pool",
+            "attributes": {
+              "base_token_price_usd": "0.0000000003311365778",
+              "base_token_price_native_currency": "0.000000000000193140923068915",
+              "quote_token_price_usd": "2560.04",
+              "quote_token_price_native_currency": "1.0",
+              "base_token_price_quote_token": "0.0000000000001931409231",
+              "quote_token_price_base_token": "5177566639480.07",
+              "address": "0xd31475235640719e8342b8d190bd2060e9b1fc3f",
+              "name": "Tony / WETH",
+              "pool_name": "Tony / WETH",
+              "pool_fee_percentage": null,
+              "pool_created_at": "2026-09-10T11:55:17Z",
+              "fdv_usd": "3.1457974891",
+              "market_cap_usd": null,
+              "price_change_percentage": {
+                "m5": "0",
+                "m15": "0",
+                "m30": "0",
+                "h1": "0",
+                "h6": "0",
+                "h24": "0"
+              },
+              "transactions": {
+                "m5": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m15": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m30": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h1": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h6": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h24": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                }
+              },
+              "volume_usd": {
+                "m5": "0.0",
+                "m15": "0.0",
+                "m30": "0.0",
+                "h1": "0.0",
+                "h6": "0.0",
+                "h24": "0.0"
+              },
+              "reserve_in_usd": "0.0346038191668351",
+              "locked_liquidity_percentage": null
+            },
+            "relationships": {
+              "base_token": {
+                "data": {
+                  "id": "base_0x42a6920eb6fb4aee9fba6c0e92e672f45261d139",
+                  "type": "token"
+                }
+              },
+              "quote_token": {
+                "data": {
+                  "id": "base_0x4200000000000000000000000000000000000006",
+                  "type": "token"
+                }
+              },
+              "dex": {
+                "data": {
+                  "id": "uniswap-v2-base",
+                  "type": "dex"
+                }
+              }
+            }
+          },
+          {
+            "id": "base_0x90cce7db98120e5906433c32699fe8259e0b756c4281b02c4974c86ec11695d6",
+            "type": "pool",
+            "attributes": {
+              "base_token_price_usd": "0.000280601208356318",
+              "base_token_price_native_currency": "0.000000112914188933725",
+              "quote_token_price_usd": "2452.63",
+              "quote_token_price_native_currency": "1.0",
+              "base_token_price_quote_token": "0.0000001129141889",
+              "quote_token_price_base_token": "8856282.8944992",
+              "address": "0x90cce7db98120e5906433c32699fe8259e0b756c4281b02c4974c86ec11695d6",
+              "name": "BABYSTONK / ETH",
+              "pool_name": "BABYSTONK / ETH",
+              "pool_fee_percentage": null,
+              "pool_created_at": "2026-09-11T11:55:39Z",
+              "fdv_usd": "280601.2084",
+              "market_cap_usd": null,
+              "price_change_percentage": {
+                "m5": "0",
+                "m15": "0",
+                "m30": "0",
+                "h1": "0",
+                "h6": "0",
+                "h24": "0"
+              },
+              "transactions": {
+                "m5": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m15": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m30": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h1": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h6": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h24": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                }
+              },
+              "volume_usd": {
+                "m5": "0.0",
+                "m15": "0.0",
+                "m30": "0.0",
+                "h1": "0.0",
+                "h6": "0.0",
+                "h24": "0.0"
+              },
+              "reserve_in_usd": "0.4963",
+              "locked_liquidity_percentage": null
+            },
+            "relationships": {
+              "base_token": {
+                "data": {
+                  "id": "base_0xfbc5f0ec119389935f4ac9594a532ece5f6693d9",
+                  "type": "token"
+                }
+              },
+              "quote_token": {
+                "data": {
+                  "id": "base_0x0000000000000000000000000000000000000000",
+                  "type": "token"
+                }
+              },
+              "dex": {
+                "data": {
+                  "id": "uniswap-v4-base",
+                  "type": "dex"
+                }
+              }
+            }
+          },
+          {
+            "id": "base_0x6b08c1fad2f6260e10127a1905e8cf27a0f87a3f7a11d174593118cca0431874",
+            "type": "pool",
+            "attributes": {
+              "base_token_price_usd": "0.00003815794819",
+              "base_token_price_native_currency": "0.0000000153218503550052",
+              "quote_token_price_usd": "2451.8364188908",
+              "quote_token_price_native_currency": "1.0",
+              "base_token_price_quote_token": "0.00000001532185036",
+              "quote_token_price_base_token": "65266268.5530883",
+              "address": "0x6b08c1fad2f6260e10127a1905e8cf27a0f87a3f7a11d174593118cca0431874",
+              "name": "Flybook / ETH 0.3%",
+              "pool_name": "Flybook / ETH",
+              "pool_fee_percentage": "0.3",
+              "pool_created_at": "2026-09-11T12:01:53Z",
+              "fdv_usd": "38157.94819",
+              "market_cap_usd": null,
+              "price_change_percentage": {
+                "m5": "0",
+                "m15": "0",
+                "m30": "0",
+                "h1": "0",
+                "h6": "0",
+                "h24": "0"
+              },
+              "transactions": {
+                "m5": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m15": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m30": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h1": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h6": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h24": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                }
+              },
+              "volume_usd": {
+                "m5": "0.0",
+                "m15": "0.0",
+                "m30": "0.0",
+                "h1": "0.0",
+                "h6": "0.0",
+                "h24": "0.0"
+              },
+              "reserve_in_usd": "119.1596",
+              "locked_liquidity_percentage": null
+            },
+            "relationships": {
+              "base_token": {
+                "data": {
+                  "id": "base_0xb2000000000000000000005caa4a1572236b418b",
+                  "type": "token"
+                }
+              },
+              "quote_token": {
+                "data": {
+                  "id": "base_0x0000000000000000000000000000000000000000",
+                  "type": "token"
+                }
+              },
+              "dex": {
+                "data": {
+                  "id": "uniswap-v4-base",
+                  "type": "dex"
+                }
+              }
+            }
+          },
+          {
+            "id": "base_0x0d42646ff48564f182918b718426b73e9cc50823c8be2507c3312edd136cc6dc",
+            "type": "pool",
+            "attributes": {
+              "base_token_price_usd": "0.00002723818566",
+              "base_token_price_native_currency": "0.0000000105991773968565",
+              "quote_token_price_usd": "2451.8364188908",
+              "quote_token_price_native_currency": "1.0",
+              "base_token_price_quote_token": "0.0000000105991774",
+              "quote_token_price_base_token": "94346944.3483963",
+              "address": "0x0d42646ff48564f182918b718426b73e9cc50823c8be2507c3312edd136cc6dc",
+              "name": "Loinbase / ETH 0.3%",
+              "pool_name": "Loinbase / ETH",
+              "pool_fee_percentage": "0.3",
+              "pool_created_at": "2026-09-11T12:01:47Z",
+              "fdv_usd": "27238.18566",
+              "market_cap_usd": null,
+              "price_change_percentage": {
+                "m5": "0",
+                "m15": "0",
+                "m30": "0",
+                "h1": "0",
+                "h6": "0",
+                "h24": "0"
+              },
+              "transactions": {
+                "m5": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m15": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m30": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h1": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h6": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h24": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                }
+              },
+              "volume_usd": {
+                "m5": "0.0",
+                "m15": "0.0",
+                "m30": "0.0",
+                "h1": "0.0",
+                "h6": "0.0",
+                "h24": "0.0"
+              },
+              "reserve_in_usd": "79.2746",
+              "locked_liquidity_percentage": null
+            },
+            "relationships": {
+              "base_token": {
+                "data": {
+                  "id": "base_0xb200000000000000000000cec38196d6d657d76d",
+                  "type": "token"
+                }
+              },
+              "quote_token": {
+                "data": {
+                  "id": "base_0x0000000000000000000000000000000000000000",
+                  "type": "token"
+                }
+              },
+              "dex": {
+                "data": {
+                  "id": "uniswap-v4-base",
+                  "type": "dex"
+                }
+              }
+            }
+          },
+          {
+            "id": "base_0x7c32e6fb5e75a518622c5f6c52440072f01f482e",
+            "type": "pool",
+            "attributes": {
+              "base_token_price_usd": "0.0000000001119491343",
+              "base_token_price_native_currency": "0.0000000000000652128699273412",
+              "quote_token_price_usd": "2564.44",
+              "quote_token_price_native_currency": "1.0",
+              "base_token_price_quote_token": "0.00000000000006521286993",
+              "quote_token_price_base_token": "15334396433007.5",
+              "address": "0x7c32e6fb5e75a518622c5f6c52440072f01f482e",
+              "name": "Flybook / WETH",
+              "pool_name": "Flybook / WETH",
+              "pool_fee_percentage": null,
+              "pool_created_at": "2026-09-11T12:07:09Z",
+              "fdv_usd": "1.0635167759",
+              "market_cap_usd": null,
+              "price_change_percentage": {
+                "m5": "0",
+                "m15": "0",
+                "m30": "0",
+                "h1": "0",
+                "h6": "0",
+                "h24": "0"
+              },
+              "transactions": {
+                "m5": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m15": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m30": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h1": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h6": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h24": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                }
+              },
+              "volume_usd": {
+                "m5": "0.0",
+                "m15": "0.0",
+                "m30": "0.0",
+                "h1": "0.0",
+                "h6": "0.0",
+                "h24": "0.0"
+              },
+              "reserve_in_usd": "0.0201838678644912",
+              "locked_liquidity_percentage": null
+            },
+            "relationships": {
+              "base_token": {
+                "data": {
+                  "id": "base_0x512adccbe2e9093b810d04e5e5b60c303f3de418",
+                  "type": "token"
+                }
+              },
+              "quote_token": {
+                "data": {
+                  "id": "base_0x4200000000000000000000000000000000000006",
+                  "type": "token"
+                }
+              },
+              "dex": {
+                "data": {
+                  "id": "uniswap-v2-base",
+                  "type": "dex"
+                }
+              }
+            }
+          },
+          {
+            "id": "base_0x13431db722be7f8b94e64228bf319a3531cc65c96be6ae471155fca39edd21ad",
+            "type": "pool",
+            "attributes": {
+              "base_token_price_usd": "0.000335148442",
+              "base_token_price_native_currency": "0.00000013199847772765",
+              "quote_token_price_usd": "2534.07",
+              "quote_token_price_native_currency": "1.0",
+              "base_token_price_quote_token": "0.0000001319984777",
+              "quote_token_price_base_token": "7575844.9431764",
+              "address": "0x13431db722be7f8b94e64228bf319a3531cc65c96be6ae471155fca39edd21ad",
+              "name": "LAPTOP / ETH",
+              "pool_name": "LAPTOP / ETH",
+              "pool_fee_percentage": null,
+              "pool_created_at": "2026-09-12T11:23:59Z",
+              "fdv_usd": "335148.442",
+              "market_cap_usd": null,
+              "price_change_percentage": {
+                "m5": "0",
+                "m15": "0",
+                "m30": "0",
+                "h1": "0",
+                "h6": "0",
+                "h24": "0"
+              },
+              "transactions": {
+                "m5": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m15": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m30": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h1": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h6": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h24": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                }
+              },
+              "volume_usd": {
+                "m5": "0.0",
+                "m15": "0.0",
+                "m30": "0.0",
+                "h1": "0.0",
+                "h6": "0.0",
+                "h24": "0.0"
+              },
+              "reserve_in_usd": "0.5012",
+              "locked_liquidity_percentage": null
+            },
+            "relationships": {
+              "base_token": {
+                "data": {
+                  "id": "base_0xde1305ab4d75e6f676414abcade519ae7917b466",
+                  "type": "token"
+                }
+              },
+              "quote_token": {
+                "data": {
+                  "id": "base_0x0000000000000000000000000000000000000000",
+                  "type": "token"
+                }
+              },
+              "dex": {
+                "data": {
+                  "id": "uniswap-v4-base",
+                  "type": "dex"
+                }
+              }
+            }
+          },
+          {
+            "id": "base_0xf50c8bb37855b564384e8036095ca66e6f2e1a8da44f28f2b589ea6f41fb4f78",
+            "type": "pool",
+            "attributes": {
+              "base_token_price_usd": "0.0003062457003",
+              "base_token_price_native_currency": "0.000000120057348947783",
+              "quote_token_price_usd": "2535.02",
+              "quote_token_price_native_currency": "1.0",
+              "base_token_price_quote_token": "0.0000001200573489",
+              "quote_token_price_base_token": "8329352.66990556",
+              "address": "0xf50c8bb37855b564384e8036095ca66e6f2e1a8da44f28f2b589ea6f41fb4f78",
+              "name": "S&amp;P 500 / ETH",
+              "pool_name": "S&amp;P 500 / ETH",
+              "pool_fee_percentage": null,
+              "pool_created_at": "2026-09-12T11:23:31Z",
+              "fdv_usd": "306245.7003",
+              "market_cap_usd": null,
+              "price_change_percentage": {
+                "m5": "0",
+                "m15": "0",
+                "m30": "0",
+                "h1": "0",
+                "h6": "0",
+                "h24": "0"
+              },
+              "transactions": {
+                "m5": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m15": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m30": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h1": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h6": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h24": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                }
+              },
+              "volume_usd": {
+                "m5": "0.0",
+                "m15": "0.0",
+                "m30": "0.0",
+                "h1": "0.0",
+                "h6": "0.0",
+                "h24": "0.0"
+              },
+              "reserve_in_usd": "0.5012",
+              "locked_liquidity_percentage": null
+            },
+            "relationships": {
+              "base_token": {
+                "data": {
+                  "id": "base_0x94b118a0c7f873583e0a1116490ddbb542b20513",
+                  "type": "token"
+                }
+              },
+              "quote_token": {
+                "data": {
+                  "id": "base_0x0000000000000000000000000000000000000000",
+                  "type": "token"
+                }
+              },
+              "dex": {
+                "data": {
+                  "id": "uniswap-v4-base",
+                  "type": "dex"
+                }
+              }
+            }
+          },
+          {
+            "id": "base_0x176f9e7649da6d0786d7750a0b0f27948eafdcb0df7e9a731562ab09e9540591",
+            "type": "pool",
+            "attributes": {
+              "base_token_price_usd": "0.000001304936516",
+              "base_token_price_native_currency": "0.00000000051212872924686",
+              "quote_token_price_usd": "2535.3",
+              "quote_token_price_native_currency": "1.0",
+              "base_token_price_quote_token": "0.0000000005121287292",
+              "quote_token_price_base_token": "1952634060.32817",
+              "address": "0x176f9e7649da6d0786d7750a0b0f27948eafdcb0df7e9a731562ab09e9540591",
+              "name": "egg / ETH 0.05%",
+              "pool_name": "egg / ETH",
+              "pool_fee_percentage": "0.05",
+              "pool_created_at": "2026-09-12T11:22:57Z",
+              "fdv_usd": "130493.6516",
+              "market_cap_usd": null,
+              "price_change_percentage": {
+                "m5": "0",
+                "m15": "0",
+                "m30": "0",
+                "h1": "0",
+                "h6": "0",
+                "h24": "0"
+              },
+              "transactions": {
+                "m5": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m15": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m30": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h1": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h6": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h24": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                }
+              },
+              "volume_usd": {
+                "m5": "0.0",
+                "m15": "0.0",
+                "m30": "0.0",
+                "h1": "0.0",
+                "h6": "0.0",
+                "h24": "0.0"
+              },
+              "reserve_in_usd": "33.0759",
+              "locked_liquidity_percentage": null
+            },
+            "relationships": {
+              "base_token": {
+                "data": {
+                  "id": "base_0xb2000000000000000000000576ef52de9167d463",
+                  "type": "token"
+                }
+              },
+              "quote_token": {
+                "data": {
+                  "id": "base_0x0000000000000000000000000000000000000000",
+                  "type": "token"
+                }
+              },
+              "dex": {
+                "data": {
+                  "id": "uniswap-v4-base",
+                  "type": "dex"
+                }
+              }
+            }
+          },
+          {
+            "id": "base_0xd50bd4f314f94d5987a2b784d68ea6059e776cb560c08728ab73712aa52fd9a1",
+            "type": "pool",
+            "attributes": {
+              "base_token_price_usd": "0.00009938477688",
+              "base_token_price_native_currency": "0.0000000387878578938735",
+              "quote_token_price_usd": "2535.3",
+              "quote_token_price_native_currency": "1.0",
+              "base_token_price_quote_token": "0.00000003878785789",
+              "quote_token_price_base_token": "25781263.8876856",
+              "address": "0xd50bd4f314f94d5987a2b784d68ea6059e776cb560c08728ab73712aa52fd9a1",
+              "name": "CMC / ETH 1%",
+              "pool_name": "CMC / ETH",
+              "pool_fee_percentage": "1",
+              "pool_created_at": "2026-09-12T11:29:07Z",
+              "fdv_usd": "99384.77688",
+              "market_cap_usd": null,
+              "price_change_percentage": {
+                "m5": "0",
+                "m15": "0",
+                "m30": "0",
+                "h1": "0",
+                "h6": "0",
+                "h24": "0"
+              },
+              "transactions": {
+                "m5": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m15": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m30": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h1": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h6": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h24": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                }
+              },
+              "volume_usd": {
+                "m5": "0.0",
+                "m15": "0.0",
+                "m30": "0.0",
+                "h1": "0.0",
+                "h6": "0.0",
+                "h24": "0.0"
+              },
+              "reserve_in_usd": "617.4168",
+              "locked_liquidity_percentage": null
+            },
+            "relationships": {
+              "base_token": {
+                "data": {
+                  "id": "base_0x22f79d449ea1201f4875956c45f1330a983fec29",
+                  "type": "token"
+                }
+              },
+              "quote_token": {
+                "data": {
+                  "id": "base_0x0000000000000000000000000000000000000000",
+                  "type": "token"
+                }
+              },
+              "dex": {
+                "data": {
+                  "id": "uniswap-v4-base",
+                  "type": "dex"
+                }
+              }
+            }
+          },
+          {
+            "id": "base_0x25ad2285af0e784918b0091a02e4aaf05e709a5b0784c89177ead094a58835c1",
+            "type": "pool",
+            "attributes": {
+              "base_token_price_usd": "0.000316517614748893",
+              "base_token_price_native_currency": "0.000000121503016994816",
+              "quote_token_price_usd": "2475.22",
+              "quote_token_price_native_currency": "1.0",
+              "base_token_price_quote_token": "0.000000121503017",
+              "quote_token_price_base_token": "8230248.3076833",
+              "address": "0x25ad2285af0e784918b0091a02e4aaf05e709a5b0784c89177ead094a58835c1",
+              "name": "LAPTOP / ETH",
+              "pool_name": "LAPTOP / ETH",
+              "pool_fee_percentage": null,
+              "pool_created_at": "2026-09-13T12:33:01Z",
+              "fdv_usd": "316517.6147",
+              "market_cap_usd": null,
+              "price_change_percentage": {
+                "m5": "0",
+                "m15": "0",
+                "m30": "0",
+                "h1": "0",
+                "h6": "0",
+                "h24": "0"
+              },
+              "transactions": {
+                "m5": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m15": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m30": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h1": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h6": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h24": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                }
+              },
+              "volume_usd": {
+                "m5": "0.0",
+                "m15": "0.0",
+                "m30": "0.0",
+                "h1": "0.0",
+                "h6": "0.0",
+                "h24": "0.0"
+              },
+              "reserve_in_usd": "0.5019",
+              "locked_liquidity_percentage": null
+            },
+            "relationships": {
+              "base_token": {
+                "data": {
+                  "id": "base_0xbae67daa9237a2df03a353b1c9039cb313b13224",
+                  "type": "token"
+                }
+              },
+              "quote_token": {
+                "data": {
+                  "id": "base_0x0000000000000000000000000000000000000000",
+                  "type": "token"
+                }
+              },
+              "dex": {
+                "data": {
+                  "id": "uniswap-v4-base",
+                  "type": "dex"
+                }
+              }
+            }
+          },
+          {
+            "id": "base_0xa109923f5b43cf457ecaeda3a8ee96f8b4d8f5e0f64165ac1926aff0a8d72281",
+            "type": "pool",
+            "attributes": {
+              "base_token_price_usd": "0.000344307567246756",
+              "base_token_price_native_currency": "0.000000151620188016847",
+              "quote_token_price_usd": "2475.81",
+              "quote_token_price_native_currency": "1.0",
+              "base_token_price_quote_token": "0.000000151620188",
+              "quote_token_price_base_token": "6595427.77963636",
+              "address": "0xa109923f5b43cf457ecaeda3a8ee96f8b4d8f5e0f64165ac1926aff0a8d72281",
+              "name": "LAPTOP / ETH",
+              "pool_name": "LAPTOP / ETH",
+              "pool_fee_percentage": null,
+              "pool_created_at": "2026-09-13T12:30:37Z",
+              "fdv_usd": "344307.5672",
+              "market_cap_usd": null,
+              "price_change_percentage": {
+                "m5": "0",
+                "m15": "0",
+                "m30": "0",
+                "h1": "0",
+                "h6": "0",
+                "h24": "0"
+              },
+              "transactions": {
+                "m5": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m15": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m30": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h1": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h6": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h24": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                }
+              },
+              "volume_usd": {
+                "m5": "0.0",
+                "m15": "0.0",
+                "m30": "0.0",
+                "h1": "0.0",
+                "h6": "0.0",
+                "h24": "0.0"
+              },
+              "reserve_in_usd": "0.2509",
+              "locked_liquidity_percentage": null
+            },
+            "relationships": {
+              "base_token": {
+                "data": {
+                  "id": "base_0xa919eb467383721b5b3d4e741221b942ad55802b",
+                  "type": "token"
+                }
+              },
+              "quote_token": {
+                "data": {
+                  "id": "base_0x0000000000000000000000000000000000000000",
+                  "type": "token"
+                }
+              },
+              "dex": {
+                "data": {
+                  "id": "uniswap-v4-base",
+                  "type": "dex"
+                }
+              }
+            }
+          },
+          {
+            "id": "base_0x177f12f49af0e89790298f9b6820330e17595fd57798b07f51198b2e390468eb",
+            "type": "pool",
+            "attributes": {
+              "base_token_price_usd": "0.0000840666972298006",
+              "base_token_price_native_currency": "0.0000000352639598757679",
+              "quote_token_price_usd": "2475.22",
+              "quote_token_price_native_currency": "1.0",
+              "base_token_price_quote_token": "0.00000003526395988",
+              "quote_token_price_base_token": "28357564.0263578",
+              "address": "0x177f12f49af0e89790298f9b6820330e17595fd57798b07f51198b2e390468eb",
+              "name": "ACAT / ETH 1%",
+              "pool_name": "ACAT / ETH",
+              "pool_fee_percentage": "1",
+              "pool_created_at": "2026-09-13T12:39:21Z",
+              "fdv_usd": "84066.69723",
+              "market_cap_usd": null,
+              "price_change_percentage": {
+                "m5": "0",
+                "m15": "0",
+                "m30": "0",
+                "h1": "0",
+                "h6": "0",
+                "h24": "0"
+              },
+              "transactions": {
+                "m5": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m15": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m30": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h1": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h6": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h24": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                }
+              },
+              "volume_usd": {
+                "m5": "0.0",
+                "m15": "0.0",
+                "m30": "0.0",
+                "h1": "0.0",
+                "h6": "0.0",
+                "h24": "0.0"
+              },
+              "reserve_in_usd": "529.9599",
+              "locked_liquidity_percentage": null
+            },
+            "relationships": {
+              "base_token": {
+                "data": {
+                  "id": "base_0xada6523cfd5d15b9feef5e923bd58755dfccec29",
+                  "type": "token"
+                }
+              },
+              "quote_token": {
+                "data": {
+                  "id": "base_0x0000000000000000000000000000000000000000",
+                  "type": "token"
+                }
+              },
+              "dex": {
+                "data": {
+                  "id": "uniswap-v4-base",
+                  "type": "dex"
+                }
+              }
+            }
+          },
+          {
+            "id": "base_0xd6ced335752862e652fbf5afeb5f674e7b434d6a8a933916fc968cff64a22ece",
+            "type": "pool",
+            "attributes": {
+              "base_token_price_usd": "0.0000889724092772234",
+              "base_token_price_native_currency": "0.0000000335369368606727",
+              "quote_token_price_usd": "2477.76",
+              "quote_token_price_native_currency": "1.0",
+              "base_token_price_quote_token": "0.00000003353693686",
+              "quote_token_price_base_token": "29817869.2989894",
+              "address": "0xd6ced335752862e652fbf5afeb5f674e7b434d6a8a933916fc968cff64a22ece",
+              "name": "ACAT / ETH 1%",
+              "pool_name": "ACAT / ETH",
+              "pool_fee_percentage": "1",
+              "pool_created_at": "2026-09-13T12:31:55Z",
+              "fdv_usd": "88972.40928",
+              "market_cap_usd": null,
+              "price_change_percentage": {
+                "m5": "0",
+                "m15": "0",
+                "m30": "0",
+                "h1": "0",
+                "h6": "0",
+                "h24": "0"
+              },
+              "transactions": {
+                "m5": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m15": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m30": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h1": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h6": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h24": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                }
+              },
+              "volume_usd": {
+                "m5": "0.0",
+                "m15": "0.0",
+                "m30": "0.0",
+                "h1": "0.0",
+                "h6": "0.0",
+                "h24": "0.0"
+              },
+              "reserve_in_usd": "461.7075",
+              "locked_liquidity_percentage": null
+            },
+            "relationships": {
+              "base_token": {
+                "data": {
+                  "id": "base_0x15f839ba3dfe7ab0293526d388ca108aad14ec29",
+                  "type": "token"
+                }
+              },
+              "quote_token": {
+                "data": {
+                  "id": "base_0x0000000000000000000000000000000000000000",
+                  "type": "token"
+                }
+              },
+              "dex": {
+                "data": {
+                  "id": "uniswap-v4-base",
+                  "type": "dex"
+                }
+              }
+            }
+          },
+          {
+            "id": "base_0x6c3d6d03a4c34803825300240603f2a2cee019cb61c8c560175d65e332b971c8",
+            "type": "pool",
+            "attributes": {
+              "base_token_price_usd": "0.000222298626665606",
+              "base_token_price_native_currency": "0.0000000890997310969634",
+              "quote_token_price_usd": "2512.44",
+              "quote_token_price_native_currency": "1.0",
+              "base_token_price_quote_token": "0.0000000890997311",
+              "quote_token_price_base_token": "11223378.4287378",
+              "address": "0x6c3d6d03a4c34803825300240603f2a2cee019cb61c8c560175d65e332b971c8",
+              "name": "STKLYNX / ETH",
+              "pool_name": "STKLYNX / ETH",
+              "pool_fee_percentage": null,
+              "pool_created_at": "2026-09-14T14:06:51Z",
+              "fdv_usd": "222298.6267",
+              "market_cap_usd": null,
+              "price_change_percentage": {
+                "m5": "0",
+                "m15": "0",
+                "m30": "0",
+                "h1": "0",
+                "h6": "151.809",
+                "h24": "151.809"
+              },
+              "transactions": {
+                "m5": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m15": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m30": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h1": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h6": {
+                  "buys": 142,
+                  "sells": 101,
+                  "buyers": 30,
+                  "sellers": 25
+                },
+                "h24": {
+                  "buys": 142,
+                  "sells": 101,
+                  "buyers": 30,
+                  "sellers": 25
+                }
+              },
+              "volume_usd": {
+                "m5": "0.0",
+                "m15": "0.0",
+                "m30": "0.0",
+                "h1": "0.0",
+                "h6": "134329.595134642",
+                "h24": "134329.595134642"
+              },
+              "reserve_in_usd": "0.2504",
+              "locked_liquidity_percentage": null
+            },
+            "relationships": {
+              "base_token": {
+                "data": {
+                  "id": "base_0x7afef20cb0bd3dec510c05d9e7b8542b74dc6093",
+                  "type": "token"
+                }
+              },
+              "quote_token": {
+                "data": {
+                  "id": "base_0x0000000000000000000000000000000000000000",
+                  "type": "token"
+                }
+              },
+              "dex": {
+                "data": {
+                  "id": "uniswap-v4-base",
+                  "type": "dex"
+                }
+              }
+            }
+          },
+          {
+            "id": "base_0x822ceec017af4178a55de2f4f2b1ee7ae98c8bc3ac467c5eb77aa542169a9add",
+            "type": "pool",
+            "attributes": {
+              "base_token_price_usd": "0.000219352781658983",
+              "base_token_price_native_currency": "0.0000000863167297896072",
+              "quote_token_price_usd": "2501.75",
+              "quote_token_price_native_currency": "1.0",
+              "base_token_price_quote_token": "0.00000008631672979",
+              "quote_token_price_base_token": "11585239.6451702",
+              "address": "0x822ceec017af4178a55de2f4f2b1ee7ae98c8bc3ac467c5eb77aa542169a9add",
+              "name": "AICAT / ETH",
+              "pool_name": "AICAT / ETH",
+              "pool_fee_percentage": null,
+              "pool_created_at": "2026-09-14T14:10:41Z",
+              "fdv_usd": "219352.7817",
+              "market_cap_usd": null,
+              "price_change_percentage": {
+                "m5": "0",
+                "m15": "0",
+                "m30": "0",
+                "h1": "0",
+                "h6": "148.519",
+                "h24": "148.519"
+              },
+              "transactions": {
+                "m5": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m15": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m30": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h1": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h6": {
+                  "buys": 161,
+                  "sells": 128,
+                  "buyers": 30,
+                  "sellers": 29
+                },
+                "h24": {
+                  "buys": 161,
+                  "sells": 128,
+                  "buyers": 30,
+                  "sellers": 29
+                }
+              },
+              "volume_usd": {
+                "m5": "0.0",
+                "m15": "0.0",
+                "m30": "0.0",
+                "h1": "0.0",
+                "h6": "129235.808975319",
+                "h24": "129235.808975319"
+              },
+              "reserve_in_usd": "0.0",
+              "locked_liquidity_percentage": null
+            },
+            "relationships": {
+              "base_token": {
+                "data": {
+                  "id": "base_0x203c6d355eb4354409b036f44da717b34df89ce4",
+                  "type": "token"
+                }
+              },
+              "quote_token": {
+                "data": {
+                  "id": "base_0x0000000000000000000000000000000000000000",
+                  "type": "token"
+                }
+              },
+              "dex": {
+                "data": {
+                  "id": "uniswap-v4-base",
+                  "type": "dex"
+                }
+              }
+            }
+          },
+          {
+            "id": "base_0x18d957c4bd4be5deb7f9f1f971b14936c668fc1b8e7d4b9362f1827efca60436",
+            "type": "pool",
+            "attributes": {
+              "base_token_price_usd": "0.0000824959306963746",
+              "base_token_price_native_currency": "0.0000000335821769435783",
+              "quote_token_price_usd": "2514.47",
+              "quote_token_price_native_currency": "1.0",
+              "base_token_price_quote_token": "0.00000003358217694",
+              "quote_token_price_base_token": "29777700.2866761",
+              "address": "0x18d957c4bd4be5deb7f9f1f971b14936c668fc1b8e7d4b9362f1827efca60436",
+              "name": "7Stock / ETH 1%",
+              "pool_name": "7Stock / ETH",
+              "pool_fee_percentage": "1",
+              "pool_created_at": "2026-09-14T14:09:23Z",
+              "fdv_usd": "82495.9307",
+              "market_cap_usd": null,
+              "price_change_percentage": {
+                "m5": "0",
+                "m15": "0",
+                "m30": "0",
+                "h1": "0",
+                "h6": "334.313",
+                "h24": "334.313"
+              },
+              "transactions": {
+                "m5": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m15": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m30": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h1": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h6": {
+                  "buys": 84,
+                  "sells": 65,
+                  "buyers": 40,
+                  "sellers": 33
+                },
+                "h24": {
+                  "buys": 84,
+                  "sells": 65,
+                  "buyers": 40,
+                  "sellers": 33
+                }
+              },
+              "volume_usd": {
+                "m5": "0.0",
+                "m15": "0.0",
+                "m30": "0.0",
+                "h1": "0.0",
+                "h6": "43993.0017338752",
+                "h24": "43993.0017338752"
+              },
+              "reserve_in_usd": "551.1898",
+              "locked_liquidity_percentage": null
+            },
+            "relationships": {
+              "base_token": {
+                "data": {
+                  "id": "base_0x98ce80acd6178291a52f789c5d15f7733f21ec29",
+                  "type": "token"
+                }
+              },
+              "quote_token": {
+                "data": {
+                  "id": "base_0x0000000000000000000000000000000000000000",
+                  "type": "token"
+                }
+              },
+              "dex": {
+                "data": {
+                  "id": "uniswap-v4-base",
+                  "type": "dex"
+                }
+              }
+            }
+          },
+          {
+            "id": "base_0x5bb34f693b7876c1da9f1f46f502aba0ded4a76e599d64dcb6fb768ae390bade",
+            "type": "pool",
+            "attributes": {
+              "base_token_price_usd": "0.000000794553469551994",
+              "base_token_price_native_currency": "0.000000000302974443395919",
+              "quote_token_price_usd": "2506.95",
+              "quote_token_price_native_currency": "1.0",
+              "base_token_price_quote_token": "0.0000000003029744434",
+              "quote_token_price_base_token": "3300608423.57329",
+              "address": "0x5bb34f693b7876c1da9f1f46f502aba0ded4a76e599d64dcb6fb768ae390bade",
+              "name": "COBIELOL / ETH 0.05%",
+              "pool_name": "COBIELOL / ETH",
+              "pool_fee_percentage": "0.05",
+              "pool_created_at": "2026-09-14T14:09:03Z",
+              "fdv_usd": "79455.34696",
+              "market_cap_usd": null,
+              "price_change_percentage": {
+                "m5": "0",
+                "m15": "0",
+                "m30": "0",
+                "h1": "0",
+                "h6": "1296.925",
+                "h24": "1296.925"
+              },
+              "transactions": {
+                "m5": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m15": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "m30": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h1": {
+                  "buys": 0,
+                  "sells": 0,
+                  "buyers": 0,
+                  "sellers": 0
+                },
+                "h6": {
+                  "buys": 99,
+                  "sells": 35,
+                  "buyers": 80,
+                  "sellers": 23
+                },
+                "h24": {
+                  "buys": 99,
+                  "sells": 35,
+                  "buyers": 80,
+                  "sellers": 23
+                }
+              },
+              "volume_usd": {
+                "m5": "0.0",
+                "m15": "0.0",
+                "m30": "0.0",
+                "h1": "0.0",
+                "h6": "49308.1112192979",
+                "h24": "49308.1112192979"
+              },
+              "reserve_in_usd": "30.2832",
+              "locked_liquidity_percentage": null
+            },
+            "relationships": {
+              "base_token": {
+                "data": {
+                  "id": "base_0xb200000000000000000000f7200de91e11dd7ecd",
+                  "type": "token"
+                }
+              },
+              "quote_token": {
+                "data": {
+                  "id": "base_0x0000000000000000000000000000000000000000",
+                  "type": "token"
+                }
+              },
+              "dex": {
+                "data": {
+                  "id": "uniswap-v4-base",
+                  "type": "dex"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

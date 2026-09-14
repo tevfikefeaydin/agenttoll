@@ -268,3 +268,39 @@ test("a known explorer scam is still reported when the other safety providers ar
   assert.ok(result.failed.includes("deployer"));
   assert.ok(result.unchecked.includes("owner-powers"));
 });
+
+test("an explorer outage uses the independent creator fallback without a keyed retry", async (t) => {
+  const address = `0x${(nextToken++).toString(16).padStart(40, "0")}`;
+  t.mock.property(process, "env", { ...process.env, BLOCKSCOUT_API_KEY: "test-only-key" });
+  let explorerCalls = 0;
+  t.mock.method(globalThis, "fetch", async (input: string | URL | Request, init?: RequestInit) => {
+    const url = String(input);
+    if (url.includes("goplus")) return Response.json({ code: 1, result: { [address]: cleanGoPlus() } });
+    if (url.includes("honeypot")) return Response.json(cleanHoneypot());
+    if (url.includes("blockscout")) { explorerCalls++; return new Response("Unavailable", { status: 503 }); }
+    const { method } = JSON.parse(String(init?.body));
+    return Response.json({ result: method === "eth_getCode" ? "0x6000" : "0x1e" });
+  });
+  const result = await getTokenSafety(address);
+  assert.equal(explorerCalls, 1);
+  assert.equal(result.deployer?.address, CREATOR);
+  assert.equal(result.sourceStatus["blockscout+rpc"].status, "unavailable");
+  assert.equal(check(result, "deployer").complete, false);
+  assert.ok(check(result, "deployer").missing.includes("scam-flag"));
+});
+
+test("creator fallback reports partially readable RPC fields as partial source coverage", async (t) => {
+  const address = `0x${(nextToken++).toString(16).padStart(40, "0")}`;
+  t.mock.method(globalThis, "fetch", async (input: string | URL | Request, init?: RequestInit) => {
+    const url = String(input);
+    if (url.includes("goplus")) return Response.json({ code: 1, result: { [address]: cleanGoPlus() } });
+    if (url.includes("honeypot")) return Response.json(cleanHoneypot());
+    if (url.includes("blockscout")) return Response.json({ creator_address_hash: null, is_scam: false });
+    const { method } = JSON.parse(String(init?.body));
+    return Response.json({ result: method === "eth_getCode" ? "0x" : "invalid-quantity" });
+  });
+  const result = await getTokenSafety(address);
+  assert.equal(result.sourceStatus["goplus+rpc"].status, "partial");
+  assert.ok(result.sourceStatus["goplus+rpc"].issues.includes("rpc.transaction-count"));
+  assert.equal(check(result, "deployer").status, "unknown");
+});

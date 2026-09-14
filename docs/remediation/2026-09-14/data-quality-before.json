@@ -1,0 +1,533 @@
+{
+  "at": "2026-09-14T16:11:55.250Z",
+  "environment": "local no Blockscout key",
+  "scorecardMs": 968,
+  "safetyMs": 2456,
+  "scorecard": {
+    "chain": "base",
+    "windowDays": 7,
+    "trackRecord": {
+      "daysCovered": 7,
+      "firstSnapshot": "2026-08-06",
+      "lastSnapshot": "2026-09-14"
+    },
+    "coverage": {
+      "requestedDays": 7,
+      "windowBasis": "latest-published-snapshots",
+      "snapshotsListed": 7,
+      "snapshotsLoaded": 7,
+      "missingSnapshotDates": [],
+      "windowFirstSnapshot": "2026-09-08",
+      "windowLastSnapshot": "2026-09-14",
+      "poolsObserved": 26,
+      "poolsWithoutSafety": 4,
+      "poolsWithoutToken": 0,
+      "tokensObserved": 26,
+      "tokensPriced": 5,
+      "priceBatchesFailed": 0,
+      "complete": false,
+      "note": "Snapshot cohorts are selected radar samples, not all Base launches. Missing snapshots, missing safety checks and unavailable quotes are reported separately; elapsed holding periods vary by first sighting."
+    },
+    "provenance": {
+      "revision": "d7d03360514aaabd5b004698f926b7c29f0e1b0b",
+      "commit": "https://github.com/tevfikefeaydin/agenttoll/commit/d7d03360514aaabd5b004698f926b7c29f0e1b0b",
+      "index": "https://raw.githubusercontent.com/tevfikefeaydin/agenttoll/d7d03360514aaabd5b004698f926b7c29f0e1b0b/data/scout/index.json",
+      "integrity": "Git revision pins the published bytes. A payment transaction does not authenticate a snapshot hash or its capture time."
+    },
+    "cohorts": {
+      "high-risk": {
+        "count": 4,
+        "priced": 1,
+        "unavailable": 3,
+        "liquidityGone": 0,
+        "medianChangePct": -99.8
+      },
+      "caution": {
+        "count": 15,
+        "priced": 3,
+        "unavailable": 12,
+        "liquidityGone": 0,
+        "medianChangePct": 12
+      },
+      "insufficient-data": {
+        "count": 3,
+        "priced": 0,
+        "unavailable": 3,
+        "liquidityGone": 0,
+        "medianChangePct": null
+      },
+      "clear": {
+        "count": 0,
+        "priced": 0,
+        "unavailable": 0,
+        "liquidityGone": 0,
+        "medianChangePct": null
+      },
+      "unassessed": {
+        "count": 4,
+        "priced": 1,
+        "unavailable": 3,
+        "liquidityGone": 0,
+        "medianChangePct": 73
+      }
+    },
+    "tokens": [
+      {
+        "token": "0xaf46d9d552b3b05b6eabb3342c0a070ed850ce47",
+        "name": "BODEN / WETH 0.01%",
+        "flaggedOn": "2026-09-08",
+        "verdictThen": "high-risk",
+        "liquidityThenUsd": 40303,
+        "liquidityNowUsd": null,
+        "priceChangePct": null,
+        "liquidityGone": null,
+        "outcome": "unavailable"
+      },
+      {
+        "token": "0xa9f98c77b0d1b88d754d015d11ce1679cbc32d60",
+        "name": "NOVA / WETH",
+        "flaggedOn": "2026-09-08",
+        "verdictThen": "caution",
+        "liquidityThenUsd": 88518,
+        "liquidityNowUsd": null,
+        "priceChangePct": null,
+        "liquidityGone": null,
+        "outcome": "unavailable"
+      },
+      {
+        "token": "0xb2000000000000000000006ff9dc5cc75cf35562",
+        "name": "NOVA / ETH 0.3%",
+        "flaggedOn": "2026-09-08",
+        "verdictThen": "caution",
+        "liquidityThenUsd": 16138,
+        "liquidityNowUsd": null,
+        "priceChangePct": null,
+        "liquidityGone": null,
+        "outcome": "unavailable"
+      },
+      {
+        "token": "0x28617dc3971fcefb7669d1ae87f980cc580d3470",
+        "name": "1KTO100M / WETH",
+        "flaggedOn": "2026-09-08",
+        "verdictThen": "high-risk",
+        "liquidityThenUsd": 18965,
+        "liquidityNowUsd": null,
+        "priceChangePct": null,
+        "liquidityGone": null,
+        "outcome": "unavailable"
+      },
+      {
+        "token": "0x5c40212d8a2ab3842f13da2618234f925b8b6bed",
+        "name": "JAIL / WETH",
+        "flaggedOn": "2026-09-09",
+        "verdictThen": "caution",
+        "liquidityThenUsd": 75000,
+        "liquidityNowUsd": null,
+        "priceChangePct": null,
+        "liquidityGone": null,
+        "outcome": "unavailable"
+      },
+      {
+        "token": "0xbfdbec98f48303ce28467eba98cb01c010adb181",
+        "name": "Laptop / ETH",
+        "flaggedOn": "2026-09-10",
+        "verdictThen": "caution",
+        "liquidityThenUsd": 22238,
+        "liquidityNowUsd": null,
+        "priceChangePct": null,
+        "liquidityGone": null,
+        "outcome": "unavailable"
+      },
+      {
+        "token": "0xb200000000000000000000627402876e4966c111",
+        "name": "FYC / ETH 0.3%",
+        "flaggedOn": "2026-09-10",
+        "verdictThen": "caution",
+        "liquidityThenUsd": 21910,
+        "liquidityNowUsd": null,
+        "priceChangePct": null,
+        "liquidityGone": null,
+        "outcome": "unavailable"
+      },
+      {
+        "token": "0xb2000000000000000000007ad265b4c5773401fa",
+        "name": "QUOTRON / ETH 0.3%",
+        "flaggedOn": "2026-09-10",
+        "verdictThen": "caution",
+        "liquidityThenUsd": 19216,
+        "liquidityNowUsd": null,
+        "priceChangePct": null,
+        "liquidityGone": null,
+        "outcome": "unavailable"
+      },
+      {
+        "token": "0x42a6920eb6fb4aee9fba6c0e92e672f45261d139",
+        "name": "Tony / WETH",
+        "flaggedOn": "2026-09-10",
+        "verdictThen": "caution",
+        "liquidityThenUsd": 82514,
+        "liquidityNowUsd": null,
+        "priceChangePct": null,
+        "liquidityGone": null,
+        "outcome": "unavailable"
+      },
+      {
+        "token": "0xfbc5f0ec119389935f4ac9594a532ece5f6693d9",
+        "name": "BABYSTONK / ETH",
+        "flaggedOn": "2026-09-11",
+        "verdictThen": "insufficient-data",
+        "liquidityThenUsd": 21955,
+        "liquidityNowUsd": null,
+        "priceChangePct": null,
+        "liquidityGone": null,
+        "outcome": "unavailable"
+      },
+      {
+        "token": "0xb2000000000000000000005caa4a1572236b418b",
+        "name": "Flybook / ETH 0.3%",
+        "flaggedOn": "2026-09-11",
+        "verdictThen": "unassessed",
+        "liquidityThenUsd": 23837,
+        "liquidityNowUsd": null,
+        "priceChangePct": null,
+        "liquidityGone": null,
+        "outcome": "unavailable"
+      },
+      {
+        "token": "0xb200000000000000000000cec38196d6d657d76d",
+        "name": "Loinbase / ETH 0.3%",
+        "flaggedOn": "2026-09-11",
+        "verdictThen": "unassessed",
+        "liquidityThenUsd": 16633,
+        "liquidityNowUsd": null,
+        "priceChangePct": null,
+        "liquidityGone": null,
+        "outcome": "unavailable"
+      },
+      {
+        "token": "0x512adccbe2e9093b810d04e5e5b60c303f3de418",
+        "name": "Flybook / WETH",
+        "flaggedOn": "2026-09-11",
+        "verdictThen": "caution",
+        "liquidityThenUsd": 76000,
+        "liquidityNowUsd": null,
+        "priceChangePct": null,
+        "liquidityGone": null,
+        "outcome": "unavailable"
+      },
+      {
+        "token": "0xde1305ab4d75e6f676414abcade519ae7917b466",
+        "name": "LAPTOP / ETH",
+        "flaggedOn": "2026-09-12",
+        "verdictThen": "insufficient-data",
+        "liquidityThenUsd": 24534,
+        "liquidityNowUsd": null,
+        "priceChangePct": null,
+        "liquidityGone": null,
+        "outcome": "unavailable"
+      },
+      {
+        "token": "0x94b118a0c7f873583e0a1116490ddbb542b20513",
+        "name": "S&amp;P 500 / ETH",
+        "flaggedOn": "2026-09-12",
+        "verdictThen": "insufficient-data",
+        "liquidityThenUsd": 23557,
+        "liquidityNowUsd": null,
+        "priceChangePct": null,
+        "liquidityGone": null,
+        "outcome": "unavailable"
+      },
+      {
+        "token": "0xb2000000000000000000000576ef52de9167d463",
+        "name": "egg / ETH 0.05%",
+        "flaggedOn": "2026-09-12",
+        "verdictThen": "unassessed",
+        "liquidityThenUsd": 23108,
+        "liquidityNowUsd": null,
+        "priceChangePct": null,
+        "liquidityGone": null,
+        "outcome": "unavailable"
+      },
+      {
+        "token": "0x22f79d449ea1201f4875956c45f1330a983fec29",
+        "name": "CMC / ETH 1%",
+        "flaggedOn": "2026-09-12",
+        "verdictThen": "caution",
+        "liquidityThenUsd": 17922,
+        "liquidityNowUsd": null,
+        "priceChangePct": null,
+        "liquidityGone": null,
+        "outcome": "unavailable"
+      },
+      {
+        "token": "0xbae67daa9237a2df03a353b1c9039cb313b13224",
+        "name": "LAPTOP / ETH",
+        "flaggedOn": "2026-09-13",
+        "verdictThen": "caution",
+        "liquidityThenUsd": 22294,
+        "liquidityNowUsd": null,
+        "priceChangePct": null,
+        "liquidityGone": null,
+        "outcome": "unavailable"
+      },
+      {
+        "token": "0xa919eb467383721b5b3d4e741221b942ad55802b",
+        "name": "LAPTOP / ETH",
+        "flaggedOn": "2026-09-13",
+        "verdictThen": "high-risk",
+        "liquidityThenUsd": 25711,
+        "liquidityNowUsd": null,
+        "priceChangePct": null,
+        "liquidityGone": null,
+        "outcome": "unavailable"
+      },
+      {
+        "token": "0xada6523cfd5d15b9feef5e923bd58755dfccec29",
+        "name": "ACAT / ETH 1%",
+        "flaggedOn": "2026-09-13",
+        "verdictThen": "caution",
+        "liquidityThenUsd": 16244,
+        "liquidityNowUsd": null,
+        "priceChangePct": null,
+        "liquidityGone": null,
+        "outcome": "unavailable"
+      },
+      {
+        "token": "0x15f839ba3dfe7ab0293526d388ca108aad14ec29",
+        "name": "ACAT / ETH 1%",
+        "flaggedOn": "2026-09-13",
+        "verdictThen": "caution",
+        "liquidityThenUsd": 16160,
+        "liquidityNowUsd": null,
+        "priceChangePct": null,
+        "liquidityGone": null,
+        "outcome": "unavailable"
+      },
+      {
+        "token": "0xb095274743941e953c746f9c228da9c18bb6ec29",
+        "name": "LAPTOP / USDC 22.22%",
+        "flaggedOn": "2026-09-09",
+        "verdictThen": "high-risk",
+        "liquidityThenUsd": 32148,
+        "liquidityNowUsd": 1574824,
+        "priceChangePct": -99.8,
+        "liquidityGone": false,
+        "outcome": "priced"
+      },
+      {
+        "token": "0x7afef20cb0bd3dec510c05d9e7b8542b74dc6093",
+        "name": "STKLYNX / ETH",
+        "flaggedOn": "2026-09-14",
+        "verdictThen": "caution",
+        "liquidityThenUsd": 19154,
+        "liquidityNowUsd": 20034,
+        "priceChangePct": 1.6,
+        "liquidityGone": false,
+        "outcome": "priced"
+      },
+      {
+        "token": "0x98ce80acd6178291a52f789c5d15f7733f21ec29",
+        "name": "7Stock / ETH 1%",
+        "flaggedOn": "2026-09-14",
+        "verdictThen": "caution",
+        "liquidityThenUsd": 16406,
+        "liquidityNowUsd": 15545,
+        "priceChangePct": 12,
+        "liquidityGone": false,
+        "outcome": "priced"
+      },
+      {
+        "token": "0x203c6d355eb4354409b036f44da717b34df89ce4",
+        "name": "AICAT / ETH",
+        "flaggedOn": "2026-09-14",
+        "verdictThen": "caution",
+        "liquidityThenUsd": 17615,
+        "liquidityNowUsd": 19828,
+        "priceChangePct": 23,
+        "liquidityGone": false,
+        "outcome": "priced"
+      },
+      {
+        "token": "0xb200000000000000000000f7200de91e11dd7ecd",
+        "name": "COBIELOL / ETH 0.05%",
+        "flaggedOn": "2026-09-14",
+        "verdictThen": "unassessed",
+        "liquidityThenUsd": 22376,
+        "liquidityNowUsd": 29869,
+        "priceChangePct": 73,
+        "liquidityGone": false,
+        "outcome": "priced"
+      }
+    ],
+    "methodology": "Each token is judged from its FIRST appearance in the available window: verdict and price then, deepest observed provider-pair price and liquidity now. liquidityGone=true means observed liquidity below $100, false means at least $100, null means unavailable. Missing pairs are not losses. Medians include only priced rows and use variable holding periods; snapshots are samples pinned to the stated git revision.",
+    "disclaimer": "A track record, not investment advice. Cohort medians over small counts are noisy — read the per-token rows.",
+    "at": "2026-09-14T16:11:52.793Z"
+  },
+  "safety": {
+    "chain": "base",
+    "token": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+    "name": "USD Coin",
+    "symbol": "USDC",
+    "verdict": "caution",
+    "failed": [],
+    "warnings": [
+      "deployer"
+    ],
+    "unchecked": [
+      "owner-powers",
+      "liquidity"
+    ],
+    "checks": [
+      {
+        "id": "honeypot",
+        "status": "pass",
+        "detail": "A simulated buy and sell both succeeded with an explicit negative honeypot result",
+        "complete": true,
+        "missing": [],
+        "sources": [
+          "goplus",
+          "honeypot.is"
+        ],
+        "conflicts": []
+      },
+      {
+        "id": "taxes",
+        "status": "pass",
+        "detail": "Buy tax 0%, sell tax 0%",
+        "complete": true,
+        "missing": [],
+        "sources": [
+          "goplus",
+          "honeypot.is"
+        ],
+        "conflicts": []
+      },
+      {
+        "id": "verified",
+        "status": "pass",
+        "detail": "Contract source is verified and public",
+        "complete": true,
+        "missing": [],
+        "sources": [
+          "goplus",
+          "honeypot.is"
+        ],
+        "conflicts": []
+      },
+      {
+        "id": "owner-powers",
+        "status": "unknown",
+        "detail": "Some contract permissions could not be read",
+        "complete": false,
+        "missing": [
+          "is_mintable",
+          "transfer_pausable",
+          "is_blacklisted",
+          "slippage_modifiable",
+          "personal_slippage_modifiable",
+          "can_take_back_ownership",
+          "hidden_owner",
+          "selfdestruct",
+          "trading_cooldown",
+          "anti_whale_modifiable",
+          "owner_change_balance"
+        ],
+        "sources": [
+          "goplus"
+        ],
+        "conflicts": []
+      },
+      {
+        "id": "concentration",
+        "status": "pass",
+        "detail": "Top 10 holders account for 26.1% of supply; 18.7% is confirmed neither locked nor contract-held",
+        "complete": true,
+        "missing": [],
+        "sources": [
+          "goplus"
+        ],
+        "conflicts": []
+      },
+      {
+        "id": "liquidity",
+        "status": "unknown",
+        "detail": "Liquidity ownership unavailable",
+        "complete": false,
+        "missing": [
+          "top-liquidity-provider-list",
+          "liquidity-share-total"
+        ],
+        "sources": [],
+        "conflicts": []
+      },
+      {
+        "id": "creator-stake",
+        "status": "pass",
+        "detail": "The creator holds 0% of supply",
+        "complete": true,
+        "missing": [],
+        "sources": [
+          "goplus"
+        ],
+        "conflicts": []
+      },
+      {
+        "id": "deployer",
+        "status": "warn",
+        "detail": "The deployer is a wallet with 11 transactions, first active 1123d ago and holds 0.07371 ETH — lightly used",
+        "complete": true,
+        "missing": [],
+        "sources": [
+          "blockscout+rpc"
+        ],
+        "conflicts": []
+      }
+    ],
+    "coverage": {
+      "complete": false,
+      "completedChecks": 6,
+      "totalChecks": 8
+    },
+    "deployer": {
+      "address": "0x6aaff8af0ae8017725312c388ba3745dfe91185b",
+      "basis": "contract-creator",
+      "isContract": false,
+      "txCount": 11,
+      "balanceEth": 0.07371418678166566,
+      "firstSeen": "2023-08-18T18:23:31.000000Z",
+      "ageHours": 26950,
+      "flaggedScam": false
+    },
+    "holderCount": 10506588,
+    "listedOnCex": [
+      "Binance"
+    ],
+    "sources": [
+      "goplus",
+      "honeypot.is",
+      "blockscout+rpc"
+    ],
+    "sourceStatus": {
+      "goplus": {
+        "status": "ok",
+        "fetchedAt": "2026-09-14T16:11:53.196Z",
+        "durationMs": 402,
+        "issues": []
+      },
+      "honeypot.is": {
+        "status": "ok",
+        "fetchedAt": "2026-09-14T16:11:53.021Z",
+        "durationMs": 225,
+        "issues": []
+      },
+      "blockscout+rpc": {
+        "status": "ok",
+        "fetchedAt": "2026-09-14T16:11:55.249Z",
+        "durationMs": 2452,
+        "issues": []
+      }
+    },
+    "disclaimer": "Automated checks against public data, not investment advice. Passing every check does not make a token safe.",
+    "at": "2026-09-14T16:11:55.250Z"
+  }
+}

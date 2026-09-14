@@ -1,0 +1,46 @@
+✖ Basename counts actual RPC attempts and a cache hit performs no upstream work (35.6681ms)
+✖ caller cancellation stops the underlying Basename RPC and further fallback attempts (8.3279ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3358.4277
+
+✖ failing tests:
+
+test at tests\basename.test.ts:1:3090
+✖ Basename counts actual RPC attempts and a cache hit performs no upstream work (35.6681ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  0 !== 4
+
+      at TestContext.<anonymous> (D:\Çalışma Alanı\01_Projeler\_Worktrees\agenttoll-remediation-20260914\tests\basename.test.ts:78:10)
+      at async Test.run (node:internal/test_runner/test:1113:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:358:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 4,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\basename.test.ts:1:3733
+✖ caller cancellation stops the underlying Basename RPC and further fallback attempts (8.3279ms)
+  AssertionError [ERR_ASSERTION]: The network operation must stop with the request
+
+  false !== true
+
+      at TestContext.<anonymous> (D:\Çalışma Alanı\01_Projeler\_Worktrees\agenttoll-remediation-20260914\tests\basename.test.ts:106:10)
+      at async Test.run (node:internal/test_runner/test:1113:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

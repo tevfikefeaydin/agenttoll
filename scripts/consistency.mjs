@@ -25,6 +25,9 @@ for (const name of ["get_payment_quote", "get_payment_budget"]) if (!new RegExp(
 const pkg = JSON.parse(read("mcp/package.json"));
 const registry = JSON.parse(read("mcp/server.json"));
 if (registry.version !== pkg.version || registry.packages.some(p => p.version !== pkg.version)) problems.push("MCP registry version differs from package metadata");
+for (const file of ["README.md", "public/llms.txt", "public/index.html", "mcp/README.md"]) {
+  if (!read(file).includes(`agenttoll-mcp@${pkg.version}`)) problems.push(`${file}: install example must pin the tested MCP version ${pkg.version}`);
+}
 const prices = ENDPOINTS.map(e => Number(e.price.slice(1)));
 for (const file of ["public/llms.txt", "README.md", "mcp/README.md", "public/index.html", "mcp/server.json"]) {
   const text = read(file);

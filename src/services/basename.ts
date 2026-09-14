@@ -11,6 +11,7 @@ import {
 import { base } from "viem/chains";
 import { cached } from "./cache.js";
 import { badRequest } from "./errors.js";
+import { requestContext } from "../request-context.js";
 
 const RPC_TIMEOUT_MS = 1_500;
 const LOOKUP_TIMEOUT_MS = 6_000;
@@ -27,8 +28,12 @@ function resolverClient(signal: AbortSignal) {
           timeout: RPC_TIMEOUT_MS,
           retryCount: 0,
           fetchFn: (input, init) => {
-            const combined = init?.signal ? AbortSignal.any([signal, init.signal]) : signal;
+            const context = requestContext.getStore();
+            const signals = [signal, init?.signal, context?.signal]
+              .filter((value): value is AbortSignal => Boolean(value));
+            const combined = AbortSignal.any(signals);
             combined.throwIfAborted();
+            if (context) context.upstreamCalls++;
             return fetch(input, { ...init, signal: combined });
           },
         }),

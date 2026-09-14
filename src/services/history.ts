@@ -100,7 +100,7 @@ export async function getRadarHistory(dateRaw?: string) {
 // ---------------------------------------------------------------------------
 
 /** Current prices for a set of tokens, one batched request. */
-interface CurrentPrice { priceUsd: number | null; liquidityUsd: number | null }
+interface CurrentPrice { priceUsd: number | null; liquidityUsd: number | null; source: string; pool: string | null }
 
 const positive = (value: unknown): number | null => {
   const n = typeof value === "number" || (typeof value === "string" && value.trim()) ? Number(value) : NaN;
@@ -111,7 +111,7 @@ const liquidity = (value: unknown): number | null => {
   return Number.isFinite(n) && n >= 0 ? n : null;
 };
 
-async function currentPrices(tokens: string[]) {
+async function currentPrices(tokens: string[], snapshotPools: SnapshotPool[]) {
   const out = new Map<string, CurrentPrice>();
   let failedBatches = 0;
   // DexScreener batches 30 addresses per call and reports pairs, not tokens;
@@ -120,6 +120,7 @@ async function currentPrices(tokens: string[]) {
     const batch = tokens.slice(i, i + 30);
     let pairs: {
       chainId?: string;
+      pairAddress?: string;
       baseToken?: { address?: string };
       priceUsd?: string;
       liquidity?: { usd?: number };
@@ -141,10 +142,56 @@ async function currentPrices(tokens: string[]) {
       const liq = liquidity(p.liquidity?.usd);
       if (!addr || !batch.includes(addr) || (p.chainId && p.chainId !== "base")) continue;
       const prev = out.get(addr);
-      if (!prev || (liq ?? -1) > (prev.liquidityUsd ?? -1)) out.set(addr, { priceUsd: price, liquidityUsd: liq });
+      if (!prev || (liq ?? -1) > (prev.liquidityUsd ?? -1)) out.set(addr, {
+        priceUsd: price, liquidityUsd: liq, source: "dexscreener", pool: typeof p.pairAddress === "string" ? p.pairAddress : null,
+      });
     }
   }
-  return { prices: out, failedBatches };
+  // The token index omits many older pools. Their exact snapshot pool IDs can
+  // still be read from GeckoTerminal without guessing a price or treating a
+  // missing pair as zero liquidity. Query only incomplete primary observations.
+  const missing = new Set(tokens.filter(token => out.get(token)?.priceUsd == null || out.get(token)?.liquidityUsd == null));
+  const pools = [...new Set(snapshotPools.filter(p => typeof p.token === "string" && missing.has(p.token.toLowerCase()))
+    .map(p => typeof p.pool === "string" ? p.pool.toLowerCase() : "").filter(p => /^0x(?:[0-9a-f]{40}|[0-9a-f]{64})$/.test(p)))];
+  // At most four parallel public requests (30 IDs each), even for oversized
+  // historical files. No retry; the shared fetch also honors the caller's deadline.
+  const bounded = pools.slice(0, 120);
+  let fallbackBatchesFailed = 0;
+  const obj = (v: unknown): Record<string, unknown> | null => v !== null && typeof v === "object" && !Array.isArray(v) ? v as Record<string, unknown> : null;
+  await Promise.all(Array.from({ length: Math.ceil(bounded.length / 30) }, async (_, i) => {
+    const batch = bounded.slice(i * 30, i * 30 + 30);
+    try {
+      const res = await fetchWithTimeout(`https://api.geckoterminal.com/api/v2/networks/base/pools/multi/${batch.join(",")}`, {}, 4000);
+      if (!res.ok) throw new Error(`Pool source returned ${res.status}`);
+      const data = obj(await res.json())?.data;
+      if (!Array.isArray(data)) throw new Error("Invalid pool source response");
+      for (const raw of data) {
+        const p = obj(raw);
+        const attributes = obj(p?.attributes);
+        const pool = typeof attributes?.address === "string" ? attributes.address.toLowerCase() : "";
+        if (p?.type !== "pool" || p.id !== `base_${pool}` || !batch.includes(pool)) continue;
+        const relationships = obj(p.relationships);
+        for (const side of ["base", "quote"] as const) {
+          const related = obj(obj(relationships?.[`${side}_token`])?.data);
+          const id = related?.id;
+          if (typeof id !== "string" || !/^base_0x[0-9a-fA-F]{40}$/.test(id)) continue;
+          const token = id.slice(5).toLowerCase();
+          if (!missing.has(token) || !snapshotPools.some(p => typeof p.pool === "string" && p.pool.toLowerCase() === pool && typeof p.token === "string" && p.token.toLowerCase() === token)) continue;
+          const priceUsd = positive(attributes?.[`${side}_token_price_usd`]);
+          const liquidityUsd = liquidity(attributes?.reserve_in_usd);
+          const previous = out.get(token);
+          if (!previous || (liquidityUsd ?? -1) > (previous.liquidityUsd ?? -1) ||
+            (liquidityUsd === previous.liquidityUsd && previous.priceUsd === null && priceUsd !== null)) {
+            out.set(token, { priceUsd, liquidityUsd, source: "geckoterminal", pool });
+          }
+        }
+      }
+    } catch {
+      requestContext.getStore()?.signal.throwIfAborted();
+      fallbackBatchesFailed++;
+    }
+  }));
+  return { prices: out, failedBatches, fallbackBatchesFailed, fallbackPoolsSkipped: pools.length - bounded.length };
 }
 
 function median(values: number[]): number | null {
@@ -201,7 +248,7 @@ export async function getScorecard(daysRaw?: string) {
     }
 
     const tokens = [...seen.keys()];
-    const now = await currentPrices(tokens);
+    const now = await currentPrices(tokens, snapshots.flatMap(snapshot => snapshot?.pools ?? []));
 
     const changes = new Map<string, number | null>();
     const entries = tokens.map((token) => {
@@ -222,6 +269,8 @@ export async function getScorecard(daysRaw?: string) {
         verdictThen: then.verdict,
         liquidityThenUsd: liquidity(then.thenLiquidityUsd) === null ? null : Math.round(then.thenLiquidityUsd),
         liquidityNowUsd: cur?.liquidityUsd == null ? null : Math.round(cur.liquidityUsd),
+        priceSource: cur?.source ?? null,
+        pricePool: cur?.pool ?? null,
         priceChangePct: measuredChange === null ? null : Number(measuredChange.toFixed(1)),
         liquidityGone: gone,
         outcome: gone === true ? "low-observed-liquidity" : measuredChange === null ? "unavailable" : "priced",
@@ -256,6 +305,8 @@ export async function getScorecard(daysRaw?: string) {
         tokensObserved: entries.length,
         tokensPriced: entries.filter((e) => e.priceChangePct !== null).length,
         priceBatchesFailed: now.failedBatches,
+        fallbackPriceBatchesFailed: now.fallbackBatchesFailed,
+        fallbackPoolsSkipped: now.fallbackPoolsSkipped,
         complete: false,
         note: "Snapshot cohorts are selected radar samples, not all Base launches. Missing snapshots, missing safety checks and unavailable quotes are reported separately; elapsed holding periods vary by first sighting.",
       },
@@ -269,7 +320,7 @@ export async function getScorecard(daysRaw?: string) {
       },
       tokens: entries.sort((a, b) => (a.priceChangePct ?? -101) - (b.priceChangePct ?? -101)),
       methodology:
-        "Each token is judged from its FIRST appearance in the available window: verdict and price then, deepest observed provider-pair price and liquidity now. liquidityGone=true means observed liquidity below $100, false means at least $100, null means unavailable. Missing pairs are not losses. Medians include only priced rows and use variable holding periods; snapshots are samples pinned to the stated git revision.",
+        "Each token is judged from its FIRST appearance in the available window: verdict and price then, deepest observed DexScreener pair now, with GeckoTerminal snapshot-pool observations for missing data. Each row names its observed source and pool; provider retrieval does not establish the last trade time. liquidityGone=true means observed liquidity below $100, false means at least $100, null means unavailable. Missing pairs are not losses. Medians include only priced rows and use variable holding periods; snapshots are samples pinned to the stated git revision.",
       disclaimer:
         "A track record, not investment advice. Cohort medians over small counts are noisy — read the per-token rows.",
       at: new Date().toISOString(),

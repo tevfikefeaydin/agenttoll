@@ -62,6 +62,7 @@
     --sans: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", sans-serif;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  [hidden] { display: none !important; }
   html { scroll-behavior: smooth; }
   body {
     background: var(--bg);
@@ -331,7 +332,8 @@
         <h3>Were we right?</h3>
         <p>Every day a CI job buys one scout call and commits the result to public git,
           with the Base transaction that paid for it. <code>/api/base/scorecard</code>
-          scores yesterday's verdicts against today's prices.</p></div>
+          compares selected historical verdicts with available current observations,
+          and reports missing data.</p></div>
     </div>
   </div>
 </section>
@@ -503,7 +505,7 @@ curl -i <span class="s">"https://agenttoll.app/api/watch/radar"</span>
   <span class="s">"mcpServers"</span>: {
     <span class="s">"agenttoll"</span>: {
       <span class="s">"command"</span>: <span class="s">"npx"</span>,
-      <span class="s">"args"</span>: [<span class="s">"-y"</span>, <span class="s">"agenttoll-mcp"</span>]
+      <span class="s">"args"</span>: [<span class="s">"-y"</span>, <span class="s">"agenttoll-mcp@0.14.0"</span>]
     }
   }
 }</pre>
@@ -511,6 +513,9 @@ curl -i <span class="s">"https://agenttoll.app/api/watch/radar"</span>
       <div class="card rv">
         <div class="ico">🧰</div>
         <h3>23 tools, start with a free quote</h3>
+        <p>Use <code>agenttoll-mcp@0.14.0</code> or newer. If you installed 0.13.0 or
+          earlier, update your MCP configuration and restart it to receive the free
+          tools and payment budget controls.</p>
         <p><code>get_price</code>, <code>get_base_gas</code>, <code>get_trending</code>,
           <code>get_base_token_price</code>, <code>get_base_address_info</code>,
           <code>get_fear_greed</code>, <code>get_base_trending_pools</code>,
@@ -536,18 +541,19 @@ curl -i <span class="s">"https://agenttoll.app/api/watch/radar"</span>
     <h2 class="rv">Numbers we can't fake, data we can't leak</h2>
     <div class="grid g3">
       <div class="card rv"><div class="ico">⛓️</div>
-        <h3>Revenue read from the chain</h3>
+        <h3>Transfers read from the chain</h3>
         <p><code>/api/stats</code> counts the actual USDC transfers to our address on Base,
-          and separates our own test wallet from real payers. Not self-reported — verify the
-          same transactions on BaseScan.</p></div>
+          and excludes known operator wallets from the external count. Transfers can include
+          tests and unsolicited payments; they do not establish API sales or unique customers.</p></div>
       <div class="card rv"><div class="ico">🔒</div>
-        <h3>Nothing to leak</h3>
+        <h3>No account setup</h3>
         <p>No accounts, no API keys, no sessions. Even the watch endpoints keep the cursor on
           your side, not ours.</p></div>
       <div class="card rv"><div class="ico">🧾</div>
-        <h3>Failed requests aren't charged</h3>
-        <p>Settlement happens only after the endpoint returns your data. If an upstream is
-          down you get an error — and keep your USDC.</p></div>
+        <h3>Data errors before settlement aren't billed</h3>
+        <p>Settlement starts after the data handler succeeds. A connection loss or timeout
+          after signing can leave the payment outcome unknown; check your receipt and wallet
+          before retrying.</p></div>
       <div class="card rv"><div class="ico">🔁</div>
         <h3>Several sources per endpoint</h3>
         <p>Prices fall through CoinGecko → Binance → Coinbase, Base tokens through

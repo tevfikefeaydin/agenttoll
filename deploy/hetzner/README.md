@@ -14,6 +14,45 @@ The existing `altyapi-caddy-1` container owns ports 80 and 443 and joins
 network. Application port 4021 is available only inside that network, with no
 published host port. Existing containers on this network are trusted peers.
 
+## Read-only monitoring
+
+After deploying a release containing `dist/operations-data.js`, install the reviewed
+`monitor.py`, `agenttoll-monitor.service` and `agenttoll-monitor.timer` files separately
+from the application controller. These are operator-owned host files, not executed
+automatically from fetched source.
+
+```sh
+install -d -m 0700 /opt/agenttoll/monitor
+install -m 0700 deploy/hetzner/monitor.py /opt/agenttoll/monitor/monitor.py
+install -m 0644 deploy/hetzner/agenttoll-monitor.service /etc/systemd/system/agenttoll-monitor.service
+install -m 0644 deploy/hetzner/agenttoll-monitor.timer /etc/systemd/system/agenttoll-monitor.timer
+systemd-analyze verify /etc/systemd/system/agenttoll-monitor.service /etc/systemd/system/agenttoll-monitor.timer
+systemctl daemon-reload
+systemctl enable --now agenttoll-monitor.timer
+systemctl start agenttoll-monitor.service
+systemctl status agenttoll-monitor.timer
+cat /opt/agenttoll/monitor/latest.json
+journalctl -u agenttoll-monitor.service --since today --no-pager
+```
+
+The timer runs hourly at minute 37 UTC with up to one minute of jitter and catches
+up after shutdown. Each invocation reads the active container from the deployment
+state, runs unsigned API checks and direct data-provider checks in a separate Node
+process, and records the source revision. It does not restart the serving process,
+sign payments, use a paying wallet, modify snapshots or send messages. A full run
+has an 85-second host deadline; the data portion has 25 seconds. The latest JSON is
+replaced atomically with mode 0600; provider stderr is never copied to its output.
+
+An API failure, stale snapshot (>30 hours), impossible timestamp or unavailable
+data check fails the monitor run. An individual provider failure can be recovered
+by a validated fallback. Partial safety/pricing coverage remains
+`degraded: true`, with explicit counts, even when availability is healthy. This
+does not guarantee executable prices, all-token coverage or payment settlement.
+The report exposes actual scout capture delay relative to its existing 07:23 UTC
+GitHub schedule; a green scheduled job is not a freshness assertion. No paying
+schedule is added. Use `systemctl disable --now agenttoll-monitor.timer` to stop
+future checks while keeping the website running.
+
 ## Runtime and credentials
 
 The image runs Node.js 24 as the unprivileged `node` user. It includes the

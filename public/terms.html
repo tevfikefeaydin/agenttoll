@@ -26,7 +26,7 @@
 <div class="wrap">
   <p class="meta"><a href="/">← AgentToll</a></p>
   <h1>Terms of Service</h1>
-  <p class="meta">Last updated 5 August 2026</p>
+  <p class="meta">Last updated 14 September 2026</p>
 
   <p>AgentToll is a pay-per-call data API. Each request to a paid endpoint is quoted in an
   HTTP 402 response and settled in USDC on Base through the x402 protocol. By calling the
@@ -36,8 +36,8 @@
   <ul>
     <li>There are no accounts, API keys, subscriptions or minimum commitments. You pay per call.</li>
     <li>Prices are stated in each 402 quote and in the free catalog at <code>/api/catalog</code>. They may change at any time; the quote you receive is the price for that call.</li>
-    <li>Requests that do not return your data are not charged. Settlement only runs after a successful response.</li>
-    <li>Responses may be served from a short-lived cache (up to five minutes depending on the endpoint).</li>
+    <li>Data-handler failures before settlement are not billed. Settlement begins after the handler succeeds; a connection loss or timeout afterward may prevent delivery even when payment settled. Inspect your receipt and wallet before retrying an authorized payment.</li>
+    <li>Responses may be cached for a route-specific period. Immutable historical snapshots can be cached for six hours; returned observation timestamps and coverage describe the data's age and limits.</li>
   </ul>
 
   <h2>Payments</h2>
@@ -57,7 +57,7 @@
   <ul>
     <li>Data is aggregated from third-party sources and public blockchain data. It is provided for informational purposes only and is <strong>not financial advice</strong>.</li>
     <li>The service is provided “as is”, without warranty of any kind. We do not guarantee accuracy, completeness, or availability, and we are not liable for losses arising from use of the data.</li>
-    <li>Upstream sources can fail or change. When that happens the endpoint returns an error and, again, you are not charged.</li>
+    <li>Upstream sources can fail or change. An endpoint may return an explicit partial result or a data error. Partial results disclose missing coverage; a data error before settlement is not billed.</li>
   </ul>
 
   <h2>Software</h2>

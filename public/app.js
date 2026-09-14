@@ -150,6 +150,7 @@ if (payBtn) {
   payBtn.addEventListener("click", async () => {
     payBtn.disabled = true;
     try {
+      if (!displayedQuote || !displayedRecipient) throw new Error("Request and inspect a payment quote first.");
       if (!window.agentTollPay) {
         show('<span class="dim">Loading the payment library…</span>', "wait");
         loading ??= new Promise((resolve, reject) => {
@@ -161,7 +162,6 @@ if (payBtn) {
         });
         await loading;
       }
-      if (!displayedQuote || !displayedRecipient) throw new Error("Request and inspect a payment quote first.");
       await window.agentTollPay(ENDPOINT, show, { quote: displayedQuote, recipient: displayedRecipient });
     } catch (err) {
       show('<span class="bad">' + esc(err.message) + "</span>", "err");

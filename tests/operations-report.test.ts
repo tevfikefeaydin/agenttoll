@@ -55,3 +55,27 @@ test('malformed timestamps, counters and impossible payment states do not fabric
   assert.equal(report.serverErrorRate, null);
   assert.equal(report.latencyMs.p95, null);
 });
+
+test('v2 diagnostics aggregate bounded stages and aborts without exposing client identity or raw reasons', () => {
+  const diagnostic = { schemaVersion: 2, terminal: 'finish', abortReason: null, paymentHeader: 'payment-signature',
+    protocolVersion: 'v2', paymentPhase: 'verify', paymentReason: 'verification_declined', paymentStage: 'rejected', paymentSubmitted: true,
+    facilitatorVerifyCalls: 1, facilitatorSettleCalls: 0, facilitatorVerifyMs: 12, facilitatorSettleMs: 0 };
+  const report = summarizeRequests([
+    row('decline', diagnostic),
+    row('abort', { ...diagnostic, terminal: 'abort', abortReason: 'client_disconnected', status: 499, paymentStage: 'unknown',
+      paymentPhase: 'settle', paymentReason: 'client_disconnected', facilitatorSettleCalls: 1, facilitatorSettleMs: 23,
+      verifiedPayer: '0x' + '11'.repeat(20), client: { name: 'secret' } }),
+    row('bad-reason', { ...diagnostic, paymentReason: 'PRIVATE-ERROR' }),
+    row('bad-abort', { ...diagnostic, terminal: 'abort' }),
+    row('bad-count', { ...diagnostic, facilitatorVerifyCalls: -1 }),
+  ].join('\n'));
+  assert.equal(report.requests, 2);
+  assert.equal(report.ignoredLines, 3);
+  assert.equal(report.payment.rejected, 1);
+  assert.equal(report.payment.unknown, 1);
+  assert.equal(report.diagnostics.aborted, 1);
+  assert.equal(report.diagnostics.phases.verify, 1);
+  assert.equal(report.diagnostics.facilitatorVerifyCalls, 2);
+  assert.equal(report.diagnostics.facilitatorSettleMs, 23);
+  assert.doesNotMatch(JSON.stringify(report), /PRIVATE|secret|111111/);
+});

@@ -1,0 +1,13 @@
+✔ data monitor exposes actual capture age and partial coverage separately from availability (3.0421ms)
+✔ successful service responses do not hide stale or impossible future snapshots (1.0163ms)
+✔ data monitor bounds a hung provider and never exposes raw diagnostics or secrets (108.556ms)
+✔ data monitor rejects invalid configuration before invoking sources (0.7706ms)
+✔ inconsistent row and summary counts cannot be reported as healthy coverage (0.516ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 924.0413

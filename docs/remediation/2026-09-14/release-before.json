@@ -1,0 +1,31 @@
+﻿{
+  "current": {
+    "sha": "c83262b68141a1451ff1fd4ab884ac60c449decd",
+    "container": "agenttoll-r-20260912t223818z-c83262b68141",
+    "upstream": "agenttoll-r-20260912t223818z-c83262b68141:4021",
+    "image": "agenttoll:20260912T223818Z-c83262b68141",
+    "directory": "/opt/agenttoll/releases/20260912T223818Z-c83262b68141",
+    "fingerprint": "8fb66b5ea50dde757f781ffa2d188baf107d4f4faddbcb697a47189554cda5df",
+    "attempt": "34723036404:1",
+    "ci_url": "https://github.com/tevfikefeaydin/agenttoll/actions/runs/34723036404",
+    "created_at": "2026-09-12T22:38:56.766505+00:00",
+    "image_id": "sha256:fe0634bc2017fd80666834a0100d7fd00ddd33cda86ee6e093e73f6937fc972f"
+  },
+  "previous": {
+    "sha": "6a40554f991b",
+    "container": "agenttoll-agenttoll-1",
+    "upstream": "agenttoll-api:4021",
+    "image": "agenttoll:20260912T204138Z-6a40554f991b-hetzner",
+    "image_id": "sha256:ba4e1a69d97f09f6b9a580e7ef397adfb1445a36cdfb82583d1f9e0d4352b56c",
+    "directory": "/opt/agenttoll/releases/20260912T204138Z-6a40554f991b-hetzner",
+    "attempt": "migration-bootstrap",
+    "fingerprint": null
+  },
+  "pending": null,
+  "cleanup": null,
+  "failed": null,
+  "observed": {
+    "sha": "d7d03360514aaabd5b004698f926b7c29f0e1b0b",
+    "checked_at": "2026-09-14T16:39:13.253754+00:00"
+  }
+}

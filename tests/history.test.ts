@@ -154,3 +154,138 @@ test("cancelled snapshot loads reject and a healthy retry can populate the score
   cancel = false;
   assert.equal((await getScorecard("1")).tokens.length, 1);
 });
+
+test("scorecard recovers missing prices and low liquidity from matching snapshot pools", async (t) => {
+  t.mock.method(Date, "now", () => Date.parse("2037-01-01T00:00:00Z"));
+  const geckoPool = (n: number, reserve: unknown, quote = false) => ({
+    id: `base_${token(n + 100)}`, type: "pool",
+    attributes: { address: token(n + 100), base_token_price_usd: "999", quote_token_price_usd: "2", reserve_in_usd: reserve },
+    relationships: { [quote ? "quote_token" : "base_token"]: { data: { id: `base_${token(n)}`, type: "token" } } },
+  });
+  t.mock.method(globalThis, "fetch", async (input: string | URL | Request) => {
+    const url = String(input);
+    if (url.includes("api.github.com")) return json({ sha: "56".repeat(20) });
+    if (url.endsWith("index.json")) return json({ dates: ["2026-09-07"] });
+    if (url.includes("dexscreener")) return json([{ baseToken: { address: token(50) }, priceUsd: "1", liquidity: { usd: 1000 } }]);
+    if (url.includes("geckoterminal")) return json({ data: [
+      geckoPool(50, "0"), // An unsolicited fallback cannot replace a primary observation.
+      geckoPool(51, "1000", true), geckoPool(52, "0"),
+      { ...geckoPool(53, "1000"), id: `eth_${token(153)}` },
+      { ...geckoPool(54, "1000"), relationships: { base_token: { data: { id: `base_${token(99)}` } } } },
+      geckoPool(55, null), null,
+    ] });
+    return json({ date: "2026-09-07", pools: [50, 51, 52, 53, 54, 55].map(n => pool(n)) });
+  });
+  const result = await getScorecard("1");
+  const row = (n: number) => result.tokens.find(p => p.token === token(n))!;
+  assert.equal(row(50).priceChangePct, 0);
+  assert.equal(row(51).priceChangePct, 100);
+  assert.equal(row(51).priceSource, "geckoterminal");
+  assert.equal(row(51).pricePool, token(151));
+  assert.equal(row(50).priceSource, "dexscreener");
+  assert.equal(row(52).outcome, "low-observed-liquidity");
+  assert.equal(row(52).priceChangePct, null);
+  for (const n of [53, 54, 55]) assert.equal(row(n).outcome, "unavailable");
+  assert.equal(result.coverage.tokensPriced, 2);
+  assert.equal(result.coverage.complete, false);
+});
+
+test("independent pool fallback can recover a failed primary batch and retains its failure", async (t) => {
+  t.mock.method(Date, "now", () => Date.parse("2038-01-01T00:00:00Z"));
+  t.mock.method(globalThis, "fetch", async (input: string | URL | Request) => {
+    const url = String(input);
+    if (url.includes("api.github.com")) return json({ sha: "78".repeat(20) });
+    if (url.endsWith("index.json")) return json({ dates: ["2026-09-07"] });
+    if (url.includes("dexscreener")) return json({}, 503);
+    if (url.includes("geckoterminal")) return json({ data: [{ id: `base_${token(160)}`, type: "pool",
+      attributes: { address: token(160), base_token_price_usd: "2", reserve_in_usd: "1000" },
+      relationships: { base_token: { data: { id: `base_${token(60)}`, type: "token" } } },
+    }] });
+    return json({ date: "2026-09-07", pools: [pool(60)] });
+  });
+  const result = await getScorecard("1");
+  assert.equal(result.tokens[0].priceChangePct, 100);
+  assert.equal(result.coverage.priceBatchesFailed, 1);
+  assert.equal(result.coverage.fallbackPriceBatchesFailed, 0);
+});
+
+test("oversized snapshot input cannot expand the pool fallback beyond four batches", async (t) => {
+  t.mock.method(Date, "now", () => Date.parse("2039-01-01T00:00:00Z"));
+  const batchSizes: number[] = [];
+  t.mock.method(globalThis, "fetch", async (input: string | URL | Request) => {
+    const url = String(input);
+    if (url.includes("api.github.com")) return json({ sha: "90".repeat(20) });
+    if (url.endsWith("index.json")) return json({ dates: ["2026-09-07"] });
+    if (url.includes("dexscreener")) return json([]);
+    if (url.includes("geckoterminal")) { batchSizes.push(url.split("/").at(-1)!.split(",").length); return json({ data: [] }); }
+    return json({ date: "2026-09-07", pools: Array.from({ length: 140 }, (_, n) => pool(1000 + n)) });
+  });
+  const result = await getScorecard("1");
+  assert.deepEqual(batchSizes, [30, 30, 30, 30]);
+  assert.equal(result.coverage.fallbackPoolsSkipped, 20);
+  assert.equal(result.coverage.tokensPriced, 0);
+  assert.ok(result.tokens.every(row => row.liquidityGone === null));
+});
+
+test("malformed snapshot token fields remain missing without discarding valid scorecard rows", async (t) => {
+  t.mock.method(Date, "now", () => Date.parse("2041-01-01T00:00:00Z"));
+  t.mock.method(globalThis, "fetch", async (input: string | URL | Request) => {
+    const url = String(input);
+    if (url.includes("api.github.com")) return json({ sha: "cd34".repeat(10) });
+    if (url.endsWith("index.json")) return json({ dates: ["2026-09-07"] });
+    if (url.includes("dexscreener")) return json([{ baseToken: { address: token(80) }, priceUsd: "2", liquidity: { usd: 1000 } }]);
+    return json({ date: "2026-09-07", pools: [pool(80), { ...pool(81), token: 123 }] });
+  });
+  const result = await getScorecard("1");
+  assert.equal(result.coverage.poolsObserved, 2);
+  assert.equal(result.coverage.poolsWithoutToken, 1);
+  assert.equal(result.tokens.length, 1);
+  assert.equal(result.tokens[0].token, token(80));
+  assert.equal(result.tokens[0].priceChangePct, 100);
+});
+
+test("malformed token on a shared snapshot pool cannot suppress a valid fallback observation", async (t) => {
+  t.mock.method(Date, "now", () => Date.parse("2042-01-01T00:00:00Z"));
+  t.mock.method(globalThis, "fetch", async (input: string | URL | Request) => {
+    const url = String(input);
+    if (url.includes("api.github.com")) return json({ sha: "ef56".repeat(10) });
+    if (url.endsWith("index.json")) return json({ dates: ["2026-09-07"] });
+    if (url.includes("dexscreener")) return json([]);
+    if (url.includes("geckoterminal")) return json({ data: [{ id: `base_${token(190)}`, type: "pool",
+      attributes: { address: token(190), base_token_price_usd: "2", reserve_in_usd: "1000" },
+      relationships: { base_token: { data: { id: `base_${token(90)}`, type: "token" } } },
+    }] });
+    return json({ date: "2026-09-07", pools: [{ ...pool(90), token: 123 }, pool(90)] });
+  });
+  const result = await getScorecard("1");
+  assert.equal(result.coverage.poolsWithoutToken, 1);
+  assert.equal(result.coverage.fallbackPriceBatchesFailed, 0);
+  assert.equal(result.tokens.length, 1);
+  assert.equal(result.tokens[0].priceChangePct, 100);
+  assert.equal(result.tokens[0].priceSource, "geckoterminal");
+});
+
+test("cancellation during independent fallback rejects instead of caching incomplete success", async (t) => {
+  const { requestContext } = await import("../src/request-context.js");
+  t.mock.method(Date, "now", () => Date.parse("2043-01-01T00:00:00Z"));
+  const controller = new AbortController();
+  let cancel = true;
+  t.mock.method(globalThis, "fetch", async (input: string | URL | Request) => {
+    const url = String(input);
+    if (url.includes("api.github.com")) return json({ sha: "ab12".repeat(10) });
+    if (url.endsWith("index.json")) return json({ dates: ["2026-09-07"] });
+    if (url.includes("dexscreener")) return json([]);
+    if (url.includes("geckoterminal")) {
+      if (cancel) { controller.abort(new DOMException("expired", "TimeoutError")); throw controller.signal.reason; }
+      return json({ data: [] });
+    }
+    return json({ date: "2026-09-07", pools: [pool(70)] });
+  });
+  await requestContext.run({ requestId: "cancel-fallback", signal: controller.signal, upstreamCalls: 0, cacheHits: 0, cacheMisses: 0, coalescedLoads: 0 }, async () => {
+    await assert.rejects(getScorecard("1"), { name: "TimeoutError" });
+  });
+  cancel = false;
+  const result = await getScorecard("1");
+  assert.equal(result.coverage.fallbackPriceBatchesFailed, 0);
+  assert.equal(result.tokens[0].outcome, "unavailable");
+});

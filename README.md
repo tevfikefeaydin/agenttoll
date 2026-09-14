@@ -165,14 +165,14 @@ These commands make paid requests using AGENT_PRIVATE_KEY. The LangChain tool fo
 
 ## MCP
 
-The MCP package is version 0.13.0, with 21 paid tools and two free tools. Start without AGENT_PRIVATE_KEY for quote-only mode:
+The MCP package is version 0.14.0, with 21 paid tools and two free tools. Start without AGENT_PRIVATE_KEY for quote-only mode:
 
 ```json
 {
   "mcpServers": {
     "agenttoll": {
       "command": "npx",
-      "args": ["-y", "agenttoll-mcp"]
+      "args": ["-y", "agenttoll-mcp@0.14.0"]
     }
   }
 }
@@ -181,6 +181,10 @@ The MCP package is version 0.13.0, with 21 paid tools and two free tools. Start 
 The free tools are get_payment_budget and get_payment_quote. Paid tools are get_price, get_base_gas, get_trending, get_base_token_price, get_base_address_info, get_fear_greed, get_base_trending_pools, get_market_brief, get_new_token_radar, get_try_premium, get_try_spread, get_base_portfolio, check_token_safety, scout_new_tokens, get_fresh_pools, get_radar_history, get_radar_scorecard, resolve_basename, watch_base_address, watch_new_tokens and watch_price_alert.
 
 Add AGENT_PRIVATE_KEY to enable payments, and AGENTTOLL_BUDGET_USDC to choose a session limit. MCP defaults to the hosted mainnet origin and requires AGENTTOLL_RECIPIENT for a custom origin. get_payment_quote accepts registered endpoint paths, never arbitrary URLs. Tool cancellation propagates to payment HTTP requests. See [mcp/README.md](mcp/README.md) for all prices and configuration.
+
+Upgrade installations of 0.13.0 or earlier by changing the package argument to `agenttoll-mcp@0.14.0` and restarting the MCP process. Those older published packages do not provide the free quote/budget tools or the documented cumulative budget, trusted-recipient and cancellation controls. A process already running old code does not update itself.
+
+The HTTP service uses **x402 v2**. Send the signed retry as `PAYMENT-SIGNATURE`, not legacy `X-PAYMENT`; read the quote from `PAYMENT-REQUIRED` and receipt from `PAYMENT-RESPONSE`. Use a v2 client rather than merely renaming a v1 payload's header. A rejected legacy request receives explicit migration guidance. Keep address-watch cursors opaque and pass them unchanged; only the initial `since` value may be an ISO timestamp.
 
 ## Discovery and development
 
@@ -201,7 +205,7 @@ npm run brand:png        # brand exports
 
 Development checks use mocked external data/payment boundaries. They do not send real payments or deploy changes. Root and MCP are separate dependency trees; audit both. See [SECURITY.md](SECURITY.md) for credentials, trust boundaries and known limits.
 
-Use `npm run ops:check` for a bounded, unsigned health/catalog/quote check, and `npm run ops:report -- --input requests.ndjson` for an offline usage/error/latency summary. Keep-warm and scout snapshot scripts support explicit `--dry-run` and `--quote-only` modes after a build. The stats snapshot job resumes verified finalized checkpoints and rebuilds a legacy baseline once. See [OPERATIONS.md](OPERATIONS.md) for limits, metric definitions, scheduled jobs and the approval-dependent release/rollback procedure.
+Use `npm run ops:check` for a bounded, unsigned health/catalog/quote check, `npm run ops:data` for actual snapshot age and source coverage, and `npm run ops:report -- --input requests.ndjson` for an offline usage/error/latency and payment-diagnostics summary. Keep-warm and scout snapshot scripts support explicit `--dry-run` and `--quote-only` modes after a build. The stats snapshot job resumes verified finalized checkpoints and rebuilds a legacy baseline once. See [OPERATIONS.md](OPERATIONS.md) for limits, metric definitions, read-only monitoring, scheduled jobs and release/rollback.
 
 After changing the MCP package version, run npm run generate from the repository root. An authorized release tag must match mcp-v<package version>; the workflow checks both dependency trees, generated artifacts, tests and types, then builds and smoke-tests the npm tarball before publishing.
 

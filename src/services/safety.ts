@@ -390,7 +390,7 @@ export interface Deployer {
 async function fromDeployer(token: string, issues: string[]): Promise<{ deployer: Deployer | null; flaggedScam: boolean | null }> {
   const res = await blockscoutFetch(`${BLOCKSCOUT_ADDR}/${token}`, {
     headers: { Accept: "application/json" },
-  });
+  }, 4000, { retryWithKey: false });
   const info = record(await res.json());
   if (!info) throw new InvalidSource("address");
   const creator = info.creator_address_hash;
@@ -406,10 +406,7 @@ async function fromDeployer(token: string, issues: string[]): Promise<{ deployer
     issues.push("creator_address_hash");
     return { deployer: null, flaggedScam };
   }
-  const deployer = await deployerFromCreator(creator, flaggedScam);
-  if (deployer.isContract === null) issues.push("rpc.code");
-  if (deployer.txCount === null) issues.push("rpc.transaction-count");
-  if (deployer.balanceEth === null) issues.push("rpc.balance");
+  const deployer = await deployerFromCreator(creator, flaggedScam, true, "contract-creator", issues);
   return { deployer, flaggedScam };
 }
 
@@ -427,6 +424,7 @@ async function deployerFromCreator(
   flaggedScam: boolean | null,
   withAge = true,
   basis: Deployer["basis"] = "contract-creator",
+  issues: string[] = [],
 ): Promise<Deployer> {
   const [codeResult, nonceResult, balanceResult] = await Promise.allSettled([
     baseRpc<string>("eth_getCode", [creator, "latest"]),
@@ -447,6 +445,9 @@ async function deployerFromCreator(
   const nonce = quantity(nonceHex);
   const txCount = nonce !== null && Number.isSafeInteger(nonce) ? nonce : null;
   const balance = quantity(balanceHex);
+  if (isContract === null) issues.push("rpc.code");
+  if (txCount === null) issues.push("rpc.transaction-count");
+  if (balance === null) issues.push("rpc.balance");
 
   // A wallet with few transactions fits on one page, so its first one - and
   // therefore its age - is one request away. A busy wallet is established by
@@ -571,7 +572,7 @@ export async function getTokenSafety(address: string) {
     let deployerFailed = depResult.source.status === "unavailable" || depResult.source.status === "invalid";
     let deployerSource = deployer ? "blockscout+rpc" : null;
     if ((deployerFailed || !deployer) && gp?.creator_address) {
-      const fallback = await observe(() => deployerFromCreator(gp.creator_address!, flaggedScam, false));
+      const fallback = await observe((issues) => deployerFromCreator(gp.creator_address!, flaggedScam, false, "contract-creator", issues));
       sourceStatus["goplus+rpc"] = fallback.source;
       if (fallback.value) {
         deployer = fallback.value;
@@ -589,7 +590,7 @@ export async function getTokenSafety(address: string) {
       try {
         const launcher = await launcherOf(addr);
         if (launcher) {
-          const fallback = await observe(() => deployerFromCreator(launcher.address, flaggedScam, false, "pool-opener"));
+          const fallback = await observe((issues) => deployerFromCreator(launcher.address, flaggedScam, false, "pool-opener", issues));
           sourceStatus["fresh+rpc"] = fallback.source;
           if (fallback.value) {
             deployer = fallback.value;

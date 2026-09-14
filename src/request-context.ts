@@ -1,4 +1,5 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
+import type { PaymentTelemetry } from './payment-telemetry.js';
 
 export interface RequestContext {
   requestId: string;
@@ -9,6 +10,7 @@ export interface RequestContext {
   coalescedLoads: number;
   facilitatorFailure?: unknown;
   settlementStarted?: boolean;
+  payment?: PaymentTelemetry;
 }
 
 export const requestContext = new AsyncLocalStorage<RequestContext>();

@@ -1,0 +1,51 @@
+▶ real middleware payment lifecycle remains bounded and sanitizes facilitator errors
+  ✔ initialization cannot hold the request beyond its total deadline (289.6073ms)
+  ✔ normal payment returns data, freshness metadata and a receipt (56.7859ms)
+  ✔ invalid handler input cannot reach settlement (15.7895ms)
+  ✔ malformed facilitator verify output is sanitized and structured (16.758ms)
+  ✔ malformed facilitator settle output is sanitized and structured (13.6242ms)
+  ✔ recognized facilitator verify decline remains a protocol 402 (12.8928ms)
+  ✔ recognized facilitator settle decline remains a protocol 402 (12.3603ms)
+  ✔ verification plus settlement share one deadline and report ambiguity (211.1505ms)
+✔ real middleware payment lifecycle remains bounded and sanitizes facilitator errors (3040.9849ms)
+▶ operations: free routes stay independent and request records preserve payment outcomes
+  ✔ health, discovery and catalog never initialize the payment provider (77.5097ms)
+  ✔ failed initialization reports a deadline and a later request recovers (18.7225ms)
+  ✔ HEAD is logged as HEAD, with a canonical endpoint and no address or query (10.0915ms)
+  ✔ a signed malformed payment is a rejection, never an unsigned quote (6.9562ms)
+✔ operations: free routes stay independent and request records preserve payment outcomes (3205.8901ms)
+✔ operations report deduplicates requests and separates quotes, declines, unknowns and settlement (4.92ms)
+✔ operations reports redact dynamic paths and preserve the supplied observation window (1.2542ms)
+✔ malformed timestamps, counters and impossible payment states do not fabricate success (0.4317ms)
+✔ v2 diagnostics aggregate bounded stages and aborts without exposing client identity or raw reasons (0.7978ms)
+▶ payment diagnostics use real middleware with offline facilitator fixtures
+  ✔ disconnect while shared initialization is pending logs the abort and does not cancel other readers (60.9294ms)
+  ✔ v2 success records verified public identifiers and sanitized client metadata (22.856ms)
+  ✔ decode and match rejections happen before verification without payload logging (16.7638ms)
+  ✔ legacy header and v1 payload receive explicit upgrade guidance (7.1252ms)
+  ✔ extension mismatch is identified before facilitator verification (4.9531ms)
+  ✔ invalid public identifiers are omitted even in a successful facilitator response (6.7394ms)
+  ✔ SDK extension-response diagnostics cannot print arbitrary facilitator reason values (6.8439ms)
+  ✔ verify-decline (7.2118ms)
+  ✔ sensitive-decline (6.302ms)
+  ✔ settle-decline (10.3796ms)
+  ✔ settle-unknown (9.888ms)
+  ✔ handler errors do not settle and use handler phase (6.6982ms)
+  ✔ timeout during verify preserves phase and settlement ambiguity (426.9728ms)
+  ✔ timeout during settle preserves phase and settlement ambiguity (438.8705ms)
+  ✔ disconnect during verify logs once and late completion cannot fabricate settlement (46.9247ms)
+  ✔ disconnect during handler logs once and late completion cannot fabricate settlement (45.8119ms)
+  ✔ disconnect during settle logs once and late completion cannot fabricate settlement (46.5082ms)
+✔ payment diagnostics use real middleware with offline facilitator fixtures (4261.8346ms)
+✔ client labels are strictly bounded and self-reported metadata cannot carry free text (0.1944ms)
+✔ SDK diagnostic adapter preserves ordinary logs and all logs outside payment context (0.3185ms)
+✔ request deadlines stop waiting even for an uncooperative upstream (2.1803ms)
+✔ already-aborted contexts cannot start an upstream request (1.5926ms)
+ℹ tests 40
+ℹ suites 0
+ℹ pass 40
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4755.531

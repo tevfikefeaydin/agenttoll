@@ -1,7 +1,8 @@
 ﻿name: Publish MCP to npm
 
-# Push a tag like mcp-v0.4.0 (after bumping mcp/package.json) and the package
-# ships itself. Requires the NPM repository secret (npm automation token).
+# Push a new matching mcp-v<version> tag. Publish exactly the tarball that passed
+# a fresh consumer install, then check the public registry bytes and behavior.
+# Retains the existing NPM automation-token authentication.
 on:
   push:
     tags: ["mcp-v*"]
@@ -9,6 +10,7 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       contents: read
       id-token: write # npm provenance attestation
@@ -25,16 +27,46 @@ jobs:
           RELEASE_TAG: ${{ github.ref_name }}
         run: |
           node -e "const p=require('./mcp/package.json'); if(process.env.RELEASE_TAG !== 'mcp-v'+p.version) throw new Error('Tag and package version differ')"
+          node --input-type=module -e "import fs from 'node:fs'; const p=JSON.parse(fs.readFileSync('mcp/package.json')); const r=await fetch('https://registry.npmjs.org/agenttoll-mcp/'+encodeURIComponent(p.version)); if(r.status!==404) throw new Error('Version must be unpublished; registry status '+r.status)"
           npm run check:generated
       - run: npm test
       - run: npm run typecheck
       - run: npm run build --prefix mcp
-      - run: npm run smoke:mcp
+      - name: Pack once and verify independent consumer installation
+        run: npm run smoke:mcp -- --artifact-dir "$RUNNER_TEMP/mcp-release"
+      - name: Retain tested package and dependency/policy evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: mcp-release-${{ github.ref_name }}
+          path: ${{ runner.temp }}/mcp-release
+          if-no-files-found: error
       - name: Verify npm auth
         run: npm whoami
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM }}
-      - run: npm publish --access public
-        working-directory: mcp
+      - name: Publish the verified immutable tarball
+        run: |
+          npm run smoke:mcp -- --verify-artifact "$RUNNER_TEMP/mcp-release"
+          npm publish "$RUNNER_TEMP/mcp-release/agenttoll-mcp.tgz" --ignore-scripts --access public --provenance
         env:
+          RELEASE_TAG: ${{ github.ref_name }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM }}
+      - name: Verify public registry integrity and actual consumer behavior
+        run: |
+          VERSION=$(node -p "require('./mcp/package.json').version")
+          npm run smoke:mcp -- --registry-version "$VERSION" --expected-artifact "$RUNNER_TEMP/mcp-release" --artifact-dir "$RUNNER_TEMP/mcp-published"
+      - name: Retain published consumer evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: mcp-published-${{ github.ref_name }}
+          path: ${{ runner.temp }}/mcp-published
+          if-no-files-found: error
+
+  registry:
+    needs: publish
+    uses: ./.github/workflows/publish-mcp-registry.yml
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      release_tag: ${{ github.ref_name }}

@@ -1,8 +1,12 @@
 import { canonicalRoute } from './telemetry.js';
+import { paymentPhases, paymentReasons } from './payment-telemetry.js';
 
 type Row = Record<string, unknown>;
 const counterNames = ['upstreamCalls', 'cacheHits', 'cacheMisses', 'coalescedLoads'] as const;
 const stages = new Set(['none', 'quote', 'submitted', 'settled', 'rejected', 'unknown']);
+const diagnosticCounters = ['facilitatorVerifyCalls', 'facilitatorSettleCalls', 'facilitatorVerifyMs', 'facilitatorSettleMs'] as const;
+const phases = new Set<string>(paymentPhases);
+const reasons = new Set<string>(paymentReasons);
 const nonnegative = (value: unknown): value is number => typeof value === 'number' && Number.isFinite(value) && value >= 0;
 
 function parseRow(line: string): Row | null {
@@ -18,9 +22,17 @@ function parseRow(line: string): Row | null {
       !['GET', 'HEAD', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE'].includes(row.method) ||
       !Number.isInteger(row.status) || row.status < 100 || row.status > 599 || !nonnegative(row.ms) ||
       !counterNames.every(name => row[name] === undefined || (nonnegative(row[name]) && Number.isSafeInteger(row[name])))) return null;
-    if (row.schemaVersion === 1) {
+    if (row.schemaVersion === 2) {
+      if (!['finish', 'abort'].includes(row.terminal) || !phases.has(row.paymentPhase) ||
+        !(row.paymentReason === null || reasons.has(row.paymentReason)) ||
+        !['none', 'payment-signature', 'x-payment', 'both'].includes(row.paymentHeader) ||
+        !['none', 'v1', 'v2', 'unknown'].includes(row.protocolVersion) ||
+        !diagnosticCounters.every(name => nonnegative(row[name]) && Number.isSafeInteger(row[name])) ||
+        (row.terminal === 'abort' ? row.status !== 499 || !['client_disconnected', 'request_timeout'].includes(row.abortReason) : row.abortReason !== null)) return null;
+    }
+    if (row.schemaVersion === 1 || row.schemaVersion === 2) {
       if (!stages.has(row.paymentStage) || typeof row.paymentSubmitted !== 'boolean') return null;
-      if (row.paymentStage === 'settled' && !(row.paymentSubmitted && row.status >= 200 && row.status < 300)) return null;
+      if (row.paymentStage === 'settled' && !(row.paymentSubmitted && ((row.status >= 200 && row.status < 300) || (row.schemaVersion === 2 && row.terminal === 'abort')))) return null;
       if (row.paymentStage === 'quote' && (row.paymentSubmitted || row.status !== 402)) return null;
       if (row.paymentStage === 'rejected' && (!row.paymentSubmitted || row.status !== 402)) return null;
       if (['submitted', 'unknown'].includes(row.paymentStage) && !row.paymentSubmitted) return null;
@@ -53,6 +65,9 @@ export function summarizeRequests(text: string) {
   const statuses: Record<string, number> = {};
   const routeRows = new Map<string, Row[]>();
   const counters = { upstreamCalls: 0, cacheHits: 0, cacheMisses: 0, coalescedLoads: 0 };
+  const diagnostics = { recorded: 0, aborted: 0, phases: {} as Record<string, number>, reasons: {} as Record<string, number>,
+    headers: {} as Record<string, number>, protocols: {} as Record<string, number>,
+    facilitatorVerifyCalls: 0, facilitatorSettleCalls: 0, facilitatorVerifyMs: 0, facilitatorSettleMs: 0 };
   const times: number[] = [];
   for (const row of rows) {
     const status = String(row.status);
@@ -62,7 +77,15 @@ export function summarizeRequests(text: string) {
     group.push(row); routeRows.set(route, group);
     times.push(Date.parse(row.t as string));
     for (const name of counterNames) counters[name] += (row[name] as number | undefined) ?? 0;
-    if (row.schemaVersion !== 1) { payment.legacyUnclassified++; continue; }
+    if (row.schemaVersion === 2) {
+      diagnostics.recorded++;
+      if (row.terminal === 'abort') diagnostics.aborted++;
+      for (const [name, value] of [['phases', row.paymentPhase], ['reasons', row.paymentReason], ['headers', row.paymentHeader], ['protocols', row.protocolVersion]] as const) {
+        if (typeof value === 'string') diagnostics[name][value] = (diagnostics[name][value] ?? 0) + 1;
+      }
+      for (const name of diagnosticCounters) diagnostics[name] += row[name] as number;
+    }
+    if (row.schemaVersion !== 1 && row.schemaVersion !== 2) { payment.legacyUnclassified++; continue; }
     if (row.paymentSubmitted) payment.submitted++;
     if (row.paymentStage === 'quote') payment.quotes++;
     if (row.paymentStage === 'settled') payment.settled++;
@@ -78,7 +101,7 @@ export function summarizeRequests(text: string) {
       lastRequestAt: times.length ? new Date(times[times.length - 1]).toISOString() : null },
     requests: rows.length, duplicates, ignoredLines, statuses, serverErrors,
     serverErrorRate: rows.length ? serverErrors / rows.length : null,
-    payment, latencyMs: latency(rows.map(row => row.ms as number)), ...counters,
+    payment, diagnostics, latencyMs: latency(rows.map(row => row.ms as number)), ...counters,
     routes: [...routeRows].map(([route, group]) => ({ route, requests: group.length,
       serverErrors: group.filter(row => Number(row.status) >= 500).length,
       latencyMs: latency(group.map(row => row.ms as number)),
@@ -89,6 +112,8 @@ export function summarizeRequests(text: string) {
       'Legacy payment stages are ambiguous and excluded from verified payment outcome counts.',
       'Settlement responses do not measure unique customers, organic demand or net revenue.',
       'Upstream/cache counters describe instrumented data loads; they exclude facilitator calls.',
+      'V2 diagnostics count facilitator verify/settle invocations and elapsed waiting time, including in-flight time at abort; shared supported initialization and its SDK retries are excluded.',
+      'Status 499 is a local aborted-request marker, not an HTTP response sent to the client. Confirmed settlement can precede a delivery abort.',
     ],
   };
 }

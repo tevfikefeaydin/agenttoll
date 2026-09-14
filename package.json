@@ -22,7 +22,8 @@
     "typecheck:tests": "tsc -p tsconfig.tests.json",
     "smoke:mcp": "node scripts/mcp-package-smoke.mjs",
     "ops:report": "node --import tsx scripts/ops-report.mjs",
-    "ops:check": "node --import tsx scripts/ops-check.mjs"
+    "ops:check": "node --import tsx scripts/ops-check.mjs",
+    "ops:data": "node --import tsx scripts/ops-data.mjs"
   },
   "keywords": [
     "x402",

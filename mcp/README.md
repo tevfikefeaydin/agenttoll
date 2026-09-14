@@ -1,6 +1,8 @@
 # agenttoll-mcp
 
-Version 0.13.0 exposes 21 paid AgentToll tools and two free payment-inspection tools. The hosted API uses real USDC on Base mainnet. Base data always comes from mainnet, even when a self-hosted instance accepts Base Sepolia payments.
+Version 0.14.0 exposes 21 paid AgentToll tools and two free payment-inspection tools. The hosted API uses real USDC on Base mainnet. Base data always comes from mainnet, even when a self-hosted instance accepts Base Sepolia payments.
+
+Upgrade to **0.14.0 or later** for quote-only startup, session budgets, registered price and recipient checks, and cancellation/timeout protection. The previously published 0.13.0 archive does not contain those protections, even though later source changes reused that version. Restart your MCP client after updating its package reference.
 
 ## Start without a wallet
 
@@ -9,7 +11,7 @@ Version 0.13.0 exposes 21 paid AgentToll tools and two free payment-inspection t
   "mcpServers": {
     "agenttoll": {
       "command": "npx",
-      "args": ["-y", "agenttoll-mcp"]
+      "args": ["-y", "agenttoll-mcp@0.14.0"]
     }
   }
 }
@@ -89,6 +91,8 @@ Data responses include freshness/network/request metadata; structured API errors
 
 The repository build synchronizes the endpoint manifest, payment policy and package version before compiling. The published dist includes version.js, so the handshake does not depend on missing source-tree files.
 
-After changing mcp/package.json, run npm run generate from the repository root to synchronize runtime version data and mcp/server.json. Run the repository checks before an authorized release. The release workflow installs both dependency trees, checks generated artifacts, tests and types, builds MCP, and smoke-tests the npm tarball. Its mcp-v<version> tag must match the package version. Publishing the npm package or registry metadata is a separate remote action; local build success does not publish either.
+After changing mcp/package.json, run npm run generate from the repository root to synchronize runtime version data and mcp/server.json. The release workflow checks the tag, generated artifacts, tests and types, then builds MCP once. `npm run smoke:mcp -- --artifact-dir <directory>` packs that build, installs the actual archive in a fresh temporary project outside ancestor dependency trees, and checks the real stdio process with freshly resolved npm dependencies. Seven offline cases cover keyless quote/budget inspection, a normal synthetic payment, and budget, recipient, price, timeout and cancellation rejection. Runtime network connections are blocked and signing uses ephemeral unfunded keys.
+
+The workflow publishes the exact verified tarball with provenance, then downloads the explicit public npm version, compares SHA-512 integrity against the tested bytes, and repeats consumer checks. A changed artifact or mismatched mcp-v<version> tag stops publication. Registry metadata is a separate publication; the presence of server.json does not establish a public MCP Registry listing.
 
 MIT — [source](https://github.com/tevfikefeaydin/agenttoll).

@@ -35,6 +35,8 @@ import { ENDPOINT_MANIFEST } from "./endpoint-manifest.js";
 export function createAgentTollServer(options: PaymentClientOptions & { privateKey?: string; network?: string } = {}) {
   const account = options.privateKey ? privateKeyToAccount(options.privateKey as `0x${string}`) : undefined;
   const payment = createPaymentClient(options.network ?? "base", account ? toClientEvmSigner(account) : undefined, options);
+  const clientHeaders = { "X-AgentToll-Client": `agenttoll-mcp/${MCP_VERSION}` };
+  const addressSchema = z.string().regex(/^0x[0-9a-fA-F]{40}$/);
 
   type PaidCall = (path: string, query?: Record<string, string | number | undefined>) => Promise<string>;
   async function callEndpoint(signal: AbortSignal, path: string, query: Record<string, string | number | undefined> = {}) {
@@ -43,7 +45,7 @@ export function createAgentTollServer(options: PaymentClientOptions & { privateK
       if (value !== undefined) params.set(key, String(value));
     }
     const qs = params.toString();
-    const res = await payment.fetchWithPayment(`${path}${qs ? `?${qs}` : ""}`, { method: "GET", signal });
+    const res = await payment.fetchWithPayment(`${path}${qs ? `?${qs}` : ""}`, { method: "GET", signal, headers: clientHeaders });
     const body = await res.text();
     if (!res.ok) throw new Error(`AgentToll returned ${res.status}: ${body}`);
     return body;
@@ -73,7 +75,7 @@ export function createAgentTollServer(options: PaymentClientOptions & { privateK
     "get_payment_quote",
     "Free: request and validate an unsigned x402 quote for a registered AgentToll endpoint path. Shows the quote and its price ceiling without using a private key or spending budget.",
     { path: z.string().describe("Concrete registered endpoint path with optional query, e.g. /api/price/eth or /api/base/fresh?minutes=5. Absolute URLs are not accepted.") },
-    async ({ path }, { signal }) => ({ content: [{ type: "text", text: JSON.stringify(await payment.getPaymentQuote(path, { signal })) }] }),
+    async ({ path }, { signal }) => ({ content: [{ type: "text", text: JSON.stringify(await payment.getPaymentQuote(path, { signal, headers: clientHeaders })) }] }),
   );
 
   paidTool(
@@ -114,7 +116,7 @@ export function createAgentTollServer(options: PaymentClientOptions & { privateK
   paidTool(
     "get_base_token_price",
     "Onchain USD price for any Base token by contract address.",
-    { address: z.string().describe("Token contract address on Base (0x...)") },
+    { address: addressSchema.describe("Token contract address on Base (0x...)") },
     async ({ address }, call) => ({
       content: [{ type: "text", text: await call(`/api/base/token/${encodeURIComponent(address)}`) }],
     }),
@@ -123,7 +125,7 @@ export function createAgentTollServer(options: PaymentClientOptions & { privateK
   paidTool(
     "get_base_address_info",
     "Base address snapshot: ETH balance, tx count, contract or EOA.",
-    { address: z.string().describe("Address on Base (0x...)") },
+    { address: addressSchema.describe("Address on Base (0x...)") },
     async ({ address }, call) => ({
       content: [{ type: "text", text: await call(`/api/base/address/${encodeURIComponent(address)}`) }],
     }),
@@ -208,7 +210,7 @@ export function createAgentTollServer(options: PaymentClientOptions & { privateK
     "get_base_portfolio",
     "Everything a Base address holds, valued in USD: ETH plus its ERC-20 tokens, largest first. The reply carries totals and says how many holdings fell below the floor or could not be priced.",
     {
-      address: z.string().describe("Address on Base (0x...)"),
+      address: addressSchema.describe("Address on Base (0x...)"),
       minValue: z
         .number()
         .min(0)
@@ -229,7 +231,7 @@ export function createAgentTollServer(options: PaymentClientOptions & { privateK
   paidTool(
     "check_token_safety",
     "Automated safety checks for a Base token: a simulated buy and sell to catch honeypots, buy/sell tax, contract verification, what the owner can still do, holder concentration, whether anyone can still withdraw the liquidity, and who deployed the contract - a token shipped from a wallet with a handful of transactions and dust in it is the shape most rugs share. The verdict is clear, caution, high-risk or insufficient-data — a token too new to check is never reported as clear.",
-    { address: z.string().describe("Token contract address on Base (0x...)") },
+    { address: addressSchema.describe("Token contract address on Base (0x...)") },
     async ({ address }, call) => ({
       content: [
         { type: "text", text: await call(`/api/base/safety/${encodeURIComponent(address)}`) },
@@ -304,7 +306,7 @@ export function createAgentTollServer(options: PaymentClientOptions & { privateK
     "watch_base_address",
     "Paginated Base address activity. Pass the previous reply's opaque cursor as since and drain pages while hasMore is true. partial and coverage describe incomplete scans; deduplicate overlapping/replayed transactions by hash.",
     {
-      address: z.string().describe("Address on Base (0x...)"),
+      address: addressSchema.describe("Address on Base (0x...)"),
       since: z.string().optional().describe("Opaque cursor from the previous reply, or an initial ISO timestamp"),
     },
     async ({ address, since }, call) => ({
@@ -331,8 +333,8 @@ export function createAgentTollServer(options: PaymentClientOptions & { privateK
     "Cheap poll: has an asset moved past a threshold from your reference price? Returns triggered true/false.",
     {
       symbol: z.string().describe("Ticker (eth, btc, sol...) or CoinGecko id"),
-      ref: z.number().describe("Reference price in USD to compare against"),
-      pct: z.number().optional().describe("Threshold in percent (default 2)"),
+      ref: z.number().positive().describe("Reference price in USD to compare against"),
+      pct: z.number().min(0).optional().describe("Threshold in percent (default 2)"),
     },
     async ({ symbol, ref, pct }, call) => ({
       content: [

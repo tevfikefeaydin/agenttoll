@@ -35,7 +35,8 @@ import { ENDPOINTS } from "./endpoints.js";
 import { requestContext, withSignal, type RequestContext } from "./request-context.js";
 import { cached } from "./services/cache.js";
 import { baseRpc } from "./services/sources.js";
-import { canonicalRoute } from "./telemetry.js";
+import { canonicalRoute, installPaymentDiagnosticFilter } from "./telemetry.js";
+import { declineReason, inspectPayment, paymentSnapshot, paymentTelemetry, publicPayer, publicTransaction, sanitizedClient } from "./payment-telemetry.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const config = readConfig();
@@ -44,6 +45,7 @@ export const NETWORK = config.network;
 export const PORT = config.port;
 const CHAIN = config.chain;
 const PUBLIC_BASE = config.publicUrl;
+installPaymentDiagnosticFilter(() => Boolean(requestContext.getStore()?.payment));
 const facilitatorHttp = new HTTPFacilitatorClient({
   ...(config.useCdp ? cdpFacilitator : { url: config.facilitatorUrl }),
   timeoutMs: Math.min(config.requestTimeoutMs, 8_000),
@@ -51,26 +53,62 @@ const facilitatorHttp = new HTTPFacilitatorClient({
 
 // The SDK's per-attempt timeout does not bound retries or the combined
 // verify/handler/settle operation. Reuse the request's remaining deadline.
-async function facilitatorCall<T>(load: () => Promise<T>, settling = false): Promise<T> {
+async function facilitatorCall<T>(load: () => Promise<T>, phase?: 'verify' | 'settle'): Promise<T> {
   const context = requestContext.getStore();
   const signal = context?.signal ?? AbortSignal.timeout(config.requestTimeoutMs);
+  const payment = context?.payment;
+  const settling = phase === 'settle';
+  let started: number | undefined;
   try {
     signal.throwIfAborted();
     if (context && settling) context.settlementStarted = true;
-    return await withSignal(Promise.resolve().then(load), signal);
+    if (payment && phase) {
+      started = Date.now();
+      payment.paymentPhase = phase;
+      payment.activeFacilitator = { phase, started };
+      payment[settling ? 'facilitatorSettleCalls' : 'facilitatorVerifyCalls']++;
+    }
+    const result = await withSignal(Promise.resolve().then(() => { signal.throwIfAborted(); return load(); }), signal);
+    if (payment && phase) {
+      const response = result as { isValid?: boolean; success?: boolean; invalidReason?: string; errorReason?: string; payer?: string; transaction?: string };
+      if (settling ? response.success === true : response.isValid === true) {
+        payment.paymentReason = null;
+        // Only successful, SDK-validated facilitator results establish public identity.
+        if (!settling) payment.verifiedPayer = publicPayer(response.payer);
+        if (settling) {
+          payment.settlementConfirmed = true;
+          payment.settlementTransaction = publicTransaction(response.transaction);
+        }
+      } else payment.paymentReason = declineReason(settling ? response.errorReason : response.invalidReason, settling);
+    }
+    return result;
   } catch (error) {
     // Structured payment declines belong to x402's 402 response path.
     // Only transport/protocol failures should become sanitized upstream errors.
-    if (context && !(error instanceof VerifyError) && !(error instanceof SettleError)) {
-      context.facilitatorFailure = error;
+    if (error instanceof VerifyError || error instanceof SettleError) {
+      const reason = declineReason(error instanceof VerifyError ? error.invalidReason : error.errorReason, settling);
+      if (payment) payment.paymentReason = reason;
+      // SDK error paths may echo messages. Forward only fixed, allowlisted reasons.
+      if (error instanceof VerifyError) throw new VerifyError(error.statusCode, { isValid: false, invalidReason: reason });
+      throw new SettleError(error.statusCode, { success: false, errorReason: reason, transaction: '', network: CHAIN });
     }
-    throw error;
+    const name = error instanceof Error ? error.name : '';
+    const timeout = name === 'TimeoutError' || name === 'FacilitatorTimeoutError';
+    const safe = new DOMException(timeout ? 'Facilitator deadline exceeded' : 'Facilitator unavailable', timeout ? 'TimeoutError' : 'Error');
+    if (context) context.facilitatorFailure = safe;
+    if (payment) payment.paymentReason = signal.aborted && signal.reason?.name === 'AbortError' ? 'client_disconnected' : timeout ? 'request_timeout' : 'facilitator_unavailable';
+    throw safe;
+  } finally {
+    if (payment && started !== undefined) {
+      payment[settling ? 'facilitatorSettleMs' : 'facilitatorVerifyMs'] += Math.max(0, Date.now() - started);
+      delete payment.activeFacilitator;
+    }
   }
 }
 const facilitatorClient: FacilitatorClient = {
   getSupported: () => facilitatorCall(() => facilitatorHttp.getSupported()),
-  verify: (payload, requirements) => facilitatorCall(() => facilitatorHttp.verify(payload, requirements)),
-  settle: (payload, requirements) => facilitatorCall(() => facilitatorHttp.settle(payload, requirements), true),
+  verify: (payload, requirements) => facilitatorCall(() => facilitatorHttp.verify(payload, requirements), 'verify'),
+  settle: (payload, requirements) => facilitatorCall(() => facilitatorHttp.settle(payload, requirements), 'settle'),
 };
 
 const app = express();
@@ -81,10 +119,12 @@ const normalizedPath = (value: string) => value.toLowerCase().replace(/\/+$/, ""
 app.use((req, res, next) => {
   const method = req.method;
   const paymentSubmitted = Boolean(req.get("payment-signature") || req.get("x-payment"));
+  const payment = paymentTelemetry(req.get('payment-signature'), req.get('x-payment'));
+  const client = sanitizedClient(req.get('x-agenttoll-client'), req.get('user-agent'));
   let responseCode: string | null = null;
   const controller = new AbortController();
   const context: RequestContext = { requestId: randomUUID(), signal: controller.signal, upstreamCalls: 0,
-    cacheHits: 0, cacheMisses: 0, coalescedLoads: 0 };
+    cacheHits: 0, cacheMisses: 0, coalescedLoads: 0, payment };
   res.setHeader("X-Request-Id", context.requestId);
   res.setHeader("X-Content-Type-Options", "nosniff");
   const originalJson = res.json.bind(res);
@@ -102,35 +142,54 @@ app.use((req, res, next) => {
         body = { ...result.body, error: "Payment settlement could not be confirmed; inspect your receipt and wallet before retrying", retryable: false, retryAfter: null, paymentOutcome: "unknown" };
       }
     }
-    if (body && typeof body === "object" && "code" in body && typeof body.code === "string") responseCode = body.code;
+    if (body && typeof body === "object" && "code" in body && typeof body.code === "string" &&
+      ['BAD_REQUEST', 'PAYLOAD_TOO_LARGE', 'REQUEST_TIMEOUT', 'UPSTREAM_UNAVAILABLE', 'NOT_READY', 'OVERLOADED', 'RATE_LIMITED', 'PAYMENT_UPGRADE_REQUIRED', 'MALFORMED_PAYMENT'].includes(body.code)) responseCode = body.code;
     return originalJson(body);
   };
   const started = Date.now();
   const timer = setTimeout(() => controller.abort(new DOMException("Request deadline exceeded", "TimeoutError")), config.requestTimeoutMs);
   timer.unref();
-  res.once("close", () => { clearTimeout(timer); if (!res.writableFinished) controller.abort(new DOMException("Client disconnected", "AbortError")); });
-  res.once("finish", () => {
+  let terminalLogged = false;
+  const terminal = (event: 'finish' | 'abort') => {
+    if (terminalLogged) return;
+    terminalLogged = true;
     clearTimeout(timer);
     if (!/^\/(api|\.well-known)\//i.test(req.path)) return;
-    const settled = res.statusCode >= 200 && res.statusCode < 300 && res.hasHeader("payment-response");
-    const paymentStage = settled ? "settled" : res.statusCode === 402 ? (paymentSubmitted ? "rejected" : "quote") :
+    const status = event === 'abort' ? 499 : res.statusCode;
+    const settled = payment.settlementConfirmed;
+    const paymentStage = settled ? "settled" : status === 402 ? (paymentSubmitted ? "rejected" : "quote") :
       context.settlementStarted ? "unknown" : paymentSubmitted ? "submitted" : "none";
+    const abortReason = event === 'abort' ? (context.signal.reason?.name === 'TimeoutError' ? 'request_timeout' : 'client_disconnected') : null;
+    if (abortReason) payment.paymentReason = abortReason;
+    else if (context.signal.aborted) payment.paymentReason = 'request_timeout';
+    else if (paymentStage === 'quote') payment.paymentReason = 'payment_required';
+    else if (paymentStage === 'rejected' && !payment.paymentReason) payment.paymentReason = 'payment_invalid';
+    else if (payment.paymentPhase === 'handler' && status >= 400) payment.paymentReason = 'handler_failed';
     const route = canonicalRoute(req.path);
-    const log = res.statusCode >= 500 ? console.error : console.log;
-    log(JSON.stringify({ schemaVersion: 1, t: new Date().toISOString(), requestId: context.requestId,
-      method, path: route, route, status: res.statusCode, ms: Date.now() - started,
+    const log = status >= 500 ? console.error : console.log;
+    log(JSON.stringify({ schemaVersion: 2, t: new Date().toISOString(), requestId: context.requestId,
+      method, path: route, route, status, ms: Date.now() - started,
+      terminal: event, abortReason, client, ...paymentSnapshot(payment),
       paymentStage, paymentSubmitted, errorCode: responseCode,
       upstreamCalls: context.upstreamCalls, cacheHits: context.cacheHits,
       cacheMisses: context.cacheMisses, coalescedLoads: context.coalescedLoads }));
+  };
+  res.once('close', () => {
+    clearTimeout(timer);
+    if (!res.writableFinished) {
+      if (!controller.signal.aborted) controller.abort(new DOMException('Client disconnected', 'AbortError'));
+      terminal('abort');
+    }
   });
+  res.once('finish', () => terminal('finish'));
   requestContext.run(context, next);
 });
 
-// Keep CORS on error responses and support both x402 protocol generations.
+// Permit legacy headers only to deliver explicit v2 migration guidance.
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, PAYMENT-SIGNATURE, X-PAYMENT");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, PAYMENT-SIGNATURE, X-PAYMENT, X-AgentToll-Client");
   res.setHeader("Access-Control-Expose-Headers", "PAYMENT-REQUIRED, PAYMENT-RESPONSE, X-PAYMENT-RESPONSE, X-Request-Id, Retry-After");
   if (req.method === "OPTIONS") { res.sendStatus(204); return; }
   // Express serves HEAD via GET. Meter it and challenge it before any data load.
@@ -174,8 +233,24 @@ app.use(express.json({ limit: "10kb" }));
 // Build the SDK gate without starting network work at module load. Vercel can
 // suspend that eager work after a free/static request, leaving the next caller
 // with a stale initialization rejection. Only paid routes initialize now.
-const paymentServer = new x402HTTPResourceServer(
-  new x402ResourceServer(facilitatorClient).register(CHAIN, new ExactEvmScheme()),
+const resourceServer = new x402ResourceServer(facilitatorClient).register(CHAIN, new ExactEvmScheme());
+// Observe SDK matching/extension decisions without duplicating its payment policy.
+const findRequirements = resourceServer.findMatchingRequirements.bind(resourceServer);
+resourceServer.findMatchingRequirements = (...args) => {
+  const payment = requestContext.getStore()?.payment;
+  if (payment) payment.paymentPhase = 'match';
+  const result = findRequirements(...args);
+  if (payment && !result) payment.paymentReason = 'requirements_mismatch';
+  return result;
+};
+const validateExtensions = resourceServer.validateExtensions.bind(resourceServer);
+resourceServer.validateExtensions = (...args) => {
+  const result = validateExtensions(...args);
+  const payment = requestContext.getStore()?.payment;
+  if (payment && !result.valid) payment.paymentReason = 'extension_mismatch';
+  return result;
+};
+const paymentServer = new x402HTTPResourceServer(resourceServer,
   Object.fromEntries(ENDPOINTS.map(endpoint => [endpoint.route, {
   accepts: { scheme: "exact", payTo: PAY_TO, price: endpoint.price, network: CHAIN },
   description: endpoint.description,
@@ -188,9 +263,22 @@ app.use(async (req, res, next) => {
   const adapter = new ExpressAdapter(req);
   if (!paymentServer.requiresPayment({ adapter, path: req.path, method: req.method })) return next();
   try {
-    const signal = requestContext.getStore()!.signal;
+    const context = requestContext.getStore()!;
+    const signal = context.signal;
+    const payment = context.payment!;
     signal.throwIfAborted();
+    const invalid = inspectPayment(req.get('payment-signature'), req.get('x-payment'), payment);
+    if (invalid) {
+      payment.paymentReason = invalid;
+      res.status(402).json({ code: invalid === 'unsupported_version' ? 'PAYMENT_UPGRADE_REQUIRED' : 'MALFORMED_PAYMENT',
+        error: invalid === 'unsupported_version'
+          ? 'Upgrade to x402 v2: request a fresh unsigned quote, then send its v2 payment in PAYMENT-SIGNATURE. X-PAYMENT/v1 is unsupported. Inspect your wallet before signing again.'
+          : 'Malformed payment. Request a fresh unsigned x402 v2 quote and use a compatible client.',
+        retryable: false, requestId: context.requestId });
+      return;
+    }
     if (!paymentInitialized) {
+      payment.paymentPhase = 'initialize';
       // Shared initialization has its own bounded facilitator deadline. One
       // disconnected caller must not cancel initialization for other callers.
       paymentInitialization ??= requestContext.exit(() => paymentServer.initialize())
@@ -198,11 +286,16 @@ app.use(async (req, res, next) => {
         .finally(() => { paymentInitialization = undefined; });
       await withSignal(paymentInitialization, signal);
     }
+    payment.paymentPhase = req.get('payment-signature') ? 'match' : 'parse';
     await paymentGate(req, res, next);
   } catch (error) {
     // The SDK wraps initialization failures; preserve timeout classification
     // while the common responder keeps provider diagnostics out of the body.
-    next(error instanceof Error && error.cause ? error.cause : error);
+    const cause = error instanceof Error && error.cause ? error.cause : error;
+    const payment = requestContext.getStore()?.payment;
+    if (payment && !payment.paymentReason) payment.paymentReason = cause instanceof Error &&
+      ['TimeoutError', 'FacilitatorTimeoutError'].includes(cause.name) ? 'request_timeout' : 'facilitator_unavailable';
+    next(cause);
   }
 });
 
@@ -212,6 +305,7 @@ const opt = (v: unknown): string | undefined => v === undefined ? undefined : on
 const serve = (load: (req: Request) => Promise<unknown>) => async (req: Request, res: Response) => {
   const context = requestContext.getStore()!;
   try {
+    if (context.payment && context.payment.paymentHeader !== 'none') context.payment.paymentPhase = 'handler';
     context.signal.throwIfAborted();
     const value = await withSignal(Promise.resolve().then(() => load(req)), context.signal);
     const data = value as Record<string, unknown>;
