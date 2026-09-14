@@ -1,0 +1,17 @@
+{
+  "validatedAt": "2026-09-14T17:10:59.970475+00:00",
+  "ok": true,
+  "apiAssertions": 24,
+  "proxyAssertions": 25,
+  "fullOfflineTests": 284,
+  "localReportLinks": 30,
+  "publicPackageMatchesCiIntegrity": true,
+  "publicConsumerCases": 7,
+  "registryActive": true,
+  "legacyWarningVerified": true,
+  "activeReleaseMatches": true,
+  "monitorSucceededWithPartialCoverage": true,
+  "diagnosticProbesReachedNoFacilitator": true,
+  "credentialPatternFindings": [],
+  "scope": "Artifact consistency and bounded secret-pattern scan; not a new live settlement or exhaustive secret detector"
+}

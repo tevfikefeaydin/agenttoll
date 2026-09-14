@@ -1,0 +1,33 @@
+{
+  "current": {
+    "sha": "e28d8dc1983e0120890fc7bcb8b43b55920a5e6f",
+    "container": "agenttoll-r-20260914t165547z-e28d8dc1983e",
+    "upstream": "agenttoll-r-20260914t165547z-e28d8dc1983e:4021",
+    "image": "agenttoll:20260914T165547Z-e28d8dc1983e",
+    "directory": "/opt/agenttoll/releases/20260914T165547Z-e28d8dc1983e",
+    "fingerprint": "a48d5a22d50caf90d0f42a7fe6696cc260091304234299758d4c417c586df5e0",
+    "attempt": "34871411023:1",
+    "ci_url": "https://github.com/tevfikefeaydin/agenttoll/actions/runs/34871411023",
+    "created_at": "2026-09-14T16:56:15.566221+00:00",
+    "image_id": "sha256:4be352fad58c7a315bc4b1db53005025016105a5fd7630e1b5fb85e772d6af04"
+  },
+  "previous": {
+    "sha": "c83262b68141a1451ff1fd4ab884ac60c449decd",
+    "container": "agenttoll-r-20260912t223818z-c83262b68141",
+    "upstream": "agenttoll-r-20260912t223818z-c83262b68141:4021",
+    "image": "agenttoll:20260912T223818Z-c83262b68141",
+    "directory": "/opt/agenttoll/releases/20260912T223818Z-c83262b68141",
+    "fingerprint": "8fb66b5ea50dde757f781ffa2d188baf107d4f4faddbcb697a47189554cda5df",
+    "attempt": "34723036404:1",
+    "ci_url": "https://github.com/tevfikefeaydin/agenttoll/actions/runs/34723036404",
+    "created_at": "2026-09-12T22:38:56.766505+00:00",
+    "image_id": "sha256:fe0634bc2017fd80666834a0100d7fd00ddd33cda86ee6e093e73f6937fc972f"
+  },
+  "pending": null,
+  "cleanup": null,
+  "failed": null,
+  "observed": {
+    "sha": "4725fd4a702e154acf5975194597c6ab27281f5e",
+    "checked_at": "2026-09-14T17:01:37.909749+00:00"
+  }
+}

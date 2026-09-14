@@ -1,0 +1,60 @@
+{
+  "origin": "https://agenttoll.app",
+  "sourceRevision": "e28d8dc1983e0120890fc7bcb8b43b55920a5e6f",
+  "dateUtc": "2026-09-14",
+  "tool": "Playwright CLI, actual Chromium page",
+  "scope": "Fresh desktop navigation and explicit mobile reload, then the unsigned quote button; no wallet connection or paid action",
+  "cases": [
+    {
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "documentWidth": 1280,
+      "beforeQuote": {
+        "hidden": true,
+        "display": "none",
+        "width": 0
+      },
+      "afterQuote": {
+        "hidden": false,
+        "display": "flex",
+        "width": 252.890625
+      },
+      "screenshot": "browser/live-desktop.png"
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "documentWidth": 390,
+      "beforeQuote": {
+        "hidden": true,
+        "display": "none",
+        "width": 0
+      },
+      "afterQuote": {
+        "hidden": false,
+        "display": "flex",
+        "width": 252.890625
+      },
+      "screenshot": "browser/live-mobile.png"
+    }
+  ],
+  "quote": {
+    "endpoint": "/api/base/fresh",
+    "status": 402,
+    "priceUsdc": "0.004",
+    "network": "Base mainnet",
+    "recipient": "0xe55359021a6a22d8385b827405991c56075f56f8"
+  },
+  "console": {
+    "observedJavaScriptExceptions": 0,
+    "expectedNetworkError": "HTTP 402 from the unsigned quote"
+  },
+  "walletConnected": false,
+  "paidActionClicked": false,
+  "screenshotsVisuallyInspected": true,
+  "note": "Resizing an already-quoted page preserves its existing quote; mobile before-state was verified after an explicit reload. Code examples scroll internally; the document has no horizontal overflow."
+}

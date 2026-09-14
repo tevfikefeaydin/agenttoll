@@ -11,3 +11,9 @@ Owner: root. Scope: audited onboarding/docs defects, Basename diagnostic and can
 - Privacy, terms, setup, Security and Operations docs now reflect the real log fields, Hetzner, size-based3x10MB Docker rotation, x402v2 migration, finite MCP controls, partial data and ambiguous-payment retry limits. Actual rotation configuration was read from the active container; no broad legal-compliance claim is made.
 
 The existing daily paying jobs are unchanged. The additional hourly monitor performs unsigned/direct read-only checks. Historical missing client events cannot be reconstructed, and upgrading our package cannot restart a user's already-running pinned old client.
+
+## Completed live verification
+
+Production e28d8dc was promoted at 16:56:26 UTC. Public API/quote checks passed 24/24 and TLS/static/proxy checks passed 25/25. Canonical Chromium checks at 1280 and 390 px confirmed the same hidden-before/visible-after behavior, correct Base mainnet 0.004 USDC quote and recipient, and no document overflow. Mobile before-state used an explicit page reload; resizing alone legitimately retains the preceding quote. Screenshots were visually inspected and retained under `browser/` with measurements in `browser-verification.json`.
+
+The monitor files were installed from the exact reviewed source after SHA-256 comparison and systemd validation. The timer is active. Its first actual service run correctly failed on an upstream GitHub timeout; an unchanged-code rerun at 17:00:07 UTC passed, with 11 priced / 15 low-observed-liquidity / 0 unavailable tokens and 6/8 safety checks. The first failure is preserved in `monitor-first-run.json`; no blanket availability claim is made. Live invalid-header probes also produced the intended explicit 402 codes and exact, safe schema-2 records with zero facilitator calls. See the consolidated `REPORT.md` for release and evidence links.

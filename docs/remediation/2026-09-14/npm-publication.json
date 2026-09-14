@@ -17,7 +17,7 @@
     "2026-09-14T16:45:44.5153091Z Error: npm pack failed: npm error code ETARGET",
     "2026-09-14T16:45:44.5153582Z npm error notarget No matching version found for agenttoll-mcp@0.14.0."
   ],
-  "recovery": "Public npm downloaded and independently installed successfully; Registry-only workflow remains pending. npm publish was not retried.",
+  "recovery": "Completed: exact public npm bytes and all seven consumer cases passed; official Registry publication and exact active record verified. npm publish was not retried; original publication workflow retains its failed conclusion.",
   "publicVerifiedAt": "2026-09-14T16:49:53.447Z",
   "publicIntegrityMatchesCiArtifact": true,
   "publicConsumerCases": [
@@ -56,5 +56,7 @@
       "tools": 23,
       "signedRetries": 1
     }
-  ]
+  ],
+  "registryRecoveryWorkflow": "https://github.com/tevfikefeaydin/agenttoll/actions/runs/34871447346",
+  "registryRecoveryConclusion": "success"
 }

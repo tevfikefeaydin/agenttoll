@@ -29,7 +29,7 @@ Owner: mcp implementer. Reviewer: root; final reviewer independent. Files: `mcp/
 - [x] Make smoke install the actual packed tarball with its own freshly resolved dependencies outside ancestor node_modules. Check no-key startup, 23 tools, version, live-quote fixture and budget.
 - [x] Exercise actual stdio process with offline fixtures for budget zero, mismatched recipient, endpoint overcharge, timeout and cancellation; prove no signed retry on rejection. Ephemeral unfunded key only, no external payment/network.
 - [x] Make publishing consume the verified immutable tarball, check tag/version and verify the public installed artifact after release; retain secure existing npm authentication.
-- [ ] Provide changed-file list and fresh commands/results; root performs registry publication and final npx verification.
+- [x] Provide changed-file list and fresh commands/results; root performs registry publication and final npx verification.
 
 ## Task PAYMENT-DIAGNOSTICS — identifiable failures and aborts
 
@@ -61,9 +61,9 @@ Owner: root. Reviewer: independent final reviewer. Files: `public/index.html`, `
 - [x] Add actual snapshot age/completeness and live data-quality signals to existing unsigned operations checks. Detect delayed GitHub jobs without adding a paid schedule or falsely counting monitor traffic as users.
 - [x] Include previously uninstrumented Basename network work in existing counters if an appropriate shared mechanism exists.
 - [x] Run baseline and final offline suite, all typechecks, generated checks, API/web/MCP builds, independent package smoke, dependency audits and deployment-controller tests.
-- [ ] Independently review final code/artifact. Commit only this task's reviewed files, update main without force, let existing successful-CI gate stage/verify/promote production; publish MCP via the verified workflow/tag.
-- [ ] Verify registry tarball/version/23 tools/no-key mode, live unsigned API/proxy checks, browser flow, fresh safe diagnostics and exact running revision. Record prior release for rollback.
-- [ ] Write `docs/remediation/2026-09-14/REPORT.md` with each finding's disposition, tests, deployed/published identities and any real external block. Final reviewer must not have authored production changes.
+- [x] Independently review final code/artifact. Commit only this task's reviewed files, update main without force, let existing successful-CI gate stage/verify/promote production; publish MCP via the verified workflow/tag.
+- [x] Verify registry tarball/version/23 tools/no-key mode, live unsigned API/proxy checks, browser flow, fresh safe diagnostics and exact running revision. Record prior release for rollback.
+- [x] Write `docs/remediation/2026-09-14/REPORT.md` with each finding's disposition, tests, deployed/published identities and any real external block. Final reviewer must not have authored production changes.
 
 ## Explicit evidence limit
 

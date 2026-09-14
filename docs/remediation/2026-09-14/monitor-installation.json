@@ -1,0 +1,25 @@
+{
+  "host": "167.233.31.87",
+  "sourceRevision": "e28d8dc1983e0120890fc7bcb8b43b55920a5e6f",
+  "reviewedFilesSha256": {
+    "monitor.py": "0b024ed35907233456c253f252b2565b093bc65ff22af89d8035f1805f82a982",
+    "agenttoll-monitor.service": "7af8383ba4cea996ab755e3c7e6efaad75d173c618f0b6d9081e60ccd15eb83c",
+    "agenttoll-monitor.timer": "81c83a931c290d9c7d38c19115713e46002873f50cca839ea24b080745262128"
+  },
+  "sourceBytesMatchedBeforeInstall": true,
+  "systemdAnalyzeVerify": "passed",
+  "timer": "agenttoll-monitor.timer",
+  "timerState": "active",
+  "observedNextElapseUtc": "2026-09-14T17:37:49Z",
+  "schedule": "Hourly at minute 37 UTC with up to 60 seconds of jitter; persistent",
+  "firstManualServiceRun": "Failed due to an 8-second upstream GitHub snapshot timeout; API 24/24 passed",
+  "secondManualServiceRun": "Succeeded with identical code at 2026-09-14T17:00:07.646990Z",
+  "latestReport": "/opt/agenttoll/monitor/latest.json",
+  "latestReportMode": "0600",
+  "changesPayingSchedules": false,
+  "sendsNotifications": false,
+  "futureTimerFiringClaimed": false,
+  "systemdServiceResult": "success",
+  "systemdExecMainStatus": 0,
+  "latestReportOwner": "root"
+}

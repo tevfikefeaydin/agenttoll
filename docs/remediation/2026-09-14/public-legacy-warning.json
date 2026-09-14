@@ -1,0 +1,7 @@
+{
+  "checkedAt": "2026-09-14T17:03:07.0640362Z",
+  "name": "agenttoll-mcp",
+  "version": "0.13.0",
+  "deprecated": "Upgrade to agenttoll-mcp@0.14.0 and restart your client. Version 0.13.0 does not enforce the documented session budget, trusted recipient, endpoint price and cancellation controls; 0.14.0 also supports keyless startup and 23 tools.",
+  "workflow": "https://github.com/tevfikefeaydin/agenttoll/actions/runs/34872171878"
+}

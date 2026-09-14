@@ -1,0 +1,34 @@
+{
+  "checkedAt": "2026-09-14T16:58:38.338Z",
+  "scope": "Invalid, unsigned diagnostic probes; no real authorization or payment",
+  "probes": [
+    {
+      "name": "legacy",
+      "header": "X-PAYMENT",
+      "status": 402,
+      "ms": 333,
+      "body": {
+        "code": "PAYMENT_UPGRADE_REQUIRED",
+        "error": "Upgrade to x402 v2: request a fresh unsigned quote, then send its v2 payment in PAYMENT-SIGNATURE. X-PAYMENT/v1 is unsupported. Inspect your wallet before signing again.",
+        "retryable": false,
+        "requestId": "60bf842b-4e86-4ee8-925e-791eb0b3f302"
+      },
+      "receiptPresent": false,
+      "clientLabel": "Synthetic self-reported version to verify bounded metadata parsing"
+    },
+    {
+      "name": "malformed",
+      "header": "PAYMENT-SIGNATURE",
+      "status": 402,
+      "ms": 175,
+      "body": {
+        "code": "MALFORMED_PAYMENT",
+        "error": "Malformed payment. Request a fresh unsigned x402 v2 quote and use a compatible client.",
+        "retryable": false,
+        "requestId": "468bd6ea-e8df-4036-ae0e-a2501f11d0fa"
+      },
+      "receiptPresent": false,
+      "clientLabel": "Synthetic self-reported version to verify bounded metadata parsing"
+    }
+  ]
+}
