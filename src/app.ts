@@ -4,6 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { ExpressAdapter, paymentMiddlewareFromHTTPServer, x402ResourceServer, x402HTTPResourceServer } from "@x402/express";
 import { HTTPFacilitatorClient, type FacilitatorClient } from "@x402/core/server";
+import { decodePaymentRequiredHeader } from "@x402/core/http";
 import { SettleError, VerifyError } from "@x402/core/types";
 import { ExactEvmScheme } from "@x402/evm/exact/server";
 import { facilitator as cdpFacilitator } from "@coinbase/x402";
@@ -141,6 +142,14 @@ app.use((req, res, next) => {
         res.removeHeader("Retry-After");
         body = { ...result.body, error: "Payment settlement could not be confirmed; inspect your receipt and wallet before retrying", retryable: false, retryAfter: null, paymentOutcome: "unknown" };
       }
+    }
+    // The v2 SDK sends its quote in PAYMENT-REQUIRED and defaults to an empty
+    // JSON body. Mirror that exact quote for clients and crawlers reading JSON.
+    // Responses without a quote (migration errors, settlement failures) keep
+    // their own diagnostics; facilitator/deadline errors were handled above.
+    const requiredHeader = res.getHeader("PAYMENT-REQUIRED");
+    if (res.statusCode === 402 && typeof requiredHeader === "string") {
+      body = decodePaymentRequiredHeader(requiredHeader);
     }
     if (body && typeof body === "object" && "code" in body && typeof body.code === "string" &&
       ['BAD_REQUEST', 'PAYLOAD_TOO_LARGE', 'REQUEST_TIMEOUT', 'UPSTREAM_UNAVAILABLE', 'NOT_READY', 'OVERLOADED', 'RATE_LIMITED', 'PAYMENT_UPGRADE_REQUIRED', 'MALFORMED_PAYMENT'].includes(body.code)) responseCode = body.code;

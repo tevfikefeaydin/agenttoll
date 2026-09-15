@@ -135,7 +135,7 @@
             }
           },
           "402": {
-            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
             "headers": {
               "PAYMENT-REQUIRED": {
                 "schema": {
@@ -254,7 +254,7 @@
             }
           },
           "402": {
-            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
             "headers": {
               "PAYMENT-REQUIRED": {
                 "schema": {
@@ -374,7 +374,7 @@
             }
           },
           "402": {
-            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
             "headers": {
               "PAYMENT-REQUIRED": {
                 "schema": {
@@ -485,7 +485,7 @@
             }
           },
           "402": {
-            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
             "headers": {
               "PAYMENT-REQUIRED": {
                 "schema": {
@@ -598,7 +598,7 @@
             }
           },
           "402": {
-            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
             "headers": {
               "PAYMENT-REQUIRED": {
                 "schema": {
@@ -719,7 +719,7 @@
             }
           },
           "402": {
-            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
             "headers": {
               "PAYMENT-REQUIRED": {
                 "schema": {
@@ -854,7 +854,7 @@
             }
           },
           "402": {
-            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
             "headers": {
               "PAYMENT-REQUIRED": {
                 "schema": {
@@ -974,7 +974,7 @@
             }
           },
           "402": {
-            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
             "headers": {
               "PAYMENT-REQUIRED": {
                 "schema": {
@@ -1098,7 +1098,7 @@
             }
           },
           "402": {
-            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
             "headers": {
               "PAYMENT-REQUIRED": {
                 "schema": {
@@ -1217,7 +1217,7 @@
             }
           },
           "402": {
-            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
             "headers": {
               "PAYMENT-REQUIRED": {
                 "schema": {
@@ -1347,7 +1347,7 @@
             }
           },
           "402": {
-            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
             "headers": {
               "PAYMENT-REQUIRED": {
                 "schema": {
@@ -1503,7 +1503,7 @@
             }
           },
           "402": {
-            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
             "headers": {
               "PAYMENT-REQUIRED": {
                 "schema": {
@@ -1772,7 +1772,7 @@
             }
           },
           "402": {
-            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
             "headers": {
               "PAYMENT-REQUIRED": {
                 "schema": {
@@ -1885,7 +1885,7 @@
             }
           },
           "402": {
-            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
             "headers": {
               "PAYMENT-REQUIRED": {
                 "schema": {
@@ -2028,7 +2028,7 @@
             }
           },
           "402": {
-            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
             "headers": {
               "PAYMENT-REQUIRED": {
                 "schema": {
@@ -2158,7 +2158,7 @@
             }
           },
           "402": {
-            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
             "headers": {
               "PAYMENT-REQUIRED": {
                 "schema": {
@@ -2296,7 +2296,7 @@
             }
           },
           "402": {
-            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
             "headers": {
               "PAYMENT-REQUIRED": {
                 "schema": {
@@ -2450,7 +2450,7 @@
             }
           },
           "402": {
-            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
             "headers": {
               "PAYMENT-REQUIRED": {
                 "schema": {
@@ -2603,7 +2603,7 @@
             }
           },
           "402": {
-            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
             "headers": {
               "PAYMENT-REQUIRED": {
                 "schema": {
@@ -2794,7 +2794,7 @@
             }
           },
           "402": {
-            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
             "headers": {
               "PAYMENT-REQUIRED": {
                 "schema": {
@@ -2960,7 +2960,7 @@
             }
           },
           "402": {
-            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.",
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
             "headers": {
               "PAYMENT-REQUIRED": {
                 "schema": {

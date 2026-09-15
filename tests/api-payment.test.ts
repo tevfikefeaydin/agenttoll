@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
-import { toClientEvmSigner } from '@x402/evm';
+import { ExactEvmScheme, toClientEvmSigner } from '@x402/evm';
+import { wrapFetchWithPayment, x402Client, x402HTTPClient } from '@x402/fetch';
 import { createPaymentClient } from '../src/payment-policy.js';
 
 test('real middleware payment lifecycle remains bounded and sanitizes facilitator errors', async (t) => {
@@ -72,6 +73,32 @@ test('real middleware payment lifecycle remains bounded and sanitizes facilitato
     assert.equal(body.meta.dataNetwork, 'base');
     assert.equal(body.meta.paymentNetwork, 'base-sepolia');
   });
+  await t.test('stock x402 v2 fetch client completes the quote and signed retry', async () => {
+    const client = new x402Client().register('eip155:84532', new ExactEvmScheme(toClientEvmSigner(account)));
+    const fetchWithPayment = wrapFetchWithPayment(nativeFetch, client);
+    const before = settleCalls;
+    const response = await fetchWithPayment(baseUrl + '/api/gas');
+    assert.equal(response.status, 200);
+    assert.equal((await response.json()).latestBlock, 100);
+    assert.ok(response.headers.get('payment-response'));
+    assert.equal(settleCalls, before + 1);
+  });
+  await t.test('a client reading only the JSON quote body can create an accepted v2 payment', async () => {
+    const client = new x402Client().register('eip155:84532', new ExactEvmScheme(toClientEvmSigner(account)));
+    const httpClient = new x402HTTPClient(client);
+    const before = settleCalls;
+    const quote = await nativeFetch(baseUrl + '/api/gas');
+    assert.equal(quote.status, 402);
+    const required = await quote.json();
+    assert.equal(required.x402Version, 2);
+    assert.equal(required.accepts[0].network, 'eip155:84532');
+    const payload = await client.createPaymentPayload(required);
+    const response = await nativeFetch(baseUrl + '/api/gas', { headers: httpClient.encodePaymentSignatureHeader(payload) });
+    assert.equal(response.status, 200);
+    assert.equal((await response.json()).latestBlock, 100);
+    assert.ok(response.headers.get('payment-response'));
+    assert.equal(settleCalls, before + 1);
+  });
   await t.test('invalid handler input cannot reach settlement', async () => {
     const before = settleCalls;
     const res = await payment.fetchWithPayment('/api/gas?gasLimit=banana');
@@ -95,6 +122,13 @@ test('real middleware payment lifecycle remains bounded and sanitizes facilitato
     const body = await res.json();
     assert.notEqual(body.code, 'UPSTREAM_UNAVAILABLE');
     assert.notEqual(body.retryable, true);
+    if (stage === 'verify') {
+      assert.equal(body.error, 'invalid_exact_evm_payload_signature');
+      assert.deepEqual(body, JSON.parse(Buffer.from(res.headers.get('payment-required')!, 'base64').toString()));
+    } else {
+      assert.equal(res.headers.get('payment-required'), null);
+      assert.equal(body.accepts, undefined);
+    }
   });
   await t.test('verification plus settlement share one deadline and report ambiguity', async () => {
     mode = 'deadline';

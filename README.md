@@ -19,7 +19,7 @@ Fresh-pool discovery, token safety checks, sampled radar history, wallet activit
 
 ## Payment flow
 
-1. An unsigned request returns HTTP 402 with a base64 JSON quote in PAYMENT-REQUIRED.
+1. An unsigned request returns HTTP 402 with a base64 JSON quote in PAYMENT-REQUIRED. JSON responses also include the same complete quote in the body for clients and discovery crawlers that read `accepts` there.
 2. The client validates the endpoint ceiling, expected origin, network, USDC contract and recipient, then signs an EIP-3009 authorization within its budget.
 3. The retry carries PAYMENT-SIGNATURE. The facilitator verifies payment and settles after a successful handler response. PAYMENT-RESPONSE carries the settlement receipt.
 

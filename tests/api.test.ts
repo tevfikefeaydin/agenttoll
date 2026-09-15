@@ -58,6 +58,21 @@ test('API integration: payment headers, discovery network, errors and normalized
       assert.equal(quote.accepts[0].amount, endpoint.amount, path);
       assert.equal(quote.accepts[0].network, 'eip155:84532', path);
       assert.equal(catalog.endpoints.find((entry: { path: string }) => entry.path === endpoint.path).price, endpoint.price);
+      assert.match(response.headers.get('content-type') ?? '', /application\/json/);
+      assert.deepEqual(await response.json(), quote, `${path}: body readers receive the same complete quote as header readers`);
+    }
+  });
+  await t.test('quote bodies preserve the requested resource and query parameters', async () => {
+    for (const path of ['/api/price/BTC', '/api/gas?gasLimit=21000', '/api/gas/', '/API/gas']) {
+      const response = await nativeFetch(base + path);
+      assert.equal(response.status, 402);
+      const body = await response.json();
+      assert.equal(body.x402Version, 2);
+      assert.equal(body.resource.url, base + path);
+      assert.equal(body.accepts[0].amount, '1000');
+      assert.equal(body.accepts[0].payTo, process.env.ADDRESS);
+      assert.ok(body.extensions.bazaar);
+      assert.deepEqual(body, JSON.parse(Buffer.from(response.headers.get('payment-required')!, 'base64').toString()));
     }
   });
   await t.test('malformed JSON has a structured error and request identity', async () => {

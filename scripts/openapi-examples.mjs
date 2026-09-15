@@ -21,7 +21,7 @@ for (const endpoint of ENDPOINTS) {
   const responses = operation.responses ??= {};
   responses["200"] = { description: "Success. meta describes response freshness and configured networks.",
     content: { "application/json": { example: { ...endpoint.discovery.output, meta: { requestId: "example-request", servedAt: endpoint.discovery.output.at ?? "2026-08-19T12:00:00.000Z", observedAt: endpoint.discovery.output.at ?? null, ageSeconds: endpoint.discovery.output.at ? 0 : null, dataNetwork: "base", paymentNetwork: "base" } } } } };
-  responses["402"] = { description: "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header.", headers: { "PAYMENT-REQUIRED": { schema: { type: "string" } } } };
+  responses["402"] = { description: "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.", headers: { "PAYMENT-REQUIRED": { schema: { type: "string" } } } };
   for (const [status, description] of [[400, "Invalid input"], [429, "Rate limited"], [502, "Upstream unavailable"], [504, "Request deadline exceeded"]]) {
     responses[status] = { description, content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } } };
   }
