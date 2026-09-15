@@ -1,0 +1,186 @@
+{
+  "kind": "recorded-example",
+  "capturedAt": "2026-09-15T11:40:45.634Z",
+  "provenance": {
+    "method": "AgentToll getTokenSafety queried public provider data directly; no payment was made for this capture.",
+    "sourceRevision": "d9a9cca4c77cf63c97398d878a7d0664974ab013"
+  },
+  "data": {
+    "chain": "base",
+    "token": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+    "name": "USD Coin",
+    "symbol": "USDC",
+    "verdict": "caution",
+    "failed": [],
+    "warnings": [
+      "deployer"
+    ],
+    "unchecked": [
+      "owner-powers",
+      "liquidity",
+      "deployer"
+    ],
+    "checks": [
+      {
+        "id": "honeypot",
+        "status": "pass",
+        "detail": "A simulated buy and sell both succeeded with an explicit negative honeypot result",
+        "complete": true,
+        "missing": [],
+        "sources": [
+          "goplus",
+          "honeypot.is"
+        ],
+        "conflicts": []
+      },
+      {
+        "id": "taxes",
+        "status": "pass",
+        "detail": "Buy tax 0%, sell tax 0%",
+        "complete": true,
+        "missing": [],
+        "sources": [
+          "goplus",
+          "honeypot.is"
+        ],
+        "conflicts": []
+      },
+      {
+        "id": "verified",
+        "status": "pass",
+        "detail": "Contract source is verified and public",
+        "complete": true,
+        "missing": [],
+        "sources": [
+          "goplus",
+          "honeypot.is"
+        ],
+        "conflicts": []
+      },
+      {
+        "id": "owner-powers",
+        "status": "unknown",
+        "detail": "Some contract permissions could not be read",
+        "complete": false,
+        "missing": [
+          "is_mintable",
+          "transfer_pausable",
+          "is_blacklisted",
+          "slippage_modifiable",
+          "personal_slippage_modifiable",
+          "can_take_back_ownership",
+          "hidden_owner",
+          "selfdestruct",
+          "trading_cooldown",
+          "anti_whale_modifiable",
+          "owner_change_balance"
+        ],
+        "sources": [
+          "goplus"
+        ],
+        "conflicts": []
+      },
+      {
+        "id": "concentration",
+        "status": "pass",
+        "detail": "Top 10 holders account for 26.1% of supply; 18.6% is confirmed neither locked nor contract-held",
+        "complete": true,
+        "missing": [],
+        "sources": [
+          "goplus"
+        ],
+        "conflicts": []
+      },
+      {
+        "id": "liquidity",
+        "status": "unknown",
+        "detail": "Liquidity ownership unavailable",
+        "complete": false,
+        "missing": [
+          "top-liquidity-provider-list",
+          "liquidity-share-total"
+        ],
+        "sources": [],
+        "conflicts": []
+      },
+      {
+        "id": "creator-stake",
+        "status": "pass",
+        "detail": "The creator holds 0% of supply",
+        "complete": true,
+        "missing": [],
+        "sources": [
+          "goplus"
+        ],
+        "conflicts": []
+      },
+      {
+        "id": "deployer",
+        "status": "warn",
+        "detail": "The deployer is a wallet with 11 transactions and holds 0.07371 ETH — lightly used",
+        "complete": false,
+        "missing": [
+          "scam-flag"
+        ],
+        "sources": [
+          "goplus+rpc"
+        ],
+        "conflicts": []
+      }
+    ],
+    "coverage": {
+      "complete": false,
+      "completedChecks": 5,
+      "totalChecks": 8
+    },
+    "deployer": {
+      "address": "0x6aaff8af0ae8017725312c388ba3745dfe91185b",
+      "basis": "contract-creator",
+      "isContract": false,
+      "txCount": 11,
+      "balanceEth": 0.07371418678166566,
+      "firstSeen": null,
+      "ageHours": null,
+      "flaggedScam": null
+    },
+    "holderCount": 10514949,
+    "listedOnCex": [
+      "Binance"
+    ],
+    "sources": [
+      "goplus",
+      "honeypot.is",
+      "goplus+rpc"
+    ],
+    "sourceStatus": {
+      "goplus": {
+        "status": "ok",
+        "fetchedAt": "2026-09-15T11:40:41.731Z",
+        "durationMs": 481,
+        "issues": []
+      },
+      "honeypot.is": {
+        "status": "ok",
+        "fetchedAt": "2026-09-15T11:40:41.600Z",
+        "durationMs": 311,
+        "issues": []
+      },
+      "blockscout+rpc": {
+        "status": "unavailable",
+        "fetchedAt": "2026-09-15T11:40:45.299Z",
+        "durationMs": 4007,
+        "issues": [
+          "request-failed"
+        ]
+      },
+      "goplus+rpc": {
+        "status": "ok",
+        "fetchedAt": "2026-09-15T11:40:45.633Z",
+        "durationMs": 334,
+        "issues": []
+      }
+    },
+    "disclaimer": "Automated checks against public data, not investment advice. Passing every check does not make a token safe.",
+    "at": "2026-09-15T11:40:45.634Z"
+  }
+}

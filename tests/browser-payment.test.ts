@@ -39,6 +39,7 @@ function browser(options: {
   const signatures: any[] = [];
   const codeAddresses: unknown[] = [];
   const walletRequests: string[] = [];
+  const requests: Request[] = [];
   let chainChecks = 0;
   let chainId = options.testnet ? "0x14a34" : "0x2105";
   const provider = {
@@ -66,6 +67,7 @@ function browser(options: {
   (globalThis as any).window = { ethereum: provider, location: { origin: API } };
   globalThis.fetch = async (input, init) => {
     const request = new Request(input, init);
+    requests.push(request);
     assert.equal(new URL(request.url).origin, API, "Browser must not use an external RPC");
     if (!request.headers.has("payment-signature")) {
       return new Response(null, { status: 402, headers: {
@@ -79,7 +81,7 @@ function browser(options: {
     return Response.json({ symbol: "eth", usd: 2000 });
   };
   return {
-    account, signatures, codeAddresses, shown, walletRequests,
+    account, signatures, codeAddresses, shown, walletRequests, requests,
     show: (html: string, tone: string) => { shown.push({ html, tone }); },
   };
 }
@@ -203,4 +205,38 @@ test("missing wallet produces an install hint without a rejected promise", async
   await assert.doesNotReject(pay(API + ENDPOINT, fixture.show, { quote: quote() }));
   assert.equal(fixture.shown.at(-1)?.tone, "err");
   assert.match(fixture.shown.at(-1)?.html ?? "", /No browser wallet/i);
+});
+
+test("a purchased inspection returns structured data and identifies both payment requests", async () => {
+  const fixture = browser();
+  const result = await pay(API + ENDPOINT, fixture.show, { quote: quote(), client: "agenttoll-inspect/1.0.0" });
+  assert.equal(result?.status, "delivered");
+  assert.deepEqual(result?.data, { symbol: "eth", usd: 2000 });
+  assert.equal(result?.signed, true);
+  assert.equal(result?.network, "base");
+  assert.deepEqual(fixture.requests.map(r => r.headers.get("x-agenttoll-client")), ["agenttoll-inspect/1.0.0", "agenttoll-inspect/1.0.0"]);
+});
+
+test("an authorized payment failure tells the caller to prevent an immediate second charge", async () => {
+  const fixture = browser({ status: 402, reason: "insufficient balance" });
+  const result = await pay(API + ENDPOINT, fixture.show, { quote: quote() });
+  assert.equal(result?.status, "failed");
+  assert.equal(result?.authorizationPossible, true);
+});
+
+test("rejecting the wallet before signing leaves the inspection retryable", async () => {
+  const fixture = browser({ accountError: "User rejected request" });
+  const result = await pay(API + ENDPOINT, fixture.show, { quote: quote() });
+  assert.equal(result?.status, "failed");
+  assert.equal(result?.authorizationPossible, false);
+});
+
+test("timing out while the wallet signature is pending reports a possible authorization", async () => {
+  const fixture = browser();
+  const provider = (globalThis as any).window.ethereum;
+  const request = provider.request.bind(provider);
+  provider.request = (args: { method: string }) => args.method === "eth_signTypedData_v4" ? new Promise(() => {}) : request(args);
+  const result = await pay(API + ENDPOINT, fixture.show, { quote: quote(), timeoutMs: 250 });
+  assert.equal(result?.status, "failed");
+  assert.equal(result?.authorizationPossible, true);
 });

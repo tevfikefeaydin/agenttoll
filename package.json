@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "node --import tsx scripts/sync-shared.mjs && tsc && npm run build:web",
-    "build:web": "esbuild web/demo.ts --bundle --format=iife --target=es2020 --minify --outfile=public/demo.js",
+    "build:web": "node --import tsx scripts/build-web.mjs",
     "start": "node dist/index.js",
     "example:client": "tsx examples/agent-client.ts",
     "example:langchain": "tsx examples/langchain-tool.ts",
@@ -22,6 +22,7 @@
     "typecheck:tests": "tsc -p tsconfig.tests.json",
     "smoke:mcp": "node scripts/mcp-package-smoke.mjs",
     "ops:report": "node --import tsx scripts/ops-report.mjs",
+    "ops:inspections": "node --import tsx scripts/inspection-report.mjs",
     "ops:check": "node --import tsx scripts/ops-check.mjs",
     "ops:data": "node --import tsx scripts/ops-data.mjs"
   },

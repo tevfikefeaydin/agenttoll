@@ -45,7 +45,9 @@ test('payment diagnostics use real middleware with offline facilitator fixtures'
       if (mode === 'timeout-settle') await new Promise(resolve => setTimeout(resolve, 400));
       if (mode === 'settle-decline') return Response.json({ success: false, errorReason: 'insufficient_funds', transaction: secret, network: 'eip155:84532' }, { status: 400 });
       if (mode === 'settle-unknown') return Response.json({ private: secret });
-      return Response.json({ success: true, transaction: mode === 'invalid-identity' ? secret : transaction, network: 'eip155:84532', payer });
+      return Response.json({ success: true, transaction: mode === 'invalid-identity' ? secret : transaction,
+        network: mode === 'inconsistent-settlement' ? 'eip155:1' : 'eip155:84532',
+        amount: mode === 'inconsistent-settlement' ? '999' : undefined, payer });
     }
     if (url.includes('base.org')) {
       const body = JSON.parse(String(init?.body));
@@ -93,10 +95,26 @@ test('payment diagnostics use real middleware with offline facilitator fixtures'
     assert.equal(record.paymentStage, 'settled');
     assert.equal(record.verifiedPayer, payer);
     assert.equal(record.settlementTransaction, transaction);
+    assert.equal(record.settlementAmount, '1000');
+    assert.equal(record.settlementAsset, '0x036cbd53842c5426634e7929541ec2318f3dcf7e');
+    assert.equal(record.settlementNetwork, 'eip155:84532');
     assert.equal(record.facilitatorVerifyCalls, 1);
     assert.equal(record.facilitatorSettleCalls, 1);
     assert.ok(record.facilitatorVerifyMs >= 0);
     assert.deepEqual(record.client, { name: 'agenttoll-mcp', version: '0.14.0', source: 'x-agenttoll-client' });
+  });
+  await t.test('browser inspection client is allowlisted while settlement facts stay server-derived', async () => {
+    const res = await nativeFetch(baseUrl + '/api/gas', { headers: {
+      'payment-signature': encode({ ...payload, accepted: { ...payload.accepted, amount: '999', asset: '0x' + '44'.repeat(20), network: 'eip155:1' } }),
+      'X-AgentToll-Client': 'agenttoll-inspect/1.0.0',
+    } });
+    await res.arrayBuffer();
+    const record = logs.find(row => row.requestId === res.headers.get('x-request-id'))!;
+    assert.equal(res.status, 402);
+    assert.deepEqual(record.client, { name: 'agenttoll-inspect', version: '1.0.0', source: 'x-agenttoll-client' });
+    assert.equal(record.settlementAmount, undefined);
+    assert.equal(record.settlementAsset, undefined);
+    assert.equal(record.settlementNetwork, undefined);
   });
   await t.test('decode and match rejections happen before verification without payload logging', async () => {
     const before = verifyCalls;
@@ -128,6 +146,14 @@ test('payment diagnostics use real middleware with offline facilitator fixtures'
     mode = 'invalid-identity';
     const { res, record } = await request();
     assert.equal(res.status, 200); assert.equal(record.verifiedPayer, null); assert.equal(record.settlementTransaction, null);
+    assert.equal(record.settlementAmount, undefined); assert.equal(record.settlementAsset, undefined);
+  });
+  await t.test('settlement facts are omitted when the facilitator receipt conflicts with server requirements', async () => {
+    mode = 'inconsistent-settlement';
+    const { res, record } = await request();
+    assert.equal(res.status, 200); assert.equal(record.settlementTransaction, transaction);
+    assert.equal(record.settlementAmount, undefined); assert.equal(record.settlementAsset, undefined);
+    assert.equal(record.settlementNetwork, undefined);
   });
   await t.test('SDK extension-response diagnostics cannot print arbitrary facilitator reason values', async () => {
     mode = 'extension-response';

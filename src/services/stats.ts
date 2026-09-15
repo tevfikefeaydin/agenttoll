@@ -2,6 +2,7 @@ import { cached, fetchWithTimeout } from "./cache.js";
 import { blockscoutFetch, fromSources } from "./sources.js";
 import { requestContext, withSignal } from "../request-context.js";
 import { MAX_TOLL_UNITS, parseStatsBaseline, type StatsBaseline, type StatsNetwork } from "./stats-baseline.js";
+import { KNOWN_OPERATOR_WALLETS } from "../operator-wallets.js";
 export type { StatsNetwork } from "./stats-baseline.js";
 
 // Counts of small USDC transfers to payTo. These include tests and unsolicited
@@ -35,10 +36,7 @@ const STATS_UPSTREAM_TIMEOUT_MS = 8_000;
 // The wallets we run our own tests from. Counted like any other payer, but
 // reported separately so "did anyone else pay yet" is answerable at a glance.
 // Retired wallets stay listed: their historical calls remain ours forever.
-const OWN_TEST_WALLETS = new Set([
-  "0x5f871f89b13f5c7f570a765aa54c211323f36f78", // retired 2026-08-06
-  "0x29d7837a1c19890d2ab123999e9cf8bfe40985b0",
-]);
+const OWN_TEST_WALLETS = KNOWN_OPERATOR_WALLETS;
 
 /** What either reading produces: who paid, how much, and how sure we are. */
 interface Tally {

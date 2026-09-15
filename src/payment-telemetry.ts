@@ -20,6 +20,9 @@ export interface PaymentTelemetry {
   verifiedPayer: string | null;
   settlementTransaction: string | null;
   settlementConfirmed: boolean;
+  settlementAmount?: string;
+  settlementAsset?: string;
+  settlementNetwork?: string;
   activeFacilitator?: { phase: 'verify' | 'settle'; started: number };
 }
 export function paymentTelemetry(signature: string | undefined, legacy: string | undefined): PaymentTelemetry {
@@ -34,6 +37,17 @@ export function declineReason(value: unknown, settling: boolean): PaymentReason 
 }
 export const publicPayer = (value: unknown): string | null => typeof value === 'string' && /^0x[0-9a-f]{40}$/i.test(value) ? value.toLowerCase() : null;
 export const publicTransaction = (value: unknown): string | null => typeof value === 'string' && /^0x[0-9a-f]{64}$/i.test(value) ? value.toLowerCase() : null;
+
+/** Snapshot the exact scheme's server-selected terms only after settlement succeeds. */
+export function settledRequirements(value: unknown, receiptNetwork: unknown, receiptAmount: unknown) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+  const requirement = value as Record<string, unknown>;
+  if (requirement.scheme !== 'exact' || typeof requirement.amount !== 'string' || !/^[1-9]\d{0,77}$/.test(requirement.amount) ||
+    typeof requirement.asset !== 'string' || !/^0x[0-9a-f]{40}$/i.test(requirement.asset) ||
+    typeof requirement.network !== 'string' || !/^eip155:\d{1,10}$/.test(requirement.network) ||
+    receiptNetwork !== requirement.network || (receiptAmount !== undefined && receiptAmount !== requirement.amount)) return null;
+  return { settlementAmount: requirement.amount, settlementAsset: requirement.asset.toLowerCase(), settlementNetwork: requirement.network };
+}
 
 /** Parse with the same decoder as the SDK, but never print decoder exceptions. */
 export function inspectPayment(signature: string | undefined, legacy: string | undefined, telemetry: PaymentTelemetry): PaymentReason | null {
@@ -54,7 +68,7 @@ export function inspectPayment(signature: string | undefined, legacy: string | u
 
 /** Client metadata is self-reported, never identity. Unknown products and free text are omitted. */
 export function sanitizedClient(explicit?: string, userAgent?: string) {
-  const pattern = /^(agenttoll-mcp|agenttoll-web|curl|python-requests|node|undici)\/(\d{1,4}\.\d{1,4}(?:\.\d{1,4})?)$/i;
+  const pattern = /^(agenttoll-mcp|agenttoll-web|agenttoll-inspect|curl|python-requests|node|undici)\/(\d{1,4}\.\d{1,4}(?:\.\d{1,4})?)$/i;
   const source = explicit ? 'x-agenttoll-client' : 'user-agent';
   const value = explicit ?? userAgent;
   if (!value || value.length > 128) return null;

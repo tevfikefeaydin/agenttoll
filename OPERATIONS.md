@@ -17,6 +17,7 @@ npm run ops:check
 npm run ops:data
 npm run ops:data -- --strict
 npm run ops:report -- --input requests.ndjson
+npm run ops:inspections -- --input requests.ndjson
 
 npm run build
 node scripts/keep-warm.mjs --dry-run
@@ -31,6 +32,43 @@ Set `AGENTTOLL_URL`, `AGENTTOLL_NETWORK` and an explicitly trusted `AGENTTOLL_RE
 
 `ops:report` reads at most 20 MiB of newline-delimited application JSON (direct request records, or JSON objects with a `message` containing the record). It makes no network calls. It outputs status counts, server errors, nearest-rank p50/p95 latency, instrumented data-provider/cache totals, payment outcomes, canonical endpoint groups, payment phases/reasons and facilitator timing. An empty/unusable export exits 1. Duplicate request IDs and invalid lines are reported separately. It describes only the supplied records; it cannot restore events lost to retention or sampling.
 
+`ops:inspections` is the narrower browser-inspection report. It reads one or more
+newline-delimited exports with repeated `--input` flags, makes no network calls,
+and includes only canonical `/api/base/safety/{address}` records carrying the
+allowlisted, self-reported `agenttoll-inspect` client label. Each file is limited
+to 20 MiB, at most 64 files and 100 MiB combined. It reports unsigned quotes,
+PAYMENT-SIGNATURE submissions, payment failure stages/phases/reasons, unique
+confirmed settlements, successfully delivered reports and confirmed settlements
+whose response later aborted. “Successfully delivered” means the server finished
+its 2xx HTTP response; it cannot prove that a browser rendered or read it.
+Byte-equivalent records with the same request ID are deduplicated across
+overlapping exports. If records sharing an ID differ, the entire request group
+is excluded and reported as a conflict rather than selecting the first record.
+Settlement receipts are separately deduplicated by network, asset and
+transaction hash; conflicting, malformed, legacy and internally inconsistent
+receipts are excluded from totals and reported as unresolved.
+For a duplicate receipt observed on different dates, returning-wallet logic uses
+its earliest supplied log timestamp consistently. That is when this log export
+observed the receipt, not an independently verified onchain transaction time.
+The command does not query Base to revalidate a transaction independently.
+
+The primary settlement, USDC and wallet fields are commercial Base mainnet
+(`eip155:8453`) totals. Base Sepolia receipts cannot increase them; valid testnet
+receipts appear only in `excludedTestnet`. Quote, submission and failure counts
+can still span deployments because records before confirmed settlement do not
+contain a receipt network. USDC totals retain integer atomic units and also
+render exactly six decimal places. Known operator wallets are reported separately from other wallets, and
+an external returning wallet means the same non-operator public address has
+confirmed settlements on at least two distinct UTC dates in the supplied log
+window. These are wallet counts, not people or customer counts. “External” only
+excludes the maintained known-operator list; it does not mean organic demand.
+The report emits no wallet addresses. For an additional operator/test wallet,
+repeat `--exclude-operator 0x...`; this changes only the local aggregate and the
+address must have the exact EVM address shape. Do not calculate a conversion
+rate by dividing quotes by submissions: the records are not paired and routine
+unsigned monitoring can produce quotes. Docker logs rotate by size (3 × 10 MB),
+so every report must be read as a bounded view of the supplied exports.
+
 `ops:data` calls read-only public data services directly: the latest immutable scout snapshot, seven-snapshot scorecard and a USDC safety benchmark. It has one 25-second deadline and never loads a wallet key or payment client. Snapshot age is measured from its actual `at` timestamp; more than 30 hours is stale. `captureDelaySeconds` compares the capture to the existing 07:23 UTC daily scout schedule. A successful GitHub job alone does not establish fresh data. Invalid/future timestamps and summary/row inconsistencies fail validation.
 
 The data report keeps `ok` (availability/freshness) separate from `degraded` (partial coverage). It records priced, low-observed-liquidity and unavailable token counts plus completed safety checks. A low-liquidity observation does not establish that every pool disappeared; unknown checks stay unknown. Default exit 1 means unavailable/stale; `--strict` additionally exits 2 for partial coverage. This benchmark does not inspect every endpoint/token and does not exercise the public payment gate.
@@ -43,7 +81,7 @@ New request logs have `schemaVersion: 2`; the report still reads version 1. Logs
 
 Payment diagnostics include `paymentHeader` (header name/generation only), `protocolVersion` (decoded, unverified), `paymentPhase` (initialize/parse/match/verify/handler/settle), a fixed allowlisted `paymentReason`, and verify/settle invocation counts and waiting milliseconds. Shared `/supported` initialization and its SDK retries are excluded. In-flight duration is captured up to abort; late results do not rewrite a terminal record. Basename RPCs now participate in the separate data-provider counters and obey caller cancellation.
 
-`paymentSubmitted` means a payment header was present, not that a valid signature was verified. Logs omit signatures, authorization payloads, private keys, raw user-agent strings, IPs, query values and requested wallet/name/symbol values. `client` accepts only known product names and numeric versions from `X-AgentToll-Client` or User-Agent; it is self-reported, not identity. `verifiedPayer` comes only from a successful SDK-validated facilitator verification response; `settlementTransaction` only from a successful facilitator settlement with a valid hash shape. They are public payment identifiers, not unique customers or an independent chain recheck. Unverified or rejected payer claims are never retained. The public [privacy notice](public/privacy.html) describes this policy and size-based Docker log rotation (3 × 10 MB).
+`paymentSubmitted` means a payment header was present, not that a valid signature was verified. Logs omit signatures, authorization payloads, private keys, raw user-agent strings, IPs, query values and requested wallet/name/symbol values. `client` accepts only known product names and numeric versions from `X-AgentToll-Client` or User-Agent; it is self-reported, not identity. `verifiedPayer` comes only from a successful SDK-validated facilitator verification response; `settlementTransaction` only from a successful facilitator settlement with a valid hash shape. After a confirmed successful settlement with a valid receipt matching the selected network and exact amount, `settlementAmount`, `settlementAsset` and `settlementNetwork` snapshot the exact server-selected payment requirements passed to the facilitator. They are never copied from the caller's unsigned or signed payload and are not inferred from a current price. These fields and the public payer/transaction are payment evidence, not unique customers or an independent chain recheck. Unverified or rejected payer claims are never retained. The public [privacy notice](public/privacy.html) describes this policy and size-based Docker log rotation (3 × 10 MB).
 
 An x402 2.21 SDK diagnostic can print arbitrary nested fields from `EXTENSION-RESPONSES`. A narrowly scoped adapter suppresses only its exact diagnostic prefix while inside payment request context. Ordinary logging is preserved. Review the adapter and its real SDK regression whenever upgrading x402. `X-PAYMENT`/v1 callers receive `PAYMENT_UPGRADE_REQUIRED` with v2 instructions; malformed input receives `MALFORMED_PAYMENT`. Neither is forwarded for verification or charged.
 

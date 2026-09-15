@@ -27,7 +27,7 @@
 <div class="wrap">
   <p class="meta"><a href="/">← AgentToll</a></p>
   <h1>Privacy</h1>
-  <p class="meta">Last updated 14 September 2026</p>
+  <p class="meta">Last updated 15 September 2026</p>
 
   <p>AgentToll has <strong>no accounts, no API keys and no sessions</strong>, so there is very
   little about you for us to hold in the first place. This page describes exactly what exists.</p>
@@ -48,8 +48,9 @@
       self-reported diagnostics. Application request logs omit IP addresses, raw user-agent
       text, query strings, requested wallet/name values and payment authorization payloads.
       After successful facilitator verification or settlement, logs may include the verified
-      public paying address and transaction hash to diagnose payment faults. We do not record
-      signatures or private keys.</li>
+      public paying address and transaction hash to diagnose payment faults. Once settlement is
+      confirmed, the log also records the amount, asset and payment network selected by the server.
+      We do not record signatures or private keys.</li>
     <li><strong>Log retention.</strong> The application runs on Hetzner. Its Docker log files
       rotate by size (three files of up to 10 MB each), so the time retained varies with
       traffic. Operational reports may preserve selected diagnostic records while a fault
@@ -58,6 +59,15 @@
       paying address, amount and timestamp are public on the network. Our
       <code>/api/stats</code> counter reads those public transfers; verified payer and receipt
       identifiers may also appear in the diagnostic logs described above.</li>
+    <li><strong>Aggregate usage reports.</strong> We can aggregate the retained or exported server
+      logs to count browser safety-check quotes, payment submissions, failure stages, confirmed
+      settlements and reports delivered after payment. The aggregate separates known operator
+      wallets from other public paying addresses and can count an address as returning when it
+      pays on two or more UTC dates in the supplied log window. Commercial payment and wallet
+      totals include Base mainnet only; testnet receipts are shown separately. Aggregate output omits wallet
+      addresses. A wallet count is not a count of people, and an address outside our known operator
+      list is not necessarily an organic customer. Because logs rotate by size, these reports cover
+      only the records supplied to them.</li>
     <li><strong>In-memory caches and rate limits.</strong> Data responses are cached for a
       route-specific period; immutable historical snapshots can remain cached for six hours.
       Cache keys describe requested data, not the paying identity. Per-IP counters enforce

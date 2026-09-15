@@ -37,7 +37,7 @@ import { requestContext, withSignal, type RequestContext } from "./request-conte
 import { cached } from "./services/cache.js";
 import { baseRpc } from "./services/sources.js";
 import { canonicalRoute, installPaymentDiagnosticFilter } from "./telemetry.js";
-import { declineReason, inspectPayment, paymentSnapshot, paymentTelemetry, publicPayer, publicTransaction, sanitizedClient } from "./payment-telemetry.js";
+import { declineReason, inspectPayment, paymentSnapshot, paymentTelemetry, publicPayer, publicTransaction, sanitizedClient, settledRequirements } from "./payment-telemetry.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const config = readConfig();
@@ -54,7 +54,7 @@ const facilitatorHttp = new HTTPFacilitatorClient({
 
 // The SDK's per-attempt timeout does not bound retries or the combined
 // verify/handler/settle operation. Reuse the request's remaining deadline.
-async function facilitatorCall<T>(load: () => Promise<T>, phase?: 'verify' | 'settle'): Promise<T> {
+async function facilitatorCall<T>(load: () => Promise<T>, phase?: 'verify' | 'settle', requirements?: unknown): Promise<T> {
   const context = requestContext.getStore();
   const signal = context?.signal ?? AbortSignal.timeout(config.requestTimeoutMs);
   const payment = context?.payment;
@@ -71,7 +71,7 @@ async function facilitatorCall<T>(load: () => Promise<T>, phase?: 'verify' | 'se
     }
     const result = await withSignal(Promise.resolve().then(() => { signal.throwIfAborted(); return load(); }), signal);
     if (payment && phase) {
-      const response = result as { isValid?: boolean; success?: boolean; invalidReason?: string; errorReason?: string; payer?: string; transaction?: string };
+      const response = result as { isValid?: boolean; success?: boolean; invalidReason?: string; errorReason?: string; payer?: string; transaction?: string; network?: string; amount?: string };
       if (settling ? response.success === true : response.isValid === true) {
         payment.paymentReason = null;
         // Only successful, SDK-validated facilitator results establish public identity.
@@ -79,6 +79,8 @@ async function facilitatorCall<T>(load: () => Promise<T>, phase?: 'verify' | 'se
         if (settling) {
           payment.settlementConfirmed = true;
           payment.settlementTransaction = publicTransaction(response.transaction);
+          const facts = payment.settlementTransaction ? settledRequirements(requirements, response.network, response.amount) : null;
+          if (facts) Object.assign(payment, facts);
         }
       } else payment.paymentReason = declineReason(settling ? response.errorReason : response.invalidReason, settling);
     }
@@ -109,7 +111,7 @@ async function facilitatorCall<T>(load: () => Promise<T>, phase?: 'verify' | 'se
 const facilitatorClient: FacilitatorClient = {
   getSupported: () => facilitatorCall(() => facilitatorHttp.getSupported()),
   verify: (payload, requirements) => facilitatorCall(() => facilitatorHttp.verify(payload, requirements), 'verify'),
-  settle: (payload, requirements) => facilitatorCall(() => facilitatorHttp.settle(payload, requirements), 'settle'),
+  settle: (payload, requirements) => facilitatorCall(() => facilitatorHttp.settle(payload, requirements), 'settle', requirements),
 };
 
 const app = express();

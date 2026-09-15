@@ -17,6 +17,14 @@
 
 Fresh-pool discovery, token safety checks, sampled radar history, wallet activity and market data share one API. Base market and chain data always use mainnet; a self-hosted instance can accept payments on Base Sepolia without changing the data network.
 
+## Inspect a token in the browser
+
+The browser flow at `/inspect.html` includes a free, dated report captured from real provider data. Paste a Base token contract address, check the price without connecting a wallet, then approve one USDC payment to receive the eight-check report. It uses the existing `/api/base/safety/:address` endpoint ($0.003), preserves missing evidence, and offers a settlement receipt and JSON download. A report can be cached for up to five minutes. Ambiguous signed failures require checking the wallet before another payment can be requested.
+
+`web/inspect.html` is the page template; `web/inspect.ts` controls quotes and payment, and `web/token-report.ts` presents the data. `npm run build:web` builds both browser bundles and embeds `public/token-example.json` into the generated page, so the example works without JavaScript. `npm run check:generated` checks that all three generated files agree with their sources. Refresh the example only with a newly recorded response and its capture time and provenance; do not relabel an old example as live.
+
+Operational inspection metrics come from exported application logs; see [`ops:inspections` in OPERATIONS.md](OPERATIONS.md#checks-that-do-not-pay). These distinguish mainnet settlements from testnet activity and known operator wallets, and do not claim that a wallet is a person or that a quote is a unique visitor.
+
 ## Payment flow
 
 1. An unsigned request returns HTTP 402 with a base64 JSON quote in PAYMENT-REQUIRED. JSON responses also include the same complete quote in the body for clients and discovery crawlers that read `accepts` there.

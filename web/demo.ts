@@ -6,21 +6,25 @@ import { decodePaymentResponseHeader } from "@x402/fetch";
 import { createPaymentClient, createPaymentDeadline, getNetworkConfig, registeredEndpoint } from "../src/payment-policy.js";
 
 type Show = (html: string, tone?: "quote" | "ok" | "err" | "wait") => void;
-interface BrowserPaymentOptions { quote?: unknown; recipient?: string; timeoutMs?: number; }
+interface BrowserPaymentOptions { quote?: unknown; recipient?: string; timeoutMs?: number; client?: string; showRaw?: boolean; }
+export type BrowserPaymentOutcome =
+  | { status: "delivered"; data: unknown; transaction: string | null; network: "base" | "base-sepolia"; signed: boolean }
+  | { status: "failed"; authorizationPossible: boolean };
 const esc = (value: unknown) => String(value).replace(/[&<>"']/g, character =>
   ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character] as string,
 );
 
-async function pay(endpoint: string, show: Show, options: BrowserPaymentOptions = {}) {
+export async function pay(endpoint: string, show: Show, options: BrowserPaymentOptions = {}): Promise<BrowserPaymentOutcome> {
   const provider = (window as unknown as { ethereum?: EIP1193Provider }).ethereum;
   if (!provider) {
     show('<span class="bad">No browser wallet found.</span><p class="dim">Install a Base-compatible wallet and reload, or call the API from your own code.</p>', "err");
-    return;
+    return { status: "failed", authorizationPossible: false };
   }
 
   let address: `0x${string}` | undefined;
   let networkName = "the quoted network";
   let signed = false;
+  let signing = false;
   let deadline: ReturnType<typeof createPaymentDeadline> | undefined;
   try {
     deadline = createPaymentDeadline(options.timeoutMs ?? 120_000);
@@ -28,9 +32,10 @@ async function pay(endpoint: string, show: Show, options: BrowserPaymentOptions 
     const url = new URL(endpoint, window.location.origin);
     if (url.origin !== window.location.origin) throw new Error("The demo only pays its own API origin.");
     registeredEndpoint(url.pathname);
+    const headers = options.client ? { "X-AgentToll-Client": options.client } : undefined;
     let displayedQuote = options.quote;
     if (displayedQuote === undefined) {
-      const response = await operation.run(() => fetch(url, { signal: operation.signal, redirect: "error" }));
+      const response = await operation.run(() => fetch(url, { signal: operation.signal, redirect: "error", headers }));
       if (response.status !== 402) throw new Error(`Expected a payment quote, received HTTP ${response.status}.`);
       const header = response.headers.get("payment-required");
       if (!header || header.length > 32_768) throw new Error("Missing or oversized payment quote.");
@@ -69,13 +74,16 @@ async function pay(endpoint: string, show: Show, options: BrowserPaymentOptions 
         if (String(currentChain).toLowerCase() !== expectedChainId) throw new Error(`Your wallet changed network; switch back to ${config.name}.`);
         operation.check();
         show('<span class="dim">Sign the USDC authorization in your wallet…</span>', "wait");
-        const signature = await wallet.signTypedData({ account: payer, ...message } as Parameters<typeof wallet.signTypedData>[0]);
-        signed = true;
-        return signature;
+        signing = true;
+        try {
+          const signature = await wallet.signTypedData({ account: payer, ...message } as Parameters<typeof wallet.signTypedData>[0]);
+          signed = true;
+          return signature;
+        } finally { signing = false; }
       },
     });
     const client = createPaymentClient(network, signer, policyOptions);
-    const response = await operation.run(() => client.fetchWithPayment(url, { signal: operation.signal }, pinnedQuote));
+    const response = await operation.run(() => client.fetchWithPayment(url, { signal: operation.signal, headers }, pinnedQuote));
     if (!response.ok) {
       let reason = "";
       try {
@@ -86,7 +94,7 @@ async function pay(endpoint: string, show: Show, options: BrowserPaymentOptions 
       show('<span class="bad">Payment did not complete.</span><p class="dim">' +
         (noFunds ? `This wallet needs USDC on ${esc(config.name)}. USDC on another network cannot pay this quote.` :
           'The server returned: <code>' + esc(reason || `HTTP ${response.status}`) + '</code>. Check your wallet before retrying an authorized payment.') + '</p>', "err");
-      return;
+      return { status: "failed", authorizationPossible: signed || signing };
     }
     const data = await operation.run(() => response.json());
     let tx: string | undefined;
@@ -95,9 +103,11 @@ async function pay(endpoint: string, show: Show, options: BrowserPaymentOptions 
       const candidate = header ? (decodePaymentResponseHeader(header) as { transaction?: string }).transaction : undefined;
       if (candidate && /^0x[0-9a-fA-F]{64}$/.test(candidate)) tx = candidate;
     } catch { /* Delivered data remains usable if settlement metadata is malformed. */ }
-    show('<div class="line"><span class="tag good">HTTP ' + response.status + '</span> ' + (signed ? 'paid &amp; delivered' : 'delivered') + '</div>' +
-      '<pre class="mini">' + esc(JSON.stringify(data, null, 2)) + '</pre>' +
+    show((options.showRaw === false ? '<p>Your report is ready.</p>' :
+      '<div class="line"><span class="tag good">HTTP ' + response.status + '</span> ' + (signed ? 'paid &amp; delivered' : 'delivered') + '</div>' +
+      '<pre class="mini">' + esc(JSON.stringify(data, null, 2)) + '</pre>') +
       (tx ? '<div class="kv"><span>settled</span><b><a href="' + config.explorer + '/tx/' + tx + '" target="_blank" rel="noopener">view on BaseScan ↗</a></b></div>' : ''), "ok");
+    return { status: "delivered", data, transaction: tx ?? null, network, signed };
   } catch (error) {
     const message = (error as Error)?.message ?? String(error);
     let friendly = message;
@@ -120,7 +130,9 @@ async function pay(endpoint: string, show: Show, options: BrowserPaymentOptions 
         ? '<p class="dim">This is a smart contract wallet. The facilitator may not support its signature format; try a regular EOA wallet.</p>'
         : '<p class="dim">Check the wallet and the server error before retrying. If this persists, report it on <a href="https://github.com/tevfikefeaydin/agenttoll/issues">GitHub</a>.</p>';
     }
+    if (signed || signing) hint += '<p class="dim">A payment authorization may still be valid. Inspect your wallet and receipt before paying again.</p>';
     show('<span class="bad">' + esc(friendly) + '</span>' + hint, "err");
+    return { status: "failed", authorizationPossible: signed || signing };
   } finally { deadline?.close(); }
 }
 
