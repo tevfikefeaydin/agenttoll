@@ -27,7 +27,7 @@ const evidenceLabels: Record<string, string> = {
   'creator-percent': 'creator’s share of supply', 'scam-flag': 'explorer scam assessment',
   'open-source': 'published contract source', 'buy-tax': 'buy tax', 'sell-tax': 'sell tax',
 };
-function evidenceLabel(value: string) {
+export function evidenceLabel(value: string) {
   if (Object.hasOwn(evidenceLabels, value)) return evidenceLabels[value];
   const holder = /^(lp_holders|holders)\[(\d{1,4})\]\.(percent|is_locked|is_contract)$/.exec(value);
   if (holder) return `${holder[1] === 'holders' ? 'holder' : 'liquidity provider'} ${Number(holder[2]) + 1}: ${{ percent: 'ownership share', is_locked: 'lock status', is_contract: 'contract status' }[holder[3]]}`;

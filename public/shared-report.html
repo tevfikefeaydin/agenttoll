@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Inspect a Base token | AgentToll</title>
-  <meta name="description" content="See a free example, then inspect a Base token for trading risks, owner permissions and missing evidence. One report, one USDC payment, no account.">
-  <link rel="canonical" href="https://agenttoll.app/inspect.html">
+  <meta name="description" content="Read a user-supplied Base token report snapshot. Shared snapshots are unverified and retain their original observation time.">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <title>Shared report | AgentToll</title>
   <link rel="icon" href="/icon.png" type="image/png">
   <style>
 :root{color-scheme:dark;--bg:#070B14;--surface:#0E1524;--surface-2:#131C2E;--text:#EAF0FA;--muted:#9BA8BF;--line:#263248;--blue:#0052FF;--blue-soft:#91B5FF;--amber:#F1C574;--red:#FFA0A0;--green:#91D8BE;--sans:"Segoe UI",system-ui,-apple-system,sans-serif;--mono:"Cascadia Code",Consolas,monospace}
@@ -25,78 +26,31 @@ main{padding-block:56px 70px}.intro{display:grid;grid-template-columns:minmax(28
 
 .keep-report{display:flex;align-items:flex-start;gap:9px;font-size:12px;font-weight:400;color:var(--muted);margin-top:16px}.keep-report input{width:16px;height:16px;padding:0;margin:2px 0 0;flex-shrink:0;accent-color:var(--blue)}.shared-page{max-width:900px}.shared-page .research-heading{display:block;margin-bottom:24px}.shared-notice{border:1px solid #5B4929;background:#30271B;color:var(--amber);padding:20px;border-radius:8px;font-size:13px;margin:22px 0}.shared-notice h2{font-size:16px;margin:0 0 8px}.shared-notice p{margin:7px 0}.shared-layout{margin-top:24px}.shared-error{border:1px solid #66404E;padding:18px;border-radius:8px}.share-fallback input{font-size:12px}.report-actions-status textarea{width:100%;margin-top:12px}
 </style>
-  <script defer src="/inspect.js"></script>
+  <script defer src="/shared-report.js"></script>
 </head>
 <body>
-  <a class="skip" href="#main">Skip to token inspection</a>
-  <header class="site-nav"><nav class="wrap nav-inner" aria-label="Main"><a class="logo" href="/"><img src="/icon.png" width="30" height="30" alt="">AgentToll</a><div class="nav-links"><a href="/research.html">My research</a><a href="/openapi.json">API</a><a href="https://www.npmjs.com/package/agenttoll-mcp" target="_blank" rel="noopener noreferrer">MCP</a></div></nav></header>
-  <main id="main" class="wrap"><div class="intro">
-    <section class="input-column" aria-labelledby="page-heading">
-      <p class="eyebrow">Base / Token inspection</p>
-      <h1 id="page-heading">Inspect a <br><span>Base token.</span></h1>
-      <p class="lead">Inspect a Base token for trading risks, owner permissions and gaps in the evidence. Eight checks, one readable report.</p>
-      <p class="steps"><span>01 Paste address</span><span>02 See price</span><span>03 Get report</span></p>
-      <form id="inspect-form" class="input-panel" novalidate>
-        <label for="token-address">Base token contract address</label>
-        <input id="token-address" name="token" type="text" placeholder="0x…" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="80" aria-describedby="address-help inspection-status">
-        <p id="address-help" class="input-help">Use a token contract on Base, not a wallet address.</p>
-        <button id="quote-button" type="submit" class="button primary full" disabled>Check price <span aria-hidden="true">→</span></button>
-        <p class="price-note">0.003 USDC per report. Checking the price is free.</p>
-        <label class="keep-report"><input id="keep-report" type="checkbox" checked> Save completed reports in this browser</label>
-      </form>
-      <div id="price-box" class="price-box" hidden>
-        <p class="price-label">One token inspection</p>
-        <p class="price"><b id="quote-amount"></b> <span>USDC</span></p>
-        <p id="quote-network" class="input-help"></p>
-        <details><summary>Payment details</summary><span>Recipient</span><code id="quote-recipient" class="recipient"></code><p>One USDC authorization. No account or subscription. Your wallet asks you to approve before paying.</p></details>
-        <button id="pay-button" type="button" class="button primary full">Pay and inspect</button>
+  <a class="skip" href="#main">Skip to shared report</a>
+  <header class="site-nav"><nav class="wrap nav-inner" aria-label="Main"><a class="logo" href="/"><img src="/icon.png" width="30" height="30" alt="">AgentToll</a><div class="nav-links"><a href="/">Home</a><a href="/inspect.html">Inspect</a><a href="/research.html">My research</a></div></nav></header>
+  <main id="main" class="wrap shared-page">
+    <div class="research-heading"><p class="eyebrow">Base / Shared research</p><h1>Read a shared <span>snapshot.</span></h1><p class="lead">A report supplied by another visitor, with its original check time and gaps in the evidence.</p></div>
+    <section class="shared-notice" aria-labelledby="snapshot-label">
+      <h2 id="snapshot-label" class="report-label">Shared snapshot · unverified</h2>
+      <p>The sender supplied this snapshot. AgentToll has not authenticated its contents.</p>
+      <p class="small-note">Opening this page does not run a new inspection or save the report to My research. Check the price before paying for a new inspection.</p>
+    </section>
+    <div id="shared-error" class="status shared-error" data-tone="err" role="alert" tabindex="-1" hidden></div>
+    <section id="shared-content" class="shared-layout report-column" aria-label="Shared token report" hidden>
+      <div id="shared-report" tabindex="-1"></div>
+      <div id="shared-actions" class="report-actions">
+        <a id="shared-reinspect" class="button primary" href="/inspect.html">Re-inspect token</a>
+        <button id="shared-copy" class="button secondary" type="button">Copy report link</button>
+        <button id="shared-png" class="button secondary" type="button">Download PNG card</button>
       </div>
-      <div id="inspection-status" class="status" role="status" aria-live="polite" aria-atomic="true" hidden></div>
-      <button id="retry-button" type="button" class="button secondary retry" hidden>I’ve checked my wallet; check price again</button>
-      <noscript><p>The example report is available below. Enable JavaScript to request a price and pay with a browser wallet.</p></noscript>
-      <div class="side-footer"><p>Start with the free example.</p><p class="small-note">The report shown here is a dated capture of real provider data. New inspections use the latest available data; cached results can be up to five minutes old.</p><p class="small-note">Building an agent? <a href="/#mcp">Use the API or MCP →</a></p></div>
+      <div id="share-fallback" class="share-fallback" hidden><label for="shared-link">Copy this report link</label><input id="shared-link" type="text" readonly spellcheck="false" aria-describedby="shared-status"></div>
+      <p id="shared-status" class="status" role="status" aria-live="polite" aria-atomic="true" hidden></p>
     </section>
-    <section class="report-column" aria-label="Token inspection report">
-      <div class="report-label-row"><div><p id="report-label" class="report-label">Recorded example</p><p id="example-note" class="example-note">Free to explore · Captured 15 Sept 2026, 11:40 UTC</p></div><button id="example-button" type="button" class="text-button" hidden>Back to free example</button></div>
-      <div id="report" tabindex="-1"><article class="token-report" data-verdict="caution">
-    <header class="report-header"><div><p class="report-network">Base token</p><h2>USD Coin <span>USDC</span></h2>
-    <a class="token-address" href="https://basescan.org/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913" target="_blank" rel="noopener noreferrer">0x833589fcd6edb6e08f4c7c32d4f71b54bda02913</a></div>
-    <div class="report-time"><span>Checked</span><time>15 Sept 2026, 11:40 UTC</time></div></header>
-    <div class="report-verdict"><span class="verdict-mark" aria-hidden="true">?</span><div><h3>Review the warnings</h3><p>Some findings need a closer look. Review the details below.</p></div></div>
-    <dl class="report-numbers"><div><dt>Evidence coverage</dt><dd>5 of 8 checks complete</dd></div><div><dt>Risk flags / warnings</dt><dd>0 / 1</dd></div><div><dt>Reported holders</dt><dd>10,514,949</dd></div></dl>
-    <div class="report-checks"><details class="report-check" data-status="pass">
-      <summary><span>Buying and selling</span><span class="check-status">Checked</span></summary>
-      <div class="check-detail"><p>A simulated buy and sell both succeeded with an explicit negative honeypot result</p>
-      <p class="check-source">Sources: goplus, honeypot.is</p></div></details><details class="report-check" data-status="pass">
-      <summary><span>Trading taxes</span><span class="check-status">Checked</span></summary>
-      <div class="check-detail"><p>Buy tax 0%, sell tax 0%</p>
-      <p class="check-source">Sources: goplus, honeypot.is</p></div></details><details class="report-check" data-status="pass">
-      <summary><span>Contract source</span><span class="check-status">Checked</span></summary>
-      <div class="check-detail"><p>Contract source is verified and public</p>
-      <p class="check-source">Sources: goplus, honeypot.is</p></div></details><details class="report-check" data-status="unknown" open>
-      <summary><span>Owner permissions</span><span class="check-status">Not available</span></summary>
-      <div class="check-detail"><p>Some contract permissions could not be read</p><p class="missing-evidence">Missing: minting permissions, ability to pause transfers, address blocking permissions, ability to change trading taxes, ability to set per-wallet taxes, ability to reclaim ownership, hidden owner permissions, contract deletion permissions, trading cooldown rules, ability to change holding limits, ability to change holder balances</p>
-      <p class="check-source">Sources: goplus</p></div></details><details class="report-check" data-status="pass">
-      <summary><span>Holder concentration</span><span class="check-status">Checked</span></summary>
-      <div class="check-detail"><p>Top 10 holders account for 26.1% of supply; 18.6% is confirmed neither locked nor contract-held</p>
-      <p class="check-source">Sources: goplus</p></div></details><details class="report-check" data-status="unknown" open>
-      <summary><span>Liquidity ownership</span><span class="check-status">Not available</span></summary>
-      <div class="check-detail"><p>Liquidity ownership unavailable</p><p class="missing-evidence">Missing: largest liquidity providers, total liquidity ownership coverage</p>
-      <p class="check-source">No source evidence available</p></div></details><details class="report-check" data-status="pass">
-      <summary><span>Creator holdings</span><span class="check-status">Checked</span></summary>
-      <div class="check-detail"><p>The creator holds 0% of supply</p>
-      <p class="check-source">Sources: goplus</p></div></details><details class="report-check" data-status="warn" open>
-      <summary><span>Who deployed it</span><span class="check-status">Review</span></summary>
-      <div class="check-detail"><p>The deployer is a wallet with 11 transactions and holds 0.07371 ETH — lightly used</p><p class="missing-evidence">Missing: explorer scam assessment</p>
-      <p class="check-source">Sources: goplus+rpc</p></div></details></div>
-    <footer class="report-footer"><p>Automated checks can miss risks. Passing a check does not make a token safe.</p>
-      <details><summary>Sources and observation times</summary><ul><li>goplus: ok — fetched 15 Sept 2026, 11:40 UTC</li><li>honeypot.is: ok — fetched 15 Sept 2026, 11:40 UTC</li><li>blockscout+rpc: unavailable — fetched 15 Sept 2026, 11:40 UTC</li><li>goplus+rpc: ok — fetched 15 Sept 2026, 11:40 UTC</li></ul><p>Fetch times describe when data was retrieved. They do not prove when the provider last observed it. Cached reports retain their original check time.</p></details></footer>
-  </article></div>
-      <div class="report-download"><a id="report-download" href="/token-example.json" download="agenttoll-recorded-example.json">Download example data</a></div>
-      <div class="report-actions"><button id="save-report" type="button" class="button secondary" disabled>Save example</button><button id="copy-report-link" type="button" class="button secondary" disabled>Copy snapshot link</button><button id="download-report-image" type="button" class="button secondary" disabled>Download image</button><a href="/research.html">My research</a></div>
-      <div id="report-actions-status" class="report-actions-status" role="status" aria-live="polite" hidden></div>
-    </section>
-  </div></main>
+    <noscript><p>Enable JavaScript to decode this report in your browser. Shared reports are unverified. You can also <a href="/inspect.html">inspect a Base token</a>.</p></noscript>
+  </main>
   <footer class="site-footer"><div class="wrap footer-inner"><span>AgentToll · Base data, paid per call.</span><span><a href="/privacy.html">Privacy</a> &nbsp; / &nbsp; <a href="https://github.com/tevfikefeaydin/agenttoll/issues" target="_blank" rel="noopener noreferrer">Report a problem</a></span></div></footer>
 </body>
 </html>

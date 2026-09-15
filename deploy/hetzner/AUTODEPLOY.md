@@ -43,7 +43,8 @@ Each successful release has `release.json`, `build.log`, `candidate-api.json`,
 environment or wallet. The candidate probe connects to the candidate's private
 loopback address and explicitly preserves canonical Host/protocol, checking all
 24 API/unsigned quote assertions. Public HTTPS then runs those checks and the
-25 proxy/static checks. None authorizes a real payment.
+32 proxy/static checks, including the inspector, research library and shared-report
+assets. None authorizes a real payment.
 
 ## Routing and failure handling
 

@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Inspect a Base token | AgentToll</title>
-  <meta name="description" content="See a free example, then inspect a Base token for trading risks, owner permissions and missing evidence. One report, one USDC payment, no account.">
-  <link rel="canonical" href="https://agenttoll.app/inspect.html">
+  <title>Your token research | AgentToll</title>
+  <meta name="description" content="Keep a Base token watchlist, compare dated reports, see what changed and inspect discovered wallet holdings.">
+  <link rel="canonical" href="https://agenttoll.app/research.html">
   <link rel="icon" href="/icon.png" type="image/png">
   <style>
 :root{color-scheme:dark;--bg:#070B14;--surface:#0E1524;--surface-2:#131C2E;--text:#EAF0FA;--muted:#9BA8BF;--line:#263248;--blue:#0052FF;--blue-soft:#91B5FF;--amber:#F1C574;--red:#FFA0A0;--green:#91D8BE;--sans:"Segoe UI",system-ui,-apple-system,sans-serif;--mono:"Cascadia Code",Consolas,monospace}
@@ -25,78 +25,57 @@ main{padding-block:56px 70px}.intro{display:grid;grid-template-columns:minmax(28
 
 .keep-report{display:flex;align-items:flex-start;gap:9px;font-size:12px;font-weight:400;color:var(--muted);margin-top:16px}.keep-report input{width:16px;height:16px;padding:0;margin:2px 0 0;flex-shrink:0;accent-color:var(--blue)}.shared-page{max-width:900px}.shared-page .research-heading{display:block;margin-bottom:24px}.shared-notice{border:1px solid #5B4929;background:#30271B;color:var(--amber);padding:20px;border-radius:8px;font-size:13px;margin:22px 0}.shared-notice h2{font-size:16px;margin:0 0 8px}.shared-notice p{margin:7px 0}.shared-layout{margin-top:24px}.shared-error{border:1px solid #66404E;padding:18px;border-radius:8px}.share-fallback input{font-size:12px}.report-actions-status textarea{width:100%;margin-top:12px}
 </style>
-  <script defer src="/inspect.js"></script>
+  <script defer src="/research.js"></script>
 </head>
 <body>
-  <a class="skip" href="#main">Skip to token inspection</a>
-  <header class="site-nav"><nav class="wrap nav-inner" aria-label="Main"><a class="logo" href="/"><img src="/icon.png" width="30" height="30" alt="">AgentToll</a><div class="nav-links"><a href="/research.html">My research</a><a href="/openapi.json">API</a><a href="https://www.npmjs.com/package/agenttoll-mcp" target="_blank" rel="noopener noreferrer">MCP</a></div></nav></header>
-  <main id="main" class="wrap"><div class="intro">
-    <section class="input-column" aria-labelledby="page-heading">
-      <p class="eyebrow">Base / Token inspection</p>
-      <h1 id="page-heading">Inspect a <br><span>Base token.</span></h1>
-      <p class="lead">Inspect a Base token for trading risks, owner permissions and gaps in the evidence. Eight checks, one readable report.</p>
-      <p class="steps"><span>01 Paste address</span><span>02 See price</span><span>03 Get report</span></p>
-      <form id="inspect-form" class="input-panel" novalidate>
-        <label for="token-address">Base token contract address</label>
-        <input id="token-address" name="token" type="text" placeholder="0x…" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="80" aria-describedby="address-help inspection-status">
-        <p id="address-help" class="input-help">Use a token contract on Base, not a wallet address.</p>
-        <button id="quote-button" type="submit" class="button primary full" disabled>Check price <span aria-hidden="true">→</span></button>
-        <p class="price-note">0.003 USDC per report. Checking the price is free.</p>
-        <label class="keep-report"><input id="keep-report" type="checkbox" checked> Save completed reports in this browser</label>
-      </form>
-      <div id="price-box" class="price-box" hidden>
-        <p class="price-label">One token inspection</p>
-        <p class="price"><b id="quote-amount"></b> <span>USDC</span></p>
-        <p id="quote-network" class="input-help"></p>
-        <details><summary>Payment details</summary><span>Recipient</span><code id="quote-recipient" class="recipient"></code><p>One USDC authorization. No account or subscription. Your wallet asks you to approve before paying.</p></details>
-        <button id="pay-button" type="button" class="button primary full">Pay and inspect</button>
+  <a class="skip" href="#main">Skip to your research</a>
+  <header class="site-nav"><nav class="wrap nav-inner" aria-label="Main"><a class="logo" href="/"><img src="/icon.png" width="30" height="30" alt="">AgentToll</a><div class="nav-links"><a href="/inspect.html">Inspect a token</a><a href="/research.html" aria-current="page">My research</a><a href="/openapi.json">API</a></div></nav></header>
+  <main id="main" class="wrap research-main">
+    <header class="research-heading"><div><h1>Your token research.</h1><p class="lead">Keep the evidence. See what changed. Compare before your next inspection.</p></div><a class="button secondary" href="/inspect.html">Inspect a token</a></header>
+    <p class="local-note">Your watchlist and saved reports stay in this browser. No automatic checks or payments.</p>
+    <div id="storage-status" class="notice" role="status" aria-live="polite" hidden></div>
+    <div id="research-status" class="status" role="status" aria-live="polite" hidden></div>
+    <nav class="research-tabs" role="tablist" aria-label="Research tools"><button id="tab-watchlist" type="button" role="tab" aria-selected="true" aria-controls="panel-watchlist" data-tab="watchlist">Watchlist &amp; history</button><button id="tab-compare" type="button" role="tab" aria-selected="false" aria-controls="panel-compare" tabindex="-1" data-tab="compare">Compare tokens</button><button id="tab-wallet" type="button" role="tab" aria-selected="false" aria-controls="panel-wallet" tabindex="-1" data-tab="wallet">Wallet holdings</button></nav>
+    <section id="panel-watchlist" role="tabpanel" aria-labelledby="tab-watchlist">
+      <div class="research-grid">
+        <aside class="watch-sidebar" aria-labelledby="watch-heading">
+          <div class="section-title"><h2 id="watch-heading">Saved tokens</h2><span id="watch-count" class="count">0</span></div>
+          <form id="watch-form" novalidate><label for="watch-address">Base token contract address</label><div class="inline-form"><input id="watch-address" type="text" placeholder="0x…" maxlength="80" spellcheck="false" autocomplete="off" autocapitalize="none"><button class="button secondary" type="submit">Save</button></div></form>
+          <div id="watch-items" class="watch-items"></div>
+          <button id="load-example" class="text-button" type="button">Explore with the recorded example</button>
+          <div class="storage-actions"><p>Up to 50 saved tokens and 100 reports, with the latest 10 per token.</p><button id="clear-library" class="text-button" type="button">Clear saved research</button><div id="clear-confirm" hidden><p>Remove this browser’s watchlist and report history?</p><button id="confirm-clear" class="button secondary" type="button">Remove saved data</button> <button id="cancel-clear" class="text-button" type="button">Cancel</button></div></div>
+        </aside>
+        <div class="saved-detail">
+          <div id="saved-empty" class="empty-state"><div class="empty-mark" aria-hidden="true">+</div><h2>A place for your next question.</h2><p>Save a token address or explore the recorded example. Your completed inspections can be kept here and compared over time.</p><a href="/inspect.html" class="button primary">Open token inspector</a></div>
+          <section id="saved-content" hidden aria-label="Saved report">
+            <div class="section-title"><h2 id="saved-heading">Token report</h2><a id="reinspect-link" class="button primary" href="/inspect.html">Re-inspect</a></div>
+            <p id="saved-address" class="address-text"></p>
+            <div id="history-controls" class="history-controls"><label for="history-choice">Saved observations</label><select id="history-choice"></select><button id="delete-report" class="text-button" type="button">Remove this report</button></div>
+            <p id="saved-origin" class="provenance"></p>
+            <div class="report-actions"><button id="saved-copy-link" class="button secondary" type="button">Copy snapshot link</button><button id="saved-image" class="button secondary" type="button">Download image</button><button id="saved-add-compare" class="text-button" type="button">Add to comparison</button></div>
+            <section id="report-changes" class="changes-panel" aria-label="Changes since the previous report"></section>
+            <div id="saved-report"></div>
+          </section>
+        </div>
       </div>
-      <div id="inspection-status" class="status" role="status" aria-live="polite" aria-atomic="true" hidden></div>
-      <button id="retry-button" type="button" class="button secondary retry" hidden>I’ve checked my wallet; check price again</button>
-      <noscript><p>The example report is available below. Enable JavaScript to request a price and pay with a browser wallet.</p></noscript>
-      <div class="side-footer"><p>Start with the free example.</p><p class="small-note">The report shown here is a dated capture of real provider data. New inspections use the latest available data; cached results can be up to five minutes old.</p><p class="small-note">Building an agent? <a href="/#mcp">Use the API or MCP →</a></p></div>
     </section>
-    <section class="report-column" aria-label="Token inspection report">
-      <div class="report-label-row"><div><p id="report-label" class="report-label">Recorded example</p><p id="example-note" class="example-note">Free to explore · Captured 15 Sept 2026, 11:40 UTC</p></div><button id="example-button" type="button" class="text-button" hidden>Back to free example</button></div>
-      <div id="report" tabindex="-1"><article class="token-report" data-verdict="caution">
-    <header class="report-header"><div><p class="report-network">Base token</p><h2>USD Coin <span>USDC</span></h2>
-    <a class="token-address" href="https://basescan.org/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913" target="_blank" rel="noopener noreferrer">0x833589fcd6edb6e08f4c7c32d4f71b54bda02913</a></div>
-    <div class="report-time"><span>Checked</span><time>15 Sept 2026, 11:40 UTC</time></div></header>
-    <div class="report-verdict"><span class="verdict-mark" aria-hidden="true">?</span><div><h3>Review the warnings</h3><p>Some findings need a closer look. Review the details below.</p></div></div>
-    <dl class="report-numbers"><div><dt>Evidence coverage</dt><dd>5 of 8 checks complete</dd></div><div><dt>Risk flags / warnings</dt><dd>0 / 1</dd></div><div><dt>Reported holders</dt><dd>10,514,949</dd></div></dl>
-    <div class="report-checks"><details class="report-check" data-status="pass">
-      <summary><span>Buying and selling</span><span class="check-status">Checked</span></summary>
-      <div class="check-detail"><p>A simulated buy and sell both succeeded with an explicit negative honeypot result</p>
-      <p class="check-source">Sources: goplus, honeypot.is</p></div></details><details class="report-check" data-status="pass">
-      <summary><span>Trading taxes</span><span class="check-status">Checked</span></summary>
-      <div class="check-detail"><p>Buy tax 0%, sell tax 0%</p>
-      <p class="check-source">Sources: goplus, honeypot.is</p></div></details><details class="report-check" data-status="pass">
-      <summary><span>Contract source</span><span class="check-status">Checked</span></summary>
-      <div class="check-detail"><p>Contract source is verified and public</p>
-      <p class="check-source">Sources: goplus, honeypot.is</p></div></details><details class="report-check" data-status="unknown" open>
-      <summary><span>Owner permissions</span><span class="check-status">Not available</span></summary>
-      <div class="check-detail"><p>Some contract permissions could not be read</p><p class="missing-evidence">Missing: minting permissions, ability to pause transfers, address blocking permissions, ability to change trading taxes, ability to set per-wallet taxes, ability to reclaim ownership, hidden owner permissions, contract deletion permissions, trading cooldown rules, ability to change holding limits, ability to change holder balances</p>
-      <p class="check-source">Sources: goplus</p></div></details><details class="report-check" data-status="pass">
-      <summary><span>Holder concentration</span><span class="check-status">Checked</span></summary>
-      <div class="check-detail"><p>Top 10 holders account for 26.1% of supply; 18.6% is confirmed neither locked nor contract-held</p>
-      <p class="check-source">Sources: goplus</p></div></details><details class="report-check" data-status="unknown" open>
-      <summary><span>Liquidity ownership</span><span class="check-status">Not available</span></summary>
-      <div class="check-detail"><p>Liquidity ownership unavailable</p><p class="missing-evidence">Missing: largest liquidity providers, total liquidity ownership coverage</p>
-      <p class="check-source">No source evidence available</p></div></details><details class="report-check" data-status="pass">
-      <summary><span>Creator holdings</span><span class="check-status">Checked</span></summary>
-      <div class="check-detail"><p>The creator holds 0% of supply</p>
-      <p class="check-source">Sources: goplus</p></div></details><details class="report-check" data-status="warn" open>
-      <summary><span>Who deployed it</span><span class="check-status">Review</span></summary>
-      <div class="check-detail"><p>The deployer is a wallet with 11 transactions and holds 0.07371 ETH — lightly used</p><p class="missing-evidence">Missing: explorer scam assessment</p>
-      <p class="check-source">Sources: goplus+rpc</p></div></details></div>
-    <footer class="report-footer"><p>Automated checks can miss risks. Passing a check does not make a token safe.</p>
-      <details><summary>Sources and observation times</summary><ul><li>goplus: ok — fetched 15 Sept 2026, 11:40 UTC</li><li>honeypot.is: ok — fetched 15 Sept 2026, 11:40 UTC</li><li>blockscout+rpc: unavailable — fetched 15 Sept 2026, 11:40 UTC</li><li>goplus+rpc: ok — fetched 15 Sept 2026, 11:40 UTC</li></ul><p>Fetch times describe when data was retrieved. They do not prove when the provider last observed it. Cached reports retain their original check time.</p></details></footer>
-  </article></div>
-      <div class="report-download"><a id="report-download" href="/token-example.json" download="agenttoll-recorded-example.json">Download example data</a></div>
-      <div class="report-actions"><button id="save-report" type="button" class="button secondary" disabled>Save example</button><button id="copy-report-link" type="button" class="button secondary" disabled>Copy snapshot link</button><button id="download-report-image" type="button" class="button secondary" disabled>Download image</button><a href="/research.html">My research</a></div>
-      <div id="report-actions-status" class="report-actions-status" role="status" aria-live="polite" hidden></div>
+    <section id="panel-compare" role="tabpanel" aria-labelledby="tab-compare" hidden>
+      <div class="section-intro"><h2>Compare the evidence.</h2><p>Choose two to five Base tokens. Start with your saved reports, then request new inspections when you need them.</p></div>
+      <form id="compare-form" class="compare-form" novalidate><label for="compare-addresses">Token contract addresses, one per line</label><textarea id="compare-addresses" rows="3" placeholder="0x…&#10;0x…" maxlength="420" spellcheck="false" autocapitalize="none"></textarea><div class="report-actions"><button class="button secondary" type="submit">Show comparison</button><button id="compare-prices" class="button primary" type="button">Check inspection prices</button></div></form>
+      <div id="comparison" class="comparison-wrap"><p class="empty-inline">Add at least two token addresses to build a comparison.</p></div>
     </section>
-  </div></main>
+    <section id="panel-wallet" role="tabpanel" aria-labelledby="tab-wallet" hidden>
+      <div class="section-intro"><h2>Look inside a wallet.</h2><p>Find observed Base holdings, then choose the tokens you want to inspect. Holdings lookup and token inspections are separate purchases.</p></div>
+      <form id="wallet-form" class="wallet-form" novalidate><label for="wallet-address">Base wallet address</label><div class="inline-form"><input id="wallet-address" type="text" placeholder="0x…" maxlength="80" spellcheck="false" autocomplete="off" autocapitalize="none"><button class="button primary" type="submit">Check lookup price</button></div><p class="input-help">The wallet being researched does not need to be your paying wallet. Wallet addresses are not added to your saved research.</p></form>
+      <div id="wallet-results" hidden><div id="wallet-summary"></div><div id="wallet-holdings" class="comparison-wrap"></div><div class="report-actions"><button id="wallet-inspect-prices" class="button primary" type="button">Check selected inspection prices</button><span id="wallet-selected-count" class="input-help">Select up to five tokens.</span></div><div id="wallet-risk-results" class="comparison-wrap"></div></div>
+    </section>
+    <section id="research-payment" class="research-payment" aria-labelledby="purchase-heading" hidden>
+      <div><p class="price-label" id="purchase-heading">Review your purchase</p><p class="price"><b id="purchase-total"></b> <span>USDC total</span></p><p id="purchase-network"></p><p id="purchase-description"></p><details><summary>Payment details</summary><code id="purchase-recipient" class="recipient"></code><ul id="purchase-items"></ul></details></div>
+      <div class="purchase-actions"><button id="purchase-button" class="button primary" type="button">Approve in wallet</button><button id="cancel-purchase" class="text-button" type="button">Cancel</button></div>
+    </section>
+    <section id="payment-progress" class="payment-progress" hidden><div id="payment-status" class="status" role="status" aria-live="polite"></div><ul id="payment-receipts" class="receipts"></ul><button id="acknowledge-payment" class="button secondary" type="button" hidden>I’ve checked my wallet and receipts</button></section>
+    <noscript><div class="notice">Enable JavaScript to use saved research, comparisons and wallet lookups. The <a href="/inspect.html">recorded example report</a> remains available without it.</div></noscript>
+  </main>
   <footer class="site-footer"><div class="wrap footer-inner"><span>AgentToll · Base data, paid per call.</span><span><a href="/privacy.html">Privacy</a> &nbsp; / &nbsp; <a href="https://github.com/tevfikefeaydin/agenttoll/issues" target="_blank" rel="noopener noreferrer">Report a problem</a></span></div></footer>
 </body>
 </html>

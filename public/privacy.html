@@ -37,11 +37,26 @@
     <li>No sign-ups, names, emails or passwords — there is no account system.</li>
     <li>No cookies, no analytics, no advertising or tracking scripts. The site loads no third-party code.</li>
     <li>No private keys. Payment authorizations are signed in your own wallet or agent.</li>
-    <li>No per-caller state. The watch endpoints work from a cursor <em>you</em> send back, so we do not store where you left off.</li>
+    <li>No server-side account history. The watch endpoints work from a cursor <em>you</em> send back, so we do not store where you left off.</li>
   </ul>
 
   <h2>What does exist</h2>
   <ul>
+    <li><strong>Research saved in your browser.</strong> Saving a token or example, or receiving an
+      inspection with “Save completed reports in this browser” enabled, uses localStorage on this
+      device. Token inspections requested from My research are saved there automatically. My research keeps up to 50 watched token addresses and 100 report snapshots, with up
+      to ten per token; older reports may be removed to fit the storage limit. These records include
+      token addresses, public report evidence, observation dates and whether a report was an example
+      or an inspection. They do not include paying wallet addresses, payment signatures or private
+      keys. Wallet portfolio lookups are held in page memory; only individual token inspections
+      are saved. Use My research to remove reports or clear all saved research. Browser storage
+      does not synchronize between devices, and clearing site data removes it.</li>
+    <li><strong>Shared snapshots.</strong> A report link includes sanitized token evidence in the
+      URL fragment after #. Browsers do not send that fragment in the page request to our server.
+      Anyone given the complete link can read and modify the included snapshot; shared snapshots
+      are explicitly unverified. No paying wallet or payment authorization is included. Sharing
+      through another service gives that service the link you supply. Opening a shared report
+      does not save it to your research or request a payment.</li>
     <li><strong>Server logs.</strong> Completed and interrupted API requests record their time,
       request ID, route template, HTTP outcome, duration, data-source counters and payment
       failure stage/reason. Recognized client names and numeric versions may be retained as

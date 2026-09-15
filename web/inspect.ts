@@ -1,6 +1,7 @@
 import { createPaymentClient, getNetworkConfig, HOSTED_RECIPIENT, HOSTED_URL } from '../src/payment-policy.js';
 import { pay } from './demo.js';
 import { escapeHtml, inspectionEndpoint, renderTokenReport, displayUsdc } from './token-report.js';
+import { mountInspectionResearch } from './inspect-research.js';
 
 const CLIENT = 'agenttoll-inspect/1.0.0';
 const element = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -17,6 +18,7 @@ const reportLabel = element('report-label');
 const exampleNote = element('example-note');
 const download = element<HTMLAnchorElement>('report-download');
 const exampleHtml = report.innerHTML;
+const research = mountInspectionResearch();
 let downloadUrl: string | undefined;
 let quoteRequest: AbortController | undefined;
 let sequence = 0;
@@ -120,6 +122,7 @@ payButton.addEventListener('click', async () => {
   }
   const terms = displayed;
   paying = true;
+  research.setBusy(true);
   input.disabled = quoteButton.disabled = payButton.disabled = exampleButton.disabled = true;
   try {
     const outcome = await pay(terms.path, show, { quote: terms.quote, recipient: terms.recipient, client: CLIENT, showRaw: false });
@@ -132,6 +135,7 @@ payButton.addEventListener('click', async () => {
         const html = renderTokenReport(outcome.data, terms.token);
         report.innerHTML = html;
         reportLabel.textContent = 'Your report';
+        research.delivered(outcome.data, terms.token);
         report.focus({ preventScroll: true });
         report.scrollIntoView({ behavior: 'instant', block: 'start' });
       } catch (error) {
@@ -148,6 +152,7 @@ payButton.addEventListener('click', async () => {
     }
   } finally {
     paying = false;
+    research.setBusy(false);
     input.disabled = exampleButton.disabled = false;
     quoteButton.disabled = authorizationPossible;
     payButton.disabled = false;
@@ -165,6 +170,7 @@ retryButton.addEventListener('click', () => {
 exampleButton.addEventListener('click', () => {
   if (paying) return;
   report.innerHTML = exampleHtml;
+  research.example();
   reportLabel.textContent = 'Recorded example';
   exampleNote.hidden = false;
   exampleButton.hidden = true;
@@ -175,3 +181,8 @@ exampleButton.addEventListener('click', () => {
 });
 
 quoteButton.disabled = false;
+const linkedToken = new URLSearchParams(location.search).get('token');
+if (linkedToken !== null) {
+  try { input.value = inspectionEndpoint(linkedToken).split('/').at(-1)!; show('Token address filled in. Check its price when you are ready.'); }
+  catch { show('The token address in this link is invalid. Paste a Base token contract address to continue.', 'err'); }
+}

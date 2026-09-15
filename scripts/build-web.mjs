@@ -6,6 +6,12 @@ import { ENDPOINT_MANIFEST } from '../src/endpoint-manifest.ts';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const check = process.argv.includes('--check');
+// The deployed CSP permits inline styles. Keep source CSS shared while shipping
+// it inside each generated page, matching the existing site's security policy.
+function inlineStyles(html) {
+  return html.replace(/<link rel="stylesheet" href="\/(inspect|research)\.css">/g, (_tag, name) =>
+    '<style>\n' + readFileSync(new URL('../web/' + name + '.css', import.meta.url), 'utf8') + '</style>');
+}
 function output(name, content) {
   const path = new URL('../public/' + name, import.meta.url);
   if (check) {
@@ -14,7 +20,7 @@ function output(name, content) {
     if (existing !== content.replace(/\r\n/g, '\n')) throw new Error(`public/${name} is stale; run npm run build:web`);
   } else writeFileSync(path, content);
 }
-for (const entry of ['demo', 'inspect']) {
+for (const entry of ['demo', 'inspect', 'research', 'shared-report']) {
   const result = await build({ absWorkingDir: root, entryPoints: [`web/${entry}.ts`], bundle: true, format: 'iife', target: 'es2020', minify: true, write: false });
   output(entry + '.js', result.outputFiles[0].text);
 }
@@ -27,5 +33,8 @@ const html = readFileSync(new URL('../web/inspect.html', import.meta.url), 'utf8
   .replace('@@EXAMPLE_TIME@@', () => escapeHtml(reportTime(example.capturedAt)))
   .replace('@@PRICE@@', () => escapeHtml(endpoint.price.replace(/^\$/, '')));
 if (/@@[A-Z_]+@@/.test(html)) throw new Error('Unresolved inspection page template field.');
-output('inspect.html', html);
+output('inspect.html', inlineStyles(html));
+for (const name of ['research.html', 'shared-report.html']) {
+  output(name, inlineStyles(readFileSync(new URL('../web/' + name, import.meta.url), 'utf8')));
+}
 console.log(check ? 'Browser bundles and recorded example agree with their sources.' : 'Built browser bundles and token inspection page.');

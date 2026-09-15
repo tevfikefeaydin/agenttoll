@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Read a user-supplied Base token report snapshot. Shared snapshots are unverified and retain their original observation time.">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <title>Shared report | AgentToll</title>
+  <link rel="icon" href="/icon.png" type="image/png">
+  <link rel="stylesheet" href="/inspect.css">
+  <link rel="stylesheet" href="/research.css">
+  <script defer src="/shared-report.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to shared report</a>
+  <header class="site-nav"><nav class="wrap nav-inner" aria-label="Main"><a class="logo" href="/"><img src="/icon.png" width="30" height="30" alt="">AgentToll</a><div class="nav-links"><a href="/">Home</a><a href="/inspect.html">Inspect</a><a href="/research.html">My research</a></div></nav></header>
+  <main id="main" class="wrap shared-page">
+    <div class="research-heading"><p class="eyebrow">Base / Shared research</p><h1>Read a shared <span>snapshot.</span></h1><p class="lead">A report supplied by another visitor, with its original check time and gaps in the evidence.</p></div>
+    <section class="shared-notice" aria-labelledby="snapshot-label">
+      <h2 id="snapshot-label" class="report-label">Shared snapshot · unverified</h2>
+      <p>The sender supplied this snapshot. AgentToll has not authenticated its contents.</p>
+      <p class="small-note">Opening this page does not run a new inspection or save the report to My research. Check the price before paying for a new inspection.</p>
+    </section>
+    <div id="shared-error" class="status shared-error" data-tone="err" role="alert" tabindex="-1" hidden></div>
+    <section id="shared-content" class="shared-layout report-column" aria-label="Shared token report" hidden>
+      <div id="shared-report" tabindex="-1"></div>
+      <div id="shared-actions" class="report-actions">
+        <a id="shared-reinspect" class="button primary" href="/inspect.html">Re-inspect token</a>
+        <button id="shared-copy" class="button secondary" type="button">Copy report link</button>
+        <button id="shared-png" class="button secondary" type="button">Download PNG card</button>
+      </div>
+      <div id="share-fallback" class="share-fallback" hidden><label for="shared-link">Copy this report link</label><input id="shared-link" type="text" readonly spellcheck="false" aria-describedby="shared-status"></div>
+      <p id="shared-status" class="status" role="status" aria-live="polite" aria-atomic="true" hidden></p>
+    </section>
+    <noscript><p>Enable JavaScript to decode this report in your browser. Shared reports are unverified. You can also <a href="/inspect.html">inspect a Base token</a>.</p></noscript>
+  </main>
+  <footer class="site-footer"><div class="wrap footer-inner"><span>AgentToll · Base data, paid per call.</span><span><a href="/privacy.html">Privacy</a> &nbsp; / &nbsp; <a href="https://github.com/tevfikefeaydin/agenttoll/issues" target="_blank" rel="noopener noreferrer">Report a problem</a></span></div></footer>
+</body>
+</html>

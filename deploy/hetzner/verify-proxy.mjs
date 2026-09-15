@@ -48,6 +48,10 @@ for (const [path, file] of Object.entries({
   '/privacy': 'privacy.html', '/privacy-policy': 'privacy.html',
   '/favicon.ico': 'icon.png', '/app.js': 'app.js', '/demo.js': 'demo.js',
   '/run.js': 'run.js', '/openapi.json': 'openapi.json', '/llms.txt': 'llms.txt',
+  '/inspect.html': 'inspect.html', '/inspect.js': 'inspect.js',
+  '/research.html': 'research.html', '/research.js': 'research.js',
+  '/shared-report.html': 'shared-report.html', '/shared-report.js': 'shared-report.js',
+  '/token-example.json': 'token-example.json',
   '/robots.txt': 'robots.txt', '/sitemap.xml': 'sitemap.xml',
   '/icon.png': 'icon.png', '/hero-poster.jpg': 'hero-poster.jpg', '/og.png': 'og.png',
 })) {

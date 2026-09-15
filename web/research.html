@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your token research | AgentToll</title>
+  <meta name="description" content="Keep a Base token watchlist, compare dated reports, see what changed and inspect discovered wallet holdings.">
+  <link rel="canonical" href="https://agenttoll.app/research.html">
+  <link rel="icon" href="/icon.png" type="image/png">
+  <link rel="stylesheet" href="/inspect.css">
+  <link rel="stylesheet" href="/research.css">
+  <script defer src="/research.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to your research</a>
+  <header class="site-nav"><nav class="wrap nav-inner" aria-label="Main"><a class="logo" href="/"><img src="/icon.png" width="30" height="30" alt="">AgentToll</a><div class="nav-links"><a href="/inspect.html">Inspect a token</a><a href="/research.html" aria-current="page">My research</a><a href="/openapi.json">API</a></div></nav></header>
+  <main id="main" class="wrap research-main">
+    <header class="research-heading"><div><h1>Your token research.</h1><p class="lead">Keep the evidence. See what changed. Compare before your next inspection.</p></div><a class="button secondary" href="/inspect.html">Inspect a token</a></header>
+    <p class="local-note">Your watchlist and saved reports stay in this browser. No automatic checks or payments.</p>
+    <div id="storage-status" class="notice" role="status" aria-live="polite" hidden></div>
+    <div id="research-status" class="status" role="status" aria-live="polite" hidden></div>
+    <nav class="research-tabs" role="tablist" aria-label="Research tools"><button id="tab-watchlist" type="button" role="tab" aria-selected="true" aria-controls="panel-watchlist" data-tab="watchlist">Watchlist &amp; history</button><button id="tab-compare" type="button" role="tab" aria-selected="false" aria-controls="panel-compare" tabindex="-1" data-tab="compare">Compare tokens</button><button id="tab-wallet" type="button" role="tab" aria-selected="false" aria-controls="panel-wallet" tabindex="-1" data-tab="wallet">Wallet holdings</button></nav>
+    <section id="panel-watchlist" role="tabpanel" aria-labelledby="tab-watchlist">
+      <div class="research-grid">
+        <aside class="watch-sidebar" aria-labelledby="watch-heading">
+          <div class="section-title"><h2 id="watch-heading">Saved tokens</h2><span id="watch-count" class="count">0</span></div>
+          <form id="watch-form" novalidate><label for="watch-address">Base token contract address</label><div class="inline-form"><input id="watch-address" type="text" placeholder="0x…" maxlength="80" spellcheck="false" autocomplete="off" autocapitalize="none"><button class="button secondary" type="submit">Save</button></div></form>
+          <div id="watch-items" class="watch-items"></div>
+          <button id="load-example" class="text-button" type="button">Explore with the recorded example</button>
+          <div class="storage-actions"><p>Up to 50 saved tokens and 100 reports, with the latest 10 per token.</p><button id="clear-library" class="text-button" type="button">Clear saved research</button><div id="clear-confirm" hidden><p>Remove this browser’s watchlist and report history?</p><button id="confirm-clear" class="button secondary" type="button">Remove saved data</button> <button id="cancel-clear" class="text-button" type="button">Cancel</button></div></div>
+        </aside>
+        <div class="saved-detail">
+          <div id="saved-empty" class="empty-state"><div class="empty-mark" aria-hidden="true">+</div><h2>A place for your next question.</h2><p>Save a token address or explore the recorded example. Your completed inspections can be kept here and compared over time.</p><a href="/inspect.html" class="button primary">Open token inspector</a></div>
+          <section id="saved-content" hidden aria-label="Saved report">
+            <div class="section-title"><h2 id="saved-heading">Token report</h2><a id="reinspect-link" class="button primary" href="/inspect.html">Re-inspect</a></div>
+            <p id="saved-address" class="address-text"></p>
+            <div id="history-controls" class="history-controls"><label for="history-choice">Saved observations</label><select id="history-choice"></select><button id="delete-report" class="text-button" type="button">Remove this report</button></div>
+            <p id="saved-origin" class="provenance"></p>
+            <div class="report-actions"><button id="saved-copy-link" class="button secondary" type="button">Copy snapshot link</button><button id="saved-image" class="button secondary" type="button">Download image</button><button id="saved-add-compare" class="text-button" type="button">Add to comparison</button></div>
+            <section id="report-changes" class="changes-panel" aria-label="Changes since the previous report"></section>
+            <div id="saved-report"></div>
+          </section>
+        </div>
+      </div>
+    </section>
+    <section id="panel-compare" role="tabpanel" aria-labelledby="tab-compare" hidden>
+      <div class="section-intro"><h2>Compare the evidence.</h2><p>Choose two to five Base tokens. Start with your saved reports, then request new inspections when you need them.</p></div>
+      <form id="compare-form" class="compare-form" novalidate><label for="compare-addresses">Token contract addresses, one per line</label><textarea id="compare-addresses" rows="3" placeholder="0x…&#10;0x…" maxlength="420" spellcheck="false" autocapitalize="none"></textarea><div class="report-actions"><button class="button secondary" type="submit">Show comparison</button><button id="compare-prices" class="button primary" type="button">Check inspection prices</button></div></form>
+      <div id="comparison" class="comparison-wrap"><p class="empty-inline">Add at least two token addresses to build a comparison.</p></div>
+    </section>
+    <section id="panel-wallet" role="tabpanel" aria-labelledby="tab-wallet" hidden>
+      <div class="section-intro"><h2>Look inside a wallet.</h2><p>Find observed Base holdings, then choose the tokens you want to inspect. Holdings lookup and token inspections are separate purchases.</p></div>
+      <form id="wallet-form" class="wallet-form" novalidate><label for="wallet-address">Base wallet address</label><div class="inline-form"><input id="wallet-address" type="text" placeholder="0x…" maxlength="80" spellcheck="false" autocomplete="off" autocapitalize="none"><button class="button primary" type="submit">Check lookup price</button></div><p class="input-help">The wallet being researched does not need to be your paying wallet. Wallet addresses are not added to your saved research.</p></form>
+      <div id="wallet-results" hidden><div id="wallet-summary"></div><div id="wallet-holdings" class="comparison-wrap"></div><div class="report-actions"><button id="wallet-inspect-prices" class="button primary" type="button">Check selected inspection prices</button><span id="wallet-selected-count" class="input-help">Select up to five tokens.</span></div><div id="wallet-risk-results" class="comparison-wrap"></div></div>
+    </section>
+    <section id="research-payment" class="research-payment" aria-labelledby="purchase-heading" hidden>
+      <div><p class="price-label" id="purchase-heading">Review your purchase</p><p class="price"><b id="purchase-total"></b> <span>USDC total</span></p><p id="purchase-network"></p><p id="purchase-description"></p><details><summary>Payment details</summary><code id="purchase-recipient" class="recipient"></code><ul id="purchase-items"></ul></details></div>
+      <div class="purchase-actions"><button id="purchase-button" class="button primary" type="button">Approve in wallet</button><button id="cancel-purchase" class="text-button" type="button">Cancel</button></div>
+    </section>
+    <section id="payment-progress" class="payment-progress" hidden><div id="payment-status" class="status" role="status" aria-live="polite"></div><ul id="payment-receipts" class="receipts"></ul><button id="acknowledge-payment" class="button secondary" type="button" hidden>I’ve checked my wallet and receipts</button></section>
+    <noscript><div class="notice">Enable JavaScript to use saved research, comparisons and wallet lookups. The <a href="/inspect.html">recorded example report</a> remains available without it.</div></noscript>
+  </main>
+  <footer class="site-footer"><div class="wrap footer-inner"><span>AgentToll · Base data, paid per call.</span><span><a href="/privacy.html">Privacy</a> &nbsp; / &nbsp; <a href="https://github.com/tevfikefeaydin/agenttoll/issues" target="_blank" rel="noopener noreferrer">Report a problem</a></span></div></footer>
+</body>
+</html>

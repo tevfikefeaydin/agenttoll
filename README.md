@@ -25,6 +25,20 @@ The browser flow at `/inspect.html` includes a free, dated report captured from 
 
 Operational inspection metrics come from exported application logs; see [`ops:inspections` in OPERATIONS.md](OPERATIONS.md#checks-that-do-not-pay). These distinguish mainnet settlements from testnet activity and known operator wallets, and do not claim that a wallet is a person or that a quote is a unique visitor.
 
+## Saved research, comparisons and wallet holdings
+
+`/research.html` keeps a browser-local watchlist and dated report history. Save a token address or the recorded example; completed inspections can also be saved from the inspector. Storage is limited to 50 watched tokens and 100 sanitized reports, with ten per token. No keys, signatures, payment receipts or paying wallet addresses enter that storage. It is specific to this browser; removing site data removes the history. Storage failures are shown and preserve previously stored data.
+
+The history view compares observations of the same token and provenance type, preserving missing evidence and warning when dates are unavailable or the same observation has conflicting contents. Repeated cached results are not presented as fresh checks. Examples and shared snapshots remain distinct from inspections.
+
+Compare two to five token addresses using saved observations, or review a summed quote for new inspections. Each token uses the existing safety endpoint and its own wallet authorization. Batches run sequentially, keep completed responses and receipts, and stop after a failure. Remaining requests need a fresh explicit quote; an uncertain payment must be acknowledged after checking the wallet before another payment can start. Displayed quotes expire after 60 seconds, including remaining steps of a long batch.
+
+The wallet panel separately prices `/api/base/portfolio/:address?minValue=0&limit=50`, displays observed holdings and source coverage, and lets the visitor select up to five discovered ERC20 tokens for separately priced inspections. Native ETH, missing/unpriced holdings and coverage gaps are not silently treated as inspected. Wallet addresses and the portfolio response remain in page memory.
+
+Report actions copy a bounded URL-fragment snapshot or download a 1200×1200 PNG card. `/shared-report.html` labels every imported snapshot as user-supplied and unverified, preserves observation dates and never pays or saves automatically. Fragment contents can be read or changed by anyone with the link; they are not an authenticated AgentToll record. Payment and wallet metadata are excluded. There is no background monitoring or messaging service.
+
+`web/research*.ts`, `web/portfolio-model.ts` and `web/report-share.ts` implement these tools. The build shares CSS source files while inlining their contents into generated HTML to match the existing deployed Content Security Policy. `npm run build:web` regenerates every browser entry; `npm run check:generated` verifies the results.
+
 ## Payment flow
 
 1. An unsigned request returns HTTP 402 with a base64 JSON quote in PAYMENT-REQUIRED. JSON responses also include the same complete quote in the body for clients and discovery crawlers that read `accepts` there.
