@@ -1,0 +1,113 @@
+{
+  "date": "2026-09-16",
+  "at": "2026-09-16T12:40:23.576Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x11e1477f136b3f6f002866301e4307da20d70be8f184c705f7020a291334a8d7",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 1,
+    "caution": 2,
+    "insufficientData": 1,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "feg / WETH 0.01%",
+      "pool": "0x252833bece792de9597d89ea84e1dfc38f96ae7419a50aee22c285807e934085",
+      "token": "0xb916d5654f3691ab2f36336001078ebc0673d075",
+      "createdAt": "2026-09-16T12:11:15Z",
+      "priceUsd": 0.000297503223599377,
+      "volume24hUsd": 720176.949762179,
+      "liquidityUsd": 146828.1261,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "verified"
+        ],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "owner-powers",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "DIDDYOIL / ETH",
+      "pool": "0x84ca65ce98f00f9b36a32bc5d1efaaa529a1ca1c122297a7acc4a0062dbc1287",
+      "token": "0xd2d72fa35eb232ecdd73e03b12b01c3b1eae8cfd",
+      "createdAt": "2026-09-16T12:24:55Z",
+      "priceUsd": 0.000199793170172368,
+      "volume24hUsd": 129860.717124904,
+      "liquidityUsd": 18689.0764,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "Grok / ETH",
+      "pool": "0x68fd3b74bd5f945286911332abd9fc668efd9d253b847a033ae9798641c0d204",
+      "token": "0xc1f018eb13e238b10f541eb110b12e51401abed5",
+      "createdAt": "2026-09-16T12:30:31Z",
+      "priceUsd": 0.000183491880700475,
+      "volume24hUsd": 127023.254012164,
+      "liquidityUsd": 16417.8361,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "lockinu / ETH 1%",
+      "pool": "0x8bffad5aec8123efb9fde516efedd4960b530a47a8b6fd7b45cbdb5438c766fc",
+      "token": "0xe5b1ec53fc4151ac1f5c94811a697d1521f5ec29",
+      "createdAt": "2026-09-16T12:31:21Z",
+      "priceUsd": 0.000161107486027372,
+      "volume24hUsd": 78674.3060296662,
+      "liquidityUsd": 22994.5935,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    }
+  ]
+}
