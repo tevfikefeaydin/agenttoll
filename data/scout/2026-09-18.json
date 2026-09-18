@@ -1,0 +1,88 @@
+{
+  "date": "2026-09-18",
+  "at": "2026-09-18T12:17:44.775Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x55c3d2646baa29116d5047276eba27adf98ce67d8fac145fd179863811b938e1",
+  "summary": {
+    "found": 4,
+    "checked": 2,
+    "unchecked": 2,
+    "highRisk": 1,
+    "caution": 1,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "DREAM / WETH 0.01%",
+      "pool": "0x55c66057dd5c23cb621d938b2abe54dc28f84da4e82173527a67a432c07a6293",
+      "token": "0x2536d34f2b3110a2e0b9419f7da4ce94933ec46b",
+      "createdAt": "2026-09-18T11:57:37Z",
+      "priceUsd": 0.0000556472248866023,
+      "volume24hUsd": 35339.4444139401,
+      "liquidityUsd": 45851.9222,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "verified"
+        ],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "owner-powers",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "Enso Finance / ETH 0.3%",
+      "pool": "0x70a4c2f7930ecf7b6fd4804f74188da862535f0be641fff4d07d4bc36adf9025",
+      "token": "0xb2000000000000000000000cebbb3211356db2c4",
+      "createdAt": "2026-09-18T12:02:23Z",
+      "priceUsd": 0.0000260198822697953,
+      "volume24hUsd": 10580.0109461508,
+      "liquidityUsd": 20360.0759,
+      "safety": null
+    },
+    {
+      "name": "WOSS / ETH 0.3%",
+      "pool": "0x1cc5920b5eb209a8363d01de1c3c0c41338c8ce12fb3a336dbcb4369ccb1b8c8",
+      "token": "0xb2000000000000000000000545b6ee75b13c3cc4",
+      "createdAt": "2026-09-18T12:02:09Z",
+      "priceUsd": 0.0000188286414199978,
+      "volume24hUsd": 9974.2317100065,
+      "liquidityUsd": 17128.7865,
+      "safety": null
+    },
+    {
+      "name": "Win / WETH",
+      "pool": "0x2822142317627db3a2a6ebba15e2a2fd864b19a6",
+      "token": "0x8e8b096beaa8eb8f3a0081316d2bda983c65d67c",
+      "createdAt": "2026-09-18T11:36:51Z",
+      "priceUsd": 0.00000610569167983052,
+      "volume24hUsd": 7028.5184741878,
+      "liquidityUsd": 89167.9845,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity"
+        ]
+      }
+    }
+  ]
+}
