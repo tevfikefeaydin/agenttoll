@@ -1,0 +1,82 @@
+{
+  "date": "2026-09-21",
+  "at": "2026-09-21T14:23:25.422Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0xdcb81d3543fe57c2b6d3709157cef943134c73cdaabcd7873dbf63dee94569cd",
+  "summary": {
+    "found": 4,
+    "checked": 2,
+    "unchecked": 2,
+    "highRisk": 0,
+    "caution": 0,
+    "insufficientData": 2,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "RSI / ETH",
+      "pool": "0xf5d1d6e4367e245114306e94f0928e1de0edfd532a32a4a136963c4d608ad533",
+      "token": "0xe77aaabcb8a6adb63d7c49c52cc63e0a15fb802b",
+      "createdAt": "2026-09-21T14:03:47Z",
+      "priceUsd": 0.000224917305755223,
+      "volume24hUsd": 175160.555290301,
+      "liquidityUsd": 20702.4914,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "ZEAL / ETH",
+      "pool": "0xb912252d63cc273a37307bb778b7f149fa403e159a1ed7487765af0dce0cedc2",
+      "token": "0xd975c23900e5b4252abf16be6bcc5f12da8d8362",
+      "createdAt": "2026-09-21T14:10:21Z",
+      "priceUsd": 0.000231796018771695,
+      "volume24hUsd": 120196.224967658,
+      "liquidityUsd": 21567.2417,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "TTL / ETH 0.3%",
+      "pool": "0xf87b95e8ee98c07127b1fcfd08b6ce8884313e938a6122553ab74af26fb25675",
+      "token": "0xb20000000000000000000048ed6ee092f2e0fc29",
+      "createdAt": "2026-09-21T14:07:49Z",
+      "priceUsd": 0.0000206078149677257,
+      "volume24hUsd": 11814.5576591534,
+      "liquidityUsd": 19156.7404,
+      "safety": null
+    },
+    {
+      "name": "MDW / ETH 0.3%",
+      "pool": "0xc67d725ed749f8dc7cd17c5a21e138edc6aba7e5c26e7c9da54a63fc399fbde1",
+      "token": "0xb200000000000000000000d683580bea6a7a9a81",
+      "createdAt": "2026-09-21T14:08:53Z",
+      "priceUsd": 0.0000169656432608869,
+      "volume24hUsd": 9417.8938970536,
+      "liquidityUsd": 16786.5731,
+      "safety": null
+    }
+  ]
+}
