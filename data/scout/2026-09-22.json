@@ -1,0 +1,83 @@
+{
+  "date": "2026-09-22",
+  "at": "2026-09-22T12:42:18.442Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x84888813aa3b8ea8764f4239095f9fdbc13bf3b568db25e1461d076ae19f905d",
+  "summary": {
+    "found": 4,
+    "checked": 2,
+    "unchecked": 2,
+    "highRisk": 0,
+    "caution": 0,
+    "insufficientData": 2,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "fomopay / ETH",
+      "pool": "0xff63eee9a972b6cb77aee8dba9e9623b1c92ffb4b4b1828075b0a3d3749c529b",
+      "token": "0x5cb2d17e36b8169fd6d5a7d63dc2e424ec5af3eb",
+      "createdAt": "2026-09-22T12:22:43Z",
+      "priceUsd": 0.000249370205144857,
+      "volume24hUsd": 157791.44618504,
+      "liquidityUsd": 22069.5749,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "INU / ETH",
+      "pool": "0x1fbfb8fdaadcf0b40c6ccffbc91ef990972a50b8f519d521fc7c1030c25b7716",
+      "token": "0x328ecd132c655176424778ef484cfdae6188e364",
+      "createdAt": "2026-09-22T12:25:53Z",
+      "priceUsd": 0.000233074684206641,
+      "volume24hUsd": 119833.857279979,
+      "liquidityUsd": 20964.8068,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "bTRENCHES / ETH 0.3%",
+      "pool": "0x2a1f092d5bfd25544a6c18360b2efbad7492c1d5f8f8b82581f977458543fc47",
+      "token": "0xb200000000000000000000f73c4ea2c70ae60545",
+      "createdAt": "2026-09-22T12:03:15Z",
+      "priceUsd": 0.000027708839981275,
+      "volume24hUsd": 29431.7562979037,
+      "liquidityUsd": 23443.615,
+      "safety": null
+    },
+    {
+      "name": "SYN / ETH 0.3%",
+      "pool": "0x0d3f4519bf8cf7d848f5a6439ddbc3a01d87eb5b5bb2efe4e0812a9c2b859102",
+      "token": "0xb2000000000000000000008b8a1e06ab062ff74e",
+      "createdAt": "2026-09-22T12:02:09Z",
+      "priceUsd": 0.0000299363421761097,
+      "volume24hUsd": 28420.6467416586,
+      "liquidityUsd": 27199.5125,
+      "safety": null
+    }
+  ]
+}
