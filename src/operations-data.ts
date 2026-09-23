@@ -91,7 +91,8 @@ export async function checkDataQuality(options: { now?: number; timeoutMs?: numb
     ]);
     const checks = { snapshot, scorecard, safety };
     return { schemaVersion: 1, ok: Object.values(checks).every(check => check.ok),
-      degraded: Object.values(checks).some(check => !check.ok || check.status === 'partial'),
+      degraded: (typeof snapshot.poolsUnchecked === 'number' && snapshot.poolsUnchecked > 0) ||
+        Object.values(checks).some(check => !check.ok || check.status === 'partial'),
       checkedAt: new Date(now).toISOString(), checks,
       scope: 'Read-only public upstream data and immutable published snapshot inspection. No payment, signature or wallet key. Partial coverage is distinct from availability; the safety benchmark covers USDC only.' };
   } finally {

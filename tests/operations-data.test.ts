@@ -39,6 +39,27 @@ test('successful service responses do not hide stale or impossible future snapsh
   }
 });
 
+test('unchecked snapshot pools remain degraded even when scorecard and safety are complete', async () => {
+  const fixture = {
+    ...loaders(),
+    scorecard: async () => ({ coverage: { tokensObserved: 1, tokensPriced: 1,
+      snapshotsListed: 1, snapshotsLoaded: 1, poolsWithoutSafety: 0, priceBatchesFailed: 0 },
+      tokens: [{ outcome: 'priced' }] }),
+    safety: async () => ({ verdict: 'clear', coverage: { completedChecks: 8, totalChecks: 8 } }),
+  };
+  const partial = await checkDataQuality({ now }, fixture);
+  assert.equal(partial.ok, true);
+  assert.equal(partial.checks.snapshot.status, 'fresh');
+  assert.equal(partial.degraded, true);
+
+  const complete = await checkDataQuality({ now }, { ...fixture,
+    history: async () => ({ ...await loaders().history(),
+      pools: [{ safety: { verdict: 'clear' } }], summary: { found: 1, checked: 1, unchecked: 0 } }),
+  });
+  assert.equal(complete.ok, true);
+  assert.equal(complete.degraded, false);
+});
+
 test('data monitor bounds a hung provider and never exposes raw diagnostics or secrets', async () => {
   const fixture = loaders();
   let aborted = false;

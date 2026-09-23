@@ -77,6 +77,41 @@ The independently installed `agenttoll-monitor.timer` runs these unsigned API an
 
 ## Request and payment evidence
 
+### Usage, revenue and returning wallets
+
+`npm run ops:usage -- --input requests.ndjson` reports all 21 registered paid
+endpoints, including clients with no client label. It uses the same receipt and
+request-conflict validation as `ops:inspections`; the browser-only command retains
+its existing scope. Repeat `--input` to combine overlapping container exports and
+`--exclude-operator 0x...` to classify additional known test wallets. Limits are
+64 regular files, 20 MiB per file and 100 MiB combined. Empty/unusable input exits 1.
+No environment file, wallet key, network service or payment client is used.
+
+```bash
+npm run ops:usage -- --input requests.ndjson --input previous.ndjson
+npm run ops:usage -- --input requests.ndjson --format markdown > usage-report.md
+```
+
+JSON and Markdown reports contain overall, daily UTC, Monday-start weekly and
+endpoint totals. Mainnet receipts distinguish external/operator gross USDC,
+unique wallets, completed responses and settled-but-aborted responses. No wallet
+addresses, transaction hashes, signatures or raw log lines are emitted. Requests,
+quotes and failures can span networks; only confirmed commercial receipts are
+restricted to Base mainnet. Testnet and unresolved evidence are separate.
+Conflicting route assignments for the same receipt are excluded, not counted in
+two endpoints. A receipt repeated on a later day belongs to its earliest supplied
+observation; the later request can still appear in request counts.
+
+Returning means an external wallet settled on two distinct UTC dates in the
+export. Weekly overlap counts wallets observed in both consecutive UTC weeks;
+it is not a retention rate, a count of people, or proof of organic demand. Missing
+days/weeks and a new deployment's shorter log window are not zero usage. Wallet
+counts across days/endpoints cannot be added. Gross USDC is not profit and does
+not infer refunds or provider costs. Keep raw exports private and do not commit
+them. Export retained current/previous container logs before they are removed;
+size-based Docker rotation limits historical coverage. This command groups data
+by day but does not install a background collection schedule.
+
 New request logs have `schemaVersion: 2`; the report still reads version 1. Logs include UTC `t`, `requestId`, original HTTP `method`, canonical `path`/`route`, `status`, `ms`, allowlisted `errorCode`, `paymentSubmitted`, `paymentStage` and data-provider/cache counters. Exactly one `terminal: finish|abort` record is emitted. Aborts use local status marker 499, not a response sent to the client, and `abortReason: client_disconnected|request_timeout`. Discovery requests are logged too. HTTP 5xx records go to stderr.
 
 Payment diagnostics include `paymentHeader` (header name/generation only), `protocolVersion` (decoded, unverified), `paymentPhase` (initialize/parse/match/verify/handler/settle), a fixed allowlisted `paymentReason`, and verify/settle invocation counts and waiting milliseconds. Shared `/supported` initialization and its SDK retries are excluded. In-flight duration is captured up to abort; late results do not rewrite a terminal record. Basename RPCs now participate in the separate data-provider counters and obey caller cancellation.
