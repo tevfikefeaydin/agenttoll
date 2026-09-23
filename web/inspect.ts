@@ -11,6 +11,7 @@ const quoteButton = element<HTMLButtonElement>('quote-button');
 const payButton = element<HTMLButtonElement>('pay-button');
 const retryButton = element<HTMLButtonElement>('retry-button');
 const exampleButton = element<HTMLButtonElement>('example-button');
+const sampleButton = element<HTMLButtonElement>('sample-token');
 const priceBox = element('price-box');
 const status = element('inspection-status');
 const report = element('report');
@@ -79,6 +80,7 @@ async function checkPrice() {
     const amount = displayUsdc(result.amountUsdc);
     element('quote-amount').textContent = amount;
     element('quote-network').textContent = `Pay with USDC on ${getNetworkConfig(network).name}.`;
+    element('payment-preparation').textContent = `Have at least ${amount} USDC on ${getNetworkConfig(network).name} in the wallet you connect. USDC on a different network cannot pay this quote.`;
     element('quote-recipient').textContent = recipient;
     payButton.textContent = `Pay ${amount} USDC and inspect`;
     payButton.disabled = false;
@@ -86,7 +88,10 @@ async function checkPrice() {
     show('Price ready. Continue when you are ready to approve in your wallet.', 'quote');
   } catch (error) {
     if (current !== sequence) return;
-    show(controller.signal.aborted ? 'The price check timed out. No payment was requested. Try again.' : escapeHtml((error as Error).message), 'err');
+    const detail = controller.signal.aborted ? 'The price check timed out.' :
+      error instanceof TypeError ? 'The price could not be loaded. Check your internet connection.' :
+        escapeHtml(error instanceof Error ? error.message : 'The price could not be verified.');
+    show(`${detail}<p>No payment was requested. Press “Check price again” to retry. If it keeps failing, <a href="https://github.com/tevfikefeaydin/agenttoll/issues" target="_blank" rel="noopener noreferrer">report the problem</a>.</p>`, 'err');
   } finally {
     clearTimeout(timer);
     if (current === sequence) {
@@ -98,6 +103,16 @@ async function checkPrice() {
 }
 
 form.addEventListener('submit', event => { event.preventDefault(); void checkPrice(); });
+sampleButton.addEventListener('click', () => {
+  if (paying || authorizationPossible) return;
+  const token = sampleButton.dataset.token;
+  if (!token) return;
+  input.value = inspectionEndpoint(token).split('/').at(-1)!;
+  invalidateQuote();
+  input.removeAttribute('aria-invalid');
+  show('Example USDC address filled in. Press “Check price” to see the current price for a new inspection. No payment has been requested.');
+  input.focus();
+});
 input.addEventListener('input', () => {
   if (paying) return;
   invalidateQuote();
@@ -123,7 +138,7 @@ payButton.addEventListener('click', async () => {
   const terms = displayed;
   paying = true;
   research.setBusy(true);
-  input.disabled = quoteButton.disabled = payButton.disabled = exampleButton.disabled = true;
+  input.disabled = quoteButton.disabled = payButton.disabled = exampleButton.disabled = sampleButton.disabled = true;
   try {
     const outcome = await pay(terms.path, show, { quote: terms.quote, recipient: terms.recipient, client: CLIENT, showRaw: false });
     if (outcome.status === 'delivered') {
@@ -155,6 +170,7 @@ payButton.addEventListener('click', async () => {
     research.setBusy(false);
     input.disabled = exampleButton.disabled = false;
     quoteButton.disabled = authorizationPossible;
+    sampleButton.disabled = authorizationPossible;
     payButton.disabled = false;
     retryButton.hidden = !authorizationPossible;
   }
@@ -163,6 +179,7 @@ payButton.addEventListener('click', async () => {
 retryButton.addEventListener('click', () => {
   if (paying) return;
   authorizationPossible = false;
+  sampleButton.disabled = false;
   retryButton.hidden = true;
   void checkPrice();
 });
@@ -181,6 +198,7 @@ exampleButton.addEventListener('click', () => {
 });
 
 quoteButton.disabled = false;
+sampleButton.disabled = false;
 const linkedToken = new URLSearchParams(location.search).get('token');
 if (linkedToken !== null) {
   try { input.value = inspectionEndpoint(linkedToken).split('/').at(-1)!; show('Token address filled in. Check its price when you are ready.'); }

@@ -31,6 +31,7 @@ if (!endpoint) throw new Error('The token inspection endpoint is missing.');
 const html = readFileSync(new URL('../web/inspect.html', import.meta.url), 'utf8')
   .replace('@@EXAMPLE_REPORT@@', () => renderTokenReport(example.data))
   .replace('@@EXAMPLE_TIME@@', () => escapeHtml(reportTime(example.capturedAt)))
+  .replace('@@SAMPLE_TOKEN@@', () => escapeHtml(example.data.token))
   .replace('@@PRICE@@', () => escapeHtml(endpoint.price.replace(/^\$/, '')));
 if (/@@[A-Z_]+@@/.test(html)) throw new Error('Unresolved inspection page template field.');
 output('inspect.html', inlineStyles(html));

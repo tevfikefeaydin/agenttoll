@@ -40,6 +40,8 @@ main{padding-block:56px 70px}.intro{display:grid;grid-template-columns:minmax(28
         <label for="token-address">Base token contract address</label>
         <input id="token-address" name="token" type="text" placeholder="0x…" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="80" aria-describedby="address-help inspection-status">
         <p id="address-help" class="input-help">Use a token contract on Base, not a wallet address.</p>
+        <button id="sample-token" type="button" class="button secondary full" data-token="0x833589fcd6edb6e08f4c7c32d4f71b54bda02913" disabled>Try the example token (USDC)</button>
+        <p class="input-help">Fills the address only. The recorded example is free; a new inspection is paid.</p>
         <button id="quote-button" type="submit" class="button primary full" disabled>Check price <span aria-hidden="true">→</span></button>
         <p class="price-note">0.003 USDC per report. Checking the price is free.</p>
         <label class="keep-report"><input id="keep-report" type="checkbox" checked> Save completed reports in this browser</label>
@@ -48,6 +50,8 @@ main{padding-block:56px 70px}.intro{display:grid;grid-template-columns:minmax(28
         <p class="price-label">One token inspection</p>
         <p class="price"><b id="quote-amount"></b> <span>USDC</span></p>
         <p id="quote-network" class="input-help"></p>
+        <p id="payment-preparation" class="input-help"></p>
+        <p class="input-help">Use a Base-compatible browser wallet. After you press Pay, connect your wallet and review its USDC authorization before signing.</p>
         <details><summary>Payment details</summary><span>Recipient</span><code id="quote-recipient" class="recipient"></code><p>One USDC authorization. No account or subscription. Your wallet asks you to approve before paying.</p></details>
         <button id="pay-button" type="button" class="button primary full">Pay and inspect</button>
       </div>
