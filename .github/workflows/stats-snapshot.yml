@@ -25,11 +25,11 @@ permissions:
 
 jobs:
   baseline:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 45 # Includes the one-time legacy migration/full rebuild.
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
           node-version: 22
       - run: npm ci
@@ -45,6 +45,7 @@ jobs:
           NETWORK: base
           FULL_REBUILD: ${{ inputs.full_rebuild }}
       - name: Commit it
+        if: github.ref == 'refs/heads/main'
         run: |
           git config user.name "Tevfik Efe Aydin"
           git config user.email "tevfikefe.aydin@gmail.com"
