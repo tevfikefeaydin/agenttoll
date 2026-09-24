@@ -1,0 +1,103 @@
+{
+  "date": "2026-09-24",
+  "at": "2026-09-24T12:47:29.035Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x158723dd5a155aa7fe3cbee5af57847e445f1bc921dd2efb3bb6b8a7a50cd2ed",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 0,
+    "caution": 2,
+    "insufficientData": 2,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "ETN / WETH 0.01%",
+      "pool": "0x182063e166ff5e59d0618c2984956dcba177e64e8b47dfd7bdb294c978c0a551",
+      "token": "0x9b6d17e06b7b6a1ba067fa6799c5dfda75d94421",
+      "createdAt": "2026-09-24T12:04:43Z",
+      "priceUsd": 0.0002569394862232,
+      "volume24hUsd": 229841.034699405,
+      "liquidityUsd": 79055.3851,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "ZEAL / ETH",
+      "pool": "0x7e295a22b5ec91949958589f0dab0009190c19b1ed8c5764952688583ce68ec9",
+      "token": "0xe83c01511f50dc5189cc35d0cf627fa43e306e8e",
+      "createdAt": "2026-09-24T12:32:39Z",
+      "priceUsd": 0.000228193438685641,
+      "volume24hUsd": 164587.062606298,
+      "liquidityUsd": 20628.6042,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "BURN / ETH",
+      "pool": "0xf7556efe1b268f835b4de02dd74287c9f13fd69b27327634f2a0b49b847bee42",
+      "token": "0xa15d8b33aefe8dfe47a1e593c286cf22e27bf390",
+      "createdAt": "2026-09-24T12:31:19Z",
+      "priceUsd": 0.000248275076042872,
+      "volume24hUsd": 163972.829280172,
+      "liquidityUsd": 21193.2395,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "RXRXon / WETH",
+      "pool": "0x15aa3b07ff6c9a1177b1d2143e36eb9fc232721a",
+      "token": "0x52c7e1664ab9fda44b06a83d730dc1c1adc4ea3a",
+      "createdAt": "2026-09-24T12:05:31Z",
+      "priceUsd": 0.000385494497479677,
+      "volume24hUsd": 2735.0866383355,
+      "liquidityUsd": 17474.5901,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "concentration"
+        ]
+      }
+    }
+  ]
+}
