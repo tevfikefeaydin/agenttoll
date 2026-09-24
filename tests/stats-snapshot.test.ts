@@ -20,7 +20,7 @@ const previous = {
 /** Run the real CLI and filesystem path, replacing only the public network. */
 function runSnapshot(t: TestContext, initial: unknown, options: {
   fullRebuild?: boolean; mismatch?: boolean; changedTarget?: boolean;
-  failLogs?: boolean; fromBlock?: string;
+  failLogs?: boolean; fromBlock?: string; rangeLimit?: number; failBlock?: number;
 } = {}) {
   const root = process.cwd();
   const directory = fs.mkdtempSync(path.join(root, "tests", ".stats-snapshot-"));
@@ -51,6 +51,11 @@ function runSnapshot(t: TestContext, initial: unknown, options: {
         if (options.failLogs) return Response.json({ error: { message: "RPC log outage" } });
         const query = request.params[0];
         const start = parseInt(query.fromBlock, 16), end = parseInt(query.toBlock, 16);
+        if (options.rangeLimit !== undefined) {
+          if (String(_input).includes("publicnode")) return new Response("Forbidden", { status: 403 });
+          if (end - start + 1 > options.rangeLimit) return new Response("Range too large", { status: 413 });
+          if (options.failBlock >= start && options.failBlock <= end) return new Response("Unavailable", { status: 503 });
+        }
         result = [100, 102].filter(block => block >= start && block <= end).map(block => ({
           address: query.address,
           data: "0x" + (1000).toString(16).padStart(64, "0"),
@@ -148,5 +153,28 @@ test("a persistent log outage leaves the old snapshot intact after bounded retri
   assert.notEqual(run.status, 0);
   assert.equal(run.content, run.input);
   assert.equal(run.requests.filter(r => r.method === "eth_getLogs").length, 8); // 4 attempts, 2 providers.
+  assert.deepEqual(run.outputFiles, ["stats.json"]);
+});
+
+test("a range-limited primary and forbidden fallback still produce a complete snapshot", (t) => {
+  const run = runSnapshot(t, previous, { fullRebuild: true, rangeLimit: 1 });
+  assert.equal(run.status, 0, run.stderr);
+  assert.deepEqual(run.snapshot.payers[payer], { calls: 2, usdcUnits: "2000" });
+  assert.equal(run.snapshot.block, 102);
+  assert.deepEqual(run.outputFiles, ["stats.json"]);
+});
+
+test("failure in a later split range never writes partially accumulated totals", (t) => {
+  const run = runSnapshot(t, previous, { fullRebuild: true, rangeLimit: 1, failBlock: 102 });
+  assert.notEqual(run.status, 0);
+  assert.equal(run.content, run.input);
+  assert.deepEqual(run.outputFiles, ["stats.json"]);
+});
+
+test("a provider rejecting even one block fails with bounded retries and preserves the baseline", (t) => {
+  const run = runSnapshot(t, previous, { rangeLimit: 0 });
+  assert.notEqual(run.status, 0);
+  assert.equal(run.content, run.input);
+  assert.ok(run.requests.filter(r => r.method === "eth_getLogs").length <= 16);
   assert.deepEqual(run.outputFiles, ["stats.json"]);
 });

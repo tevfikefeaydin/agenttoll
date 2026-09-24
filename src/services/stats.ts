@@ -127,7 +127,7 @@ const TRANSFER_TOPIC = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a
 // drpc used to have that slot and no longer earns it — its free tier stops at
 // 50 blocks, short of even one chunk. Nothing else free reads Base logs this
 // far back at all, so base.org failing is the case worth degrading well for.
-const CHUNK = 2_000; // the ceiling both remaining public providers enforce
+const CHUNK = 2_000; // initial range; HTTP 413 responses are bisected per provider
 const LANES = 3; // measured: three concurrent getLogs are clean, six draw 429s
 const MAX_CHUNKS = 90; // ~4 days of catching up on a stale baseline
 const SCAN_BUDGET_MS = 9_000; // stay under the platform's own request timeout
@@ -155,18 +155,36 @@ async function logsRpc<T>(network: StatsNetwork, method: string, params: unknown
     NETWORKS[network].rpcs.map((url) => ({
       name: new URL(url).host,
       load: async () => {
-        signal?.throwIfAborted();
-        const res = await fetchWithTimeout(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
-          signal,
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const json = (await res.json()) as { result?: T; error?: { message: string } };
-        if (json.error) throw new Error(json.error.message);
-        if (json.result === undefined) throw new Error("empty result");
-        return json.result;
+        // Providers can lower their range/response-size limits independently.
+        // Split only explicit size rejections, within the same provider, so a
+        // successful half is never combined with a retry of the whole range.
+        const read = async (requestParams: unknown[]): Promise<unknown> => {
+          signal?.throwIfAborted();
+          const res = await fetchWithTimeout(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params: requestParams }),
+            signal,
+          });
+          if (res.status === 413 && method === "eth_getLogs") {
+            await res.body?.cancel();
+            const query = requestParams[0] as { fromBlock: string; toBlock: string };
+            const from = Number(query.fromBlock), to = Number(query.toBlock);
+            if (Number.isSafeInteger(from) && Number.isSafeInteger(to) && from >= 0 && from < to) {
+              const middle = from + Math.floor((to - from) / 2);
+              const left = await read([{ ...query, toBlock: hex(middle) }]);
+              const right = await read([{ ...query, fromBlock: hex(middle + 1) }]);
+              if (!Array.isArray(left) || !Array.isArray(right)) throw new Error("Invalid RPC log result");
+              return [...left, ...right];
+            }
+          }
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const json = (await res.json()) as { result?: T; error?: { message: string } };
+          if (json.error) throw new Error(json.error.message);
+          if (json.result === undefined) throw new Error("empty result");
+          return json.result;
+        };
+        return await read(params) as T;
       },
     })),
   );
