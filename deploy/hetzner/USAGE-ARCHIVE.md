@@ -2,6 +2,11 @@
 
 Status: installable, not activated by this change. Requires Linux, systemd,
 Docker, Python 3 and Node 22+ with npm. No new service or paid dependency.
+The service also searches `/opt/agenttoll/usage/node/bin` for a private Node
+installation. On a Docker-only host, provision Node there before starting it;
+the runtime may be copied from the existing pinned AgentToll image. Keep its
+`bin/node`, `lib/node_modules/npm` and `bin/npm` link together and verify both
+version commands. This leaves the host's global Node configuration unchanged.
 
 ## Install on the host
 

@@ -95,4 +95,3 @@ export function updateUsageArchive(previous: unknown, input: string, now: string
  } };
  return { state, report };
 }
-
