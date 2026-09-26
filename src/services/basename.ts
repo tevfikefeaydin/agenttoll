@@ -135,7 +135,7 @@ export interface BasenameResult {
 }
 
 /** Names may be given bare ("agenttoll") or fully qualified. */
-function normalize(name: string): string {
+export function normalize(name: string): string {
   const trimmed = name.trim().toLowerCase().replace(/\.$/, "");
   if (!trimmed) badRequest("Empty name");
   if (!/^[a-z0-9-]+(\.[a-z0-9-]+)*$/.test(trimmed)) {

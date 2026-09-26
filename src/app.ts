@@ -1,6 +1,7 @@
 import "dotenv/config";
 import express, { type Request, type Response, type NextFunction } from "express";
 import path from "node:path";
+import { parse as parseQuery } from 'node:querystring';
 import { fileURLToPath } from "node:url";
 import { ExpressAdapter, paymentMiddlewareFromHTTPServer, x402ResourceServer, x402HTTPResourceServer } from "@x402/express";
 import { HTTPFacilitatorClient, type FacilitatorClient } from "@x402/core/server";
@@ -19,7 +20,7 @@ import { getBaseTrending } from "./services/basetrending.js";
 import { getMarketBrief } from "./services/brief.js";
 import { getStats } from "./services/stats.js";
 import { getAddressActivity, getRadarSince, getPriceAlert } from "./services/watch.js";
-import { errorResponse } from "./services/errors.js";
+import { badRequest, errorResponse } from "./services/errors.js";
 import { resolveBasename } from "./services/basename.js";
 import { getNewTokenRadar } from "./services/radar.js";
 import { getPortfolio } from "./services/portfolio.js";
@@ -33,6 +34,7 @@ import { getTrySpread } from "./services/tryspread.js";
 import { randomUUID } from "node:crypto";
 import { readConfig } from "./config.js";
 import { ENDPOINTS } from "./endpoints.js";
+import { validateEndpointInput } from './request-validation.js';
 import { requestContext, withSignal, type RequestContext } from "./request-context.js";
 import { cached } from "./services/cache.js";
 import { baseRpc } from "./services/sources.js";
@@ -116,6 +118,12 @@ const facilitatorClient: FacilitatorClient = {
 
 const app = express();
 app.set("trust proxy", config.trustProxy);
+app.set('query parser', (raw: string | null) => {
+  // Reject overflow instead of silently losing fields at the default 1,000-key limit.
+  const query = raw ?? '';
+  if (query.length > 16_384 || query.split('&').length > 64) badRequest('Too many query parameters');
+  return parseQuery(query, '&', '=', { maxKeys: 0 });
+});
 app.disable("x-powered-by");
 const normalizedPath = (value: string) => value.toLowerCase().replace(/\/+$/, "") || "/";
 
@@ -154,7 +162,7 @@ app.use((req, res, next) => {
       body = decodePaymentRequiredHeader(requiredHeader);
     }
     if (body && typeof body === "object" && "code" in body && typeof body.code === "string" &&
-      ['BAD_REQUEST', 'PAYLOAD_TOO_LARGE', 'REQUEST_TIMEOUT', 'UPSTREAM_UNAVAILABLE', 'NOT_READY', 'OVERLOADED', 'RATE_LIMITED', 'PAYMENT_UPGRADE_REQUIRED', 'MALFORMED_PAYMENT'].includes(body.code)) responseCode = body.code;
+      ['BAD_REQUEST', 'NOT_FOUND', 'PAYLOAD_TOO_LARGE', 'REQUEST_TIMEOUT', 'UPSTREAM_UNAVAILABLE', 'NOT_READY', 'OVERLOADED', 'RATE_LIMITED', 'PAYMENT_UPGRADE_REQUIRED', 'MALFORMED_PAYMENT'].includes(body.code)) responseCode = body.code;
     return originalJson(body);
   };
   const started = Date.now();
@@ -240,6 +248,14 @@ app.use((req, res, next) => {
   next();
 });
 app.use(express.json({ limit: "10kb" }));
+
+// Match with Express itself so preflight and paid handlers agree on URL decoding.
+for (const endpoint of ENDPOINTS) {
+  app.get(endpoint.route.slice(4), (req, _res, next) => {
+    try { validateEndpointInput(endpoint, req.params, req.query); next(); }
+    catch (error) { next(error); }
+  });
+}
 
 // Build the SDK gate without starting network work at module load. Vercel can
 // suspend that eager work after a free/static request, leaving the next caller
@@ -435,6 +451,12 @@ app.get(
 );
 
 // Local static serving; on Vercel the public/ folder is served by the CDN.
+app.use((req, res, next) => {
+  const pathname = normalizedPath(req.path);
+  if (pathname !== '/api' && !pathname.startsWith('/api/')) return next();
+  res.status(404).json({ error: 'API endpoint not found', code: 'NOT_FOUND', retryable: false,
+    retryAfter: null, requestId: res.getHeader('X-Request-Id') });
+});
 app.use(express.static(path.join(__dirname, "..", "public")));
 
 app.use((error: unknown, _req: Request, res: Response, next: NextFunction) => {

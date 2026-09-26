@@ -14,7 +14,7 @@ const OVERLAP_MS = 120_000;
 const MAX_SEEN = 100;
 const MAX_CURSOR_LENGTH = 8_000;
 
-function parseSince(since?: string): number {
+export function parseSince(since?: string): number {
   if (!since) return 0;
   const t = Date.parse(since);
   if (!/^\d{4}-\d{2}-\d{2}T/.test(since) || !Number.isFinite(t) || t < 0) badRequest("Invalid 'since' — pass the cursor from the previous reply or an ISO timestamp");
@@ -68,6 +68,10 @@ function readCursor(address: string, since?: string): ActivityCursor {
 }
 
 const writeCursor = (value: ActivityCursor) => `w1.${deflateRawSync(JSON.stringify(value)).toString("base64url")}`;
+
+export function validateActivityCursor(address: string, since?: string): void {
+  readCursor(address.toLowerCase(), since);
+}
 
 interface Tx {
   hash: string;
@@ -197,7 +201,7 @@ export async function getRadarSince(since?: string) {
 }
 
 /** Cheap poll: has the price moved past a threshold from the agent's reference? */
-export async function getPriceAlert(symbol: string, ref?: string, pct?: string) {
+export function parsePriceAlert(ref?: string, pct?: string) {
   const reference = Number(ref);
   const threshold = pct === undefined ? 2 : Number(pct);
   if (!Number.isFinite(reference) || reference <= 0) {
@@ -208,6 +212,11 @@ export async function getPriceAlert(symbol: string, ref?: string, pct?: string) 
   if (!Number.isFinite(threshold) || threshold < 0) {
     badRequest("Invalid 'pct' — the threshold must be a non-negative number of percent");
   }
+  return { reference, threshold };
+}
+
+export async function getPriceAlert(symbol: string, ref?: string, pct?: string) {
+  const { reference, threshold } = parsePriceAlert(ref, pct);
 
   const price = await getPrice(symbol);
   const changePct = ((price.usd - reference) / reference) * 100;

@@ -34,10 +34,12 @@ export async function checkService(options: { baseUrl?: string; network?: string
   }
   for (const endpoint of ENDPOINTS) {
     const started = Date.now();
+    const query = new URLSearchParams((endpoint.discovery.inputSchema?.required ?? []).map(key =>
+      [key, String(endpoint.discovery.input?.[key])]));
     const path = endpoint.path.replace(/\{(\w+)\}/g, (_, name) => {
       const params = endpoint.discovery.pathParams as Record<string, string> | undefined;
       return encodeURIComponent(params?.[name] ?? '');
-    });
+    }) + (query.size ? '?' + query : '');
     try {
       await client.getPaymentQuote(path, { signal, headers: { 'User-Agent': 'AgentToll-ReadOnly-Monitor/1' } });
       checks.push({ path: endpoint.path, ok: true, status: 402, ms: Date.now() - started });

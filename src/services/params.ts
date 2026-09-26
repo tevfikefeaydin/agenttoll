@@ -10,6 +10,14 @@ import { badRequest } from "./errors.js";
 
 const missing = (raw: string | undefined) => raw === undefined || raw.trim() === "";
 
+export function validateSnapshotDate(raw: string | undefined): void {
+  if (raw === undefined) return;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(raw) || !Number.isFinite(Date.parse(raw + 'T00:00:00Z')) ||
+      new Date(raw + 'T00:00:00Z').toISOString().slice(0, 10) !== raw) {
+    badRequest("Invalid 'date' — expected a real date in YYYY-MM-DD format");
+  }
+}
+
 export function optionalBoolean(name: string, raw: string | undefined): boolean | undefined {
   if (raw === undefined) return undefined;
   const value = raw.trim().toLowerCase();

@@ -47,13 +47,13 @@ test('operations: free routes stay independent and request records preserve paym
   });
   await t.test('HEAD is logged as HEAD, with a canonical endpoint and no address or query', async () => {
     const res = await nativeFetch(baseUrl + '/API/base/token/0x2222222222222222222222222222222222222222/?secret=private', { method: 'HEAD' });
-    assert.equal(res.status, 402);
+    assert.equal(res.status, 400);
     const entry = logs.find(e => e.requestId === res.headers.get('x-request-id'))!;
     assert.ok(entry);
     assert.equal(entry.method, 'HEAD');
     assert.equal(entry.route, '/api/base/token/{address}');
     assert.equal(entry.path, '/api/base/token/{address}');
-    assert.equal(entry.paymentStage, 'quote');
+    assert.equal(entry.paymentStage, 'none');
     assert.doesNotMatch(JSON.stringify(entry), /222222222|secret|private/);
   });
   await t.test('a signed malformed payment is a rejection, never an unsigned quote', async () => {

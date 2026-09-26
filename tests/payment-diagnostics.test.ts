@@ -172,10 +172,16 @@ test('payment diagnostics use real middleware with offline facilitator fixtures'
       else assert.equal(res.status, 402);
     });
   }
-  await t.test('handler errors do not settle and use handler phase', async () => {
-    mode = 'healthy'; const before = settleCalls;
+  await t.test('signed invalid input is rejected before verification or settlement', async () => {
+    mode = 'healthy'; const before = settleCalls, beforeVerify = verifyCalls;
     const { res, record } = await request(encode(payload), '/api/gas?gasLimit=' + secret);
-    assert.equal(res.status, 400); assert.equal(record.paymentPhase, 'handler'); assert.equal(record.paymentReason, 'handler_failed'); assert.equal(settleCalls, before);
+    assert.equal(res.status, 400); assert.equal(record.paymentPhase, 'none');
+    assert.equal(record.errorCode, 'BAD_REQUEST'); assert.equal(verifyCalls, beforeVerify); assert.equal(settleCalls, before);
+  });
+  await t.test('provider failures in the handler do not settle and retain the handler phase', async () => {
+    mode = 'healthy'; const before = settleCalls;
+    const { res, record } = await request(encode(payload), '/api/gas?gasLimit=21000');
+    assert.equal(res.status, 502); assert.equal(record.paymentPhase, 'handler'); assert.equal(record.paymentReason, 'handler_failed'); assert.equal(settleCalls, before);
   });
   for (const phase of ['verify', 'settle']) await t.test(`timeout during ${phase} preserves phase and settlement ambiguity`, async () => {
     mode = `timeout-${phase}`;

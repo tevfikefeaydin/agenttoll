@@ -133,6 +133,18 @@ An unsigned quote and its signed retry are two requests. Do not count 402 as a s
 
 `/api/stats` uses a separate onchain heuristic: incoming USDC transfers of 1–50,000 micro-USDC. Field names such as `tollsCollected` and `revenueUsdc` are retained for API compatibility. These totals include tests and unsolicited transfers; they are not authenticated API sales. `external*` excludes only the known operator wallets, not every possible test wallet. Respect `partial`, `truncated`, source and timestamp notes. A distinct wallet is not a unique person or business.
 
+## API input errors
+
+Paid GET/HEAD requests validate declared query fields and path parameters before
+payment-provider initialization. Invalid, unknown or repeated query fields return
+400 JSON with `BAD_REQUEST` and a request ID, without an x402 quote or verification
+call. Query parsing rejects more than 64 segments or 16,384 characters rather than
+silently truncating fields. Price alerts require `ref` even for unsigned quotes.
+Checks requiring provider evidence (for example whether a historical snapshot
+exists) still run in the handler. Failed handlers do not settle a payment.
+Unknown API paths return 404 JSON with `NOT_FOUND`; static pages keep their normal
+fallback. These errors are non-retryable until the caller corrects the request.
+
 ## Scheduled jobs
 
 ### Optional private usage archive

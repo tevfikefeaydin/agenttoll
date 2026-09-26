@@ -289,3 +289,28 @@ test("cancellation during independent fallback rejects instead of caching incomp
   assert.equal(result.coverage.fallbackPriceBatchesFailed, 0);
   assert.equal(result.tokens[0].outcome, "unavailable");
 });
+
+test('equal-liquidity pairs keep an available price in either response order', async (t) => {
+  let reverse = false;
+  t.mock.method(Date, 'now', () => Date.parse(reverse ? '2090-01-02T00:00:00Z' : '2090-01-01T00:00:00Z'));
+  t.mock.method(globalThis, 'fetch', async (input: string | URL | Request) => {
+    const url = String(input);
+    if (url.includes('api.github.com')) return json({ sha: revision });
+    if (url.endsWith('index.json')) return json({ dates: ['2026-09-07'] });
+    if (url.includes('dexscreener')) {
+      const pairs = [
+        { chainId: 'base', baseToken: { address: token(99) }, liquidity: { usd: 1000 } },
+        { chainId: 'base', baseToken: { address: token(99) }, liquidity: { usd: 1000 }, priceUsd: '2' },
+      ];
+      return json(reverse ? pairs.reverse() : pairs);
+    }
+    if (url.includes('geckoterminal')) return json({ data: [] });
+    return json({ date: '2026-09-07', at: '2026-09-07T10:00:00Z', settlement: null, summary: {}, pools: [pool(99)] });
+  });
+  for (const order of [false, true]) {
+    reverse = order;
+    const result = await getScorecard('1');
+    assert.equal(result.tokens[0].outcome, 'priced');
+    assert.equal(result.tokens[0].priceChangePct, 100);
+  }
+});

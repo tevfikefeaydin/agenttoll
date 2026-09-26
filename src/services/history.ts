@@ -1,6 +1,6 @@
 import { cached, fetchWithTimeout } from "./cache.js";
 import { badRequest } from "./errors.js";
-import { optionalInt } from "./params.js";
+import { optionalInt, validateSnapshotDate } from "./params.js";
 import { requestContext } from "../request-context.js";
 
 /**
@@ -67,14 +67,12 @@ const integrity = "Git revision pins the published bytes. A payment transaction 
 
 /** One day's snapshot, exactly as it was committed — plus its provenance. */
 export async function getRadarHistory(dateRaw?: string) {
+  validateSnapshotDate(dateRaw);
   const { dates, revision } = await listDates();
   if (!dates.length) throw new Error("No snapshots are published yet — history begins " + HISTORY_BEGINS);
 
   let date = dates[dates.length - 1];
   if (dateRaw !== undefined) {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateRaw)) {
-      badRequest("Invalid 'date' — expected YYYY-MM-DD");
-    }
     if (!dates.includes(dateRaw)) {
       badRequest(`No snapshot for ${dateRaw}. Available: ${dates[0]} .. ${dates[dates.length - 1]} (${dates.length} days)`);
     }
@@ -142,7 +140,8 @@ async function currentPrices(tokens: string[], snapshotPools: SnapshotPool[]) {
       const liq = liquidity(p.liquidity?.usd);
       if (!addr || !batch.includes(addr) || (p.chainId && p.chainId !== "base")) continue;
       const prev = out.get(addr);
-      if (!prev || (liq ?? -1) > (prev.liquidityUsd ?? -1)) out.set(addr, {
+      if (!prev || (liq ?? -1) > (prev.liquidityUsd ?? -1) ||
+        (liq === prev.liquidityUsd && prev.priceUsd === null && price !== null)) out.set(addr, {
         priceUsd: price, liquidityUsd: liq, source: "dexscreener", pool: typeof p.pairAddress === "string" ? p.pairAddress : null,
       });
     }
