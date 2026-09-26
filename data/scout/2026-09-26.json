@@ -1,0 +1,87 @@
+{
+  "date": "2026-09-26",
+  "at": "2026-09-26T12:18:29.590Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x4f578bbbd8e110bdbe0ede9f8c1f78ce61ceff3c231bb1b46fbfa62e22078035",
+  "summary": {
+    "found": 3,
+    "checked": 3,
+    "unchecked": 0,
+    "highRisk": 0,
+    "caution": 2,
+    "insufficientData": 1,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "DUMBCOIN / ETH",
+      "pool": "0xec63d0df000606778eae47e7f35cec8661adcc2e594f788fa075b7d1108b3f62",
+      "token": "0xb69985a579a0d7fd77d9608c6c0c9602f30e130b",
+      "createdAt": "2026-09-26T12:03:17Z",
+      "priceUsd": 0.000246330463691145,
+      "volume24hUsd": 182860.822774546,
+      "liquidityUsd": 22498.6338,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "BITSHARK / ETH",
+      "pool": "0x13f298e9a986fc815ee52f933912eb470f4a46286ce7d12ef267365bb43a505d",
+      "token": "0xc34b32e72cae520e7a84b21ef0c1c77b6f216389",
+      "createdAt": "2026-09-26T12:10:57Z",
+      "priceUsd": 0.00019760435958871,
+      "volume24hUsd": 140002.842896613,
+      "liquidityUsd": 19265.8372,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "VSOF / WETH 0.01%",
+      "pool": "0xd05179ae781ab399fdbf414273c569bdf7488c4385e199e28449464de710ef08",
+      "token": "0xf24f6ed90ee6e5c937b443631a1b10c0b99eac36",
+      "createdAt": "2026-09-26T12:12:23Z",
+      "priceUsd": 0.00000122523764712584,
+      "volume24hUsd": 67812.0830118759,
+      "liquidityUsd": 74555.8192344239,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    }
+  ]
+}
