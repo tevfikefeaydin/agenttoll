@@ -89,6 +89,30 @@ test('research accepts one separately quoted portfolio lookup with bounded canon
   assert.equal(batch.totalUsdc, '0.003000');
 });
 
+test('radar discovery is quoted freely and paid only as a separate explicit purchase', async () => {
+  const path = '/api/base/radar?minLiquidity=10000&limit=15';
+  const f = fixture();
+  const batch = await f.research.quote([path]);
+  assert.equal(batch.items[0].path, path);
+  assert.equal(batch.totalUsdc, '0.003000');
+  assert.equal(f.payments.length, 0);
+  const result = await f.research.run(batch, show, () => {});
+  assert.equal(result.stopReason, 'complete');
+  assert.equal(f.payments.length, 1);
+  assert.equal(f.payments[0].path, path);
+});
+
+test('radar discovery rejects mixed purchases and altered filters before accessing the network', async () => {
+  const path = '/api/base/radar?minLiquidity=10000&limit=15';
+  for (const paths of [[path, SAFETY], [path, PORTFOLIO], [path, path], [path + '&limit=1'],
+    ['/api/base/radar'], [path.replace('10000', '-1')], [path + '#other'], [path.replace('15', '500')]]) {
+    const f = fixture();
+    await assert.rejects(f.research.quote(paths));
+    assert.equal(f.requests.length, 0);
+    assert.equal(f.payments.length, 0);
+  }
+});
+
 for (const [label, paths] of [
   ['external URL', [API + SAFETY]], ['protocol-relative URL', ['//agenttoll.app' + SAFETY]],
   ['unregistered endpoint', ['/api/price/eth']], ['escaped path', [SAFETY.replace('/base/', '/base/../base/')]],

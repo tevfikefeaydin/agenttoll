@@ -135,6 +135,15 @@ An unsigned quote and its signed retry are two requests. Do not count 402 as a s
 
 ## Scheduled jobs
 
+### Optional private usage archive
+
+The installable five-minute collector is documented in
+[deploy/hetzner/USAGE-ARCHIVE.md](deploy/hetzner/USAGE-ARCHIVE.md). It is not enabled
+by the application build or deployment. It atomically stores one private bundle
+of allowlisted records and aggregate daily/weekly reports across deployments.
+Always inspect coverage and collection timestamps before interpreting counts.
+It does not measure visitors, unique people, provider costs or profit.
+
 The existing daily payment schedules remain payment-enabled. Manual keep-warm/scout workflow dispatch defaults to `dry-run`; `quote-only` performs unsigned inspection; `pay` enables the existing behavior. Preview jobs receive no wallet secret, and only a paying scout job commits snapshot data. Local invocations without a preview flag retain their previous payment behavior.
 
 The automation client validates registered endpoint prices, origin, recipient, asset, chain and finite budget before signing. Its default budget covers one call at the selected endpoint's price. CI explicitly caps each run at 0.008 USDC and a 30-second payment deadline. Unknown or conflicting command-line options fail before payment. Inspect the emitted `budget` on failure: a reserved authorization may still be redeemable. Do not automatically rerun an ambiguous signed payment. The budget is per process, not a persistent daily wallet limit.

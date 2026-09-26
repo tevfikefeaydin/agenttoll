@@ -1,9 +1,12 @@
 import { escapeHtml as esc, renderTokenReport, reportTime, displayUsdc, evidenceLabel } from './token-report.js';
 import { normalizeToken, summarizeReport, diffReports, CHECK_DEFINITIONS } from './research-model.js';
 import { readResearchStore, writeResearchStore, reconcileResearchStore, addWatch, removeWatch, saveReport, removeReport, emptyResearchStore, RESEARCH_STORAGE_KEY, type ResearchStore, type SavedReport } from './research-store.js';
-import { ResearchPayments, type ResearchQuote, type QuotedRequest, type DeliveredOutcome } from './research-payment.js';
+import { ResearchPayments, DISCOVERY_PATH, type ResearchQuote, type QuotedRequest, type DeliveredOutcome } from './research-payment.js';
 import { parsePortfolio } from './portfolio-model.js';
 import { createReportLink, downloadReportCard } from './report-share.js';
+import { parseDiscovery, type Discovery } from './discovery-model.js';
+import { buildResearchDigest, type DigestState } from './research-digest.js';
+import { createResearchReminder } from './research-reminder.js';
 
 const el = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const payments = new ResearchPayments();
@@ -17,7 +20,8 @@ let selectedReportId: string | undefined;
 let compareTokens: string[] = [];
 let walletTokens = new Set<string>();
 let portfolio: ReturnType<typeof parsePortfolio> | undefined;
-type Purpose = 'compare' | 'portfolio' | 'wallet-scan';
+let discovery: Discovery | undefined;
+type Purpose = 'compare' | 'portfolio' | 'wallet-scan' | 'discovery';
 let pending: { quote: ResearchQuote; purpose: Purpose } | undefined;
 let remaining: { purpose: Purpose; paths: string[] } | undefined;
 let previewAbort: AbortController | undefined;
@@ -76,6 +80,7 @@ function saveDelivered(data: unknown, token: string) {
 }
 
 function renderLibrary() {
+  renderDigest();
   el('watch-count').textContent = String(library.watchlist.length);
   const watched = new Set(library.watchlist.map(w => w.token));
   const recent = [...new Set(library.reports.map(r => r.token))].filter(t => !watched.has(t));
@@ -143,6 +148,9 @@ function addComparison(token: string) {
 }
 
 function selectTab(tab: string) {
+  if (!['watchlist', 'discover', 'compare', 'wallet'].includes(tab)) return;
+  if (payments.busy && !previewBusy) return;
+  invalidatePurchase(); syncControls();
   for (const button of document.querySelectorAll<HTMLButtonElement>('[data-tab]')) {
     const selected = button.dataset.tab === tab;
     button.setAttribute('aria-selected', String(selected)); button.tabIndex = selected ? 0 : -1;
@@ -215,6 +223,55 @@ el('compare-prices').addEventListener('click', () => {
 });
 
 const number = (value: number | null, currency = false) => value === null ? 'Not available' : currency ? value.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }) : value.toLocaleString('en-US', { maximumFractionDigits: 6 });
+function renderDiscovery() {
+  if (!discovery) return;
+  const d = discovery;
+  el('discovery-results').innerHTML = `<div class="wallet-coverage"><h3>${d.pools.length} pool${d.pools.length === 1 ? '' : 's'} shown · Partial market coverage</h3><p>Observed ${esc(reportTime(d.at))} · Source: ${esc(d.source || 'Not available')}</p><p>Reported liquidity floor: ${number(d.minLiquidityUsd, true)}. Source-reported pool count: ${number(d.count)}.</p>${d.notes.map(note => `<p class="provenance">${esc(note)}</p>`).join('')}<p>Pool activity and liquidity do not establish token safety. These results stay on this page for this visit; save a token to keep researching it.</p></div>` +
+    (d.pools.length ? `<div class="discovery-grid">${d.pools.map(pool => `<article class="discovery-card"><h3>${esc(pool.name)}</h3><p class="address-text">Token: ${pool.token || 'Address unavailable'}</p><p class="address-text">Pool: ${pool.pool || 'Address unavailable'}</p><p>Pool created ${esc(reportTime(pool.createdAt))}</p><dl><div><dt>Reported price</dt><dd>${number(pool.priceUsd, true)}</dd></div><div><dt>24h volume</dt><dd>${number(pool.volume24hUsd, true)}</dd></div><div><dt>Liquidity</dt><dd>${number(pool.liquidityUsd, true)}</dd></div></dl>${pool.token ? `<div class="report-actions"><a class="button primary" href="/inspect.html?token=${pool.token}">Inspect token</a><button class="button secondary" type="button" data-discovery-save="${pool.token}">Save token</button><button class="text-button" type="button" data-discovery-compare="${pool.token}">Compare</button></div><p class="input-help">Inspection has its own price review. Saving and comparing saved evidence are free.</p>` : '<p class="provenance">Token attribution is unavailable. Inspection, saving and comparison are disabled for this pool.</p>'}</article>`).join('')}</div>` : '<p class="empty-inline">No pools were returned for this listing and liquidity floor. This does not mean no new Base tokens exist. You can return later and review a new discovery quote.</p>');
+}
+const digestStates: Record<DigestState, string> = {
+  'no-inspections': 'No saved inspections. Examples and shared snapshots do not establish changes.',
+  'missing-date': 'An inspection date is unavailable. Changes over time cannot be established.',
+  conflict: 'Conflicting snapshots have the same observation time. No fresh-change claim is made.',
+  'one-observation': 'One dated observation. Cached repeats are not a new check.',
+  unchanged: 'No recorded check changes. This does not establish current safety.',
+  changed: 'Recorded evidence changed between these saved inspections.',
+};
+function renderDigest() {
+  const entries = buildResearchDigest(library);
+  el('research-digest').innerHTML = entries.length ? entries.map(entry => `<article class="digest-item" data-evidence-lost="${entry.evidenceLost}"><div><h3>${esc(entry.name)}</h3>${entry.evidenceLost ? '<p class="evidence-lost">Evidence became unavailable. This is not an improvement.</p>' : ''}${entry.newRisk ? '<p class="evidence-lost">New risk or warning in the recorded checks.</p>' : ''}<p>${digestStates[entry.state]}</p>${entry.beforeAt ? `<p>${esc(reportTime(entry.beforeAt))} → ${esc(reportTime(entry.afterAt))}</p>` : entry.afterAt ? `<p>Latest dated inspection: ${esc(reportTime(entry.afterAt))}</p>` : ''}${entry.changes.length ? `<ul>${entry.changes.map(change => `<li>${esc(change.title)}: ${statusNames[change.before.status]} → ${statusNames[change.after.status]}${change.evidenceLost ? ' · evidence lost' : ''}</li>`).join('')}</ul>` : ''}</div><button type="button" class="text-button" data-digest-open="${entry.token}">Review history<span class="sr-only"> for ${esc(entry.name)}</span></button></article>`).join('') : '<p class="empty-inline">Save a token to build your research history. Completed inspections can reveal changes when you revisit.</p>';
+}
+el('research-digest').addEventListener('click', event => {
+  const button = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-digest-open]');
+  if (!button || !library.watchlist.some(w => w.token === button.dataset.digestOpen)) return;
+  activeToken = button.dataset.digestOpen; selectedReportId = undefined; renderLibrary();
+  el('saved-content').scrollIntoView({ behavior: 'instant', block: 'start' });
+});
+el('discovery-price').addEventListener('click', () => { remaining = undefined; void preview([DISCOVERY_PATH], 'discovery'); });
+el('discovery-results').addEventListener('click', event => {
+  const button = (event.target as HTMLElement).closest<HTMLButtonElement>('button');
+  const token = button?.dataset.discoverySave || button?.dataset.discoveryCompare;
+  if (!token || !discovery?.pools.some(pool => pool.token === token) || payments.busy) return;
+  try {
+    if (button!.dataset.discoveryCompare) addComparison(token);
+    else {
+      const saved = persist(addWatch(library, token)); activeToken = token; selectedReportId = undefined; renderLibrary();
+      message(saved ? 'Token saved to your watchlist. No safety report has been purchased.' : 'Token added for this visit. Browser storage could not be updated.');
+    }
+    syncControls();
+  } catch (error) { message((error as Error).message, true); }
+});
+const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+el<HTMLInputElement>('reminder-date').value = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth() + 1).padStart(2, '0')}-${String(tomorrow.getDate()).padStart(2, '0')}`;
+el('reminder-form').addEventListener('submit', event => {
+  event.preventDefault();
+  try {
+    const content = createResearchReminder(el<HTMLInputElement>('reminder-date').value);
+    const url = URL.createObjectURL(new Blob([content], { type: 'text/calendar;charset=utf-8' })); receiptUrls.push(url);
+    const link = document.createElement('a'); link.href = url; link.download = 'agenttoll-research-reminder.ics'; document.body.append(link); link.click(); link.remove();
+    message('Calendar file downloaded. Import it into your calendar to set your reminder. No background research or payments were scheduled.');
+  } catch (error) { message((error as Error).message, true); }
+});
 function renderPortfolio() {
   if (!portfolio) return;
   const p = portfolio;
@@ -247,7 +304,7 @@ function invalidatePurchase() {
 }
 function syncControls() {
   for (const control of document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLButtonElement>('main input, main textarea, main button')) control.disabled = payments.busy;
-  for (const id of ['compare-prices', 'wallet-inspect-prices', 'purchase-button']) el<HTMLButtonElement>(id).disabled = payments.busy || payments.blocked || previewBusy;
+  for (const id of ['compare-prices', 'wallet-inspect-prices', 'discovery-price', 'purchase-button']) el<HTMLButtonElement>(id).disabled = payments.busy || payments.blocked || previewBusy;
   el<HTMLButtonElement>('wallet-inspect-prices').disabled ||= !walletTokens.size;
   el<HTMLButtonElement>('purchase-button').disabled ||= !pending;
   el<HTMLButtonElement>('acknowledge-payment').hidden = !payments.blocked;
@@ -267,16 +324,21 @@ async function preview(paths: string[], purpose: Purpose) {
     pending = { quote, purpose };
     el('purchase-total').textContent = displayUsdc(quote.totalUsdc);
     const count = quote.items.length;
-    el('purchase-description').textContent = purpose === 'portfolio' ? 'One holdings lookup. Token inspections are a separate purchase you can choose afterwards.' : `${count} token inspection${count === 1 ? '' : 's'}. Your wallet will ask for ${count} separate authorization${count === 1 ? '' : 's'}. Processing stops if a payment fails. Completed reports are saved in this browser.`;
+    el('purchase-description').textContent = purpose === 'discovery' ? 'One discovery lookup: up to 15 recent pools at a $10,000 liquidity floor. No safety checks are included. Token inspections are a separate purchase you can choose afterwards.' : purpose === 'portfolio' ? 'One holdings lookup. Token inspections are a separate purchase you can choose afterwards.' : `${count} token inspection${count === 1 ? '' : 's'}. Your wallet will ask for ${count} separate authorization${count === 1 ? '' : 's'}. Processing stops if a payment fails. Completed reports are saved in this browser.`;
     el('purchase-network').textContent = quote.network === 'base' ? 'Pay with USDC on Base mainnet.' : 'Pay with test USDC on Base Sepolia.';
     el('purchase-recipient').textContent = quote.recipient;
-    el('purchase-items').innerHTML = quote.items.map(i => `<li>${purpose === 'portfolio' ? 'Holdings lookup' : short(i.path.split('/').at(-1)!)}: ${esc(displayUsdc(i.amountUsdc))} USDC</li>`).join('');
+    el('purchase-items').innerHTML = quote.items.map(i => `<li>${purpose === 'discovery' ? 'Pool discovery (no safety checks)' : purpose === 'portfolio' ? 'Holdings lookup' : short(i.path.split('/').at(-1)!)}: ${esc(displayUsdc(i.amountUsdc))} USDC</li>`).join('');
     el('purchase-button').textContent = `Pay ${displayUsdc(quote.totalUsdc)} USDC${count > 1 ? ` in ${count} steps` : ''}`;
     el('research-payment').hidden = false;
     el('research-payment').scrollIntoView({ behavior: 'instant', block: 'nearest' });
     message('Prices ready. Review the total before continuing.');
   } catch (error) { if (sequence === previewSequence) message(controller.signal.aborted ? 'Price lookup cancelled. No payment was requested.' : (error as Error).message, true); }
-  finally { if (sequence === previewSequence) { previewBusy = false; previewAbort = undefined; syncControls(); } if (deferredStorage) refreshStorage(); }
+  finally {
+    if (sequence === previewSequence) { previewBusy = false; previewAbort = undefined; }
+    // Cancellation also clears the payment client's busy state asynchronously.
+    syncControls();
+    if (deferredStorage) refreshStorage();
+  }
 }
 function retainReceipt(request: QuotedRequest, outcome: DeliveredOutcome) {
   const item = document.createElement('li');
@@ -294,7 +356,10 @@ el('purchase-button').addEventListener('click', async () => {
   const purchase = pending; pending = undefined; el('research-payment').hidden = true; el('payment-progress').hidden = false;
   const promise = payments.run(purchase.quote, (html, tone) => { const box = el('payment-status'); box.innerHTML = html; box.dataset.tone = tone ?? 'quote'; }, (request, outcome) => {
     retainReceipt(request, outcome);
-    if (purchase.purpose === 'portfolio') {
+    if (purchase.purpose === 'discovery') {
+      discovery = undefined; el('discovery-results').textContent = 'Response received. Checking its format…';
+      discovery = parseDiscovery(outcome.data); renderDiscovery();
+    } else if (purchase.purpose === 'portfolio') {
       const address = request.path.split('/').at(-1)!.split('?')[0];
       portfolio = parsePortfolio(outcome.data, address); walletTokens.clear(); renderPortfolio();
     } else { const token = request.path.split('/').at(-1)!; summarizeReport(outcome.data, token); saveDelivered(outcome.data, token); renderLibrary(); renderComparison(); if (portfolio) renderPortfolio(); }
@@ -305,8 +370,8 @@ el('purchase-button').addEventListener('click', async () => {
     const result = await promise;
     const completed = new Set(result.results.map(r => r.request.path));
     const unpaid = purchase.quote.items.filter(i => !completed.has(i.path)).map(i => i.path);
-    remaining = unpaid.length && purchase.purpose !== 'portfolio' ? { purpose: purchase.purpose, paths: unpaid } : undefined;
-    if (result.stopReason === 'complete') message(purchase.purpose === 'portfolio' ? 'Holdings received. Select tokens if you want separate inspections.' : `${result.completed} report${result.completed === 1 ? '' : 's'} received. Saved evidence is shown below.`);
+    remaining = unpaid.length && !['portfolio', 'discovery'].includes(purchase.purpose) ? { purpose: purchase.purpose, paths: unpaid } : undefined;
+    if (result.stopReason === 'complete') message(purchase.purpose === 'discovery' ? 'Discovery received. Inspect, save or compare tokens below; safety inspections are priced separately.' : purchase.purpose === 'portfolio' ? 'Holdings received. Select tokens if you want separate inspections.' : `${result.completed} report${result.completed === 1 ? '' : 's'} received. Saved evidence is shown below.`);
     else message(`${result.completed} response${result.completed === 1 ? '' : 's'} received before processing stopped. ${result.error || 'Review your wallet and receipts before continuing.'} Completed requests will not be included in the remaining batch.`, true);
   } catch (error) { message((error as Error).message, true); }
   finally { syncControls(); if (deferredStorage) refreshStorage(); }
@@ -320,3 +385,5 @@ window.addEventListener('storage', event => {
 window.addEventListener('beforeunload', event => { if (payments.busy) { event.preventDefault(); event.returnValue = ''; } });
 window.addEventListener('pagehide', () => receiptUrls.forEach(url => URL.revokeObjectURL(url)));
 storageMessage(loaded.warnings); renderLibrary(); renderComparison(); syncControls();
+selectTab(location.hash.slice(1));
+window.addEventListener('hashchange', () => selectTab(location.hash.slice(1)));

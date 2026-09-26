@@ -68,7 +68,12 @@
       We do not record signatures or private keys.</li>
     <li><strong>Log retention.</strong> The application runs on Hetzner. Its Docker log files
       rotate by size (three files of up to 10 MB each), so the time retained varies with
-      traffic. Operational reports may preserve selected diagnostic records while a fault
+      traffic. An optional private usage archive retains allowlisted request and payment
+      evidence for up to 30 days after collection, including verified public payer addresses
+      and settlement hashes. It excludes raw log payloads and signatures, hashes request IDs,
+      and is bounded to 50,000 records and 20 MB of state. Expiry runs during successful
+      collection; a stopped collector retains its last archive until it is restarted or removed.
+      Operational reports may preserve selected diagnostic records while a fault
       is investigated. Hosting/network providers can maintain separate operational logs.</li>
     <li><strong>Onchain payments.</strong> x402 payments settle on Base, a public blockchain. The
       paying address, amount and timestamp are public on the network. Our

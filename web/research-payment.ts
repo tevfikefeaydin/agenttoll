@@ -34,6 +34,7 @@ export interface ResearchPaymentOptions {
 const CLIENT = 'agenttoll-research/1.0.0';
 const MAX_QUOTE_AGE = 60_000;
 const ADDRESS = /^0x[0-9a-fA-F]{40}$/;
+export const DISCOVERY_PATH = '/api/base/radar?minLiquidity=10000&limit=15';
 const record = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null && !Array.isArray(value);
 const formatUsdc = (amount: bigint) => `${amount / 1_000_000n}.${(amount % 1_000_000n).toString().padStart(6, '0')}`;
 const message = (error: unknown) => (error instanceof Error ? error.message : 'The operation did not complete.').replace(/[\u0000-\u001f\u007f]/g, ' ').slice(0, 300);
@@ -46,7 +47,11 @@ function origin(): string {
 }
 
 function canonicalPaths(paths: string[]): string[] {
-  if (!Array.isArray(paths) || paths.length < 1 || paths.length > 5) throw new Error('Choose one to five unique token inspections, or one portfolio lookup.');
+  if (!Array.isArray(paths) || paths.length < 1 || paths.length > 5) throw new Error('Choose one to five unique token inspections, one portfolio lookup, or one discovery request.');
+  if (paths.includes(DISCOVERY_PATH)) {
+    if (paths.length !== 1) throw new Error('Discovery must be purchased separately from inspections and portfolio lookups.');
+    return [DISCOVERY_PATH];
+  }
   let portfolio = false;
   const normalized = paths.map(path => {
     const parts = typeof path === 'string' && path.length <= 256

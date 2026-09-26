@@ -11,6 +11,7 @@ agenttoll-test-cuzdan.txt
 .vercel
 .env*
 .playwright-cli/
+.playwright-mcp/
 output/playwright/
 tests/.automation-tests-*/
 tests/.automation-cleanup-check-*/

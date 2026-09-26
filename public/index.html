@@ -295,12 +295,13 @@
   </div>
   <div class="wrap hero-in">
     <span class="eyebrow"><span class="dot"></span> Live on Base mainnet</span>
-    <h1>See a token <em>before</em> the indexers do</h1>
-    <p class="lede">Pools read straight off Base seconds after they exist, each with the
-      launched token's address — then ask whether it's a trap in the next call. Your agent
-      pays a fraction of a cent in USDC per request. No accounts. No API keys.</p>
+    <h1>Discover. Inspect. <em>Keep the evidence.</em></h1>
+    <p class="lede">Research new Base tokens, review eight risk checks and compare what
+      changed since your last saved inspection. Use the browser or connect your agent.
+      See the USDC price before each purchase. No accounts. No API keys.</p>
     <div class="cta">
-      <a class="btn btn-primary" href="/inspect.html">Inspect a Base token</a>
+      <a class="btn btn-primary" href="/research.html#discover">Discover Base tokens</a>
+      <a class="btn btn-ghost" href="/inspect.html">Inspect a token you know</a>
       <a class="btn btn-ghost" href="#endpoints">See the 21 endpoints</a>
     </div>
     <div class="hero-meta">
@@ -315,27 +316,26 @@
 <section class="band">
   <div class="wrap">
     <p class="kicker rv">What is this</p>
-    <h2 class="rv">A data vending machine for software</h2>
-    <p class="sub rv">Software can't sign up for accounts or hold credit cards. So here,
-      nothing is gated behind a signup form — the price is quoted in the HTTP response and
-      paid by the agent itself, machine to machine.</p>
+    <h2 class="rv">From a new pool to a dated research trail</h2>
+    <p class="sub rv">Start with discovery, inspect a token, then save the evidence for your
+      next visit. Agents use the same pay-per-call API through HTTP or MCP. Every purchase
+      has its own quote; a listing is not a safety assessment.</p>
     <div class="grid g3">
       <div class="card rv"><div class="ico">⚡</div>
-        <h3>Seconds, not minutes</h3>
-        <p>Everything else reads an indexer. <code>/api/base/fresh</code> reads Base's own
-          pool-creation log, so a token shows up about a block after it's born — we've
-          caught one <strong>2 seconds old</strong>.</p></div>
+        <h3>1. Discover a candidate</h3>
+        <p>Browse selected Base pools above a liquidity floor, with observation dates and
+          coverage limits. Agents can also read Uniswap v4 creation events through
+          <code>/api/base/fresh</code>. Token attribution can be unavailable.</p></div>
       <div class="card rv"><div class="ico">🕵️</div>
-        <h3>Then: is it a trap?</h3>
-        <p>A simulated buy <em>and</em> sell, taxes, owner powers, holder concentration,
-          and who deployed it — a token shipped from a six-transaction wallet holding dust
-          is the shape most rugs share.</p></div>
+        <h3>2. Inspect the evidence</h3>
+        <p>Review trading restrictions, taxes, owner permissions, holder concentration and
+          deployer evidence. Missing or conflicting provider data stays visible.
+          Passing automated checks does not guarantee safety.</p></div>
       <div class="card rv"><div class="ico">📒</div>
-        <h3>Were we right?</h3>
-        <p>Every day a CI job buys one scout call and commits the result to public git,
-          with the Base transaction that paid for it. <code>/api/base/scorecard</code>
-          compares selected historical verdicts with available current observations,
-          and reports missing data.</p></div>
+        <h3>3. Revisit what changed</h3>
+        <p>Keep dated inspections in your browser and compare later observations.
+          Evidence loss remains a warning. Add a calendar reminder when you want to
+          return; inspections always require a new explicit purchase.</p></div>
     </div>
   </div>
 </section>
