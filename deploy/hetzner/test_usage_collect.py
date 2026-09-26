@@ -9,6 +9,19 @@ import usage_collect as c
 CID = 'a' * 64
 NOW = '2026-09-26T12:00:00.000Z'
 class CollectorTests(unittest.TestCase):
+    def test_bounded_initial_window_is_explicit_and_resume_uses_cursor(self):
+        with tempfile.TemporaryDirectory() as d:
+            windows = []
+            def run(args, data=None, limit=None):
+                if args[1] == 'ps': return CID.encode()
+                if args[1] == 'inspect': return json.dumps([{'Config': {'Labels': {'com.agenttoll.managed': 'autodeploy'}}}]).encode()
+                if args[1] == 'logs':
+                    windows.append(args[3])
+                    return b''
+                return json.dumps({'state': {'collectedAt': NOW}, 'report': {'coverage': {'complete': False}}}).encode()
+            c.collect(Path(d), Path(d), run=run, now=NOW, initial_hours=6)
+            c.collect(Path(d), Path(d), run=run, now=NOW, initial_hours=6)
+            self.assertEqual(windows, ['2026-09-26T06:00:00+00:00', '2026-09-26T11:50:00+00:00'])
     def test_real_archive_adapter_survives_collector_restart_and_overlap(self):
         app = Path(__file__).resolve().parents[2]
         log = json.dumps({'schemaVersion': 2, 'requestId': 'integration-quote', 't': NOW,

@@ -35,7 +35,11 @@ sudo systemctl enable --now agenttoll-usage.timer
 sudo systemctl list-timers agenttoll-usage.timer
 ```
 
-The first collection requests retained logs from the last 30 days. Later runs
+The installed service's first collection requests retained logs from the last
+six hours to stay within bounded input on busy hosts. Older logs are not imported
+by that bootstrap. The standalone CLI defaults to 720 hours; use
+`--initial-hours 1..720` to choose an explicit first-run window. This option
+does not reset an existing archive cursor or change record retention. Later runs
 overlap the previous collection by ten minutes. Docker stdout and stderr are
 both collected, so 5xx terminal records are included. Failed commands, bounds,
 invalid state and write failures do not advance the last-good bundle.

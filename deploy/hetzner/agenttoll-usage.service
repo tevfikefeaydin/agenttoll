@@ -5,7 +5,7 @@ Requires=docker.service
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/python3 /opt/agenttoll/usage/usage_collect.py
+ExecStart=/usr/bin/python3 /opt/agenttoll/usage/usage_collect.py --initial-hours 6
 WorkingDirectory=/opt/agenttoll/usage/app
 Environment=PATH=/opt/agenttoll/usage/node/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 TimeoutStartSec=300

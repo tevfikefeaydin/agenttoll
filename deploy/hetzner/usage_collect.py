@@ -73,7 +73,9 @@ def instant(value):
     return datetime.fromisoformat(value.replace('Z', '+00:00'))
 
 
-def collect(directory, app, run=command, now=None):
+def collect(directory, app, run=command, now=None, initial_hours=720):
+    if not isinstance(initial_hours, int) or not 1 <= initial_hours <= 720:
+        raise ValueError('Initial collection window must be 1 to 720 hours')
     directory.mkdir(mode=0o700, parents=True, exist_ok=True)
     if directory.is_symlink(): raise ValueError('Archive directory cannot be a symlink')
     os.chmod(directory, 0o700)
@@ -93,7 +95,7 @@ def collect(directory, app, run=command, now=None):
         last = instant(previous['bundle']['state']['collectedAt'])
         if last > current: raise ValueError('Collection clock moved backwards')
         since = max(current - timedelta(days=30), last - timedelta(minutes=10))
-    else: since = current - timedelta(days=30)
+    else: since = current - timedelta(hours=initial_hours)
     sources = run(['docker', 'ps', '--all', '--no-trunc', '--filter', 'label=' + LABEL, '--format', '{{.ID}}'], limit=32768).decode().split()
     if not sources or len(sources) > 256 or len(set(sources)) != len(sources) or any(not re.fullmatch('[0-9a-f]{64}', c) for c in sources):
         raise ValueError('No managed sources or invalid source list')
@@ -123,6 +125,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--directory', type=Path, default=Path('/var/lib/agenttoll-usage'))
     parser.add_argument('--app', type=Path, default=Path('/opt/agenttoll/usage/app'))
+    parser.add_argument('--initial-hours', type=int, default=720,
+                        help='First-run log window (1-720 hours); subsequent runs resume the saved cursor')
     args = parser.parse_args()
     # Linux host flock releases on every exit, including process crashes.
     import fcntl
@@ -132,7 +136,7 @@ def main():
     fd = os.open(lock_path, os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
     with os.fdopen(fd, 'w') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        collect(args.directory, args.app)
+        collect(args.directory, args.app, initial_hours=args.initial_hours)
     print('Private usage archive updated; coverage remains best effort.')
 
 if __name__ == '__main__':
