@@ -1,0 +1,108 @@
+{
+  "date": "2026-09-28",
+  "at": "2026-09-28T15:40:49.173Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x0148010a1c70808a058e54c0bbc4115bb7d5e9da83972b47d966c71de1962006",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 0,
+    "caution": 3,
+    "insufficientData": 1,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "Lumen / ETH",
+      "pool": "0xaf0241e6f7986c8db66c77dbc450aef8fdfb0d5f98f49cab2abcdad82e504347",
+      "token": "0x5d2eea55c0fb11f0c6584ab7ff1aa90901341834",
+      "createdAt": "2026-09-28T15:30:03Z",
+      "priceUsd": 0.000207366018284469,
+      "volume24hUsd": 177676.769613722,
+      "liquidityUsd": 19090.9551,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "e/dec / ETH",
+      "pool": "0x80ac92096f6e14305cc43c5bab40d0d26a66857f0ede7913cd31a12a1ba1b942",
+      "token": "0x4d1ebda8e948254900ed757266702a25956f3fbc",
+      "createdAt": "2026-09-28T15:32:05Z",
+      "priceUsd": 0.000202441642246931,
+      "volume24hUsd": 104108.261761068,
+      "liquidityUsd": 19327.3755,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "HCAT / HYDX 0.05%",
+      "pool": "0x97a332c2e1c0198ad3e5aaa53d28bc4108877fe7",
+      "token": "0x4ad971014534568e1796c6eff503303d2aeb6f4d",
+      "createdAt": "2026-09-28T15:38:09Z",
+      "priceUsd": 0.00000297865233344811,
+      "volume24hUsd": 6413.8885664576,
+      "liquidityUsd": 27412.1804,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "USHYon / WETH",
+      "pool": "0x3e2bd1d5858998fbca5a06112b8ececa334353d4",
+      "token": "0xdaa40b847465b11b8b9438a6410656f506a1abd2",
+      "createdAt": "2026-09-28T15:12:27Z",
+      "priceUsd": 0.000289952749036782,
+      "volume24hUsd": 2088.7590412476,
+      "liquidityUsd": 15238.6917,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity"
+        ]
+      }
+    }
+  ]
+}
