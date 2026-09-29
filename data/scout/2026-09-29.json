@@ -1,0 +1,107 @@
+{
+  "date": "2026-09-29",
+  "at": "2026-09-29T14:10:20.754Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x8a7b0649b623deb345d27c8a4f7c49c62fff566d51153e42e97239b6e7401cdb",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 0,
+    "caution": 3,
+    "insufficientData": 1,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "LLMA / ETH",
+      "pool": "0xc3bdacb27cecf7ea660b438884bc1f0b3940d597a578000363bd273296e4a1be",
+      "token": "0xb99e0edcf7af7179958de8cd71efd029363f495d",
+      "createdAt": "2026-09-29T13:56:21Z",
+      "priceUsd": 0.000285328996026012,
+      "volume24hUsd": 234441.606343957,
+      "liquidityUsd": 23863.2092,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "DRAKE / ETH",
+      "pool": "0xe03fd65cba66460975c11e94f3d72c070f39b187cee9ad989a488fe637604f1d",
+      "token": "0x3662fbc83968b1d47e21c2989ac212e2151b6572",
+      "createdAt": "2026-09-29T13:59:47Z",
+      "priceUsd": 0.00022093347221378,
+      "volume24hUsd": 211662.192062037,
+      "liquidityUsd": 20028.5331,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "SAIZ / WETH",
+      "pool": "0x64785cc2587f381c71c651efd56701ff3e81ad3c",
+      "token": "0xae2ae8d909389e687973b4fcbfee4ea0942de877",
+      "createdAt": "2026-09-29T13:49:11Z",
+      "priceUsd": 0.00000914889527991808,
+      "volume24hUsd": 2276.7854834993,
+      "liquidityUsd": 15676.7738,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "AROS / WETH 0.3%",
+      "pool": "0x5cf0377a0320b327a435c608ffe8751e7bf84a5d",
+      "token": "0xad2e2d802de048f2af1bc16c7e193aced7f11def",
+      "createdAt": "2026-09-29T14:02:25Z",
+      "priceUsd": 0.00068196590645371,
+      "volume24hUsd": 1.07989947,
+      "liquidityUsd": 543937.0561,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "owner-powers",
+          "creator-stake"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity"
+        ]
+      }
+    }
+  ]
+}
