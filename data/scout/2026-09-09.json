@@ -1,0 +1,63 @@
+{
+  "date": "2026-09-09",
+  "at": "2026-09-09T12:24:13.984Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x1118cfd85a4097a1544c83e08171f5c95c393c7039e2ec6ee0eb9b16995c3c5c",
+  "summary": {
+    "found": 2,
+    "checked": 2,
+    "unchecked": 0,
+    "highRisk": 1,
+    "caution": 1,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "LAPTOP / USDC 22.22%",
+      "pool": "0xcdcbb49ff7dd85384f1661ee744ba48ba870bde3494214e4afbb4bf9f2b71433",
+      "token": "0xb095274743941e953c746f9c228da9c18bb6ec29",
+      "createdAt": "2026-09-09T12:14:31Z",
+      "priceUsd": 93.4957936015979,
+      "volume24hUsd": 11303.2119688773,
+      "liquidityUsd": 32147.678,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "liquidity"
+        ],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "JAIL / WETH",
+      "pool": "0x5ca254507b0ade9b53d8fe019e2aa38b3a6337a2",
+      "token": "0x5c40212d8a2ab3842f13da2618234f925b8b6bed",
+      "createdAt": "2026-09-09T12:16:39Z",
+      "priceUsd": 0.0000085483862571651,
+      "volume24hUsd": 0.05500503476,
+      "liquidityUsd": 74999.997,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    }
+  ]
+}

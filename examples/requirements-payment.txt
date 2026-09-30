@@ -1,0 +1,6 @@
+# Offline client tests do not require CrewAI or an x402 SDK.
+eth-account==0.14.0
+requests==2.34.2
+urllib3==2.8.0
+pydantic==2.12.5
+python-dotenv==1.2.3

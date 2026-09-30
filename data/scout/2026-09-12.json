@@ -1,0 +1,94 @@
+{
+  "date": "2026-09-12",
+  "at": "2026-09-12T11:40:15.162Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0xb5c16cbccab778a1ddb4f759b3b8e28058fb793a900956ae4146319e8e630dbf",
+  "summary": {
+    "found": 4,
+    "checked": 3,
+    "unchecked": 1,
+    "highRisk": 0,
+    "caution": 1,
+    "insufficientData": 2,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "LAPTOP / ETH",
+      "pool": "0x13431db722be7f8b94e64228bf319a3531cc65c96be6ae471155fca39edd21ad",
+      "token": "0xde1305ab4d75e6f676414abcade519ae7917b466",
+      "createdAt": "2026-09-12T11:23:59Z",
+      "priceUsd": 0.000335148441992149,
+      "volume24hUsd": 889356.444767331,
+      "liquidityUsd": 24534.1055,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "S&amp;P 500 / ETH",
+      "pool": "0xf50c8bb37855b564384e8036095ca66e6f2e1a8da44f28f2b589ea6f41fb4f78",
+      "token": "0x94b118a0c7f873583e0a1116490ddbb542b20513",
+      "createdAt": "2026-09-12T11:23:31Z",
+      "priceUsd": 0.000306245700295409,
+      "volume24hUsd": 560200.181174161,
+      "liquidityUsd": 23557.1804,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "egg / ETH 0.05%",
+      "pool": "0x176f9e7649da6d0786d7750a0b0f27948eafdcb0df7e9a731562ab09e9540591",
+      "token": "0xb2000000000000000000000576ef52de9167d463",
+      "createdAt": "2026-09-12T11:22:57Z",
+      "priceUsd": 0.00000130493651639062,
+      "volume24hUsd": 50068.8616306961,
+      "liquidityUsd": 23108.2283,
+      "safety": null
+    },
+    {
+      "name": "CMC / ETH 1%",
+      "pool": "0xd50bd4f314f94d5987a2b784d68ea6059e776cb560c08728ab73712aa52fd9a1",
+      "token": "0x22f79d449ea1201f4875956c45f1330a983fec29",
+      "createdAt": "2026-09-12T11:29:07Z",
+      "priceUsd": 0.0000993847768836514,
+      "volume24hUsd": 49092.9023478983,
+      "liquidityUsd": 17921.8309,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "date": "2026-08-25",
+  "at": "2026-08-25T08:04:54.418Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x5057c1948093cadf9ab27e58ee5b7b0c4c814bf825b2cfbc2cf911c30de73165",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 1,
+    "caution": 3,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "VIA / ETH 0.05%",
+      "pool": "0x2918c619f284d51b2dffc53d604de43a5de4efbcedcd0093085178cba6bc1948",
+      "token": "0xb200000000000000000000f8ebbc6ef3629267d7",
+      "createdAt": "2026-08-25T07:46:53Z",
+      "priceUsd": 1.85199007247381e-7,
+      "volume24hUsd": 91478.3963732911,
+      "liquidityUsd": 18021.1043,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "PrinterInkCoin / ETH",
+      "pool": "0x1ba70e16ceec0555279c32fc2aa594f7f0adfed095d83bfea07f9986f3a9c5c8",
+      "token": "0xb200000000000000000000a513344e0bc01a5101",
+      "createdAt": "2026-08-25T07:45:11Z",
+      "priceUsd": 0.000106185936972541,
+      "volume24hUsd": 79184.7841711073,
+      "liquidityUsd": 45055.2288,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "AI / ETH 0.3%",
+      "pool": "0x418988d6d0775e635fa3491a7aea458b295b869440709acb28dfda5a33824f45",
+      "token": "0xb2000000000000000000003120f0f734f4250a3a",
+      "createdAt": "2026-08-25T07:31:55Z",
+      "priceUsd": 0.0000275704087273356,
+      "volume24hUsd": 29550.2078067979,
+      "liquidityUsd": 23554.6049,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "liquidity"
+        ],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "RISK / ETH 0.3%",
+      "pool": "0x647f7e263eecc53ed0318b43659f9125ddb740cca017844894dfd7c9dd1b4ee3",
+      "token": "0xb2000000000000000000001d92edaad2e29f5c84",
+      "createdAt": "2026-08-25T07:36:39Z",
+      "priceUsd": 0.0000246214564098659,
+      "volume24hUsd": 22021.0521736132,
+      "liquidityUsd": 20859.9989,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    }
+  ]
+}

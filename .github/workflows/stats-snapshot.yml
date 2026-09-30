@@ -1,0 +1,62 @@
+name: Refresh the toll baseline
+
+# /api/stats reads Blockscout first and the chain second. The chain reading
+# starts from data/stats.json and only scans the blocks since, so this keeps
+# that file close to the head: a day of drift is ~22 getLogs calls per request,
+# a month of drift is more than one request can catch up with.
+#
+# Public logs off a public RPC — no wallet, no secrets, nothing to pay for.
+on:
+  schedule:
+    - cron: "41 5 * * *" # 05:41 UTC daily, before the scout run
+  workflow_dispatch:
+    inputs:
+      full_rebuild:
+        description: Rebuild all configured history instead of extending a verified checkpoint
+        type: boolean
+        default: false
+
+concurrency:
+  group: stats-snapshot
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  baseline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45 # Includes the one-time legacy migration/full rebuild.
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run build
+      - name: Walk the chain
+        id: capture
+        run: |
+          if [ "$FULL_REBUILD" = "true" ]; then
+            node --import tsx scripts/stats-snapshot.mjs --full-rebuild
+          else
+            node --import tsx scripts/stats-snapshot.mjs
+          fi
+        env:
+          NETWORK: base
+          FULL_REBUILD: ${{ inputs.full_rebuild }}
+      - name: Preserve generated public JSON before publication
+        id: preserve
+        if: always() && github.ref == 'refs/heads/main'
+        run: node scripts/publish-snapshot.mjs --capture stats --artifact-dir "$RUNNER_TEMP/stats-capture"
+      - name: Publish captured data with bounded conflict-aware retries
+        if: github.ref == 'refs/heads/main' && steps.capture.outcome == 'success' && steps.preserve.outcome == 'success'
+        run: node scripts/publish-snapshot.mjs --publish "$RUNNER_TEMP/stats-capture"
+      - name: Retain capture even when publication fails
+        if: always() && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: stats-capture-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/stats-capture
+          retention-days: 14
+          if-no-files-found: warn

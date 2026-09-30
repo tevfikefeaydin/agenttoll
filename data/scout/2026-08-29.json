@@ -1,0 +1,97 @@
+{
+  "date": "2026-08-29",
+  "at": "2026-08-29T13:14:24.020Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x1f158263d2c66afde6f18ea5498ff643145355a7f3daae8fbf2aca856b2f492b",
+  "summary": {
+    "found": 4,
+    "checked": 3,
+    "unchecked": 1,
+    "highRisk": 0,
+    "caution": 3,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "孙小圣 / USDC",
+      "pool": "0xb67038cb3ac17e8b7dacb63fc3647c8d20f5e028",
+      "token": "0x11730cbe129a931bc7e7092b59a53b444f548b07",
+      "createdAt": "2026-08-29T13:06:53Z",
+      "priceUsd": 0.0000478776859424769,
+      "volume24hUsd": 3209919.64008716,
+      "liquidityUsd": 1145170.7152,
+      "safety": null
+    },
+    {
+      "name": "Pigtasio / ETH 0.05%",
+      "pool": "0xfa69ae46a3ef86cbfd4c23f9547aa8bb7e31a9bf0836dc3e89ea3d1b6e99d82c",
+      "token": "0xb2000000000000000000006197e92bd9f8ab82e2",
+      "createdAt": "2026-08-29T12:54:07Z",
+      "priceUsd": 7.47160701179041e-7,
+      "volume24hUsd": 63499.4997741023,
+      "liquidityUsd": 19266.9578,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "WOIF / ETH 0.3%",
+      "pool": "0xb128a54dada87f9d09013b7af9c25a29582869a3b880579b312250f154da8df9",
+      "token": "0xb200000000000000000000d55f96c7aa571c8167",
+      "createdAt": "2026-08-29T12:42:43Z",
+      "priceUsd": 0.0000406807036438052,
+      "volume24hUsd": 23009.9460854366,
+      "liquidityUsd": 30034.2882,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "WIOF / ETH 0.3%",
+      "pool": "0xe405e36bcd63f7b296c7dcd6388f8626685c04b6e785aef5d28c7d01ed0b2105",
+      "token": "0xb200000000000000000000822664158b2e07b683",
+      "createdAt": "2026-08-29T12:42:43Z",
+      "priceUsd": 0.0000282641522225877,
+      "volume24hUsd": 21173.8488093579,
+      "liquidityUsd": 23873.5947,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    }
+  ]
+}

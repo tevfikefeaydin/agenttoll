@@ -1,0 +1,106 @@
+{
+  "date": "2026-08-10",
+  "at": "2026-08-10T08:55:32.955Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0xdb6e099b33b15ea81a5364af22172334b6f37959d8315b8d2a30c9b6bda95b9a",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 0,
+    "caution": 4,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "SLOPSHOP / WETH",
+      "pool": "0xdcfc8ad87a7601b4cd8dcf57c6c682221dbe8bac",
+      "token": "0x9bf0438539ad2fe9c88786ebe5fddf95e247952e",
+      "createdAt": "2026-08-10T08:48:15Z",
+      "priceUsd": 0.00000418210152540256,
+      "volume24hUsd": 1282.832464,
+      "liquidityUsd": 59889.1856,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "XTRUMP / WETH",
+      "pool": "0xf89d170ee6d282c1498f62e2f2e2433a50236e3b1726d1baa5a0b6239cb06c09",
+      "token": "0x9d95146d562ba10a0baf226b5bd20444c0c70a1c",
+      "createdAt": "2026-08-10T08:40:23Z",
+      "priceUsd": 0.0000804028359123656,
+      "volume24hUsd": 830.8957570755,
+      "liquidityUsd": 36356.1818,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "XTS - XST / ZORA",
+      "pool": "0x93529e3b2645313fea1299574bb74a560454ba19c1955e2192a3a807fa5d6354",
+      "token": "0x28b3a16cfac85d9d9e6af2c53e3ae09fae8e722b",
+      "createdAt": "2026-08-10T08:39:51Z",
+      "priceUsd": 0.0000666766945606037,
+      "volume24hUsd": 64.6537083514,
+      "liquidityUsd": 60917.3274,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "MCX / WETH",
+      "pool": "0x117bd027fc216d45effb9b186ea1094229befb23720ca86d2d059f04adc2033f",
+      "token": "0x484ebf1204c1a34d8dc9cd2d5b51c5a83e713f56",
+      "createdAt": "2026-08-10T07:11:37Z",
+      "priceUsd": 0.000106070235030142,
+      "volume24hUsd": 23.0249982989,
+      "liquidityUsd": 104853.609,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    }
+  ]
+}

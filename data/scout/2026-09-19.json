@@ -1,0 +1,85 @@
+{
+  "date": "2026-09-19",
+  "at": "2026-09-19T11:58:43.478Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x4ed1a638e7718a70d36516f4df7f3575adb80ed504665e5b29382d515d19b4bc",
+  "summary": {
+    "found": 4,
+    "checked": 2,
+    "unchecked": 2,
+    "highRisk": 0,
+    "caution": 2,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "STONKSZN / ETH",
+      "pool": "0x7b8c7676d02fb61d9a2ccd89dda34615d6640af4bbaa7874e773f3887d4f2bb2",
+      "token": "0x2165e66d48cc7fdb9f2a77aad685647a31ded721",
+      "createdAt": "2026-09-19T11:44:53Z",
+      "priceUsd": 0.000223094989452269,
+      "volume24hUsd": 148847.598187533,
+      "liquidityUsd": 20691.3092,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "CYBER / ETH",
+      "pool": "0xf29c4045a5ac9e479fec3464e404576e6450c6d54bb4f8042d518959520cb6d7",
+      "token": "0x9de3340d99f24b6fe2fb04d951d184880a823ca8",
+      "createdAt": "2026-09-19T11:49:57Z",
+      "priceUsd": 0.000195618328809017,
+      "volume24hUsd": 128930.878736531,
+      "liquidityUsd": 18909.2005,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "ANTS / ETH 0.3%",
+      "pool": "0xf3b617495e5e9d73a6c2443ebae00ab733bffce6998e55f0d729b9331ce52450",
+      "token": "0xb200000000000000000000adc9f5e2d497168ea8",
+      "createdAt": "2026-09-19T11:30:49Z",
+      "priceUsd": 0.0000213058449513072,
+      "volume24hUsd": 27285.7703799582,
+      "liquidityUsd": 20773.4518,
+      "safety": null
+    },
+    {
+      "name": "WildBeest / ETH 0.3%",
+      "pool": "0x9cc94d487af332e40ef15b1287fc039d311c2f0195de290f676aa438849a6df1",
+      "token": "0xb2000000000000000000006f5d0c7de368df6964",
+      "createdAt": "2026-09-19T11:30:43Z",
+      "priceUsd": 0.0000433322283395409,
+      "volume24hUsd": 25252.2747098017,
+      "liquidityUsd": 31535.1452,
+      "safety": null
+    }
+  ]
+}

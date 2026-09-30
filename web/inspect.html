@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inspect a Base token | AgentToll</title>
+  <meta name="description" content="See a free example, then inspect a Base token for trading risks, owner permissions and missing evidence. One report, one USDC payment, no account.">
+  <link rel="canonical" href="https://agenttoll.app/inspect.html">
+  <link rel="icon" href="/icon.png" type="image/png">
+  <link rel="stylesheet" href="/inspect.css">
+  <link rel="stylesheet" href="/research.css">
+  <script defer src="/inspect.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to token inspection</a>
+  <header class="site-nav"><nav class="wrap nav-inner" aria-label="Main"><a class="logo" href="/"><img src="/icon.png" width="30" height="30" alt="">AgentToll</a><div class="nav-links"><a href="/research.html">My research</a><a href="/openapi.json">API</a><a href="https://www.npmjs.com/package/agenttoll-mcp" target="_blank" rel="noopener noreferrer">MCP</a></div></nav></header>
+  <main id="main" class="wrap"><div class="intro">
+    <section class="input-column" aria-labelledby="page-heading">
+      <p class="eyebrow">Base / Token inspection</p>
+      <h1 id="page-heading">Inspect a <br><span>Base token.</span></h1>
+      <p class="lead">Inspect a Base token for trading risks, owner permissions and gaps in the evidence. Eight checks, one readable report.</p>
+      <p class="steps"><span>01 Paste address</span><span>02 See price</span><span>03 Get report</span></p>
+      <form id="inspect-form" class="input-panel" novalidate>
+        <label for="token-address">Base token contract address</label>
+        <input id="token-address" name="token" type="text" placeholder="0x…" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="80" aria-describedby="address-help inspection-status">
+        <p id="address-help" class="input-help">Use a token contract on Base, not a wallet address.</p>
+        <button id="sample-token" type="button" class="button secondary full" data-token="@@SAMPLE_TOKEN@@" disabled>Try the example token (USDC)</button>
+        <p class="input-help">Fills the address only. The recorded example is free; a new inspection is paid.</p>
+        <button id="quote-button" type="submit" class="button primary full" disabled>Check price <span aria-hidden="true">→</span></button>
+        <p class="price-note">@@PRICE@@ USDC per report. Checking the price is free.</p>
+        <label class="keep-report"><input id="keep-report" type="checkbox" checked> Save completed reports in this browser</label>
+      </form>
+      <div id="price-box" class="price-box" hidden>
+        <p class="price-label">One token inspection</p>
+        <p class="price"><b id="quote-amount"></b> <span>USDC</span></p>
+        <p id="quote-network" class="input-help"></p>
+        <p id="payment-preparation" class="input-help"></p>
+        <p class="input-help">Use a Base-compatible browser wallet. After you press Pay, connect your wallet and review its USDC authorization before signing.</p>
+        <details><summary>Payment details</summary><span>Recipient</span><code id="quote-recipient" class="recipient"></code><p>One USDC authorization. No account or subscription. Your wallet asks you to approve before paying.</p></details>
+        <button id="pay-button" type="button" class="button primary full">Pay and inspect</button>
+      </div>
+      <div id="inspection-status" class="status" role="status" aria-live="polite" aria-atomic="true" hidden></div>
+      <button id="retry-button" type="button" class="button secondary retry" hidden>I’ve checked my wallet; check price again</button>
+      <noscript><p>The example report is available below. Enable JavaScript to request a price and pay with a browser wallet.</p></noscript>
+      <div class="side-footer"><p>Start with the free example.</p><p class="small-note">The report shown here is a dated capture of real provider data. New inspections use the latest available data; cached results can be up to five minutes old.</p><p class="small-note">Building an agent? <a href="/#mcp">Use the API or MCP →</a></p></div>
+    </section>
+    <section class="report-column" aria-label="Token inspection report">
+      <div class="report-label-row"><div><p id="report-label" class="report-label">Recorded example</p><p id="example-note" class="example-note">Free to explore · Captured @@EXAMPLE_TIME@@</p></div><button id="example-button" type="button" class="text-button" hidden>Back to free example</button></div>
+      <div id="report" tabindex="-1">@@EXAMPLE_REPORT@@</div>
+      <div class="report-download"><a id="report-download" href="/token-example.json" download="agenttoll-recorded-example.json">Download example data</a></div>
+      <div class="report-actions"><button id="save-report" type="button" class="button secondary" disabled>Save example</button><button id="copy-report-link" type="button" class="button secondary" disabled>Copy snapshot link</button><button id="download-report-image" type="button" class="button secondary" disabled>Download image</button><a href="/research.html">My research</a></div>
+      <div id="report-actions-status" class="report-actions-status" role="status" aria-live="polite" hidden></div>
+    </section>
+  </div></main>
+  <footer class="site-footer"><div class="wrap footer-inner"><span>AgentToll · Base data, paid per call.</span><span><a href="/privacy.html">Privacy</a> &nbsp; / &nbsp; <a href="https://github.com/tevfikefeaydin/agenttoll/issues" target="_blank" rel="noopener noreferrer">Report a problem</a></span></div></footer>
+</body>
+</html>

@@ -1,0 +1,109 @@
+{
+  "date": "2026-09-06",
+  "at": "2026-09-06T11:42:26.891Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x5dba229aab60c6b5fce5de83e9227916b3e42d28064e77b6b2473797c59f8848",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 1,
+    "caution": 3,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "No clue / ETH 0.3%",
+      "pool": "0xd1264870abce5020324f74040862a033a5f4de9656882151bb777ca7f207acd9",
+      "token": "0xb20000000000000000000074cc4ae639c994b5a7",
+      "createdAt": "2026-09-06T11:30:53Z",
+      "priceUsd": 0.0000189565954024241,
+      "volume24hUsd": 8229.9062522046,
+      "liquidityUsd": 16034.5065,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "Cubie / ETH 0.3%",
+      "pool": "0xac04ba13931e88b6b53f2df38ce7cd651577577e99ad52429d84cf559d056386",
+      "token": "0xb2000000000000000000003e280e11eb69cb8f5d",
+      "createdAt": "2026-09-06T11:30:47Z",
+      "priceUsd": 0.0000251187870735869,
+      "volume24hUsd": 6716.3366520857,
+      "liquidityUsd": 20727.5816,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "Deployer / WETH",
+      "pool": "0x3d24d15a0197bb318c7c5ccf1c4a184f75438bbb",
+      "token": "0x516deb171d1fea487134acd6d7884010533ea7e9",
+      "createdAt": "2026-09-06T11:21:07Z",
+      "priceUsd": 0.00000829320721557443,
+      "volume24hUsd": 4302.7151132297,
+      "liquidityUsd": 83600.8376,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "1KTO100M / WETH",
+      "pool": "0x6f42843dc844f9e86a144a73229cfb8f3962ede9",
+      "token": "0x08b3e901fd479243a4427877f6b151fb45e2b158",
+      "createdAt": "2026-09-06T11:27:31Z",
+      "priceUsd": 0.00000168456848879275,
+      "volume24hUsd": 3211.1574344721,
+      "liquidityUsd": 15221.9935,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "verified"
+        ],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity"
+        ]
+      }
+    }
+  ]
+}

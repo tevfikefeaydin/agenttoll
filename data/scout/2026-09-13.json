@@ -1,0 +1,110 @@
+{
+  "date": "2026-09-13",
+  "at": "2026-09-13T12:47:24.146Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x64a6ccaa5147beb8cf48730bd33e6fd4b165f66173ba2cf9d1dc84719202781e",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 1,
+    "caution": 3,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "LAPTOP / ETH",
+      "pool": "0x25ad2285af0e784918b0091a02e4aaf05e709a5b0784c89177ead094a58835c1",
+      "token": "0xbae67daa9237a2df03a353b1c9039cb313b13224",
+      "createdAt": "2026-09-13T12:33:01Z",
+      "priceUsd": 0.000289552723031681,
+      "volume24hUsd": 932191.222747069,
+      "liquidityUsd": 22293.9483,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "LAPTOP / ETH",
+      "pool": "0xa109923f5b43cf457ecaeda3a8ee96f8b4d8f5e0f64165ac1926aff0a8d72281",
+      "token": "0xa919eb467383721b5b3d4e741221b942ad55802b",
+      "createdAt": "2026-09-13T12:30:37Z",
+      "priceUsd": 0.000344307567246756,
+      "volume24hUsd": 491412.512715694,
+      "liquidityUsd": 25711.3425,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "liquidity"
+        ],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration"
+        ]
+      }
+    },
+    {
+      "name": "ACAT / ETH 1%",
+      "pool": "0x177f12f49af0e89790298f9b6820330e17595fd57798b07f51198b2e390468eb",
+      "token": "0xada6523cfd5d15b9feef5e923bd58755dfccec29",
+      "createdAt": "2026-09-13T12:39:21Z",
+      "priceUsd": 0.0000878598247829878,
+      "volume24hUsd": 37862.7852220416,
+      "liquidityUsd": 16244.2758,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "ACAT / ETH 1%",
+      "pool": "0xd6ced335752862e652fbf5afeb5f674e7b434d6a8a933916fc968cff64a22ece",
+      "token": "0x15f839ba3dfe7ab0293526d388ca108aad14ec29",
+      "createdAt": "2026-09-13T12:31:55Z",
+      "priceUsd": 0.0000889724092772234,
+      "volume24hUsd": 35570.3053522227,
+      "liquidityUsd": 16159.8682,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    }
+  ]
+}

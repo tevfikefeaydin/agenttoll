@@ -1,0 +1,3052 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "AgentToll",
+    "version": "0.15.0",
+    "description": "Base mainnet data with x402 payments. Hosted prices: $0.001-$0.008 USDC. Self-hosted payment network and recipient are configured at startup; inspect /api/catalog and /.well-known/agent-card.json. PAYMENT-SIGNATURE sends authorization; PAYMENT-REQUIRED and PAYMENT-RESPONSE carry the quote and receipt.",
+    "contact": {
+      "name": "AgentToll",
+      "url": "https://github.com/tevfikefeaydin/agenttoll/issues"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://github.com/tevfikefeaydin/agenttoll/blob/main/LICENSE"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://agenttoll.app"
+    }
+  ],
+  "paths": {
+    "/api/health": {
+      "get": {
+        "summary": "Service status (free)",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/catalog": {
+      "get": {
+        "summary": "Machine-readable catalog of everything for sale (free)",
+        "responses": {
+          "200": {
+            "description": "Catalog"
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/demo": {
+      "get": {
+        "summary": "Sample response shapes for every paid endpoint (free)",
+        "responses": {
+          "200": {
+            "description": "Samples"
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/stats": {
+      "get": {
+        "summary": "Onchain-derived toll counter (free): calls, USDC revenue, unique payers, and the same figures excluding the operator's own test wallet",
+        "responses": {
+          "200": {
+            "description": "Stats read from USDC transfers on Base"
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/price/{symbol}": {
+      "get": {
+        "summary": "Token price lookup: spot price in USD and 24h change for a crypto asset, by ticker or CoinGecko id",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.001"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Ticker or CoinGecko id"
+            },
+            "example": "eth"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success. meta describes response freshness and configured networks.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "symbol": "eth",
+                  "id": "ethereum",
+                  "usd": 1867.28,
+                  "change24h": -0.1,
+                  "source": "coingecko",
+                  "at": "2026-08-05T13:31:57.070Z",
+                  "quoteCurrency": "USD",
+                  "assumptions": [],
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-05T13:31:57.070Z",
+                    "observedAt": "2026-08-05T13:31:57.070Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get_price"
+      }
+    },
+    "/api/gas": {
+      "get": {
+        "summary": "Base gas price check: the current gas price and latest block number; add ?gasLimit=150000 to also get what a transaction that size costs in ETH and USD",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.001"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
+        "parameters": [
+          {
+            "name": "gasLimit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 21000,
+              "maximum": 30000000,
+              "description": "Optional. Also price a transaction of this gas size"
+            },
+            "example": 150000
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success. meta describes response freshness and configured networks.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "chain": "base",
+                  "gasPriceWei": "6041753",
+                  "gasPriceGwei": 0.006041753,
+                  "latestBlock": 49573693,
+                  "estimate": {
+                    "gasLimit": 150000,
+                    "ethCost": 9.06263e-7,
+                    "usdCost": 0.001692,
+                    "ethUsd": 1867.28
+                  },
+                  "at": "2026-08-05T13:32:13.596Z",
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-05T13:32:13.596Z",
+                    "observedAt": "2026-08-05T13:32:13.596Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get_base_gas"
+      }
+    },
+    "/api/trending": {
+      "get": {
+        "summary": "Trending token scan: the tokens moving across the crypto market right now; ?limit=N trims the list",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.002"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 25,
+              "description": "Optional. Top N only"
+            },
+            "example": 5
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success. meta describes response freshness and configured networks.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "coins": [
+                    {
+                      "id": "hyperliquid",
+                      "symbol": "hype",
+                      "name": "Hyperliquid",
+                      "rank": 18,
+                      "usd": 22.4,
+                      "change24h": 3.1
+                    }
+                  ],
+                  "source": "coingecko",
+                  "at": "2026-08-05T13:31:58.678Z",
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-05T13:31:58.678Z",
+                    "observedAt": "2026-08-05T13:31:58.678Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get_trending"
+      }
+    },
+    "/api/base/token/{address}": {
+      "get": {
+        "summary": "Base token price lookup by contract address: the onchain USD price for any token on Base",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.001"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[0-9a-fA-F]{40}$"
+            },
+            "example": "0x4200000000000000000000000000000000000006"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success. meta describes response freshness and configured networks.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "chain": "base",
+                  "token": "0x4200000000000000000000000000000000000006",
+                  "usd": 1867.28,
+                  "source": "geckoterminal",
+                  "at": "2026-08-05T13:31:58.678Z",
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-05T13:31:58.678Z",
+                    "observedAt": "2026-08-05T13:31:58.678Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get_base_token_price"
+      }
+    },
+    "/api/base/address/{address}": {
+      "get": {
+        "summary": "Base wallet lookup: an address's primary basename, ETH balance, transaction count, and whether it is a contract",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.001"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[0-9a-fA-F]{40}$"
+            },
+            "example": "0x4200000000000000000000000000000000000006"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success. meta describes response freshness and configured networks.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "chain": "base",
+                  "address": "0xe553...56f8",
+                  "basename": "agenttoll.base.eth",
+                  "ethBalance": 0.0019,
+                  "txCount": 42,
+                  "isContract": false,
+                  "at": "2026-08-05T13:31:58.678Z",
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-05T13:31:58.678Z",
+                    "observedAt": "2026-08-05T13:31:58.678Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get_base_address_info"
+      }
+    },
+    "/api/base/trending": {
+      "get": {
+        "summary": "Trending Base pool scan: the DEX pools moving on Base right now, with price, 24h volume and liquidity; ?limit=N sets how many",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.002"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 20,
+              "description": "Optional. How many pools, default 10"
+            },
+            "example": 5
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success. meta describes response freshness and configured networks.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "chain": "base",
+                  "pools": [
+                    {
+                      "name": "AERO / USDC",
+                      "pool": "0x6cdc...971d",
+                      "priceUsd": 0.4206,
+                      "volume24hUsd": 1118348.8,
+                      "change24hPct": 2.711,
+                      "liquidityUsd": 25358508.8
+                    }
+                  ],
+                  "source": "geckoterminal-trending",
+                  "at": "2026-08-05T13:31:58.678Z",
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-05T13:31:58.678Z",
+                    "observedAt": "2026-08-05T13:31:58.678Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get_base_trending_pools"
+      }
+    },
+    "/api/base/radar": {
+      "get": {
+        "summary": "New token radar on Base with a liquidity floor: pools created in the last 24 hours that already hold real liquidity; ?minLiquidity sets the spam floor in USD, default 10000. Each pool carries its token address, so anything interesting can go straight to /api/base/safety",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.003"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
+        "parameters": [
+          {
+            "name": "minLiquidity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Optional. Liquidity floor in USD, default 10000"
+            },
+            "example": 50000
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 30,
+              "description": "Optional. How many pools, default 15"
+            },
+            "example": 5
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success. meta describes response freshness and configured networks.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "chain": "base",
+                  "pools": [
+                    {
+                      "name": "BASED / ETH 1%",
+                      "pool": "0x2acb...cac0",
+                      "token": "0xb6bb786056c690e41b20a587573fd77aade2eb07",
+                      "createdAt": "2026-08-05T13:01:33Z",
+                      "priceUsd": 0.0000156,
+                      "volume24hUsd": 19071.46,
+                      "liquidityUsd": 14246.1
+                    }
+                  ],
+                  "minLiquidityUsd": 10000,
+                  "count": 1,
+                  "source": "geckoterminal-new-pools",
+                  "at": "2026-08-05T13:31:58.678Z",
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-05T13:31:58.678Z",
+                    "observedAt": "2026-08-05T13:31:58.678Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get_new_token_radar"
+      }
+    },
+    "/api/feargreed": {
+      "get": {
+        "summary": "Crypto market sentiment check: the Fear and Greed index with yesterday's value; ?days=7 adds a daily history so you can see whether sentiment is turning",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.001"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 30,
+              "description": "Optional. Add this many days of daily history"
+            },
+            "example": 7
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success. meta describes response freshness and configured networks.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "value": 27,
+                  "classification": "Fear",
+                  "yesterday": 25,
+                  "days": 7,
+                  "history": [
+                    {
+                      "date": "2026-08-05T00:00:00.000Z",
+                      "value": 27,
+                      "classification": "Fear"
+                    }
+                  ],
+                  "at": "2026-08-05T13:32:14.339Z",
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-05T13:32:14.339Z",
+                    "observedAt": "2026-08-05T13:32:14.339Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get_fear_greed"
+      }
+    },
+    "/api/brief": {
+      "get": {
+        "summary": "Market brief in one call: prices (BTC, ETH and SOL by default, or ?symbols=eth,degen), Base gas, and market sentiment",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.005"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
+        "parameters": [
+          {
+            "name": "symbols",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Optional. Comma-separated tickers, up to 6. Default btc,eth,sol"
+            },
+            "example": "eth,degen,aero"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success. meta describes response freshness and configured networks.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "majors": {
+                    "eth": {
+                      "symbol": "eth",
+                      "usd": 1867.28,
+                      "change24h": -0.1
+                    }
+                  },
+                  "baseGas": {
+                    "chain": "base",
+                    "gasPriceGwei": 0.006,
+                    "latestBlock": 49573686
+                  },
+                  "sentiment": {
+                    "value": 27,
+                    "classification": "Fear",
+                    "yesterday": 25
+                  },
+                  "at": "2026-08-05T13:31:59.006Z",
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-05T13:31:59.006Z",
+                    "observedAt": "2026-08-05T13:31:59.006Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get_market_brief"
+      }
+    },
+    "/api/try/premium": {
+      "get": {
+        "summary": "Turkish lira crypto premium check: implied USD/TRY from a crypto cross-rate versus the official rate; ?asset=usdt is the reading desks quote",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.002"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
+        "parameters": [
+          {
+            "name": "asset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "btc",
+                "eth",
+                "usdt",
+                "usdc"
+              ],
+              "description": "Optional. Cross-rate asset, default btc"
+            },
+            "example": "usdt"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success. meta describes response freshness and configured networks.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "asset": "usdt",
+                  "assetUsd": 0.999318,
+                  "assetTry": 47.53,
+                  "impliedUsdTry": 47.5624,
+                  "officialUsdTry": 47.2891,
+                  "premiumPct": 0.578,
+                  "at": "2026-08-05T13:31:58.678Z",
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-05T13:31:58.678Z",
+                    "observedAt": "2026-08-05T13:31:58.678Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get_try_premium"
+      }
+    },
+    "/api/try/spread": {
+      "get": {
+        "summary": "Turkish exchange spread check: BTCTurk and Paribu's TRY quotes converted back to USD via the official rate and compared against the global price; ?asset=usdt is the pair with the deepest local volume",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.002"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
+        "parameters": [
+          {
+            "name": "asset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "btc",
+                "usdt"
+              ],
+              "description": "Optional. Cross-rate asset, default btc"
+            },
+            "example": "usdt"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success. meta describes response freshness and configured networks.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "asset": "usdt",
+                  "officialUsdTry": 47.2891,
+                  "globalUsd": 0.999318,
+                  "exchanges": [
+                    {
+                      "name": "btcturk",
+                      "try": 47.53,
+                      "impliedUsd": 1.00509,
+                      "spreadPct": 0.578,
+                      "unavailable": false
+                    },
+                    {
+                      "name": "paribu",
+                      "try": 47.51,
+                      "impliedUsd": 1.00466,
+                      "spreadPct": 0.535,
+                      "unavailable": false
+                    }
+                  ],
+                  "at": "2026-08-05T13:31:58.678Z",
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-05T13:31:58.678Z",
+                    "observedAt": "2026-08-05T13:31:58.678Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get_try_spread"
+      }
+    },
+    "/api/base/portfolio/{address}": {
+      "get": {
+        "summary": "Observed wallet holdings on Base valued in USD: ETH and indexed ERC-20 tokens, largest first, with a caller-selected floor and explicit source coverage. Totals cover observed holdings; bounded scans can omit smaller or unpriced tokens",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.003"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[0-9a-fA-F]{40}$"
+            },
+            "example": "0x4200000000000000000000000000000000000006"
+          },
+          {
+            "name": "minValue",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Optional. USD floor per holding, default 1"
+            },
+            "example": 100
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "description": "Optional. How many holdings to list, default 20"
+            },
+            "example": 10
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success. meta describes response freshness and configured networks.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "chain": "base",
+                  "address": "0x1985...5c87",
+                  "basename": null,
+                  "native": {
+                    "symbol": "ETH",
+                    "balance": 194.68,
+                    "priceUsd": 1868.57,
+                    "valueUsd": 363774.32
+                  },
+                  "tokens": [
+                    {
+                      "symbol": "CBBTC",
+                      "name": "Coinbase Wrapped BTC",
+                      "address": "0xcbb7...33bf",
+                      "balance": 5.673857,
+                      "priceUsd": 64198,
+                      "valueUsd": 364250.29
+                    }
+                  ],
+                  "totalUsd": 7143109.27,
+                  "tokenCount": 52,
+                  "shown": 1,
+                  "hiddenBelowFloor": 48,
+                  "unpriced": 0,
+                  "minValueUsd": 10000,
+                  "source": "blockscout",
+                  "at": "2026-08-05T13:31:58.678Z",
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-05T13:31:58.678Z",
+                    "observedAt": "2026-08-05T13:31:58.678Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get_base_portfolio"
+      }
+    },
+    "/api/base/safety/{address}": {
+      "get": {
+        "summary": "Token safety check for a Base token before you buy - is it a honeypot, is it a rug: a simulated buy and sell, buy and sell tax, contract verification, owner privileges, holder concentration, whether anyone can still pull the liquidity, and who deployed the contract - a token shipped from a wallet with a handful of transactions is the shape most rugs share",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.003"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[0-9a-fA-F]{40}$"
+            },
+            "example": "0x4200000000000000000000000000000000000006"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success. meta describes response freshness and configured networks.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "chain": "base",
+                  "token": "0x940181a94a35a4569e4529a3cdfb74e38fd98631",
+                  "name": "Example Token",
+                  "symbol": "EXAMPLE",
+                  "verdict": "caution",
+                  "failed": [],
+                  "warnings": [
+                    "owner-powers",
+                    "liquidity"
+                  ],
+                  "unchecked": [
+                    "concentration",
+                    "liquidity",
+                    "creator-stake",
+                    "deployer"
+                  ],
+                  "checks": [
+                    {
+                      "id": "honeypot",
+                      "status": "pass",
+                      "detail": "Simulated buy and sell succeeded",
+                      "complete": true,
+                      "sources": [
+                        "goplus"
+                      ],
+                      "missing": [],
+                      "conflicts": []
+                    },
+                    {
+                      "id": "taxes",
+                      "status": "pass",
+                      "detail": "Both taxes measured at 0%",
+                      "complete": true,
+                      "sources": [
+                        "goplus"
+                      ],
+                      "missing": [],
+                      "conflicts": []
+                    },
+                    {
+                      "id": "verified",
+                      "status": "pass",
+                      "detail": "Source code verified",
+                      "complete": true,
+                      "sources": [
+                        "goplus"
+                      ],
+                      "missing": [],
+                      "conflicts": []
+                    },
+                    {
+                      "id": "owner-powers",
+                      "status": "warn",
+                      "detail": "Owner can mint",
+                      "complete": true,
+                      "sources": [
+                        "goplus"
+                      ],
+                      "missing": [],
+                      "conflicts": []
+                    },
+                    {
+                      "id": "concentration",
+                      "status": "unknown",
+                      "detail": "Holder shares unavailable",
+                      "complete": false,
+                      "sources": [
+                        "goplus"
+                      ],
+                      "missing": [
+                        "holders"
+                      ],
+                      "conflicts": []
+                    },
+                    {
+                      "id": "liquidity",
+                      "status": "warn",
+                      "detail": "Some removable liquidity detected; incomplete ownership",
+                      "complete": false,
+                      "sources": [
+                        "goplus"
+                      ],
+                      "missing": [
+                        "liquidity-share-total"
+                      ],
+                      "conflicts": []
+                    },
+                    {
+                      "id": "creator-stake",
+                      "status": "unknown",
+                      "detail": "Creator share unavailable",
+                      "complete": false,
+                      "sources": [
+                        "goplus"
+                      ],
+                      "missing": [
+                        "creator_percent"
+                      ],
+                      "conflicts": []
+                    },
+                    {
+                      "id": "deployer",
+                      "status": "unknown",
+                      "detail": "Explorer scam flag unavailable",
+                      "complete": false,
+                      "sources": [
+                        "goplus"
+                      ],
+                      "missing": [
+                        "flaggedScam"
+                      ],
+                      "conflicts": []
+                    }
+                  ],
+                  "deployer": {
+                    "address": "0xe83f922c34a1...",
+                    "basis": "contract-creator",
+                    "isContract": false,
+                    "txCount": 731,
+                    "balanceEth": 0.12094,
+                    "firstSeen": null,
+                    "ageHours": null,
+                    "flaggedScam": null
+                  },
+                  "holderCount": 748566,
+                  "listedOnCex": [
+                    "Coinbase"
+                  ],
+                  "sources": [
+                    "goplus",
+                    "honeypot.is"
+                  ],
+                  "disclaimer": "Automated checks against public data, not investment advice. Passing every check does not make a token safe.",
+                  "at": "2026-08-05T13:31:58.678Z",
+                  "coverage": {
+                    "complete": false,
+                    "completedChecks": 4,
+                    "totalChecks": 8
+                  },
+                  "sourceStatus": {
+                    "goplus": {
+                      "status": "partial",
+                      "fetchedAt": "2026-08-05T13:31:58.678Z",
+                      "durationMs": 100,
+                      "issues": [
+                        "creator_percent"
+                      ]
+                    },
+                    "honeypot.is": {
+                      "status": "ok",
+                      "fetchedAt": "2026-08-05T13:31:58.678Z",
+                      "durationMs": 100,
+                      "issues": []
+                    },
+                    "blockscout+rpc": {
+                      "status": "partial",
+                      "fetchedAt": "2026-08-05T13:31:58.678Z",
+                      "durationMs": 100,
+                      "issues": [
+                        "flaggedScam"
+                      ]
+                    }
+                  },
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-05T13:31:58.678Z",
+                    "observedAt": "2026-08-05T13:31:58.678Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "check_token_safety"
+      }
+    },
+    "/api/base/name/{nameOrAddress}": {
+      "get": {
+        "summary": "Basename lookup both ways: a name returns its address and text records, an address returns its primary basename",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.001"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
+        "parameters": [
+          {
+            "name": "nameOrAddress",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "A basename (.base.eth optional) or a 0x address"
+            },
+            "example": "agenttoll.base.eth"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success. meta describes response freshness and configured networks.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "query": "agenttoll.base.eth",
+                  "name": "agenttoll.base.eth",
+                  "address": "0xe553...56f8",
+                  "resolver": "0x426fA03f...",
+                  "records": {},
+                  "at": "2026-08-05T13:31:58.678Z",
+                  "registered": true,
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-05T13:31:58.678Z",
+                    "observedAt": "2026-08-05T13:31:58.678Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "resolve_basename"
+      }
+    },
+    "/api/watch/address/{address}": {
+      "get": {
+        "summary": "Wallet activity watch: new activity for a Base address since your cursor, so a scheduled agent only fetches what changed",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.002"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[0-9a-fA-F]{40}$"
+            },
+            "example": "0x4200000000000000000000000000000000000006"
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Echo the previous reply cursor unchanged; wallet cursors are opaque, radar cursors are ISO timestamps"
+            },
+            "example": "2026-08-05T08:40:01Z"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success. meta describes response freshness and configured networks.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "chain": "base",
+                  "address": "0xe553...56f8",
+                  "since": "2026-08-05T08:40:01Z",
+                  "count": 1,
+                  "events": [
+                    {
+                      "hash": "0x4893...3c91",
+                      "at": "2026-08-05T12:10:44Z",
+                      "direction": "in",
+                      "counterparty": "0x5f87...6f78",
+                      "ethValue": 0,
+                      "method": "transferWithAuthorization"
+                    }
+                  ],
+                  "cursor": "w1.<opaque-example-returned-by-server>",
+                  "at": "2026-08-05T13:31:58.678Z",
+                  "hasMore": false,
+                  "partial": false,
+                  "coverage": {
+                    "complete": true,
+                    "scope": "indexed-confirmed-transactions",
+                    "pagesRead": 1,
+                    "overlapSeconds": 120,
+                    "deduplicationLimit": 100,
+                    "replayPossible": false,
+                    "note": "Drain hasMore pages, then echo the cursor when polling. Deduplicate by hash; indexer gaps and older reorganizations are outside this coverage."
+                  },
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-05T13:31:58.678Z",
+                    "observedAt": "2026-08-05T13:31:58.678Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "watch_base_address"
+      }
+    },
+    "/api/watch/radar": {
+      "get": {
+        "summary": "New pool watch within a limited ranked radar listing. Returns an ISO cursor and explicit partial coverage; the listing can omit pools",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.003"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
+        "parameters": [
+          {
+            "name": "since",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Echo the previous reply cursor unchanged; wallet cursors are opaque, radar cursors are ISO timestamps"
+            },
+            "example": "2026-08-05T08:40:01Z"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success. meta describes response freshness and configured networks.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "chain": "base",
+                  "since": "2026-08-05T08:40:01Z",
+                  "count": 1,
+                  "pools": [
+                    {
+                      "name": "BASED / ETH 1%",
+                      "pool": "0x2acb...cac0",
+                      "token": "0xb6bb786056c690e41b20a587573fd77aade2eb07",
+                      "createdAt": "2026-08-05T13:01:33Z",
+                      "priceUsd": 0.0000156,
+                      "volume24hUsd": 19071.46,
+                      "liquidityUsd": 14246.1
+                    }
+                  ],
+                  "cursor": "2026-08-05T13:01:33Z",
+                  "at": "2026-08-05T13:31:58.678Z",
+                  "partial": true,
+                  "coverage": {
+                    "complete": false,
+                    "scope": "ranked-radar-listing",
+                    "source": "geckoterminal-new-pools",
+                    "observedAt": "2026-08-05T13:31:58.678Z",
+                    "note": "Limited ranked listing, not an exhaustive pool event stream."
+                  },
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-05T13:31:58.678Z",
+                    "observedAt": "2026-08-05T13:31:58.678Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "watch_new_tokens"
+      }
+    },
+    "/api/watch/price/{symbol}": {
+      "get": {
+        "summary": "Price alert check: whether an asset moved past your threshold from a reference price",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.001"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Ticker or CoinGecko id"
+            },
+            "example": "eth"
+          },
+          {
+            "name": "ref",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "description": "Reference price in USD to compare against"
+            },
+            "example": 1900
+          },
+          {
+            "name": "pct",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Threshold in percent, default 2"
+            },
+            "example": 2
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success. meta describes response freshness and configured networks.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "symbol": "eth",
+                  "usd": 1867.28,
+                  "ref": 1900,
+                  "changePct": -1.7221,
+                  "thresholdPct": 2,
+                  "triggered": false,
+                  "direction": "down",
+                  "at": "2026-08-05T13:31:58.678Z",
+                  "quoteCurrency": "USD",
+                  "assumptions": [],
+                  "source": "coingecko",
+                  "priceObservedAt": "2026-08-05T13:31:58.678Z",
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-05T13:31:58.678Z",
+                    "observedAt": "2026-08-05T13:31:58.678Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "watch_price_alert"
+      }
+    },
+    "/api/base/scout": {
+      "get": {
+        "summary": "New token scan with a safety verdict attached: today's new Base pools above your liquidity floor, each already checked for honeypot, taxes and owner powers. One call instead of N+1",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.008"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
+        "parameters": [
+          {
+            "name": "minLiquidity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Optional. Liquidity floor in USD, default 15000"
+            },
+            "example": 25000
+          },
+          {
+            "name": "pools",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 4,
+              "description": "Optional. How many pools to check, default 3"
+            },
+            "example": 3
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success. meta describes response freshness and configured networks.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "chain": "base",
+                  "minLiquidityUsd": 25000,
+                  "pools": [
+                    {
+                      "name": "SAAS / WETH 1%",
+                      "pool": "0x1c3a...9d2e",
+                      "token": "0x74bb95da6692c34ee9755ac87ea10366653dbc77",
+                      "createdAt": "2026-08-06T09:12:44Z",
+                      "priceUsd": 0.0021,
+                      "volume24hUsd": 88410.2,
+                      "liquidityUsd": 445120.5,
+                      "safety": {
+                        "verdict": "high-risk",
+                        "failed": [
+                          "liquidity"
+                        ],
+                        "warnings": [
+                          "creator-stake"
+                        ],
+                        "unchecked": []
+                      }
+                    }
+                  ],
+                  "summary": {
+                    "found": 3,
+                    "checked": 3,
+                    "unchecked": 0,
+                    "highRisk": 1,
+                    "caution": 2,
+                    "insufficientData": 0,
+                    "clear": 0
+                  },
+                  "source": "geckoterminal-new-pools",
+                  "disclaimer": "Automated checks against public data, not investment advice.",
+                  "at": "2026-08-06T10:00:00.000Z",
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-06T10:00:00.000Z",
+                    "observedAt": "2026-08-06T10:00:00.000Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "scout_new_tokens"
+      }
+    },
+    "/api/base/radar/history": {
+      "get": {
+        "summary": "Published radar snapshot pinned to an immutable git revision. The payment receipt proves payment, not snapshot content or capture time. ?date=YYYY-MM-DD, default latest",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.002"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
+        "parameters": [
+          {
+            "name": "date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "description": "Optional. Snapshot day, default latest. History begins 2026-08-06"
+            },
+            "example": "2026-08-06"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success. meta describes response freshness and configured networks.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "chain": "base",
+                  "date": "2026-08-06",
+                  "at": "2026-08-06T10:57:00.000Z",
+                  "settlement": "0x9c41...b02a",
+                  "summary": {
+                    "found": 3,
+                    "checked": 3,
+                    "unchecked": 0,
+                    "highRisk": 1,
+                    "caution": 2,
+                    "insufficientData": 0,
+                    "clear": 0
+                  },
+                  "pools": [
+                    {
+                      "name": "openhuman / WETH",
+                      "pool": "0x74bb...dc77",
+                      "token": "0x74bb95da6692c34ee9755ac87ea10366653dbc77",
+                      "createdAt": "2026-08-05T13:02:05Z",
+                      "priceUsd": 0.0000047,
+                      "liquidityUsd": 68437,
+                      "volume24hUsd": 5.4,
+                      "safety": {
+                        "verdict": "high-risk",
+                        "failed": [
+                          "liquidity"
+                        ],
+                        "warnings": [
+                          "creator-stake"
+                        ],
+                        "unchecked": []
+                      }
+                    }
+                  ],
+                  "provenance": {
+                    "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "commit": "https://github.com/tevfikefeaydin/agenttoll/commit/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "raw": "https://raw.githubusercontent.com/tevfikefeaydin/agenttoll/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/data/scout/2026-08-06.json",
+                    "paidWith": null,
+                    "integrity": "Git revision pins the published bytes. A payment transaction does not authenticate a snapshot hash or its capture time."
+                  },
+                  "availableDates": {
+                    "first": "2026-08-06",
+                    "last": "2026-08-06",
+                    "count": 1
+                  },
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-06T10:57:00.000Z",
+                    "observedAt": "2026-08-06T10:57:00.000Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get_radar_history"
+      }
+    },
+    "/api/base/scorecard": {
+      "get": {
+        "summary": "Radar sample scorecard: first sightings across the latest N published snapshots, grouped by original verdict and compared to current quotes. Missing outcomes stay null; observed liquidity below $100 is reported separately; holding periods vary",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.005"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 30,
+              "description": "Optional. Latest published snapshots to compare, default 7; elapsed holding periods vary"
+            },
+            "example": 7
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success. meta describes response freshness and configured networks.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "chain": "base",
+                  "windowDays": 7,
+                  "trackRecord": {
+                    "daysCovered": 7,
+                    "firstSnapshot": "2026-08-06",
+                    "lastSnapshot": "2026-08-12"
+                  },
+                  "cohorts": {
+                    "high-risk": {
+                      "count": 1,
+                      "priced": 0,
+                      "unavailable": 0,
+                      "liquidityGone": 1,
+                      "medianChangePct": null
+                    },
+                    "caution": {
+                      "count": 0,
+                      "priced": 0,
+                      "unavailable": 0,
+                      "liquidityGone": 0,
+                      "medianChangePct": null
+                    },
+                    "insufficient-data": {
+                      "count": 0,
+                      "priced": 0,
+                      "unavailable": 0,
+                      "liquidityGone": 0,
+                      "medianChangePct": null
+                    },
+                    "clear": {
+                      "count": 0,
+                      "priced": 0,
+                      "unavailable": 0,
+                      "liquidityGone": 0,
+                      "medianChangePct": null
+                    },
+                    "unassessed": {
+                      "count": 0,
+                      "priced": 0,
+                      "unavailable": 0,
+                      "liquidityGone": 0,
+                      "medianChangePct": null
+                    }
+                  },
+                  "tokens": [
+                    {
+                      "token": "0x74bb...dc77",
+                      "name": "openhuman / WETH",
+                      "flaggedOn": "2026-08-06",
+                      "verdictThen": "high-risk",
+                      "liquidityThenUsd": 68437,
+                      "liquidityNowUsd": 3,
+                      "priceChangePct": null,
+                      "liquidityGone": true,
+                      "outcome": "low-observed-liquidity"
+                    }
+                  ],
+                  "methodology": "First sightings in published samples; current deepest observed pool. liquidityGone is null when unavailable; true only for observed liquidity below $100. Medians use available quotes and varying holding periods.",
+                  "disclaimer": "A track record, not investment advice.",
+                  "at": "2026-08-12T10:00:00.000Z",
+                  "coverage": {
+                    "requestedDays": 7,
+                    "windowBasis": "latest-published-snapshots",
+                    "snapshotsListed": 7,
+                    "snapshotsLoaded": 7,
+                    "missingSnapshotDates": [],
+                    "windowFirstSnapshot": "2026-08-06",
+                    "windowLastSnapshot": "2026-08-12",
+                    "poolsObserved": 1,
+                    "poolsWithoutSafety": 0,
+                    "poolsWithoutToken": 0,
+                    "tokensObserved": 1,
+                    "tokensPriced": 0,
+                    "priceBatchesFailed": 0,
+                    "complete": false,
+                    "note": "Published radar samples with variable holding periods; missing quotes are not losses."
+                  },
+                  "provenance": {
+                    "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "commit": "https://github.com/tevfikefeaydin/agenttoll/commit/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "index": "https://raw.githubusercontent.com/tevfikefeaydin/agenttoll/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/data/scout/index.json",
+                    "integrity": "Git revision pins the published bytes. A payment transaction does not authenticate a snapshot hash or its capture time."
+                  },
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-12T10:00:00.000Z",
+                    "observedAt": "2026-08-12T10:00:00.000Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get_radar_scorecard"
+      }
+    },
+    "/api/base/fresh": {
+      "get": {
+        "summary": "New pair scan seconds after launch: Uniswap v4 pools read straight off Base before any indexer has them - the launched token address, whether anyone has funded it yet, and whether its hook is a launchpad's or bespoke code shipped with this token",
+        "x-payment-info": {
+          "price": {
+            "currency": "USD",
+            "mode": "fixed",
+            "amount": "0.004"
+          },
+          "protocols": [
+            {
+              "x402": {
+                "version": 2,
+                "network": "eip155:8453",
+                "scheme": "exact",
+                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "assetSymbol": "USDC",
+                "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8"
+              }
+            }
+          ]
+        },
+        "parameters": [
+          {
+            "name": "minutes",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 60,
+              "description": "Optional. How far back to look, default 10"
+            },
+            "example": 10
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "description": "Optional. How many pools to return, default 15"
+            }
+          },
+          {
+            "name": "fundedOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Optional. Drop pools nobody has added liquidity to yet"
+            },
+            "example": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success. meta describes response freshness and configured networks.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "chain": "base",
+                  "scope": "uniswap-v4",
+                  "windowMinutes": 10,
+                  "headBlock": 49648349,
+                  "pools": [
+                    {
+                      "poolId": "0xb2417a41cd75...",
+                      "protocol": "uniswap-v4",
+                      "token": "0x47d4126cb8...",
+                      "tokenBasis": "quote-asset",
+                      "pair": [
+                        "0x4200000000000000000000000000000000000006",
+                        "0x47d4126cb8..."
+                      ],
+                      "quote": "0x4200000000000000000000000000000000000006",
+                      "quoteSymbol": "WETH",
+                      "block": 49648342,
+                      "createdAt": "2026-08-07T09:41:12.000Z",
+                      "ageSeconds": 14,
+                      "funded": true,
+                      "launchTx": "0xd31d3b760a...",
+                      "launchedBy": "0x51dfdeecdc...",
+                      "hook": "0xbdf938149a...",
+                      "hookPools": 21,
+                      "feeMode": "dynamic",
+                      "feeBps": null
+                    }
+                  ],
+                  "summary": {
+                    "found": 10,
+                    "funded": 10,
+                    "bespokeHooks": 0,
+                    "shown": 10
+                  },
+                  "method": "Read from the Uniswap v4 PoolManager's own Initialize log on Base...",
+                  "notMeasured": "USD liquidity - v4 keeps every pool's tokens in one singleton...",
+                  "at": "2026-08-07T09:41:26.000Z",
+                  "meta": {
+                    "requestId": "example-request",
+                    "servedAt": "2026-08-07T09:41:26.000Z",
+                    "observedAt": "2026-08-07T09:41:26.000Z",
+                    "ageSeconds": 0,
+                    "dataNetwork": "base",
+                    "paymentNetwork": "base"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Unsigned x402 v2 quote in the base64 JSON PAYMENT-REQUIRED header and the same complete quote in the JSON body.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Request deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get_fresh_pools"
+      }
+    },
+    "/api/ready": {
+      "get": {
+        "summary": "Facilitator and Base RPC readiness (free, cached for 15 seconds)",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Both dependencies ready"
+          },
+          "503": {
+            "description": "A required dependency is unavailable"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ApiError": {
+        "type": "object",
+        "required": [
+          "error",
+          "code",
+          "retryable",
+          "retryAfter",
+          "requestId"
+        ],
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "retryable": {
+            "type": "boolean"
+          },
+          "retryAfter": {
+            "type": "integer",
+            "nullable": true
+          },
+          "requestId": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

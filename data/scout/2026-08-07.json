@@ -1,0 +1,87 @@
+{
+  "date": "2026-08-07",
+  "at": "2026-08-07T08:33:34.619Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x37af4765cb77841fcf7cd7be99eed5b031452b32d44b7e598f90b2ecc98d1e84",
+  "summary": {
+    "found": 3,
+    "checked": 3,
+    "unchecked": 0,
+    "highRisk": 3,
+    "caution": 0,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "OpenAI / USDC",
+      "pool": "0xaed957c61e1d7426c0fb45d469fc5567d66f777c",
+      "token": "0x9c0fa3b56a3b40dead7680d0837e9219d7c2ab07",
+      "createdAt": "2026-08-07T05:55:37Z",
+      "priceUsd": 0.000102594857490015,
+      "volume24hUsd": 20744710.7189978,
+      "liquidityUsd": 2110955.8844,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "liquidity"
+        ],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "openhuman / WETH",
+      "pool": "0xcf6a03ac48cf8e3b316426dd632988b9764a8a10",
+      "token": "0xf0ee6458c4541b0e9a433b694dcd748a5e632865",
+      "createdAt": "2026-08-07T07:55:41Z",
+      "priceUsd": 0.00000630936237587378,
+      "volume24hUsd": 5443.272722,
+      "liquidityUsd": 68051.3151,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "liquidity"
+        ],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration"
+        ]
+      }
+    },
+    {
+      "name": "BRUH / WETH 0.3%",
+      "pool": "0x1c4e532a768934e666551474057c876473b8b3f0",
+      "token": "0xa97a1554f2b3b3260c03d086d3aba659fedee014",
+      "createdAt": "2026-08-07T08:09:49Z",
+      "priceUsd": 0.0000259867532332561,
+      "volume24hUsd": 4.0423928041,
+      "liquidityUsd": 25988.4546,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "verified"
+        ],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity"
+        ]
+      }
+    }
+  ]
+}

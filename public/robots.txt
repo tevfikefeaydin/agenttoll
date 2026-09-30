@@ -1,0 +1,17 @@
+# AgentToll — Base-native onchain data for AI agents, paid per call over x402.
+#
+# Everything here is meant to be read by machines, so nothing is disallowed.
+# The three files below are the ones worth fetching first: llms.txt describes
+# the service in prose, openapi.json is the full spec, and the x402 manifest
+# lists every paid resource with its price.
+
+User-agent: *
+Allow: /
+
+Sitemap: https://agenttoll.app/sitemap.xml
+
+# Machine-readable entry points
+# https://agenttoll.app/llms.txt
+# https://agenttoll.app/openapi.json
+# https://agenttoll.app/.well-known/x402
+# https://agenttoll.app/.well-known/agent-card.json

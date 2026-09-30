@@ -1,0 +1,110 @@
+{
+  "date": "2026-09-03",
+  "at": "2026-09-03T12:10:24.717Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x352cf26afcfacb519665731fc2b54c69868bba955968d224a8199bc1256a1e78",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 1,
+    "caution": 3,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "Burn / WETH 0.01%",
+      "pool": "0x3fff95d3de89583d28ebacad9f166ec297abfb993bc3c3208fa0283ae6013ed3",
+      "token": "0xef456645ec62c6c314c9ad684163aee9f39b5de8",
+      "createdAt": "2026-09-03T11:17:01Z",
+      "priceUsd": 7.47818272332031e-7,
+      "volume24hUsd": 36358.4137777247,
+      "liquidityUsd": 53592.1748,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "verified"
+        ],
+        "warnings": [
+          "honeypot",
+          "creator-stake"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "ARCINS / ETH 0.05%",
+      "pool": "0xb83985fa329e6186ce8335ed63dab2b0e4b605fce6fce9535399ea24453d329e",
+      "token": "0xb20000000000000000000042fdaa768bf7e36678",
+      "createdAt": "2026-09-03T12:01:35Z",
+      "priceUsd": 3.54931941846447e-7,
+      "volume24hUsd": 18689.3240119915,
+      "liquidityUsd": 18998.6172,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "1KTO100M / WETH",
+      "pool": "0x5aa8322298241fcc29dfdf9b546159641369a513",
+      "token": "0x72900074730bc81d405037382f52c2d7946e7e2c",
+      "createdAt": "2026-09-03T11:53:57Z",
+      "priceUsd": 3.57685271776805e-14,
+      "volume24hUsd": 3164.6612872647,
+      "liquidityUsd": 15339.0678,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "creator-stake"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "PrinterInkCoin / WETH",
+      "pool": "0x8c288664c4ebfd183749ddf2333df0de53689ea3",
+      "token": "0xf71dce8f9f3fed13449c13adc9b2432150082de3",
+      "createdAt": "2026-09-03T12:01:15Z",
+      "priceUsd": 0.00000406768597873869,
+      "volume24hUsd": 1672.3168170605,
+      "liquidityUsd": 75507.7033,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "creator-stake"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    }
+  ]
+}

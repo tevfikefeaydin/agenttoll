@@ -1,0 +1,106 @@
+{
+  "date": "2026-08-13",
+  "at": "2026-08-13T08:49:03.945Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x73a4050474d8badf3f7d9127db0992bc3406a4cff701b7908bdc6d3fba2cd6bf",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 1,
+    "caution": 3,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "OpenAI / USDC",
+      "pool": "0x798b4a547197370688278d44d19e0bc04cd4455e",
+      "token": "0xbb32d5c41c1fe335e0a1811be56f921904612b07",
+      "createdAt": "2026-08-13T06:57:03Z",
+      "priceUsd": 0.000101592684380255,
+      "volume24hUsd": 24329378.5426513,
+      "liquidityUsd": 9659345.5433,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "concentration",
+          "liquidity"
+        ],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "PACK / WETH",
+      "pool": "0x57850d91e6d8552cb000861d4345cafbcfe5359023403a0e726ed2c0018b0eed",
+      "token": "0x9e05d32046776a6f85e51961d0d8dc35657f60d5",
+      "createdAt": "2026-08-13T07:25:25Z",
+      "priceUsd": 0.0000336702005786428,
+      "volume24hUsd": 32.8278693905,
+      "liquidityUsd": 29668.7953,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "RIPPLE / WETH",
+      "pool": "0xfa02d3b9171a5f9fe25e7a227d738d1f917d179954e5c2c04953033eb398a331",
+      "token": "0x412da1624d510bedb2a38042961fe2cd617db473",
+      "createdAt": "2026-08-13T06:42:03Z",
+      "priceUsd": 0.00046063227209905,
+      "volume24hUsd": 8.8719778709,
+      "liquidityUsd": 455452.338,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "RIPPLE / WETH",
+      "pool": "0x46bcfdc01d98cf083b2e39e3e2df522229c9e095ff9ccc26166ab19e30520b9e",
+      "token": "0x98f06f7a4027eeb9eca518c3ae4871904ad9cb31",
+      "createdAt": "2026-08-13T06:41:05Z",
+      "priceUsd": 0.000321545921570098,
+      "volume24hUsd": 8.7029269379,
+      "liquidityUsd": 317663.567,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "date": "2026-09-15",
+  "at": "2026-09-15T12:45:41.443Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x7fd1c62ba471889e7c1ef80a7366c83b33911008a6498c4c5bb39ae906be1bb9",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 0,
+    "caution": 2,
+    "insufficientData": 2,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "TENDIE / ETH",
+      "pool": "0xa770182c62e719d726fdfa4ffa9aacb5a5f9adc6b9016427ec424445a06d53d7",
+      "token": "0xc14b15d70c484d139191d81be69d5f12a8a9df1a",
+      "createdAt": "2026-09-15T12:18:23Z",
+      "priceUsd": 0.000211900622905206,
+      "volume24hUsd": 160757.876778907,
+      "liquidityUsd": 19120.14,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "verified",
+          "owner-powers",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "LAPTOP / ETH",
+      "pool": "0xf692857658f59cc6b22de9964d0612ce0113819d67fb1c3211b461971daa8152",
+      "token": "0x78856adf0dd04a6a588efcef644d2e6f03771eb9",
+      "createdAt": "2026-09-15T12:29:17Z",
+      "priceUsd": 0.000221290249353566,
+      "volume24hUsd": 144180.495364561,
+      "liquidityUsd": 19806.1287,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "verified",
+          "owner-powers",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "USELESSLAPTOP / ETH",
+      "pool": "0x61afc62bfece42accac76d3ef9693be8a4c8f84d5a58e248a0587aee3253ee2a",
+      "token": "0xacc5b90e4437eb899b40cea214e489696b21a651",
+      "createdAt": "2026-09-15T12:33:39Z",
+      "priceUsd": 0.000207715415924463,
+      "volume24hUsd": 130374.134426122,
+      "liquidityUsd": 19444.605,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "verified",
+          "owner-powers",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "果蝇 / ETH 1%",
+      "pool": "0x08b72edfb0bdd7088035c8883229a99d3bd3eb70d4ea27bcb1eca9be1a3d556c",
+      "token": "0xfd6e5551ed0ca07b68800bf451b0e90eeb84ec29",
+      "createdAt": "2026-09-15T12:21:35Z",
+      "priceUsd": 0.000128228876038532,
+      "volume24hUsd": 80096.8771832722,
+      "liquidityUsd": 20737.796,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "date": "2026-09-01",
+  "at": "2026-09-01T12:38:33.094Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x12a67ed59478942030b6c12180e963b19ff0af325c1a486d40955108dce8908e",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 2,
+    "caution": 2,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "Anthropic / USDC",
+      "pool": "0xcec872aa720d380ba3d02f86699fcfba94cc7df7",
+      "token": "0xa3fc570c02da688f2689c8dcfa1ebbb730dacb07",
+      "createdAt": "2026-09-01T11:28:53Z",
+      "priceUsd": 0.0000500328985471309,
+      "volume24hUsd": 10915376.9215664,
+      "liquidityUsd": 4782164.4574,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "concentration",
+          "liquidity"
+        ],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "孙小圣 / USDC",
+      "pool": "0xe527a438e7e59298271a953a8ad94a8e7152cc11",
+      "token": "0x1c4448a3d284200cbcbb28366402d5c039a6db07",
+      "createdAt": "2026-09-01T12:18:51Z",
+      "priceUsd": 0.0000482689127284401,
+      "volume24hUsd": 5483822.55311083,
+      "liquidityUsd": 2212905.4245,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "liquidity"
+        ],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "CTO / ETH 0.3%",
+      "pool": "0x0df041df1a2f82005e520522936ad9b4eb25564fc8c2f56a0ab7a7680ff9857b",
+      "token": "0xb2000000000000000000001dd8e7ebb649d0be28",
+      "createdAt": "2026-09-01T12:07:47Z",
+      "priceUsd": 0.0000263433290970024,
+      "volume24hUsd": 21621.0287283216,
+      "liquidityUsd": 22750.1593,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "AAPLCAT / WETH",
+      "pool": "0xf8b80e0d92d54e6b3d61865d31d48abc8858f532",
+      "token": "0xc0b1ac4cbff249c54dbda44be123bd6ee4ae08c0",
+      "createdAt": "2026-09-01T12:17:37Z",
+      "priceUsd": 0.00000963418795637766,
+      "volume24hUsd": 3685.8758197867,
+      "liquidityUsd": 80771.9982,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "creator-stake"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    }
+  ]
+}

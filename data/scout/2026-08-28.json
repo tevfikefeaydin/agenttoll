@@ -1,0 +1,109 @@
+{
+  "date": "2026-08-28",
+  "at": "2026-08-28T19:29:59.033Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0xb2047b25228ccd799623b6d438c96841b5a6a9add3d9b89b664ec7f561279632",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 0,
+    "caution": 4,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "SHIT / ETH 0.05%",
+      "pool": "0x56675164a835c4f8902954758be1f6b11654ffbf405e57c23bdab7521421c17d",
+      "token": "0xb200000000000000000000e7c711bf66cd6ad901",
+      "createdAt": "2026-08-28T19:00:19Z",
+      "priceUsd": 0.00000107819867805756,
+      "volume24hUsd": 33660.0698796113,
+      "liquidityUsd": 33598.057,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "C / ETH 0.3%",
+      "pool": "0xd9da64ad12a2da539fbefe4f7367769c058743d9a1d38f27c0bd90a33b88efec",
+      "token": "0xb200000000000000000000b450a91b2aa422c7bc",
+      "createdAt": "2026-08-28T18:56:51Z",
+      "priceUsd": 0.0000316961734446246,
+      "volume24hUsd": 25632.1403626386,
+      "liquidityUsd": 27619.5918,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "ATXP / ETH 0.3%",
+      "pool": "0xcddcfab597c23dd65342b06c872b94c0fd3f55ffe57bbab627c2063c0ef5b8a1",
+      "token": "0xb20000000000000000000091aafb3781b876971a",
+      "createdAt": "2026-08-28T19:04:47Z",
+      "priceUsd": 0.0000353529390553798,
+      "volume24hUsd": 20856.8902857797,
+      "liquidityUsd": 27571.7278,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "ERC-8196 / ETH 0.3%",
+      "pool": "0xd1e4d6d6d92f16b860f9983a55f0117584c82b4d4ba8883f26a99d35bb1a9606",
+      "token": "0xb2000000000000000000008b33825803d98aa790",
+      "createdAt": "2026-08-28T19:00:01Z",
+      "priceUsd": 0.0000319673025681075,
+      "volume24hUsd": 20184.7958681777,
+      "liquidityUsd": 24536.6663,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    }
+  ]
+}

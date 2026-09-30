@@ -1,0 +1,108 @@
+{
+  "date": "2026-08-21",
+  "at": "2026-08-21T08:02:49.585Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0xacea7ba5a0b1f919dfd748c2442ab3ef69f0ed64642d9db4b332f1e66f6d6d8b",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 0,
+    "caution": 4,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "TREX / ETH 0.05%",
+      "pool": "0x62f6d0498a51bedcb3a8ed3e0994aba92c6bb3959b11da46f6e2fefed9d411d7",
+      "token": "0xeccf2b6cacbf8f49f9d074ab14faf3109d3d73d0",
+      "createdAt": "2026-08-21T07:41:43Z",
+      "priceUsd": 6.96082023474869e-7,
+      "volume24hUsd": 28450.8219147121,
+      "liquidityUsd": 42967.1674,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot",
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "CASHCAT / ETH 0.3%",
+      "pool": "0x620212b7ba111f3639e8eb3872ea6c6b0bd22139bb13702f59eb3e0d55958de0",
+      "token": "0xb20000000000000000000064df959c35737d258a",
+      "createdAt": "2026-08-21T07:42:57Z",
+      "priceUsd": 0.0000176504948926313,
+      "volume24hUsd": 11076.3682816689,
+      "liquidityUsd": 16378.7021,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "Whorl / ETH 0.3%",
+      "pool": "0x18d0063c00550a54ec6bf62dee6ac87ed73ca0bff599b00345784a134c3d7235",
+      "token": "0xb200000000000000000000a73e3b6f24f3163a78",
+      "createdAt": "2026-08-21T07:46:27Z",
+      "priceUsd": 0.0000208537239086653,
+      "volume24hUsd": 10021.5465715349,
+      "liquidityUsd": 18623.7563,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "MEOW / WETH",
+      "pool": "0xf928203509393a7976e6319f375a22a8d7c1b941",
+      "token": "0x9b12040a93412841f24b05a8e5a2966546e55f1b",
+      "createdAt": "2026-08-21T07:49:19Z",
+      "priceUsd": 0.00000220462949436868,
+      "volume24hUsd": 2888.6539684673,
+      "liquidityUsd": 18463.4916,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity"
+        ]
+      }
+    }
+  ]
+}

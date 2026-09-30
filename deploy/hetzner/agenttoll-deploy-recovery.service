@@ -1,0 +1,17 @@
+[Unit]
+Description=Restore interrupted AgentToll routing before Docker starts
+DefaultDependencies=no
+After=local-fs.target
+Before=docker.service
+# Add the configured proxy storage mount with a host-local systemd drop-in.
+RequiresMountsFor=/opt/agenttoll
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /opt/agenttoll/deployer/autodeploy.py --recover-files
+UMask=0077
+TimeoutStartSec=30s
+NoNewPrivileges=true
+
+[Install]
+WantedBy=docker.service

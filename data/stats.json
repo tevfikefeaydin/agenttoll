@@ -1,0 +1,138 @@
+{
+  "network": "base",
+  "payTo": "0xe55359021a6a22d8385b827405991c56075f56f8",
+  "schemaVersion": 1,
+  "fromBlock": 49340000,
+  "countingPolicy": "usdc-transfer-1-50000-v1",
+  "block": 51988394,
+  "blockHash": "0xec772da193e4eb8e74c7dfaf84afe6ffcbf15d00de0f85a6421fc19ef82cb330",
+  "at": "2026-09-30T11:20:17.678Z",
+  "firstTollAt": "2026-07-31T13:49:17.000Z",
+  "lastTollAt": "2026-09-30T03:04:55.000Z",
+  "payers": {
+    "0x29d7837a1c19890d2ab123999e9cf8bfe40985b0": {
+      "calls": 140,
+      "usdcUnits": "687000"
+    },
+    "0x51063e78f02f028ddce8f722e24800ed433e435f": {
+      "calls": 42,
+      "usdcUnits": "46000"
+    },
+    "0x5f871f89b13f5c7f570a765aa54c211323f36f78": {
+      "calls": 37,
+      "usdcUnits": "62000"
+    },
+    "0x8d2a47cbd262e1bc5ee0645c81899f9896957d37": {
+      "calls": 37,
+      "usdcUnits": "83000"
+    },
+    "0xc59e74ed6386b2a12d892fff2509a6965a0498dc": {
+      "calls": 26,
+      "usdcUnits": "54000"
+    },
+    "0x89c0003ab32b3756a31fda726fab03966cfdc6fb": {
+      "calls": 12,
+      "usdcUnits": "12000"
+    },
+    "0x686ca1f3baf7f7df3334f2f1a65ae314ee9cdb29": {
+      "calls": 11,
+      "usdcUnits": "27000"
+    },
+    "0xc9c7b38c0942914fc8ea12063bc92dcd3b581670": {
+      "calls": 11,
+      "usdcUnits": "32000"
+    },
+    "0xbb5dc827367e34e5fc663a4d86451b12aaeb71a9": {
+      "calls": 10,
+      "usdcUnits": "31000"
+    },
+    "0x34eb6e6101fae8c9900d22ad9b1dc84204d8a195": {
+      "calls": 10,
+      "usdcUnits": "32000"
+    },
+    "0x54e163e9b8edda194d83f46add921bfa5fc5f4e0": {
+      "calls": 10,
+      "usdcUnits": "25000"
+    },
+    "0xa19f621581dbc851a21d6179868111709a52accc": {
+      "calls": 8,
+      "usdcUnits": "44000"
+    },
+    "0x6777e11fb0a7917b8110b7dab9188aa3f6d23986": {
+      "calls": 5,
+      "usdcUnits": "11000"
+    },
+    "0x556d8a86991b56646f98040c8c8298c5053d0484": {
+      "calls": 4,
+      "usdcUnits": "4000"
+    },
+    "0x95b1e99a4c89c6e5bec4c45f59ede7682d18f9d2": {
+      "calls": 3,
+      "usdcUnits": "3000"
+    },
+    "0x843b544bf5f0aa6cbf13e94563874878c98cc4a7": {
+      "calls": 3,
+      "usdcUnits": "3000"
+    },
+    "0xb76ac0ab6a5f45151797beb1aa96aca72f788b68": {
+      "calls": 3,
+      "usdcUnits": "3000"
+    },
+    "0x644678ad37833c0d52f0170f1f73a5e62bc3e6d5": {
+      "calls": 2,
+      "usdcUnits": "2000"
+    },
+    "0xc533bf5268a2f64adde58dce380651f70aa92d7a": {
+      "calls": 2,
+      "usdcUnits": "2000"
+    },
+    "0xe0b2bf1ebf16ddaf46905cabc75b623261e87c39": {
+      "calls": 1,
+      "usdcUnits": "2000"
+    },
+    "0x4afc5ecf6d1fd84d71fee3e06769bc0271aadcf7": {
+      "calls": 1,
+      "usdcUnits": "2000"
+    },
+    "0x9a07cea7ed111c93a233d1d12bbb68a511b59eea": {
+      "calls": 1,
+      "usdcUnits": "5000"
+    },
+    "0x6e5306c83602b204acaa65ceb05ec178120ea265": {
+      "calls": 1,
+      "usdcUnits": "1000"
+    },
+    "0xd10616149e2b967316f9a82c1af4dda6d3608d1d": {
+      "calls": 1,
+      "usdcUnits": "1000"
+    },
+    "0x1ded5e8bb5c8135038cf05ac446f090631780649": {
+      "calls": 1,
+      "usdcUnits": "1000"
+    },
+    "0x902dcf34e53695bdea2ffb354b1a2e58bd598256": {
+      "calls": 1,
+      "usdcUnits": "1000"
+    },
+    "0xe3badbd4f38214b9eae528a1a5398f6678f63fb3": {
+      "calls": 1,
+      "usdcUnits": "1000"
+    },
+    "0xd66a5153ba4eebeada642bc7196472d7efe38cc7": {
+      "calls": 1,
+      "usdcUnits": "1000"
+    },
+    "0x7dd81398fac7de0bf843bfd874cbea68face17d2": {
+      "calls": 1,
+      "usdcUnits": "1000"
+    },
+    "0xd9ece5e17d99458721414bbd587ef651209d145e": {
+      "calls": 1,
+      "usdcUnits": "1000"
+    },
+    "0x2e8dfc2a77adcdd865a46293844c250462a1c32d": {
+      "calls": 1,
+      "usdcUnits": "1000"
+    }
+  }
+}

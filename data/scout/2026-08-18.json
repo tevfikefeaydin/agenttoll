@@ -1,0 +1,105 @@
+{
+  "date": "2026-08-18",
+  "at": "2026-08-18T07:59:47.194Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x7862e361a6504afc8e56cd397bedbe9124122dce3b5838cc516872d2a382754d",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 0,
+    "caution": 4,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "BB / WETH",
+      "pool": "0x47a892ef9e4b9468c614b5a5d5671f452106f8c85178c09881d9ebb7a6655484",
+      "token": "0x2af4d4a93832e3d09ee91ad487c27ac8412d8b07",
+      "createdAt": "2026-08-18T07:35:09Z",
+      "priceUsd": 2.71990094041345e-7,
+      "volume24hUsd": 78883.9852168661,
+      "liquidityUsd": 21382.4072,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "BB / WETH",
+      "pool": "0xd8e9cc0d6ffafc801db51de4b393d81540100d34",
+      "token": "0xbc1f5a2e19ae3a79b742ec6e9215deb8d1808b33",
+      "createdAt": "2026-08-18T07:54:11Z",
+      "priceUsd": 0.00000379555773407271,
+      "volume24hUsd": 619.340911,
+      "liquidityUsd": 58130.4219,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "BaseBull / USDC",
+      "pool": "0xe3cb2eff92b27678e3e8c13702055325cef85cbbf38e7d34711beea4437ad76e",
+      "token": "0x5ed801fc81d4d428e5867eeb0464ba99d61b43ea",
+      "createdAt": "2026-08-18T07:27:49Z",
+      "priceUsd": 0.000103503159276516,
+      "volume24hUsd": 49.8277118905,
+      "liquidityUsd": 102710.7594,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "BaseBull / USDC",
+      "pool": "0xe3cb2eff92b27678e3e8c13702055325cef85cbbf38e7d34711beea4437ad76e",
+      "token": "0x5ed801fc81d4d428e5867eeb0464ba99d61b43ea",
+      "createdAt": "2026-08-18T07:27:49Z",
+      "priceUsd": 0.000103503159276516,
+      "volume24hUsd": 49.8277118905,
+      "liquidityUsd": 102710.7594,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    }
+  ]
+}

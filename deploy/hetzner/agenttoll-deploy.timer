@@ -1,0 +1,11 @@
+[Unit]
+Description=Check AgentToll main after GitHub CI every five minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitInactiveSec=5min
+AccuracySec=15s
+Unit=agenttoll-deploy.service
+
+[Install]
+WantedBy=timers.target

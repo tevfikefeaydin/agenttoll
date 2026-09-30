@@ -1,0 +1,100 @@
+{
+  "date": "2026-08-06",
+  "at": "2026-08-06T10:34:32.442Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x79bbfacc62f1dd03f9a479d6331ce3be1f53ea1377eb83e4407e990a8e8b23a5",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 1,
+    "caution": 3,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "QUID / USDC 0.004%",
+      "pool": "0xe8d3795c8bc6d750ea114f897fb521b393d9aedfa96fa05733328f7a7efa1486",
+      "token": "0x1a44233fae8d50f1aeb3a5d58dd426ff4814cb53",
+      "createdAt": "2026-08-06T10:10:29Z",
+      "priceUsd": 0.100011596724783,
+      "volume24hUsd": 1612392.61268752,
+      "liquidityUsd": 17714.7354,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "liquidity"
+        ],
+        "warnings": [],
+        "unchecked": []
+      }
+    },
+    {
+      "name": "RENT / ETH 0.3%",
+      "pool": "0x6d9365a0b9b2b829ceba17a7fa8edbae0332c98dd32a64991b6d17db03f38a68",
+      "token": "0xb200000000000000000000d17f98e88d52a5e6f6",
+      "createdAt": "2026-08-06T10:09:51Z",
+      "priceUsd": 0.000022549807910547,
+      "volume24hUsd": 9813.0721583727,
+      "liquidityUsd": 18468.7272,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "openhuman / WETH",
+      "pool": "0xc958f6a4e21aa882e5148844bb0717ac3cfbd66c",
+      "token": "0x5fa375cad511ce2112fd90089ff62f9e15e5b241",
+      "createdAt": "2026-08-06T10:15:43Z",
+      "priceUsd": 0.00000499222114840847,
+      "volume24hUsd": 2622.428951,
+      "liquidityUsd": 62336.8455,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "creator-stake"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "SOAF / WETH",
+      "pool": "0x1cd6b91609b4fbb721c70c48ccbe3f3cb3c2b63d2049ba8c3e5f8720cffe5e52",
+      "token": "0x5e617cc8f993c4ef37a55b6f4bee4af639244fb7",
+      "createdAt": "2026-08-06T10:01:05Z",
+      "priceUsd": 0.000281255194136899,
+      "volume24hUsd": 47.0006744771,
+      "liquidityUsd": 275377.2044,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+name: Daily scout snapshot
+
+# Buys one scout call a day and commits the result to data/scout/. The track
+# record has to live in git: a dated commit is the tamper-evident form of
+# "this is what we flagged, before what happened next happened".
+on:
+  schedule:
+    - cron: "23 7 * * *" # 07:23 UTC daily
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "dry-run is offline; quote-only checks an unsigned quote; pay captures and commits"
+        type: choice
+        options: [dry-run, quote-only, pay]
+        default: dry-run
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-scout-snapshot
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    # Preview runs remain available on branches; a paid capture must be publishable.
+    if: github.ref == 'refs/heads/main' || inputs.mode != 'pay'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      AGENTTOLL_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.mode || 'pay' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: ${{ env.AGENTTOLL_MODE == 'pay' }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run build
+      - name: Inspect or capture today's snapshot
+        id: capture
+        run: node scripts/snapshot.mjs
+        env:
+          AGENT_PRIVATE_KEY: ${{ env.AGENTTOLL_MODE == 'pay' && secrets.AGENT_WALLET_KEY || '' }}
+          AGENTTOLL_URL: https://agenttoll.app
+          AGENTTOLL_NETWORK: base
+          AGENTTOLL_BUDGET_USDC: "0.008"
+          AGENTTOLL_MAX_PER_CALL_USDC: "0.008"
+          AGENTTOLL_TIMEOUT_MS: "30000"
+      - name: Preserve captured public JSON before publication
+        id: preserve
+        if: always() && env.AGENTTOLL_MODE == 'pay' && github.ref == 'refs/heads/main'
+        run: node scripts/publish-snapshot.mjs --capture scout --artifact-dir "$RUNNER_TEMP/scout-capture"
+      - name: Publish captured data with bounded conflict-aware retries
+        if: env.AGENTTOLL_MODE == 'pay' && github.ref == 'refs/heads/main' && steps.capture.outcome == 'success' && steps.preserve.outcome == 'success'
+        run: node scripts/publish-snapshot.mjs --publish "$RUNNER_TEMP/scout-capture"
+      - name: Retain capture even when publication fails
+        if: always() && env.AGENTTOLL_MODE == 'pay' && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: scout-capture-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/scout-capture
+          retention-days: 14
+          if-no-files-found: warn

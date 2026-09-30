@@ -1,0 +1,99 @@
+{
+  "date": "2026-09-30",
+  "at": "2026-09-30T13:58:22.745Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0xb5b629a82dbddf3fa48cc5d418076bdd827373ec7ea13565a57c85a41c4b2dff",
+  "summary": {
+    "found": 4,
+    "checked": 3,
+    "unchecked": 1,
+    "highRisk": 1,
+    "caution": 0,
+    "insufficientData": 2,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "BLUEPILL / ETH 0.01%",
+      "pool": "0xb791a47371a2a8ee3015b0fdd2dfa5c3888ee51d0c2de98c9972009e2b165511",
+      "token": "0xb37bbabc17f96538dabb4a16742af730d2a98884",
+      "createdAt": "2026-09-30T13:34:39Z",
+      "priceUsd": 0.000357743751055294,
+      "volume24hUsd": 712151.762379333,
+      "liquidityUsd": 80974.742,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "verified"
+        ],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "owner-powers",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "UDR / WETH 0.3%",
+      "pool": "0xfbfa11289944a3008ba517e66a26822eb9dc67bf35031b365dff056d1774541e",
+      "token": "0x2ef05cef86f29aaf2889ec0c32ba76d7ae6fe128",
+      "createdAt": "2026-09-30T13:28:55Z",
+      "priceUsd": 5.94851539644722e-8,
+      "volume24hUsd": 5510.0027076783,
+      "liquidityUsd": 143105250.1179,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "GOIF / WETH 0.3%",
+      "pool": "0xff98d7c25b02d59833943163c290f6a5c5a8140ab9ec3b724157800ffbad1eab",
+      "token": "0x25a14d45856611f594ed898d3d3cdaa4e7e1915f",
+      "createdAt": "2026-09-30T13:26:47Z",
+      "priceUsd": 4.97013623504e-8,
+      "volume24hUsd": 5469.9559225489,
+      "liquidityUsd": 151062991.1366,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "PYPLc / USDC 5%",
+      "pool": "0x9fe752e5ab1cd1c5e8b1bc90f38271fbc4485d067448f50a76d6e1474b5e9d40",
+      "token": "0xb200000000000000000000450ad3abe5d4846c6e",
+      "createdAt": "2026-09-30T13:26:19Z",
+      "priceUsd": 66.9581929121372,
+      "volume24hUsd": 2939.1312571996,
+      "liquidityUsd": 16533.7895,
+      "safety": null
+    }
+  ]
+}

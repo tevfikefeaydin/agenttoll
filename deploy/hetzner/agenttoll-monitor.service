@@ -1,0 +1,17 @@
+[Unit]
+Description=AgentToll unsigned API and data freshness checks
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /opt/agenttoll/monitor/monitor.py
+TimeoutStartSec=95
+User=root
+UMask=0077
+Nice=10
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/agenttoll/monitor

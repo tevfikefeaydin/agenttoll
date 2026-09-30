@@ -1,0 +1,112 @@
+{
+  "date": "2026-08-19",
+  "at": "2026-08-19T07:59:15.069Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x64fa9f81b726944580e7403877072c50c83e79c20e7fb59751ca513e6f13c449",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 2,
+    "caution": 2,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "NVDAc / USDC 3%",
+      "pool": "0xe82fa069a5e01a6dc36c6736b5de4f721d726291b080c69b48e21b9c5a11a2ad",
+      "token": "0xb20000000000000000000078ee7ce2fe4908108c",
+      "createdAt": "2026-08-19T07:34:21Z",
+      "priceUsd": 262.611811845365,
+      "volume24hUsd": 49722.6079563617,
+      "liquidityUsd": 26030.4957,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot",
+          "liquidity"
+        ],
+        "unchecked": [
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "4 / ETH 0.05%",
+      "pool": "0xd2ec7d9dba04b89d3ec2eaf82cea403fb84cb99da51e9b7c54882ac3378ce9a7",
+      "token": "0x9d952d73f7e88dd360260f46fa05ab8d02e7e851",
+      "createdAt": "2026-08-19T07:42:57Z",
+      "priceUsd": 3.46456398590046e-7,
+      "volume24hUsd": 44416.2042859366,
+      "liquidityUsd": 16863.0077,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "verified"
+        ],
+        "warnings": [
+          "honeypot",
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "BDK / ETH 0.3%",
+      "pool": "0xf5868290e5ed8dd61bcbb80c7291916e6ab4d1be58d848cc5f5343ceb577388f",
+      "token": "0xb20000000000000000000031219da3539e606c7b",
+      "createdAt": "2026-08-19T07:36:55Z",
+      "priceUsd": 0.0000217400679135893,
+      "volume24hUsd": 12644.7288028128,
+      "liquidityUsd": 17467.8181,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "openhuman / WETH",
+      "pool": "0x25591b70dcca98543f5596fa4b926ee14f474b9c",
+      "token": "0x43496a682f099f39ba76e30dcf1440b1e97f7482",
+      "createdAt": "2026-08-19T07:29:47Z",
+      "priceUsd": 0.00000531371504859073,
+      "volume24hUsd": 4944.853378,
+      "liquidityUsd": 67313.7016,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "verified"
+        ],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    }
+  ]
+}

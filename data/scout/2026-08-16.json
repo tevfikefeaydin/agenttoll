@@ -1,0 +1,108 @@
+{
+  "date": "2026-08-16",
+  "at": "2026-08-16T07:51:56.618Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x7de940e3a71c4d8e535c46d37b049a28f1c24b234ba7c8facefcbfdd4b823fb8",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 0,
+    "caution": 4,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "병신 / ETH 0.3%",
+      "pool": "0xb11a20559d8134bd87cee87613394803abbec9cacba9cd560c5b88b4d140fd4b",
+      "token": "0xb200000000000000000000c1364b779e96d7034a",
+      "createdAt": "2026-08-16T07:16:53Z",
+      "priceUsd": 0.0000229378394325247,
+      "volume24hUsd": 24329.2408426766,
+      "liquidityUsd": 19155.4722,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "병신 / ETH 0.3%",
+      "pool": "0xb11a20559d8134bd87cee87613394803abbec9cacba9cd560c5b88b4d140fd4b",
+      "token": "0xb200000000000000000000c1364b779e96d7034a",
+      "createdAt": "2026-08-16T07:16:53Z",
+      "priceUsd": 0.0000229378394325247,
+      "volume24hUsd": 24329.2408426766,
+      "liquidityUsd": 19155.4722,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "openhuman / WETH",
+      "pool": "0xb95124cf241f949a92fc730dacba9fc87d27ee39",
+      "token": "0x84074aad56448f813e6ea84db651009db47569d4",
+      "createdAt": "2026-08-16T07:40:35Z",
+      "priceUsd": 0.00000310754348715143,
+      "volume24hUsd": 1287.98861,
+      "liquidityUsd": 58672.4216,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "SST / WETH",
+      "pool": "0x7c280593a411789915bc7e7565a028f97bb8c061118e777fe361ac3d6feb038b",
+      "token": "0xa1324c13f12424fcf4281285a224cca881fff9f2",
+      "createdAt": "2026-08-16T07:27:07Z",
+      "priceUsd": 0.0000962788045487222,
+      "volume24hUsd": 110.1026147225,
+      "liquidityUsd": 84875.6253,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    }
+  ]
+}

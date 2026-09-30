@@ -1,0 +1,97 @@
+{
+  "date": "2026-09-17",
+  "at": "2026-09-17T12:39:33.665Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0xcbe030617f3aedbc6d3df5c4fabbf7e7b19458a928e9f8a51b8bb34e7a84106f",
+  "summary": {
+    "found": 4,
+    "checked": 3,
+    "unchecked": 1,
+    "highRisk": 0,
+    "caution": 2,
+    "insufficientData": 1,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "CYBER / ETH",
+      "pool": "0x196e8b4cebb195f969a9196bd4421425af50147abb0f0978b8f5b7a3546c8a4f",
+      "token": "0x1104c2b0a77253cd18d92d07b640b0b653ee518a",
+      "createdAt": "2026-09-17T12:26:23Z",
+      "priceUsd": 0.000197674690811224,
+      "volume24hUsd": 126206.725542275,
+      "liquidityUsd": 18146.8711,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "TENDIE / ETH",
+      "pool": "0xaeb67d34016df239ebbd2931242f5a3e31f3c816f28650eddf9eef0c33101e44",
+      "token": "0x28b795fcb65f95f15a318ec35e8a5464a1480a02",
+      "createdAt": "2026-09-17T12:20:41Z",
+      "priceUsd": 0.000211151270383254,
+      "volume24hUsd": 117274.947584771,
+      "liquidityUsd": 19077.6957,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "LAPTOP / ETH",
+      "pool": "0x3d78cc4e559803d548074857cb05a5d49db1bcd029e251e215d9845f332f1580",
+      "token": "0xfd42a6c5776e6fcdc82d4bbe475b102b99fb3dc1",
+      "createdAt": "2026-09-17T12:32:49Z",
+      "priceUsd": 0.000124642487059687,
+      "volume24hUsd": 80452.9505895435,
+      "liquidityUsd": 15191.7947,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "DTCC Ondo / ETH 0.3%",
+      "pool": "0xfe58d2dc4c83865323e7918e007828eea0e4271251c75aedc25c6513579f5571",
+      "token": "0xb20000000000000000000017dcfecc015b5b61e7",
+      "createdAt": "2026-09-17T12:03:03Z",
+      "priceUsd": 0.0000273784205306203,
+      "volume24hUsd": 20589.7078448642,
+      "liquidityUsd": 23593.497,
+      "safety": null
+    }
+  ]
+}

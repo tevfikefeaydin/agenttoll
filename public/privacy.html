@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy — AgentToll</title>
+<meta name="description" content="What AgentToll collects: no accounts, no keys, no tracking. Short-lived server logs and public onchain payment data only.">
+<link rel="icon" href="/icon.png" type="image/png">
+<style>
+  :root { --bg:#070B14; --text:#EAF0FA; --muted:#8A97AF; --line:rgba(138,151,175,.16); --blue:#7BA6FF; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:"Segoe UI",system-ui,sans-serif; line-height:1.7; }
+  .wrap { width:min(760px,100% - 44px); margin:0 auto; padding:56px 0 80px; }
+  a { color:var(--blue); text-decoration:none; } a:hover { text-decoration:underline; }
+  h1 { font-size:2rem; letter-spacing:-.02em; margin-bottom:8px; }
+  h2 { font-size:1.1rem; margin:34px 0 10px; letter-spacing:-.01em; }
+  p, li { color:var(--muted); }
+  ul { padding-left:20px; margin-top:8px; }
+  li { margin-bottom:6px; }
+  .meta { color:var(--muted); font-size:.9rem; margin-bottom:28px; }
+  hr { border:none; border-top:1px solid var(--line); margin:40px 0 22px; }
+  code { font-family:Consolas,monospace; font-size:.9em; color:var(--text); }
+  strong { color:var(--text); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="meta"><a href="/">← AgentToll</a></p>
+  <h1>Privacy</h1>
+  <p class="meta">Last updated 15 September 2026</p>
+
+  <p>AgentToll has <strong>no accounts, no API keys and no sessions</strong>, so there is very
+  little about you for us to hold in the first place. This page describes exactly what exists.</p>
+
+  <h2>What we do not collect</h2>
+  <ul>
+    <li>No sign-ups, names, emails or passwords — there is no account system.</li>
+    <li>No cookies, no analytics, no advertising or tracking scripts. The site loads no third-party code.</li>
+    <li>No private keys. Payment authorizations are signed in your own wallet or agent.</li>
+    <li>No server-side account history. The watch endpoints work from a cursor <em>you</em> send back, so we do not store where you left off.</li>
+  </ul>
+
+  <h2>What does exist</h2>
+  <ul>
+    <li><strong>Research saved in your browser.</strong> Saving a token or example, or receiving an
+      inspection with “Save completed reports in this browser” enabled, uses localStorage on this
+      device. Token inspections requested from My research are saved there automatically. My research keeps up to 50 watched token addresses and 100 report snapshots, with up
+      to ten per token; older reports may be removed to fit the storage limit. These records include
+      token addresses, public report evidence, observation dates and whether a report was an example
+      or an inspection. They do not include paying wallet addresses, payment signatures or private
+      keys. Wallet portfolio lookups are held in page memory; only individual token inspections
+      are saved. Use My research to remove reports or clear all saved research. Browser storage
+      does not synchronize between devices, and clearing site data removes it.</li>
+    <li><strong>Shared snapshots.</strong> A report link includes sanitized token evidence in the
+      URL fragment after #. Browsers do not send that fragment in the page request to our server.
+      Anyone given the complete link can read and modify the included snapshot; shared snapshots
+      are explicitly unverified. No paying wallet or payment authorization is included. Sharing
+      through another service gives that service the link you supply. Opening a shared report
+      does not save it to your research or request a payment.</li>
+    <li><strong>Server logs.</strong> Completed and interrupted API requests record their time,
+      request ID, route template, HTTP outcome, duration, data-source counters and payment
+      failure stage/reason. Recognized client names and numeric versions may be retained as
+      self-reported diagnostics. Application request logs omit IP addresses, raw user-agent
+      text, query strings, requested wallet/name values and payment authorization payloads.
+      After successful facilitator verification or settlement, logs may include the verified
+      public paying address and transaction hash to diagnose payment faults. Once settlement is
+      confirmed, the log also records the amount, asset and payment network selected by the server.
+      We do not record signatures or private keys.</li>
+    <li><strong>Log retention.</strong> The application runs on Hetzner. Its Docker log files
+      rotate by size (three files of up to 10 MB each), so the time retained varies with
+      traffic. An optional private usage archive retains allowlisted request and payment
+      evidence for up to 30 days after collection, including verified public payer addresses
+      and settlement hashes. It excludes raw log payloads and signatures, hashes request IDs,
+      and is bounded to 50,000 records and 20 MB of state. Expiry runs during successful
+      collection; a stopped collector retains its last archive until it is restarted or removed.
+      Operational reports may preserve selected diagnostic records while a fault
+      is investigated. Hosting/network providers can maintain separate operational logs.</li>
+    <li><strong>Onchain payments.</strong> x402 payments settle on Base, a public blockchain. The
+      paying address, amount and timestamp are public on the network. Our
+      <code>/api/stats</code> counter reads those public transfers; verified payer and receipt
+      identifiers may also appear in the diagnostic logs described above.</li>
+    <li><strong>Aggregate usage reports.</strong> We can aggregate the retained or exported server
+      logs to count browser safety-check quotes, payment submissions, failure stages, confirmed
+      settlements and reports delivered after payment. The aggregate separates known operator
+      wallets from other public paying addresses and can count an address as returning when it
+      pays on two or more UTC dates in the supplied log window. Commercial payment and wallet
+      totals include Base mainnet only; testnet receipts are shown separately. Aggregate output omits wallet
+      addresses. A wallet count is not a count of people, and an address outside our known operator
+      list is not necessarily an organic customer. Because logs rotate by size, these reports cover
+      only the records supplied to them.</li>
+    <li><strong>In-memory caches and rate limits.</strong> Data responses are cached for a
+      route-specific period; immutable historical snapshots can remain cached for six hours.
+      Cache keys describe requested data, not the paying identity. Per-IP counters enforce
+      one-minute request limits; they are separate from application request logs. Watch
+      cursors stay with the caller.</li>
+  </ul>
+
+  <h2>Third parties</h2>
+  <p>The canonical website and API are hosted on Hetzner; Vercel is retained as a deployment
+  fallback. Coinbase's CDP x402 facilitator verifies and settles payments and receives their
+  authorization data. Endpoint data comes from sources including CoinGecko, GeckoTerminal,
+  DexScreener, Blockscout, alternative.me, GitHub and Base RPC. Those data providers receive our
+  server's queries, including requested public token/address identifiers where needed.</p>
+
+  <h2>Your choices</h2>
+  <p>Because we hold no account data, there is no profile to export or delete. If you want a
+  server log line removed, or have any privacy question, open an issue at
+  <a href="https://github.com/tevfikefeaydin/agenttoll/issues">github.com/tevfikefeaydin/agenttoll</a>
+  with the approximate timestamp and request ID. Issues are public: do not post private keys,
+  signatures or payment authorization payloads. Public blockchain records cannot be removed
+  by AgentToll.</p>
+
+  <hr>
+  <p class="meta">AgentToll · agenttoll.base.eth · <a href="/terms.html">Terms</a></p>
+</div>
+</body>
+</html>

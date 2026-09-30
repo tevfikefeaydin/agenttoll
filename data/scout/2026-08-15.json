@@ -1,0 +1,111 @@
+{
+  "date": "2026-08-15",
+  "at": "2026-08-15T07:49:29.579Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0xe4aea7ddc54543339e184b8e328f319dae207c60f5cdc207c7b4c3e3d3f7618a",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 4,
+    "caution": 0,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "RS / USDC",
+      "pool": "0x10cad5a6cb0fd86e487b4953f3c888f41d3fcbf12ec39de46a8fed9021276193",
+      "token": "0xe02d3099c8273822fccdf1183ed353528b14b8cd",
+      "createdAt": "2026-08-15T05:40:23Z",
+      "priceUsd": 4074.80972808989,
+      "volume24hUsd": 24048556986.6123,
+      "liquidityUsd": 3967620913.6018,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "verified"
+        ],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "SJ / USDC",
+      "pool": "0xab63bc27afc28644035435a45e845c5069963b258aa7e33a1e9a60b1ef3d7b83",
+      "token": "0x87faa2efd44da5b3c9bc84c2e92098d4f90f8108",
+      "createdAt": "2026-08-15T05:40:23Z",
+      "priceUsd": 1.52075356937801,
+      "volume24hUsd": 11115676180.6056,
+      "liquidityUsd": 3526859025.9353,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "verified"
+        ],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "SPX79K / WETH",
+      "pool": "0x28f3cf18c0538686a353851d53b12555ad872c18",
+      "token": "0xc5dba21bd8ba6f621ddbde780cafe9f8f3586c04",
+      "createdAt": "2026-08-15T05:44:55Z",
+      "priceUsd": 0.000685839342056925,
+      "volume24hUsd": 5035.4315890833,
+      "liquidityUsd": 53588.1553,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "verified",
+          "liquidity"
+        ],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration"
+        ]
+      }
+    },
+    {
+      "name": "openhuman / WETH",
+      "pool": "0x03bf1f172e2de4094f1bb540547e70a4425165cf",
+      "token": "0x5648f33167eb8b5674ddf07b7267bc5bc90cc6fb",
+      "createdAt": "2026-08-15T07:15:03Z",
+      "priceUsd": 0.00000504569599857288,
+      "volume24hUsd": 4732.531284,
+      "liquidityUsd": 65843.83,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "liquidity"
+        ],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration"
+        ]
+      }
+    }
+  ]
+}

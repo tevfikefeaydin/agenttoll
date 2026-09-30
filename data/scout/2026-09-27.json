@@ -1,0 +1,62 @@
+{
+  "date": "2026-09-27",
+  "at": "2026-09-27T13:09:57.744Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x7852473d7aeba52db56615400306a1bef0946ba3cea3ff043288748868e1b3aa",
+  "summary": {
+    "found": 2,
+    "checked": 2,
+    "unchecked": 0,
+    "highRisk": 0,
+    "caution": 1,
+    "insufficientData": 1,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "IDEA / GITLAWB 3%",
+      "pool": "0xa49ad364673d06a710367fe0f512f13a432e2b9ae931297b25adf5b59d80ab64",
+      "token": "0x93fe25ac5a233a277a7fcece211a1c91f43566c8",
+      "createdAt": "2026-09-27T13:03:25Z",
+      "priceUsd": 0.0000151354647479711,
+      "volume24hUsd": 18847.1607764536,
+      "liquidityUsd": 15352.348,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "HMM / WETH",
+      "pool": "0x982f8566498b458aa9cd62c8ebb52bc711275354",
+      "token": "0xc85fa0e47978900cfe379be28f748219d20d85cd",
+      "createdAt": "2026-09-27T12:54:03Z",
+      "priceUsd": 8.70872085282873e-11,
+      "volume24hUsd": 2256.2679984765,
+      "liquidityUsd": 15734.8033,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity"
+        ]
+      }
+    }
+  ]
+}

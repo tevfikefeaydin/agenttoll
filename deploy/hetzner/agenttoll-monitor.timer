@@ -1,0 +1,11 @@
+[Unit]
+Description=Run AgentToll read-only checks every hour
+
+[Timer]
+OnCalendar=*-*-* *:37:00 UTC
+RandomizedDelaySec=60
+Persistent=true
+Unit=agenttoll-monitor.service
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,83 @@
+{
+  "date": "2026-09-11",
+  "at": "2026-09-11T12:16:42.556Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x4cafb6beacc52d7ae6b2b83e5b67d1f55c8d897042bc817ceb19ebd75fb2e1c3",
+  "summary": {
+    "found": 4,
+    "checked": 2,
+    "unchecked": 2,
+    "highRisk": 0,
+    "caution": 1,
+    "insufficientData": 1,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "BABYSTONK / ETH",
+      "pool": "0x90cce7db98120e5906433c32699fe8259e0b756c4281b02c4974c86ec11695d6",
+      "token": "0xfbc5f0ec119389935f4ac9594a532ece5f6693d9",
+      "createdAt": "2026-09-11T11:55:39Z",
+      "priceUsd": 0.000280601208356318,
+      "volume24hUsd": 454692.966063151,
+      "liquidityUsd": 21954.7194,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "Flybook / ETH 0.3%",
+      "pool": "0x6b08c1fad2f6260e10127a1905e8cf27a0f87a3f7a11d174593118cca0431874",
+      "token": "0xb2000000000000000000005caa4a1572236b418b",
+      "createdAt": "2026-09-11T12:01:53Z",
+      "priceUsd": 0.0000315685529931794,
+      "volume24hUsd": 14494.3696810452,
+      "liquidityUsd": 23837.2366,
+      "safety": null
+    },
+    {
+      "name": "Loinbase / ETH 0.3%",
+      "pool": "0x0d42646ff48564f182918b718426b73e9cc50823c8be2507c3312edd136cc6dc",
+      "token": "0xb200000000000000000000cec38196d6d657d76d",
+      "createdAt": "2026-09-11T12:01:47Z",
+      "priceUsd": 0.0000174922812492609,
+      "volume24hUsd": 8914.8892316242,
+      "liquidityUsd": 16632.985,
+      "safety": null
+    },
+    {
+      "name": "Flybook / WETH",
+      "pool": "0x7c32e6fb5e75a518622c5f6c52440072f01f482e",
+      "token": "0x512adccbe2e9093b810d04e5e5b60c303f3de418",
+      "createdAt": "2026-09-11T12:07:09Z",
+      "priceUsd": 0.00000417853393993011,
+      "volume24hUsd": 1531.577634883,
+      "liquidityUsd": 76000.2614,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity"
+        ]
+      }
+    }
+  ]
+}

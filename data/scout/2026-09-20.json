@@ -1,0 +1,81 @@
+{
+  "date": "2026-09-20",
+  "at": "2026-09-20T12:31:20.194Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x431f17ae92b2d6bcf0b37febcaa7dd5531138bb5cec0cbdba6f8ca1753c19c80",
+  "summary": {
+    "found": 4,
+    "checked": 2,
+    "unchecked": 2,
+    "highRisk": 0,
+    "caution": 0,
+    "insufficientData": 2,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "DIDDYOIL / ETH",
+      "pool": "0x194244a01ba42a10133464535a49b6cd1469fc55511d0376be30194276f4dc24",
+      "token": "0x0bb6267c627fa39fdefe5be16ec6585846981595",
+      "createdAt": "2026-09-20T12:15:45Z",
+      "priceUsd": 0.000226591211655212,
+      "volume24hUsd": 165230.50241549,
+      "liquidityUsd": 20642.3917,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "BUTTERS / ETH",
+      "pool": "0x2b327b2a712e38059419a0cf34d2dd0983ecfe9e5f2b0ab91d95bb38f8d22720",
+      "token": "0xaaa3aa2fad1fb9094c285e7c7b0f3d61c580d4db",
+      "createdAt": "2026-09-20T12:11:27Z",
+      "priceUsd": 0.000208408149601283,
+      "volume24hUsd": 146965.27296148,
+      "liquidityUsd": 19320.3894,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "VELVETBASE / ETH 0.3%",
+      "pool": "0x1f536de57b01b83caa779de26f170e211d11c215ecf7691eb2cc9691fed0e0fc",
+      "token": "0xb20000000000000000000011c4f94c04940f28d5",
+      "createdAt": "2026-09-20T12:02:41Z",
+      "priceUsd": 0.0000342038728067795,
+      "volume24hUsd": 20627.2797126905,
+      "liquidityUsd": 25123.3392,
+      "safety": null
+    },
+    {
+      "name": "CRST0 / ETH 0.3%",
+      "pool": "0x004467b7790e316f41a7549bd730ea89d6e99b5bb09c4bf69470fd1ff05b758c",
+      "token": "0xb20000000000000000000062db9b6b19f2847759",
+      "createdAt": "2026-09-20T12:03:21Z",
+      "priceUsd": 0.0000283664097821858,
+      "volume24hUsd": 20071.5265872887,
+      "liquidityUsd": 22390.8956,
+      "safety": null
+    }
+  ]
+}

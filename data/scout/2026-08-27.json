@@ -1,0 +1,109 @@
+{
+  "date": "2026-08-27",
+  "at": "2026-08-27T18:20:36.612Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0xdf355a277d6907e62d1aa2acf8e2c3e729b8a5e2551df58b0b64aa4fe9156b4c",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 0,
+    "caution": 4,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "AP / ETH 0.3%",
+      "pool": "0x3c65dcecc152bf8e7e0bb13d0a35656648365667483b72212063cc5e32cfa5c1",
+      "token": "0xb200000000000000000000ab18bb12ed8138134f",
+      "createdAt": "2026-08-27T17:56:43Z",
+      "priceUsd": 0.0000288003926048809,
+      "volume24hUsd": 18109.6504793503,
+      "liquidityUsd": 25350.1525,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "STOCKS / ETH 0.3%",
+      "pool": "0xd207105590ce3b2c41efc967190a61a2fcea8e48bbb984d9c6c3fec5cfe371a4",
+      "token": "0xb200000000000000000000a3747b4e6297830eff",
+      "createdAt": "2026-08-27T17:55:37Z",
+      "priceUsd": 0.000030348010230282,
+      "volume24hUsd": 17585.5363480641,
+      "liquidityUsd": 24261.0834,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "miroshark / ETH 0.3%",
+      "pool": "0x1d331451e9cba438e9b8bf06606f5e69df30c5ca2ae54445a403a923b30fdfe0",
+      "token": "0xb2000000000000000000008937b91793781d6742",
+      "createdAt": "2026-08-27T17:53:09Z",
+      "priceUsd": 0.0000324742304940537,
+      "volume24hUsd": 17144.013401959,
+      "liquidityUsd": 27400.3217,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "MTGA / ETH 0.3%",
+      "pool": "0x6973de02d2d957a0d20cea3fbf355857c8a4a7af2b3924922391942c73d27a40",
+      "token": "0xb2000000000000000000000abf837be7fb41bcec",
+      "createdAt": "2026-08-27T17:53:47Z",
+      "priceUsd": 0.0000244332644379419,
+      "volume24hUsd": 15753.5992469005,
+      "liquidityUsd": 20485.2386,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "honeypot"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    }
+  ]
+}

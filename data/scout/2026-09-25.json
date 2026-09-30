@@ -1,0 +1,61 @@
+{
+  "date": "2026-09-25",
+  "at": "2026-09-25T12:50:47.832Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x8992a1117c5b1f8d1bb4c8af9ee1165b734057361330f312b90c642ca8506674",
+  "summary": {
+    "found": 2,
+    "checked": 2,
+    "unchecked": 0,
+    "highRisk": 0,
+    "caution": 1,
+    "insufficientData": 1,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "CPT / WETH",
+      "pool": "0x7cf52a86c760ec377c53180e008a1a5862dea2cb",
+      "token": "0xb4e9843e9aa5f210765e1f2c9e32148e97be5cfd",
+      "createdAt": "2026-09-25T12:03:55Z",
+      "priceUsd": 7.10664374906894e-16,
+      "volume24hUsd": 14072.9114786122,
+      "liquidityUsd": 19376.6607,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "creator-stake"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "BICAT / ETH 3%",
+      "pool": "0x2a8237260164139e277039f177b893ba817e0c18508b46af0f1713e47a5de5ba",
+      "token": "0x76e8d92187b01f9d1c351727bc81d716b1c3b9fc",
+      "createdAt": "2026-09-25T11:25:17Z",
+      "priceUsd": 0.0000251036039350755,
+      "volume24hUsd": 0.6782648611,
+      "liquidityUsd": 25108.5934,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    }
+  ]
+}

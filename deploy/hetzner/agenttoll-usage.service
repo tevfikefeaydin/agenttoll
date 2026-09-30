@@ -1,0 +1,22 @@
+[Unit]
+Description=AgentToll private retained usage collector
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /opt/agenttoll/usage/usage_collect.py --initial-hours 6
+WorkingDirectory=/opt/agenttoll/usage/app
+Environment=PATH=/opt/agenttoll/usage/node/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+TimeoutStartSec=300
+User=root
+UMask=0077
+Nice=10
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+StateDirectory=agenttoll-usage
+StateDirectoryMode=0700
+ReadWritePaths=/var/lib/agenttoll-usage
+MemoryMax=1536M

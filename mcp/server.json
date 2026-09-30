@@ -1,0 +1,71 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.tevfikefeaydin/agenttoll",
+  "description": "21 paid data tools plus free quote/budget inspection, with bounded USDC payments on Base.",
+  "repository": {
+    "url": "https://github.com/tevfikefeaydin/agenttoll",
+    "source": "github"
+  },
+  "version": "0.14.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "agenttoll-mcp",
+      "version": "0.14.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "AGENT_PRIVATE_KEY",
+          "description": "Optional paying-wallet EVM private key; omit for free quote/budget inspection.",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": true
+        },
+        {
+          "name": "AGENTTOLL_URL",
+          "description": "API origin (default https://agenttoll.app); custom origins require AGENTTOLL_RECIPIENT.",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": false
+        },
+        {
+          "name": "AGENTTOLL_NETWORK",
+          "description": "Payment network: base (default) or base-sepolia. Base data always uses mainnet.",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": false
+        },
+        {
+          "name": "AGENTTOLL_RECIPIENT",
+          "description": "Trusted receiving address; required for a custom API origin.",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": false
+        },
+        {
+          "name": "AGENTTOLL_BUDGET_USDC",
+          "description": "Finite session USDC budget (default 1); maximum six decimal places.",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": false
+        },
+        {
+          "name": "AGENTTOLL_MAX_PER_CALL_USDC",
+          "description": "Optional lower USDC ceiling; registered endpoint prices remain the upper limit.",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": false
+        },
+        {
+          "name": "AGENTTOLL_TIMEOUT_MS",
+          "description": "Total quote/sign/retry/body timeout in milliseconds (default 30000; 1–300000).",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": false
+        }
+      ]
+    }
+  ]
+}
