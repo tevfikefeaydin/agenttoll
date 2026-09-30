@@ -39,7 +39,7 @@ class SnapshotPublishTests(unittest.TestCase):
     def write(self, cwd, name, value):
         target = cwd / name
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(value)
+        target.write_text(value, encoding='utf-8', newline='\n')
 
     def commit(self, cwd, message):
         self.git(cwd, 'add', '.')
@@ -65,7 +65,7 @@ class SnapshotPublishTests(unittest.TestCase):
         hook.write_text('#!/bin/sh\n'
                         f'printf x >> "{count}"\n'
                         f'if [ "$(wc -c < "{count}")" -le {reject_count} ]; then exit 1; fi\n'
-                        'exit 0\n')
+                        'exit 0\n', encoding='utf-8', newline='\n')
         hook.chmod(0o755)
         return count
 

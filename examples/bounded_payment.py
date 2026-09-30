@@ -18,6 +18,7 @@ from typing import Callable, TypeVar
 from urllib.parse import urlsplit
 
 import requests
+from requests.adapters import HTTPAdapter
 from eth_account import Account
 from urllib3.exceptions import HTTPError as UrllibHTTPError, ReadTimeoutError
 
@@ -118,6 +119,59 @@ class _Deadline:
                 continue
 
 
+class _DeadlineAdapter(HTTPAdapter):
+    """Check the operation at the transport boundary, including after DNS/TLS.
+
+    A Requests timeout does not interrupt DNS. Guard each manager's own
+    connection classes so a late connection cannot send payment headers. Keep
+    existing HTTP, HTTPS and proxy behavior without changing global pools.
+    """
+
+    def __init__(self, deadline: _Deadline):
+        self.deadline = deadline
+        super().__init__(max_retries=0)
+
+    def _guard(self, manager) -> None:
+        deadline = self.deadline
+
+        def guarded_pool(pool):
+            class Connection(pool.ConnectionCls):
+                def connect(self):
+                    deadline.check()
+                    try:
+                        super().connect()
+                        deadline.check()
+                    except BaseException:
+                        self.close()
+                        raise
+
+                def send(self, data):
+                    deadline.check()
+                    # A new socket invokes guarded connect() before sending;
+                    # an already-connected socket still checks every write.
+                    return super().send(data)
+
+            class Pool(pool):
+                ConnectionCls = Connection
+
+            return Pool
+
+        manager.pool_classes_by_scheme = {
+            scheme: guarded_pool(pool) for scheme, pool in manager.pool_classes_by_scheme.items()
+        }
+
+    def init_poolmanager(self, *args, **kwargs):
+        super().init_poolmanager(*args, **kwargs)
+        self._guard(self.poolmanager)
+
+    def proxy_manager_for(self, proxy, **kwargs):
+        existing = proxy in self.proxy_manager
+        manager = super().proxy_manager_for(proxy, **kwargs)
+        if not existing:
+            self._guard(manager)
+        return manager
+
+
 @dataclass(frozen=True)
 class PaymentResponse:
     status: int
@@ -194,6 +248,9 @@ class BoundedSafetyClient:
         try:
             # Separate sessions keep simultaneous tool calls independent.
             with requests.Session() as session:
+                adapter = _DeadlineAdapter(deadline)
+                session.mount("http://", adapter)
+                session.mount("https://", adapter)
                 with session.get(url, headers=headers, allow_redirects=False, stream=True,
                                  timeout=(deadline.remaining(), deadline.remaining())) as response:
                     deadline.check()

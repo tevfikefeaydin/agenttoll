@@ -34,8 +34,12 @@ HTTP deadlines cover quote, signing, retry and response body. A caller can pass 
 signed failures remain reserved: inspect `get_payment_budget()`, the wallet and
 receipt before retrying. Do not recreate a client to bypass an ambiguous reservation.
 Python cannot forcibly interrupt every DNS or signing library operation; daemon
-workers let callers return at the deadline, and late work cannot submit a payment
-after cancellation/timeout. Responses are buffered with a 4 MiB limit.
+workers let callers return at the deadline. Each request has a transport guard
+that checks cancellation after connection setup (including DNS/TLS) and before
+sending headers, for direct and proxy connections. A late connection is closed
+without sending an authorization. Cancellation cannot recall an authorization
+already transmitted; its amount remains reserved. Responses are buffered with a
+4 MiB limit.
 
 Offline regression tests install only the small client requirements and stub the
 CrewAI host class while exercising real EVM signatures and the actual tool callback:

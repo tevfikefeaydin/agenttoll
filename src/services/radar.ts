@@ -9,7 +9,7 @@ interface NewPool {
     pool_created_at: string;
     base_token_price_usd: string;
     volume_usd: { h24: string };
-    reserve_in_usd: string;
+    reserve_in_usd: unknown;
   };
   relationships?: { base_token?: { data?: { id?: string } } };
 }
@@ -60,6 +60,16 @@ async function fetchPools(path: string): Promise<NewPool[]> {
   return json.data;
 }
 
+function parseLiquidity(value: unknown): number {
+  if ((typeof value !== "string" && typeof value !== "number") ||
+      (typeof value === "string" && value.trim() === "")) {
+    throw new Error("invalid pool liquidity");
+  }
+  const liquidity = Number(value);
+  if (!Number.isFinite(liquidity) || liquidity < 0) throw new Error("invalid pool liquidity");
+  return liquidity;
+}
+
 function shape(data: NewPool[], source: string, freshOnly: boolean): RadarData {
   const cutoff = Date.now() - DAY_MS;
   const pools = data
@@ -70,7 +80,7 @@ function shape(data: NewPool[], source: string, freshOnly: boolean): RadarData {
       createdAt: p.attributes.pool_created_at,
       priceUsd: Number(p.attributes.base_token_price_usd),
       volume24hUsd: Number(p.attributes.volume_usd?.h24 ?? 0),
-      liquidityUsd: Number(p.attributes.reserve_in_usd ?? 0),
+      liquidityUsd: parseLiquidity(p.attributes.reserve_in_usd),
     }))
     // The volume listing spans all pools, so it needs the age filter applied.
     .filter((p) => !freshOnly || Date.parse(p.createdAt) >= cutoff)

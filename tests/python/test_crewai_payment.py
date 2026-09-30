@@ -3,6 +3,7 @@ import base64
 import importlib
 import json
 import os
+import socket
 import sys
 import threading
 import time
@@ -12,6 +13,8 @@ from concurrent.futures import ThreadPoolExecutor
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from unittest.mock import patch
 
+import requests
+from urllib3.connection import HTTPConnection
 from eth_account import Account
 from eth_account.messages import encode_typed_data
 from pydantic import ValidationError
@@ -72,6 +75,9 @@ class Session:
 
     def get(self, url, **kwargs):
         return self.send(url, **kwargs)
+
+    def mount(self, *_):
+        pass  # Fixture HTTP; real transport behavior has loopback regressions.
 
 
 class PaymentTests(unittest.TestCase):
@@ -399,6 +405,87 @@ class PaymentTests(unittest.TestCase):
             release.set()
             server.shutdown()
             server.server_close()
+
+    def test_cancelled_connection_setup_never_sends_a_late_payment(self):
+        for stage in ("dns", "connect"):
+            for mode in ("cancel", "timeout"):
+                with self.subTest(stage=stage, mode=mode):
+                    entered, release, finished, cancellation = (threading.Event() for _ in range(4))
+                    signed_requests = []
+                    class Handler(BaseHTTPRequestHandler):
+                        def log_message(self, *_):
+                            pass
+                        def do_GET(self):
+                            if self.headers.get("PAYMENT-SIGNATURE"):
+                                signed_requests.append(self.path)
+                                self.send_response(200)
+                            else:
+                                value = quote()
+                                value["resource"]["url"] = origin + self.path
+                                self.send_response(402)
+                                self.send_header("PAYMENT-REQUIRED", header(value))
+                            self.send_header("Content-Length", "0")
+                            self.end_headers()
+
+                    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+                    origin = f"http://127.0.0.1:{server.server_port}"
+                    threading.Thread(target=server.serve_forever, daemon=True).start()
+                    client = BoundedSafetyClient(base_url=origin, recipient=HOSTED_RECIPIENT,
+                                                 timeout_ms=350 if mode == "timeout" else 2000)
+                    client.account = object()  # Only an invalid marker is sent; no wallet key.
+                    original_request, original_dns = client._request, socket.getaddrinfo
+                    original_connect, original_session = HTTPConnection.connect, requests.Session
+                    calls = 0
+
+                    def pause_retry():
+                        nonlocal calls
+                        calls += 1
+                        if calls == 2:
+                            entered.set()
+                            self.assertTrue(release.wait(3))
+                    def dns(host, *args, **kwargs):
+                        self.assertEqual(host, "127.0.0.1")
+                        if stage == "dns":
+                            pause_retry()
+                        return original_dns(host, *args, **kwargs)
+                    def connect(connection):
+                        original_connect(connection)
+                        if stage == "connect":
+                            pause_retry()
+                    def session():
+                        value = original_session()
+                        value.trust_env = False
+                        return value
+                    def request(url, deadline, signature=None):
+                        try:
+                            return original_request(url, deadline, signature)
+                        finally:
+                            if signature:
+                                finished.set()
+                    try:
+                        with patch.object(client, "_sign", return_value="offline-invalid-marker"), \
+                                patch.object(client, "_request", side_effect=request), \
+                                patch.object(requests, "Session", side_effect=session), \
+                                patch.object(socket, "getaddrinfo", side_effect=dns), \
+                                patch.object(HTTPConnection, "connect", connect), \
+                                ThreadPoolExecutor(max_workers=1) as pool:
+                            pending = pool.submit(client.fetch_with_payment, TOKEN, cancellation)
+                            try:
+                                self.assertTrue(entered.wait(1), "Signed connection must reach the blocked stage")
+                                if mode == "cancel":
+                                    cancellation.set()
+                                with self.assertRaisesRegex(PaymentError, "cancelled" if mode == "cancel" else "timed out"):
+                                    pending.result(timeout=1)
+                                self.assertEqual(signed_requests, [])
+                            finally:
+                                release.set()
+                            self.assertTrue(finished.wait(2), "Late HTTP worker must finish before asserting no send")
+                            self.assertEqual(signed_requests, [], "Cancelled connection sent PAYMENT-SIGNATURE after returning")
+                            self.assertEqual(client.get_payment_budget()["reservedUsdc"], "0.003000")
+                    finally:
+                        release.set()
+                        server.shutdown()
+                        server.server_close()
 
     def test_actual_crewai_callbacks_share_one_budget_and_validate_schema(self):
         host, tools = types.ModuleType("crewai"), types.ModuleType("crewai.tools")

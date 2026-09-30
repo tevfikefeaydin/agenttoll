@@ -26,6 +26,20 @@ validated optional transfer hints must survive quote normalization.
 | Cached price alias symbol | Aliases reuse the observation but shape the symbol for each request. `prices.test.ts`. |
 | Additional x402 matching issue | Already validated EIP-3009/authorization hints are preserved; unrelated signing data is stripped. `payment.test.ts` uses the actual SDK matcher and unfunded signing. |
 
+PR review follow-up:
+
+- A request-specific Python transport checks cancellation after connection setup
+  and before sending headers. Direct and proxy connection pools keep their
+  existing TLS behavior; delayed DNS or connection setup cannot send a late
+  authorization. Loopback regressions reproduce cancellation and timeout during
+  DNS, connection, TLS and proxy tunnel setup, and retain the uncertain payment
+  reservation. Separate adapters do not share cancellation state.
+- Radar validates finite, nonnegative provider liquidity independently of the
+  caller's floor. Malformed primary values trigger fallback; valid empty and
+  low-liquidity listings remain supported and cacheable.
+- Snapshot test fixtures and Git hooks explicitly write UTF-8/LF, matching the
+  generators and avoiding false conflicts on Windows with Git newline conversion.
+
 The Python example is deliberately limited to the registered token-safety route.
 It no longer uses an unrestricted generic payment SDK. Requirements and usage are
 documented in [examples/PYTHON.md](../../../examples/PYTHON.md). The separate
@@ -36,8 +50,8 @@ checked through pip resolution.
 
 Verification commands:
 
-Local verification passed 500 JavaScript/TypeScript tests, 49 deployment tests,
-23 Python client tests and seven independent MCP tarball scenarios. Typechecking,
+Local verification passed 518 JavaScript/TypeScript tests, 49 deployment tests,
+31 Python client/transport tests and seven independent MCP tarball scenarios. Typechecking,
 generated-file consistency and both builds passed. Both complete npm dependency
 audits reported zero advisories. No live payment was authorized.
 
@@ -65,6 +79,7 @@ controller under the existing deployment-lock procedure in
 live controller update, npm release or real mainnet settlement verification.
 
 Budgets remain in-memory per client/process. Python cannot interrupt every DNS
-or signing implementation; callers return at their deadline and late workers
-check cancellation before submitting a payment. These boundaries are documented
+or signing implementation; callers return at their deadline and late connections
+check cancellation before sending payment headers. Cancellation cannot recall
+an authorization already transmitted. These boundaries are documented
 rather than represented as wallet-wide or persistent controls.
