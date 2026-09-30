@@ -1392,7 +1392,7 @@
     },
     "/api/base/portfolio/{address}": {
       "get": {
-        "summary": "Wallet portfolio on Base: everything an address holds valued in USD, ETH plus its ERC-20 tokens, largest first, with a spam floor you set",
+        "summary": "Observed wallet holdings on Base valued in USD: ETH and indexed ERC-20 tokens, largest first, with a caller-selected floor and explicit source coverage. Totals cover observed holdings; bounded scans can omit smaller or unpriced tokens",
         "x-payment-info": {
           "price": {
             "currency": "USD",

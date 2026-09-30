@@ -53,7 +53,7 @@ export async function getPrice(symbol: string): Promise<Price> {
   const id = SYMBOL_MAP[key] ?? key;
   const ticker = SYMBOL_MAP[key] ? key.toUpperCase() : TICKER_BY_ID[id];
 
-  return cached(`price:${id}`, 30_000, () =>
+  const price = await cached(`price:${id}`, 30_000, () =>
     fromSources<Price>(`price ${key}`, [
       { name: "coingecko", load: () => fromCoinGecko(key, id) },
       // The exchange fallbacks only work for assets with a listed pair.
@@ -65,6 +65,8 @@ export async function getPrice(symbol: string): Promise<Price> {
         : []),
     ]),
   );
+  // Aliases share the market observation, while symbol reflects this request.
+  return { ...price, symbol: key };
 }
 
 async function fromCoinGecko(symbol: string, id: string): Promise<Price> {

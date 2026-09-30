@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { afterEach, test } from "node:test";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { toClientEvmSigner } from "@x402/evm";
+import { x402ResourceServer } from "@x402/core/server";
+import { decodePaymentSignatureHeader } from "@x402/core/http";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { payingFetch } from "../src/pay.js";
@@ -74,12 +76,71 @@ test("a normal quote signs the exact amount, recipient and chain and spends only
   assert.deepEqual(await (await client.fetchWithPayment(`${API}/api/price/eth`)).json(), { symbol: "eth", usd: 2000 });
   assert.equal(signed.length, 1);
   assert.equal(signed[0].accepted.network, "eip155:84532");
+  assert.deepEqual(signed[0].accepted.extra, { name: "USDC", version: "2" });
   assert.equal(signed[0].payload.authorization.to.toLowerCase(), RECIPIENT);
   assert.equal(signed[0].payload.authorization.value, "1000");
   assert.match(signed[0].payload.signature, /^0x[0-9a-f]{130}$/i);
   assert.equal(client.getPaymentBudget().remainingUsdc, "0.999000");
   assert.equal(client.getPaymentBudget().spentUsdc, "0.001000");
   assert.equal(client.getPaymentBudget().reservedUsdc, "0.000000");
+});
+
+test("explicit validated EIP-3009 hints survive a real SDK requirement round trip", async () => {
+  const origin = "https://selfhost.audit.invalid";
+  const matcher = new x402ResourceServer([]);
+  for (const tags of [
+    { assetTransferMethod: "eip3009" },
+    { paymentFlow: "authorization" },
+    { assetTransferMethod: "eip3009", paymentFlow: "authorization" },
+  ]) {
+    const extra = { name: "USDC", version: "2", ...tags };
+    const advertised = { ...quote("1000", { extra }),
+      resource: { url: `${origin}/api/price/eth`, mimeType: "application/json" },
+      extensions: { erc20ApprovalGasSponsoring: { unsupported: true } },
+    };
+    let signingAttempts = 0;
+    let signedRetries = 0;
+    const account = privateKeyToAccount(generatePrivateKey());
+    const signer = toClientEvmSigner({ address: account.address, signTypedData: async data => {
+      signingAttempts++;
+      return account.signTypedData(data as Parameters<typeof account.signTypedData>[0]);
+    } });
+    globalThis.fetch = async (input, init) => {
+      const request = new Request(input, init);
+      assert.equal(new URL(request.url).origin, origin, "Unexpected external HTTP/RPC call");
+      const signature = request.headers.get("payment-signature");
+      if (!signature) return paymentRequired(advertised);
+      signedRetries++;
+      const payload = decodePaymentSignatureHeader(signature);
+      assert.deepEqual(payload.accepted.extra, extra);
+      assert.equal(payload.extensions, undefined, "Unrecognized extensions cannot request more signatures");
+      const required = advertised.accepts as Parameters<typeof matcher.findMatchingRequirements>[0];
+      assert.equal(matcher.findMatchingRequirements(required, payload), required[0]);
+      return Response.json({ symbol: "eth", usd: 2000 });
+    };
+    const client = createPaymentClient("base-sepolia", signer, { baseUrl: origin, recipient: RECIPIENT });
+    const inspected = await client.getPaymentQuote("/api/price/eth");
+    assert.deepEqual(inspected.quote.accepts[0].extra, extra);
+    assert.equal(inspected.quote.extensions, undefined);
+    const response = await client.fetchWithPayment("/api/price/eth", undefined, inspected.quote);
+    assert.equal(response.status, 200);
+    assert.equal(signingAttempts, 1);
+    assert.equal(signedRetries, 1);
+    assert.equal(client.getPaymentBudget().spentUsdc, "0.001000");
+    assert.equal(client.getPaymentBudget().reservedUsdc, "0.000000");
+  }
+});
+
+test("unrecognized requirement extras remain absent from normalized signing data", async () => {
+  mockApi(quote("1000", { extra: {
+    name: "USDC", version: "2", assetTransferMethod: "eip3009", paymentFlow: "authorization",
+    unsupportedSigningData: { permit: true },
+  } }));
+  const client = createPaymentClient("base-sepolia");
+  const inspected = await client.getPaymentQuote("/api/price/eth");
+  assert.deepEqual(inspected.quote.accepts[0].extra, {
+    name: "USDC", version: "2", assetTransferMethod: "eip3009", paymentFlow: "authorization",
+  });
 });
 
 for (const [name, changes, reason] of [
@@ -89,6 +150,7 @@ for (const [name, changes, reason] of [
   ["non-integer amount", { amount: "1e3" }, /amount/i],
   ["unbounded lifetime", { maxTimeoutSeconds: 86400 }, /lifetime/i],
   ["approval transfer method", { extra: { name: "USDC", version: "2", assetTransferMethod: "permit2" } }, /transfer method/i],
+  ["unsupported payment flow", { extra: { name: "USDC", version: "2", paymentFlow: "permit2" } }, /transfer method/i],
 ] as const) {
   test(`${name} never reaches the signing boundary`, async () => {
     mockApi(quote("1000", changes));

@@ -101,6 +101,42 @@ test("radar watch labels its ranked listing as partial coverage", async (t) => {
   assert.match(result.coverage.note, /ranked|limited/i);
 });
 
+test("radar watch keeps its cursor when the newest ranked pool leaves and returns", async (t) => {
+  let now = Date.now() + 301_000;
+  t.mock.method(Date, "now", () => now);
+  const row = (n: number, createdAt: string) => ({
+    attributes: { name: `Pool ${n}`, address: address(n), pool_created_at: createdAt, base_token_price_usd: "1", volume_usd: { h24: "100" }, reserve_in_usd: "20000" },
+    relationships: { base_token: { data: { id: `base_${address(n + 100)}` } } },
+  });
+  const older = row(80, "2026-09-30T11:50:00Z");
+  const newest = row(81, "2026-09-30T11:55:00Z");
+  const later = row(82, "2026-09-30T12:00:00Z");
+  let listing = [newest, older];
+  t.mock.method(globalThis, "fetch", async (input: string | URL | Request) =>
+    json({ data: new URL(String(input)).searchParams.get("page") === "2" ? [] : listing }));
+  const first = await getRadarSince();
+  assert.equal(first.count, 2);
+  assert.equal(first.cursor, newest.attributes.pool_created_at);
+
+  now += 301_000;
+  listing = [older];
+  const shrunk = await getRadarSince(first.cursor);
+  assert.equal(shrunk.count, 0);
+  assert.equal(shrunk.cursor, first.cursor);
+
+  now += 301_000;
+  listing = [newest, older];
+  const returned = await getRadarSince(shrunk.cursor);
+  assert.equal(returned.count, 0, "An already observed pool returning to the listing must not replay");
+  assert.equal(returned.cursor, first.cursor);
+
+  now += 301_000;
+  listing = [later, newest, older];
+  const advanced = await getRadarSince(returned.cursor);
+  assert.deepEqual(advanced.pools.map(pool => pool.pool), [later.attributes.address]);
+  assert.equal(advanced.cursor, later.attributes.pool_created_at);
+});
+
 test("price alerts retain exchange currency assumptions from the price they compare", async (t) => {
   t.mock.method(globalThis, "fetch", async (input: string | URL | Request) =>
     String(input).includes("coingecko") ? new Response("{}", { status: 503 }) : json({ lastPrice: "1", priceChangePercent: "0" }));

@@ -182,12 +182,17 @@ export async function getRadarSince(since?: string) {
     (acc, p) => (!acc || Date.parse(p.createdAt) > Date.parse(acc) ? p.createdAt : acc),
     null,
   );
+  // Ranked listings can drop their newest pool; preserve the caller's high
+  // watermark so an old pool returning to the listing is not reported again.
+  const cursor = newest && Date.parse(newest) > sinceMs
+    ? newest
+    : since ?? newest ?? new Date().toISOString();
   return {
     chain: "base",
     since: since ?? null,
     count: fresh.length,
     pools: fresh,
-    cursor: newest ?? since ?? new Date().toISOString(),
+    cursor,
     partial: true,
     coverage: {
       complete: false,

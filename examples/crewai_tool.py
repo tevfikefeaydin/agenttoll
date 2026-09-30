@@ -2,7 +2,7 @@
 Example: wrapping an AgentToll endpoint as a CrewAI tool.
 
 Usage:
-    1. pip install "x402[requests,evm]" crewai python-dotenv
+    1. pip install -r examples/requirements-crewai.txt (Python 3.10-3.13).
     2. Put a funded wallet key in .env as EVM_PRIVATE_KEY.
        Testnet USDC: https://faucet.circle.com (select Base Sepolia).
     3. python examples/crewai_tool.py
@@ -10,42 +10,42 @@ Usage:
 CheckTokenSafety wraps /api/base/safety/:address -- honeypot simulation,
 taxes, owner privileges, holder concentration, and deployer history for a
 Base token. Drop it into any CrewAI agent's tool list; the $0.003 USDC
-payment happens inline inside the request, via x402's requests integration.
+payment uses a bounded x402 v2 client with a shared $1 session budget.
 No API key, no separate billing step.
 
 Hosted API: https://agenttoll.app
 """
 
-import os
 from typing import Type
 
 from crewai.tools import BaseTool
 from dotenv import load_dotenv
-from eth_account import Account
 from pydantic import BaseModel, Field
-from x402 import x402ClientSync
-from x402.http.clients import x402_requests
-from x402.mechanisms.evm import EthAccountSigner
-from x402.mechanisms.evm.exact.register import register_exact_evm_client
+import threading
+
+if __package__:
+    from .bounded_payment import BoundedSafetyClient, PaymentError
+else:
+    from bounded_payment import BoundedSafetyClient, PaymentError
 
 load_dotenv()
 
-BASE_URL = os.getenv("AGENTTOLL_URL", "https://agenttoll.app")
+_client: BoundedSafetyClient | None = None
+_client_lock = threading.Lock()
 
 
-def _paid_session():
-    key = os.getenv("EVM_PRIVATE_KEY")
-    if not key:
-        raise RuntimeError("Set EVM_PRIVATE_KEY in .env to call AgentToll.")
-    client = x402ClientSync().set_spend_controls({"max_amount_per_payment": "$0.05"})
-    register_exact_evm_client(client, EthAccountSigner(Account.from_key(key)))
-    return x402_requests(client)
+def _payment_client() -> BoundedSafetyClient:
+    global _client
+    with _client_lock:
+        if _client is None:
+            _client = BoundedSafetyClient.from_env()
+        return _client
 
 
 class CheckTokenSafetyInput(BaseModel):
     """Input schema for CheckTokenSafety."""
 
-    address: str = Field(..., description="Base token contract address, e.g. 0x1234...")
+    address: str = Field(..., pattern=r"^0x[0-9a-fA-F]{40}$", description="Base token contract address (0x plus 40 hex digits)")
 
 
 class CheckTokenSafety(BaseTool):
@@ -53,18 +53,30 @@ class CheckTokenSafety(BaseTool):
     description: str = (
         "Check whether a Base token is a honeypot or rug: simulated buy and sell, "
         "taxes, owner privileges, holder concentration, and deployer history. "
-        "Costs $0.003, paid automatically in USDC on Base via x402 -- no API key."
+        "Costs at most $0.003 USDC on the configured network via x402, within a shared session budget (default $1)."
     )
     args_schema: Type[BaseModel] = CheckTokenSafetyInput
 
     def _run(self, address: str) -> str:
-        with _paid_session() as session:
-            res = session.get(f"{BASE_URL}/api/base/safety/{address}")
-            res.raise_for_status()
-            return res.text
+        client = _payment_client()
+        res = client.fetch_with_payment(address)
+        if not res.ok:
+            raise PaymentError(f"AgentToll returned HTTP {res.status}; inspect the payment budget and wallet before retrying.")
+        return res.text
 
 
 if __name__ == "__main__":
-    # Standalone smoke test -- call it directly the way an agent would.
-    tool = CheckTokenSafety()
-    print(tool._run(address="0x940181a94a35a4569e4529a3cdfb74e38fd98631"))
+    import argparse
+    parser = argparse.ArgumentParser(description="CheckTokenSafety example with a bounded x402 payment client.")
+    parser.add_argument("--quote-only", action="store_true", help="Inspect an unsigned quote without a private key or payment.")
+    parser.add_argument("--budget", action="store_true", help="Inspect the shared session budget without making a request.")
+    parser.add_argument("--address", default="0x940181a94a35a4569e4529a3cdfb74e38fd98631")
+    args = parser.parse_args()
+    import json
+    client = _payment_client()
+    if args.budget:
+        print(json.dumps(client.get_payment_budget()))
+    elif args.quote_only:
+        print(json.dumps(client.get_payment_quote(args.address)))
+    else:
+        print(CheckTokenSafety()._run(args.address))

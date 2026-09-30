@@ -11,8 +11,10 @@ import autodeploy as deploy
 
 
 SHA = "a" * 40
-OLD = {"sha": "b" * 40, "container": "old", "upstream": "old:4021", "attempt": "old"}
-NEW = {"sha": SHA, "container": "new", "upstream": "new:4021", "attempt": "123:1"}
+OLD = {"sha": "b" * 40, "container": "old", "upstream": "old:4021", "attempt": "old",
+       "image": "agenttoll:old", "directory": "/opt/agenttoll/releases/old"}
+NEW = {"sha": SHA, "container": "new", "upstream": "new:4021", "attempt": "123:1",
+       "image": "agenttoll:new", "directory": "/opt/agenttoll/releases/new"}
 CONFIG = b"other.example {\n reverse_proxy unrelated:8080\n}\n# BEGIN AGENTTOLL\nagenttoll.app {\n reverse_proxy old:4021 {\n  transport http {}\n }\n}\n# END AGENTTOLL\n"
 
 
@@ -46,6 +48,42 @@ class SelectionTests(unittest.TestCase):
 
     def test_failed_new_attempt_supersedes_old_success_for_same_commit(self):
         self.assertIsNone(self.select([run(run_attempt=1), run(run_attempt=2, conclusion="failure")]))
+
+    def test_later_rerun_of_older_run_supersedes_newer_run_number(self):
+        success = run(id=100, run_number=10, run_started_at="2026-09-30T08:00:00Z")
+        for state in ({"conclusion": "failure"}, {"status": "in_progress", "conclusion": None}):
+            later = run(id=99, run_number=9, run_attempt=2,
+                        run_started_at="2026-09-30T09:00:00Z", **state)
+            with self.subTest(state=state):
+                self.assertIsNone(self.select([success, later]))
+                self.assertIsNone(self.select([later, success]))
+        recovered = run(id=99, run_number=9, run_attempt=3,
+                        run_started_at="2026-09-30T10:00:00Z")
+        self.assertEqual(self.select([success, later, recovered])["id"], 99)
+
+    def test_updated_at_and_sequence_are_timestamp_fallbacks(self):
+        success = run(run_number=10, run_started_at="2026-09-30T08:00:00Z")
+        later = run(run_number=9, run_attempt=2, conclusion="failure",
+                    run_started_at="malformed", updated_at="2026-09-30T09:00:00+00:00")
+        self.assertIsNone(self.select([success, later]))
+        self.assertIsNone(self.select([run(run_number=10, run_started_at="not-a-date"),
+                                      run(run_number=11, conclusion="failure")]))
+        self.assertIsNone(self.select([success, run(run_number=11, conclusion="failure")]))
+
+    def test_ambiguous_mixed_timestamp_order_fails_closed(self):
+        records = [run(run_number=10, run_started_at="2026-09-30T08:00:00Z"),
+                   run(run_number=9, run_attempt=2, conclusion="failure",
+                       run_started_at="2026-09-30T09:00:00Z"),
+                   run(run_number=11)]
+        # The missing timestamp must not undo the known later failed rerun.
+        self.assertIsNone(self.select(records))
+
+    def test_undated_lower_number_failed_rerun_is_ambiguous(self):
+        self.assertIsNone(self.select([run(id=100, run_number=10),
+                                      run(id=99, run_number=9, run_attempt=2, conclusion="failure")]))
+        # An older initial failed run has unambiguous legacy sequence ordering.
+        self.assertEqual(self.select([run(id=100, run_number=10),
+                                      run(id=99, run_number=9, conclusion="failure")])["id"], 100)
 
     def test_manual_ci_run_is_allowed_but_scheduled_payment_workflow_is_not(self):
         self.assertIsNotNone(self.select([run(event="workflow_dispatch")]))
@@ -292,6 +330,38 @@ class FilesystemTests(unittest.TestCase):
             snippet.write_bytes(b"malformed proxy config")
             deploy.recover_files(root, {"snippet_host": str(snippet)})
             self.assertIn(b"reverse_proxy old:4021", snippet.read_bytes())
+
+    def test_boot_quarantines_schema_invalid_pending_and_uses_current(self):
+        invalid = [[], {}, {"previous": {}, "candidate": {}},
+                   {"previous": {**OLD, "upstream": "bad\nrespond injected"}, "candidate": NEW},
+                   {"previous": OLD, "candidate": {**NEW, "sha": "not-a-sha"}},
+                   {"previous": OLD, "candidate": {**NEW, "attempt": ""}},
+                   {"previous": {**OLD, "image": None}, "candidate": NEW},
+                   {"previous": OLD, "candidate": {**NEW, "directory": None}}]
+        for pending in invalid:
+            with self.subTest(pending=pending), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                snippet = root / "upstream.caddy"
+                controller = deploy.Controller(root / "deployer/state", None)
+                controller.write("current", OLD)
+                controller.write("pending", pending)
+                deploy.recover_files(root, {"snippet_host": str(snippet)})
+                self.assertIn(b"reverse_proxy old:4021", snippet.read_bytes())
+                self.assertIsNone(controller.read("pending"))
+                self.assertEqual(len(list(controller.directory.glob("pending.corrupt-*.json"))), 1)
+
+    def test_boot_accepts_recorded_migration_bootstrap_alias_and_short_revision(self):
+        activation = json.loads((Path(__file__).parent / "evidence/autodeploy-activated.json").read_text())
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            snippet = root / "upstream.caddy"
+            controller = deploy.Controller(root / "deployer/state", None)
+            controller.write("current", activation["current"])
+            controller.write("pending", {"previous": activation["previous"], "candidate": activation["current"]})
+            deploy.recover_files(root, {"snippet_host": str(snippet)})
+            self.assertIn(b"reverse_proxy agenttoll-api:4021", snippet.read_bytes())
+            self.assertIsNotNone(controller.read("pending"))
+            self.assertEqual(len(list(controller.directory.glob("pending.corrupt-*.json"))), 0)
 
     def test_unrecoverable_state_disables_only_agenttoll_route(self):
         with tempfile.TemporaryDirectory() as temporary:

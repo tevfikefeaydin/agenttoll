@@ -1,0 +1,32 @@
+name: Verify bounded Python payments
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'examples/**'
+      - 'tests/python/**'
+      - '.github/workflows/python-payments.yml'
+  pull_request:
+    paths:
+      - 'examples/**'
+      - 'tests/python/**'
+      - '.github/workflows/python-payments.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Install pinned payment client dependencies
+        run: |
+          python3 -m venv "$RUNNER_TEMP/agenttoll-python-tests"
+          "$RUNNER_TEMP/agenttoll-python-tests/bin/pip" install -r examples/requirements-payment.txt
+      - name: Offline quote, signing, budget and deadline regressions
+        run: |
+          "$RUNNER_TEMP/agenttoll-python-tests/bin/python" -m unittest discover -s tests/python -p 'test_*.py' -v

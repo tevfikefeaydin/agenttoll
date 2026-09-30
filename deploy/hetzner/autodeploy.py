@@ -34,17 +34,62 @@ class DeployError(RuntimeError):
 
 def select_run(runs, wanted_fingerprint, fingerprint, is_ancestor):
     """An old success must never hide a newer failed or pending attempt."""
-    seen = set()
-    for run in sorted(runs, key=lambda r: (r.get("run_number", 0), r.get("run_attempt", 0)), reverse=True):
+    def attempt_time(run):
+        # Rerunning an older run does not increase its run_number. GitHub reports
+        # the current attempt's start time; updated_at is the fallback for a
+        # queued attempt or older API response without run_started_at.
+        for key in ("run_started_at", "updated_at"):
+            value = run.get(key)
+            if not isinstance(value, str):
+                continue
+            try:
+                instant = datetime.fromisoformat(value.replace("Z", "+00:00"))
+                if instant.tzinfo is not None:
+                    return instant.timestamp()
+            except ValueError:
+                pass
+        return None
+
+    def sequence(run):
+        return tuple(value if isinstance(value, int) and not isinstance(value, bool) else 0
+                     for value in (run.get("run_number"), run.get("run_attempt")))
+
+    def newer(other, candidate):
+        left, right = attempt_time(other), attempt_time(candidate)
+        if left is not None and right is not None and left != right:
+            return left > right
+        if ((left is None) != (right is None)
+                and (other.get("status") != "completed" or other.get("conclusion") != "success")):
+            # In a partial API response, the time of a failure relative to a
+            # success cannot be established. Wait for complete CI observations.
+            return True
+        if (left is None and right is None and sequence(other)[0] < sequence(candidate)[0]
+                and sequence(other)[1] > 1
+                and (other.get("status") != "completed" or other.get("conclusion") != "success")):
+            # A rerun of a lower-numbered run could have started later. With
+            # neither timestamp available, its failure cannot be dismissed.
+            return True
+        return sequence(other) > sequence(candidate)
+
+    trusted = []
+    for run in runs:
+        if not isinstance(run, dict):
+            continue
         sha = run.get("head_sha", "")
-        if (not re.fullmatch(r"[a-f0-9]{40}", sha) or run.get("head_branch") != "main"
+        if (not isinstance(sha, str) or not re.fullmatch(r"[a-f0-9]{40}", sha) or run.get("head_branch") != "main"
                 or run.get("event") not in ("push", "workflow_dispatch")
                 or run.get("path") != WORKFLOW
-                or (run.get("head_repository") or {}).get("full_name") != REPO):
+                or not isinstance(run.get("head_repository"), dict)
+                or run["head_repository"].get("full_name") != REPO):
             continue
-        if sha in seen:
+        trusted.append(run)
+    for run in sorted(trusted, key=sequence, reverse=True):
+        sha = run["head_sha"]
+        # Compare every attempt for this revision. Mixed/missing timestamps can
+        # make ordering ambiguous; accepting only an unsuperseded success fails
+        # closed rather than letting an arbitrary sort order hide a failure.
+        if any(other["head_sha"] == sha and newer(other, run) for other in trusted):
             continue
-        seen.add(sha)
         if (run.get("status") == "completed" and run.get("conclusion") == "success"
                 and is_ancestor(sha) and fingerprint(sha) == wanted_fingerprint):
             return run
@@ -527,9 +572,27 @@ def recover_files(root, config):
         state.remove("bootstrap")
     try:
         pending = state.read("pending")
-        if pending and (not isinstance(pending, dict) or not isinstance(pending.get("previous"), dict)
+        if pending is not None and (not isinstance(pending, dict) or not isinstance(pending.get("previous"), dict)
                         or not isinstance(pending.get("candidate"), dict)):
             raise ValueError("Invalid pending record")
+        if pending is not None:
+            for release in (pending["previous"], pending["candidate"]):
+                # Check the fields used by both file recovery and the later
+                # Docker transaction recovery, before trusting the journal.
+                bootstrap = (release.get("container") == "agenttoll-agenttoll-1"
+                             and release.get("upstream") == "agenttoll-api:4021"
+                             and release.get("attempt") == "migration-bootstrap")
+                sha_pattern = r"[a-f0-9]{12}(?:[a-f0-9]{28})?" if bootstrap else r"[a-f0-9]{40}"
+                if (not isinstance(release.get("sha"), str) or not re.fullmatch(sha_pattern, release["sha"])
+                        or not isinstance(release.get("container"), str)
+                        or not re.fullmatch(r"[a-zA-Z0-9][a-zA-Z0-9_.-]*", release["container"])
+                        or (not bootstrap and release.get("upstream") != release["container"] + ":4021")
+                        or not isinstance(release.get("attempt"), str) or not release["attempt"]
+                        or not isinstance(release.get("image"), str)
+                        or not re.fullmatch(r"agenttoll:[a-zA-Z0-9][a-zA-Z0-9_.-]*", release["image"])
+                        or not isinstance(release.get("directory"), str) or not release["directory"]):
+                    raise ValueError("Invalid pending release")
+                upstream_snippet(release["upstream"])
     except (ValueError, TypeError):
         corrupt = state.directory / ("pending.corrupt-" + str(time.time_ns()) + ".json")
         os.replace(state.directory / "pending.json", corrupt)

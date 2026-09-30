@@ -354,8 +354,9 @@
       <div class="demo-actions">
         <button id="demo-quote" class="btn btn-primary" type="button">Get the live 402 quote</button>
         <button id="demo-pay" class="btn btn-ghost" type="button" hidden>Pay $0.004 with your wallet →</button>
+        <button id="demo-acknowledge" class="btn btn-ghost" type="button" aria-describedby="demo-out" hidden>I’ve checked my wallet and receipt</button>
       </div>
-      <div id="demo-out" hidden></div>
+      <div id="demo-out" role="status" aria-live="polite" aria-atomic="true" hidden></div>
       <p class="demo-foot">The quote needs nothing at all. Paying is optional and needs a
         browser wallet holding a cent of USDC on Base — the same signature your agent would
         make, just done by hand.</p>

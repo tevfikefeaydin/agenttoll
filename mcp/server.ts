@@ -208,7 +208,7 @@ export function createAgentTollServer(options: PaymentClientOptions & { privateK
 
   paidTool(
     "get_base_portfolio",
-    "Everything a Base address holds, valued in USD: ETH plus its ERC-20 tokens, largest first. The reply carries totals and says how many holdings fell below the floor or could not be priced.",
+    "Observed Base holdings valued in USD: ETH plus indexed ERC-20 tokens, largest first. Totals and unpriced counts cover observed holdings only; read the partial and source coverage fields for bounded scans or missing holdings.",
     {
       address: addressSchema.describe("Address on Base (0x...)"),
       minValue: z

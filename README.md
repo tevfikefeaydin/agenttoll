@@ -82,9 +82,13 @@ Handler failures before settlement are not billed. A lost response or timeout af
 
 Optional query parameters do not change registered prices. Invalid inputs return 400. fundedOnly accepts the literal values true or false. The catalog and OpenAPI describe parameter limits. Selected upstream results are cached and concurrent loads are coalesced; TTLs vary, and history caches last longer than live-market caches.
 
+API GET/HEAD requests use URL parameters and payment headers, and reject request bodies with 400 and a closed connection. Encoded path parameters, case variants and one trailing slash are supported; encoded route prefixes and duplicate or encoded path separators are rejected before payment verification.
+
 ## Interpreting the data
 
 Safety responses preserve unknown checks and provider coverage. A missing owner flag or tax is not a pass. clear requires the necessary evidence; a detected failure can still produce high-risk when other checks are unknown. Passing automated checks does not guarantee safety. Portfolio and radar responses also need their partial/coverage fields to be interpreted correctly.
+
+Portfolio indexer scans stop after three pages or when the indexed tail falls below the $1 source read floor. Lowering `minValue` changes the display filter, not this source scan bound. Any unread provider pages mark the response partial; totals and unpriced counts describe observed holdings only, and the number of unseen tokens remains unknown. Sentiment responses preserve the provider's observation timestamp separately from their fetch time, including when served from cache.
 
 Address-to-Basename results are forward-resolved back to the original address. Fresh pools cover Uniswap v4; token attribution can be null, ages are estimates from block height, and funded records observed liquidity events rather than a USD liquidity valuation.
 
@@ -184,6 +188,8 @@ npm run example:langchain
 ```
 
 These commands make paid requests using AGENT_PRIVATE_KEY. The LangChain tool forwards framework cancellation signals. The snapshot/demo/findings scripts also use the bounded helper; build first because they import dist. scripts/demo.mjs --dry performs validated quote inspection only.
+
+The [CrewAI Python example](examples/PYTHON.md) uses a separate bounded client with pinned dependencies, a $0.003 token-safety ceiling, trusted origin/receiver/network checks and a shared finite budget. Its operation deadline also covers signing and response-body reads. See that guide for installation and handling ambiguous payment outcomes.
 
 ## MCP
 

@@ -68,9 +68,13 @@ if (matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObs
 const ENDPOINT = "/api/base/fresh";
 let displayedQuote;
 let displayedRecipient;
+let quoting = false;
+let paying = false;
+let authorizationPossible = false;
 const demoOut = document.getElementById("demo-out");
 const quoteBtn = document.getElementById("demo-quote");
 const payBtn = document.getElementById("demo-pay");
+const acknowledgeBtn = document.getElementById("demo-acknowledge");
 
 const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]);
 
@@ -81,12 +85,27 @@ function show(html, tone = "quote") {
   demoOut.hidden = false;
 }
 
+function invalidateQuote() {
+  displayedQuote = undefined;
+  displayedRecipient = undefined;
+  if (payBtn) payBtn.hidden = true;
+}
+
+function syncDemoControls() {
+  if (quoteBtn) quoteBtn.disabled = quoting || paying || authorizationPossible;
+  if (payBtn) payBtn.disabled = quoting || paying || authorizationPossible || !displayedQuote;
+  if (acknowledgeBtn) {
+    acknowledgeBtn.hidden = !authorizationPossible;
+    acknowledgeBtn.disabled = quoting || paying;
+  }
+}
+
 if (quoteBtn) {
   quoteBtn.addEventListener("click", async () => {
-    quoteBtn.disabled = true;
-    displayedQuote = undefined;
-    displayedRecipient = undefined;
-    if (payBtn) payBtn.hidden = true;
+    if (quoting || paying || authorizationPossible) return;
+    quoting = true;
+    invalidateQuote();
+    syncDemoControls();
     show('<span class="dim">Requesting ' + ENDPOINT + " …</span>", "wait");
     try {
       const res = await fetch(ENDPOINT, { signal: AbortSignal.timeout(10000), redirect: "error" });
@@ -140,7 +159,8 @@ if (quoteBtn) {
     } catch (err) {
       show('<span class="bad">' + esc(err.message) + "</span>", "err");
     } finally {
-      quoteBtn.disabled = false;
+      quoting = false;
+      syncDemoControls();
     }
   });
 }
@@ -148,9 +168,13 @@ if (quoteBtn) {
 if (payBtn) {
   let loading;
   payBtn.addEventListener("click", async () => {
-    payBtn.disabled = true;
+    if (quoting || paying || authorizationPossible || !displayedQuote || !displayedRecipient) return;
+    const terms = { quote: displayedQuote, recipient: displayedRecipient };
+    paying = true;
+    invalidateQuote();
+    syncDemoControls();
+    let paymentInvoked = false;
     try {
-      if (!displayedQuote || !displayedRecipient) throw new Error("Request and inspect a payment quote first.");
       if (!window.agentTollPay) {
         show('<span class="dim">Loading the payment library…</span>', "wait");
         loading ??= new Promise((resolve, reject) => {
@@ -162,14 +186,32 @@ if (payBtn) {
         });
         await loading;
       }
-      await window.agentTollPay(ENDPOINT, show, { quote: displayedQuote, recipient: displayedRecipient });
+      if (typeof window.agentTollPay !== "function") throw new Error("The payment library could not be loaded. Get a new quote to try again.");
+      paymentInvoked = true;
+      const outcome = await window.agentTollPay(ENDPOINT, show, terms);
+      if (outcome?.status === "failed") authorizationPossible = outcome.authorizationPossible !== false;
+      else if (outcome?.status !== "delivered") throw new Error("The payment outcome could not be confirmed. Check your wallet and receipt before paying again.");
     } catch (err) {
-      show('<span class="bad">' + esc(err.message) + "</span>", "err");
+      authorizationPossible = paymentInvoked;
+      show('<span class="bad">' + esc(err?.message ?? "The payment did not complete.") + "</span>", "err");
     } finally {
-      payBtn.disabled = false;
+      paying = false;
+      syncDemoControls();
     }
   });
 }
+
+if (acknowledgeBtn) {
+  acknowledgeBtn.addEventListener("click", () => {
+    if (quoting || paying || !authorizationPossible) return;
+    authorizationPossible = false;
+    invalidateQuote();
+    syncDemoControls();
+    show('<p class="dim">Get a new quote when you are ready. A previous payment authorization may still be valid.</p>');
+  });
+}
+
+syncDemoControls();
 
 // The hero video is opt-in: the still is always painted first, and the 200 KB
 // clip only loads on a wide screen, with motion allowed and a decent connection.

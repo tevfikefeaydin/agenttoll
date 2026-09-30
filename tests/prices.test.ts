@@ -56,3 +56,25 @@ test("whitespace percentage data stays unknown", async (t) => {
   t.mock.method(globalThis, "fetch", async () => json({ chainlink: { usd: 10, usd_24h_change: "   " } }));
   assert.equal((await getPrice("link")).change24h, null);
 });
+
+test("concurrent ticker and CoinGecko-ID requests share a price without sharing the requested symbol", async (t) => {
+  let calls = 0;
+  t.mock.method(globalThis, "fetch", async () => { calls++; return json({ arbitrum: { usd: 1, usd_24h_change: 2 } }); });
+  const [ticker, id] = await Promise.all([getPrice("ARB"), getPrice("arbitrum")]);
+  assert.equal(calls, 1);
+  assert.equal(ticker.symbol, "arb");
+  assert.equal(id.symbol, "arbitrum");
+  assert.equal(ticker.id, id.id);
+  assert.equal(ticker.at, id.at);
+  assert.equal((await getPrice("arbitrum")).symbol, "arbitrum");
+  assert.equal((await getPrice("arb")).symbol, "arb");
+  assert.equal(calls, 1);
+});
+
+test("canonical-ID-first cache entries still return the later caller's ticker", async (t) => {
+  let calls = 0;
+  t.mock.method(globalThis, "fetch", async () => { calls++; return json({ optimism: { usd: 2, usd_24h_change: 0 } }); });
+  assert.equal((await getPrice("optimism")).symbol, "optimism");
+  assert.equal((await getPrice("OP")).symbol, "op");
+  assert.equal(calls, 1);
+});

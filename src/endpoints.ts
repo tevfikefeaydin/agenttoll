@@ -71,7 +71,7 @@ const definitions = [
   {
     "route": "GET /api/base/portfolio/:address",
     "price": "$0.003",
-    "description": "Wallet portfolio on Base: everything an address holds valued in USD, ETH plus its ERC-20 tokens, largest first, with a spam floor you set",
+    "description": "Observed wallet holdings on Base valued in USD: ETH and indexed ERC-20 tokens, largest first, with a caller-selected floor and explicit source coverage. Totals cover observed holdings; bounded scans can omit smaller or unpriced tokens",
     "tool": "get_base_portfolio"
   },
   {

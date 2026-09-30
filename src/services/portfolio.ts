@@ -33,11 +33,12 @@ interface Holdings {
   source: string;
   /** Set when the source could only see part of what the address holds. */
   incomplete?: string;
+  readFloorUsd?: number;
 }
 
 /**
- * Below this the tail is airdrop dust, so paging further buys nothing. It is
- * deliberately not the caller's floor: the caller's floor filters the answer,
+ * Bound indexer work at the dust tail. This is deliberately not the caller's
+ * floor: the caller's floor filters the observed answer,
  * this one decides how much of the chain we read, and keeping them separate is
  * what lets one cached snapshot serve every floor.
  */
@@ -74,7 +75,7 @@ async function fromBlockscout(address: string): Promise<Holdings> {
   const base = `https://base.blockscout.com/api/v2/addresses/${address}/tokens?type=ERC-20`;
   const items: BlockscoutEntry[] = [];
   let url = base;
-  let truncated = false;
+  let incomplete: string | undefined;
 
   for (let page = 1; ; page++) {
     const res = await blockscoutFetch(url, { headers: { Accept: "application/json" } });
@@ -86,12 +87,22 @@ async function fromBlockscout(address: string): Promise<Holdings> {
     items.push(...json.items);
 
     const next = json.next_page_params;
-    if (!next || !json.items.length) break;
+    if (!next) break;
+    if (!json.items.length) {
+      incomplete = "The indexer returned an empty page with more holdings still unscanned.";
+      break;
+    }
     // Sorted descending, so the last row on the page bounds everything after it.
-    const tail = Number(next.fiat_value);
-    if (!Number.isFinite(tail) || tail < DUST_USD) break;
+    const rawTail = next.fiat_value;
+    const tail = typeof rawTail === "number" || (typeof rawTail === "string" && rawTail.trim()) ? Number(rawTail) : NaN;
+    if (!Number.isFinite(tail) || tail < DUST_USD) {
+      incomplete = Number.isFinite(tail)
+        ? `The indexer scan stopped at the $${DUST_USD} source read floor; additional lower-value or unpriced holdings were not scanned.`
+        : "The indexer scan stopped because the remaining holdings' fiat-value boundary is unavailable.";
+      break;
+    }
     if (page >= MAX_PAGES) {
-      truncated = true;
+      incomplete = `The indexer scan reached its ${MAX_PAGES}-page limit; additional holdings were not scanned.`;
       break;
     }
     const params = new URLSearchParams();
@@ -130,8 +141,9 @@ async function fromBlockscout(address: string): Promise<Holdings> {
     holdings,
     unpriced,
     source: "blockscout",
-    incomplete: truncated
-      ? `This address holds more than ${MAX_PAGES * 50} priced tokens; the largest ${MAX_PAGES * 50} are listed and the rest are not counted in the total.`
+    readFloorUsd: DUST_USD,
+    incomplete: incomplete
+      ? `${incomplete} Totals and token, below-floor and unpriced counts cover observed holdings only; the remaining counts and value are unknown.`
       : undefined,
   };
 }
@@ -295,8 +307,8 @@ export async function getPortfolio(
     valueUsd: Number(h.valueUsd.toFixed(2)),
   }));
 
-  // The total covers everything at or above the floor, so the listed rows and
-  // the total always agree even when `limit` trims the tail.
+  // The total covers observed holdings at or above the floor, even when
+  // `limit` trims the displayed rows. Source gaps remain explicit below.
   const totalUsd = above.reduce((sum, h) => sum + h.valueUsd, snapshot.native.valueUsd);
 
   return {
@@ -316,6 +328,13 @@ export async function getPortfolio(
     unpriced: snapshot.tokens.unpriced,
     minValueUsd,
     source: snapshot.tokens.source,
+    coverage: {
+      complete: !snapshot.tokens.incomplete,
+      scope: "source-holdings-scan",
+      countsBasis: "observed-holdings",
+      readFloorUsd: snapshot.tokens.readFloorUsd ?? null,
+      unscannedTokens: snapshot.tokens.incomplete ? null : 0,
+    },
     ...(snapshot.tokens.incomplete
       ? { partial: true, note: snapshot.tokens.incomplete }
       : {}),

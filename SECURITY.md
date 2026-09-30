@@ -35,7 +35,7 @@ A published git SHA pins snapshot bytes. A USDC payment transaction does not aut
 
 ## Dependency verification
 
-The root and MCP production dependency audits both reported zero advisories during the local 2026-09-08 verification after dependency fixes. This is a dated result, not a guarantee about future advisories or deployed versions. Recheck both dependency trees after updates:
+The root and MCP dependency audits reported zero advisories during the local 2026-09-30 verification after updating fast-uri to 3.1.8 and ip-address to 10.7.2. This is a dated result, not a guarantee about future advisories or deployed versions. Recheck both dependency trees after updates:
 
 ```bash
 npm audit --omit=dev

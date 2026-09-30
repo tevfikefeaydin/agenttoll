@@ -171,11 +171,16 @@ export function createPaymentClient(network: string, signer?: ClientEvmSigner, o
         (accepted.extra.paymentFlow !== undefined && accepted.extra.paymentFlow !== "authorization")) {
       throw new Error("Unrecognized USDC signing domain or transfer method in payment quote.");
     }
-    // Copy only recognized signing data. Server extensions cannot request extra signatures.
+    // Echo validated transfer hints so the SDK can match the advertised terms.
+    // Copy only recognized signing data; extensions cannot request extra signatures.
     const requirement: Requirement = {
       scheme: "exact", network: chain.network, amount: accepted.amount,
       asset: accepted.asset, payTo: accepted.payTo, maxTimeoutSeconds: accepted.maxTimeoutSeconds as number,
-      extra: { name: chain.domainName, version: "2" },
+      extra: {
+        name: chain.domainName, version: "2",
+        ...(accepted.extra.assetTransferMethod === undefined ? {} : { assetTransferMethod: "eip3009" }),
+        ...(accepted.extra.paymentFlow === undefined ? {} : { paymentFlow: "authorization" }),
+      },
     };
     const quote: PaymentRequired = { x402Version: 2, resource: { url: resource.href }, accepts: [requirement] };
     return { quote, requirement, amount, endpoint, ceiling };

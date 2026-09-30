@@ -10,6 +10,11 @@ interface TokenPrice {
   at: string;
 }
 
+function positivePrice(value: unknown): number | null {
+  const price = typeof value === "number" || (typeof value === "string" && value.trim()) ? Number(value) : NaN;
+  return Number.isFinite(price) && price > 0 ? price : null;
+}
+
 // Onchain spot price for any Base token by contract address.
 export async function getBaseTokenPrice(address: string) {
   if (!/^0x[0-9a-fA-F]{40}$/.test(address)) {
@@ -29,9 +34,9 @@ async function fromGeckoTerminal(addr: string): Promise<TokenPrice> {
     `https://api.geckoterminal.com/api/v2/simple/networks/base/token_price/${addr}`,
     { headers: { Accept: "application/json" } },
   )) as { data?: { attributes?: { token_prices?: Record<string, string> } } };
-  const price = json.data?.attributes?.token_prices?.[addr];
-  if (!price) throw new Error("no price for this token");
-  return { chain: "base", token: addr, usd: Number(price), source: "geckoterminal", at: new Date().toISOString() };
+  const price = positivePrice(json.data?.attributes?.token_prices?.[addr]);
+  if (price === null) throw new Error("no valid positive price for this token");
+  return { chain: "base", token: addr, usd: price, source: "geckoterminal", at: new Date().toISOString() };
 }
 
 async function fromDexScreener(addr: string): Promise<TokenPrice> {
@@ -53,7 +58,7 @@ async function fromDexScreener(addr: string): Promise<TokenPrice> {
       (p) =>
         p.chainId === "base" &&
         p.baseToken?.address?.toLowerCase() === addr &&
-        Number(p.priceUsd) > 0,
+        positivePrice(p.priceUsd) !== null,
     )
     .sort((a, b) => (b.liquidity?.usd ?? 0) - (a.liquidity?.usd ?? 0))[0];
   if (!best) throw new Error("no Base pair with this token as base");

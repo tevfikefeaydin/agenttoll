@@ -23,6 +23,8 @@ concurrency:
 
 jobs:
   snapshot:
+    # Preview runs remain available on branches; a paid capture must be publishable.
+    if: github.ref == 'refs/heads/main' || inputs.mode != 'pay'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
@@ -37,6 +39,7 @@ jobs:
       - run: npm ci
       - run: npm run build
       - name: Inspect or capture today's snapshot
+        id: capture
         run: node scripts/snapshot.mjs
         env:
           AGENT_PRIVATE_KEY: ${{ env.AGENTTOLL_MODE == 'pay' && secrets.AGENT_WALLET_KEY || '' }}
@@ -45,11 +48,18 @@ jobs:
           AGENTTOLL_BUDGET_USDC: "0.008"
           AGENTTOLL_MAX_PER_CALL_USDC: "0.008"
           AGENTTOLL_TIMEOUT_MS: "30000"
-      - name: Commit it
-        if: env.AGENTTOLL_MODE == 'pay'
-        run: |
-          git config user.name "Tevfik Efe Aydin"
-          git config user.email "tevfikefe.aydin@gmail.com"
-          git add data/scout
-          git diff --cached --quiet && echo "nothing new" || git commit -m "Scout snapshot: $(date -u +%F)"
-          git push
+      - name: Preserve captured public JSON before publication
+        id: preserve
+        if: always() && env.AGENTTOLL_MODE == 'pay' && github.ref == 'refs/heads/main'
+        run: node scripts/publish-snapshot.mjs --capture scout --artifact-dir "$RUNNER_TEMP/scout-capture"
+      - name: Publish captured data with bounded conflict-aware retries
+        if: env.AGENTTOLL_MODE == 'pay' && github.ref == 'refs/heads/main' && steps.capture.outcome == 'success' && steps.preserve.outcome == 'success'
+        run: node scripts/publish-snapshot.mjs --publish "$RUNNER_TEMP/scout-capture"
+      - name: Retain capture even when publication fails
+        if: always() && env.AGENTTOLL_MODE == 'pay' && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: scout-capture-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/scout-capture
+          retention-days: 14
+          if-no-files-found: warn

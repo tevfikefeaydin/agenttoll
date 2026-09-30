@@ -18,6 +18,7 @@ import { baseRpc } from "./sources.js";
  */
 
 const POOL_MANAGER = "0x498581ff718922c3f8e6a244956af099b2652b2b";
+const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 const INITIALIZE = parseAbiItem(
   "event Initialize(bytes32 indexed id, address indexed currency0, address indexed currency1, uint24 fee, int24 tickSpacing, address hooks, uint160 sqrtPriceX96, int24 tick)",
 );
@@ -147,7 +148,8 @@ async function readWindow(): Promise<Window> {
   const created = await baseRpc<RawLog[]>("eth_getLogs", [
     {
       fromBlock: hex(fromBlock),
-      toBlock: "latest",
+      // Both log reads share the head used to calculate timestamps and ages.
+      toBlock: headHex,
       address: POOL_MANAGER,
       topics: [toEventSelector(INITIALIZE)],
     },
@@ -174,7 +176,7 @@ async function readWindow(): Promise<Window> {
     const mods = await baseRpc<RawLog[]>("eth_getLogs", [
       {
         fromBlock: hex(fromBlock),
-        toBlock: "latest",
+        toBlock: headHex,
         address: POOL_MANAGER,
         topics: [toEventSelector(MODIFY_LIQUIDITY), ids],
       },
@@ -182,9 +184,9 @@ async function readWindow(): Promise<Window> {
     funded = new Set(mods.map((m) => m.topics[1].toLowerCase()));
   }
 
-  // A hook shared by many pools is a launchpad; a hook used exactly once is
-  // bespoke code shipped with a brand-new token, which is where a contract
-  // that blocks selling would live. Counted over the whole window, not the
+  // A nonzero hook shared by many pools may be a launchpad; one seen exactly
+  // once may be bespoke. Usage alone does not verify either interpretation.
+  // Zero means the pool has no hook. Counted over the whole window, not the
   // caller's slice, so the number means the same thing at any window size.
   const hookUse = new Map<string, number>();
   for (const d of decoded) {
@@ -314,11 +316,11 @@ export async function getFreshPools(
     summary: {
       found: inWindow.length,
       funded: inWindow.filter((p) => p.funded).length,
-      bespokeHooks: inWindow.filter((p) => p.hookPools === 1).length,
+      bespokeHooks: inWindow.filter((p) => p.hook !== ZERO_ADDRESS && p.hookPools === 1).length,
       shown: pools.length,
     },
     method:
-      "Read from the Uniswap v4 PoolManager's own Initialize log on Base, so a pool appears about a block after it exists. `funded` comes from ModifyLiquidity events for the same pool id. `hookPools` counts how many pools in the last hour share that hook: a high count is a launchpad, exactly 1 is bespoke code shipped with this token. `tokenBasis` says how the launched side was identified — against a known quote asset, or inferred because the other side recurs across the window as a backing asset; when both sides are equally new it stays null rather than guessing, and `pair` always carries both. `launchedBy` is the sender of the pool-opening transaction, read from the chain rather than an index — for a launchpad pool that is the person who pressed the button, not the factory; it is who opened the pool, which is not necessarily who deployed the token. Ages are derived from block height at 2s per block.",
+      "Read from the Uniswap v4 PoolManager's own Initialize log on Base, so a pool appears about a block after it exists. `funded` comes from ModifyLiquidity events for the same pool id, read through the reported headBlock. `hookPools` counts how many pools in the last hour share that hook. A zero hook address means there is no hook; `bespokeHooks` counts only nonzero hooks seen once. Shared hooks may belong to launchpads and unique hooks may be bespoke, but usage does not verify their purpose or safety. `tokenBasis` says how the launched side was identified — against a known quote asset, or inferred because the other side recurs across the window as a backing asset; when both sides are equally new it stays null rather than guessing, and `pair` always carries both. `launchedBy` is the sender of the pool-opening transaction, read from the chain rather than an index — for a launchpad pool that is the person who pressed the button, not the factory; it is who opened the pool, which is not necessarily who deployed the token. Ages are derived from block height at 2s per block.",
     notMeasured:
       "USD liquidity. v4 keeps every pool's tokens in one singleton contract, and the pool's liquidity at the current tick reads 0 for most fresh launches, so any USD figure here would be invented. /api/base/radar carries real liquidity and volume once an indexer has the pool, minutes later.",
     at: window.at,

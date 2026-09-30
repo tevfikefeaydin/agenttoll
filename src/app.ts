@@ -20,7 +20,7 @@ import { getBaseTrending } from "./services/basetrending.js";
 import { getMarketBrief } from "./services/brief.js";
 import { getStats } from "./services/stats.js";
 import { getAddressActivity, getRadarSince, getPriceAlert } from "./services/watch.js";
-import { badRequest, errorResponse } from "./services/errors.js";
+import { BadRequestError, badRequest, errorResponse } from "./services/errors.js";
 import { resolveBasename } from "./services/basename.js";
 import { getNewTokenRadar } from "./services/radar.js";
 import { getPortfolio } from "./services/portfolio.js";
@@ -126,6 +126,15 @@ app.set('query parser', (raw: string | null) => {
 });
 app.disable("x-powered-by");
 const normalizedPath = (value: string) => value.toLowerCase().replace(/\/+$/, "") || "/";
+// Recognize alternate namespace spellings before rejecting them. The payment
+// SDK decodes paths and collapses separators; raw-prefix checks alone miss them.
+const boundaryPath = (value: string) => {
+  let decoded = value;
+  try { decoded = decodeURIComponent(value); } catch { /* Keep malformed paths raw. */ }
+  return normalizedPath(decoded.replace(/\\/g, "/").replace(/\/+/g, "/"));
+};
+const isApiNamespace = (pathname: string) => pathname === "/api" || pathname.startsWith("/api/") ||
+  pathname === "/.well-known" || pathname.startsWith("/.well-known/");
 
 app.use((req, res, next) => {
   const method = req.method;
@@ -173,7 +182,8 @@ app.use((req, res, next) => {
     if (terminalLogged) return;
     terminalLogged = true;
     clearTimeout(timer);
-    if (!/^\/(api|\.well-known)\//i.test(req.path)) return;
+    const pathname = boundaryPath(req.path);
+    if (!isApiNamespace(pathname)) return;
     const status = event === 'abort' ? 499 : res.statusCode;
     const settled = payment.settlementConfirmed;
     const paymentStage = settled ? "settled" : status === 402 ? (paymentSubmitted ? "rejected" : "quote") :
@@ -184,7 +194,7 @@ app.use((req, res, next) => {
     else if (paymentStage === 'quote') payment.paymentReason = 'payment_required';
     else if (paymentStage === 'rejected' && !payment.paymentReason) payment.paymentReason = 'payment_invalid';
     else if (payment.paymentPhase === 'handler' && status >= 400) payment.paymentReason = 'handler_failed';
-    const route = canonicalRoute(req.path);
+    const route = canonicalRoute(pathname);
     const log = status >= 500 ? console.error : console.log;
     log(JSON.stringify({ schemaVersion: 2, t: new Date().toISOString(), requestId: context.requestId,
       method, path: route, route, status, ms: Date.now() - started,
@@ -213,6 +223,17 @@ app.use((req, res, next) => {
   if (req.method === "OPTIONS") { res.sendStatus(204); return; }
   // Express serves HEAD via GET. Meter it and challenge it before any data load.
   if (req.method === "HEAD") req.method = "GET";
+  next();
+});
+
+// Express and x402 must agree on which routes can reach payment verification.
+// Preserve ordinary encoded path parameters, case variants and one trailing
+// slash, but reject alternate prefixes and separators before the payment gate.
+app.use((req, _res, next) => {
+  if (isApiNamespace(boundaryPath(req.path)) &&
+    (!isApiNamespace(normalizedPath(req.path)) || /\\|\/{2,}|%(?:2f|5c)/i.test(req.path))) {
+    return next(new BadRequestError("Noncanonical API path"));
+  }
   next();
 });
 
@@ -247,12 +268,42 @@ app.use((req, res, next) => {
   }
   next();
 });
-app.use(express.json({ limit: "10kb" }));
+const parseJsonBody = express.json({ limit: "10kb" });
+app.use((req, res, next) => {
+  const context = requestContext.getStore()!;
+  const hasBody = req.headers["transfer-encoding"] !== undefined || Number(req.headers["content-length"] ?? 0) > 0;
+  if (hasBody && isApiNamespace(boundaryPath(req.path))) {
+    // API GET/HEAD inputs live in the URL. Close instead of waiting to drain an
+    // unused body, which can otherwise keep a slow sender connected indefinitely.
+    res.setHeader("Connection", "close");
+    if (req.method === "GET") {
+      return next(new BadRequestError("GET and HEAD requests must not include a request body"));
+    }
+  }
+  const onAbort = () => {
+    if (res.destroyed || res.writableEnded) return;
+    res.setHeader("Connection", "close");
+    const result = errorResponse(context.signal.reason, context.requestId);
+    if (result.body.retryAfter) res.setHeader("Retry-After", String(result.body.retryAfter));
+    res.status(result.status).json(result.body);
+  };
+  const cleanup = () => {
+    context.signal.removeEventListener("abort", onAbort);
+    res.removeListener("close", cleanup);
+  };
+  if (context.signal.aborted) { onAbort(); return; }
+  context.signal.addEventListener("abort", onAbort, { once: true });
+  res.once("close", cleanup);
+  parseJsonBody(req, res, error => {
+    cleanup();
+    if (!context.signal.aborted) next(error);
+  });
+});
 
 // Match with Express itself so preflight and paid handlers agree on URL decoding.
 for (const endpoint of ENDPOINTS) {
-  app.get(endpoint.route.slice(4), (req, _res, next) => {
-    try { validateEndpointInput(endpoint, req.params, req.query); next(); }
+  app.get(endpoint.route.slice(4), (req, res, next) => {
+    try { validateEndpointInput(endpoint, req.params, req.query); res.locals.validatedPaidRoute = true; next(); }
     catch (error) { next(error); }
   });
 }
@@ -289,6 +340,7 @@ let paymentInitialization: Promise<void> | undefined;
 app.use(async (req, res, next) => {
   const adapter = new ExpressAdapter(req);
   if (!paymentServer.requiresPayment({ adapter, path: req.path, method: req.method })) return next();
+  if (res.locals.validatedPaidRoute !== true) return next(new BadRequestError("Noncanonical API path"));
   try {
     const context = requestContext.getStore()!;
     const signal = context.signal;

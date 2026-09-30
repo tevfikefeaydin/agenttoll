@@ -56,7 +56,7 @@ async function fetchPools(path: string): Promise<NewPool[]> {
     `https://api.geckoterminal.com/api/v2/networks/base/${path}`,
     { headers: { Accept: "application/json" } },
   )) as { data?: NewPool[] };
-  if (!json.data?.length) throw new Error("empty response");
+  if (!Array.isArray(json?.data)) throw new Error("invalid pool response");
   return json.data;
 }
 
@@ -75,12 +75,8 @@ function shape(data: NewPool[], source: string, freshOnly: boolean): RadarData {
     // The volume listing spans all pools, so it needs the age filter applied.
     .filter((p) => !freshOnly || Date.parse(p.createdAt) >= cutoff)
     .sort((a, b) => b.volume24hUsd - a.volume24hUsd);
-  // The caller's floor is applied later, per request. This one is a health
-  // check on the source itself: a page with nothing but dust is how the new
-  // pools listing looks when it is degraded, and that is worth failing over.
-  if (!pools.some((p) => p.liquidityUsd >= DEFAULT_MIN_LIQUIDITY_USD)) {
-    throw new Error("no pools cleared the liquidity floor");
-  }
+  // A valid quiet or low-liquidity listing is still data. Apply the caller's
+  // floor after caching, rather than treating the default floor as source health.
   return { chain: "base", pools, source, at: new Date().toISOString() };
 }
 
