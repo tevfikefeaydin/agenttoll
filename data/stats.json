@@ -4,15 +4,15 @@
   "schemaVersion": 1,
   "fromBlock": 49340000,
   "countingPolicy": "usdc-transfer-1-50000-v1",
-  "block": 51988394,
-  "blockHash": "0xec772da193e4eb8e74c7dfaf84afe6ffcbf15d00de0f85a6421fc19ef82cb330",
-  "at": "2026-09-30T11:20:17.678Z",
+  "block": 52032376,
+  "blockHash": "0x95ee62d74c3850ad2f2cba81fe2c1cda29d1dbfcc6cd77d9f197d25ac827cb6f",
+  "at": "2026-10-01T11:47:57.956Z",
   "firstTollAt": "2026-07-31T13:49:17.000Z",
-  "lastTollAt": "2026-09-30T03:04:55.000Z",
+  "lastTollAt": "2026-09-30T18:02:13.000Z",
   "payers": {
     "0x29d7837a1c19890d2ab123999e9cf8bfe40985b0": {
-      "calls": 140,
-      "usdcUnits": "687000"
+      "calls": 142,
+      "usdcUnits": "696000"
     },
     "0x51063e78f02f028ddce8f722e24800ed433e435f": {
       "calls": 42,
@@ -34,13 +34,13 @@
       "calls": 12,
       "usdcUnits": "12000"
     },
+    "0xc9c7b38c0942914fc8ea12063bc92dcd3b581670": {
+      "calls": 12,
+      "usdcUnits": "33000"
+    },
     "0x686ca1f3baf7f7df3334f2f1a65ae314ee9cdb29": {
       "calls": 11,
       "usdcUnits": "27000"
-    },
-    "0xc9c7b38c0942914fc8ea12063bc92dcd3b581670": {
-      "calls": 11,
-      "usdcUnits": "32000"
     },
     "0xbb5dc827367e34e5fc663a4d86451b12aaeb71a9": {
       "calls": 10,
