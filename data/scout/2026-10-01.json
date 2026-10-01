@@ -1,0 +1,106 @@
+{
+  "date": "2026-10-01",
+  "at": "2026-10-01T14:36:09.685Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x711ca5bc3be1663e43a0c02da03903d8d7ebb9d9085d9581a4e43a0869ec1c44",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 0,
+    "caution": 0,
+    "insufficientData": 4,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "XDP / USDC",
+      "pool": "0x3211ee0661000eb6264270c7bf338770db92d971",
+      "token": "0xaacbc3e17596157a3921f72eadc2457277debb07",
+      "createdAt": "2026-10-01T14:28:29Z",
+      "priceUsd": 0.000100650500349228,
+      "volume24hUsd": 3038328.47860447,
+      "liquidityUsd": 6854428.8029,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "AROS / WETH 0.3%",
+      "pool": "0x87eae68e44557183f3b63e3f3d98c7ee5432a3d390fe11c637cd580cb6412ad0",
+      "token": "0x17065201028d8dd3f25f0e932834e75624a72dc0",
+      "createdAt": "2026-10-01T14:30:49Z",
+      "priceUsd": 0.201438584226891,
+      "volume24hUsd": 2299.5734957056,
+      "liquidityUsd": 67078.0327,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "verified",
+          "owner-powers",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "XBC / WETH 0.3%",
+      "pool": "0xe83dbff1b13dbed1c6d77b3415f049b2a81aeb28a779397e2a2452b7aecd939d",
+      "token": "0x40ba96de13528d5481a129570d7342cedf347f55",
+      "createdAt": "2026-10-01T14:32:55Z",
+      "priceUsd": 0.0636445704080745,
+      "volume24hUsd": 2299.3262453233,
+      "liquidityUsd": 67249.2456,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "XRPN / WETH",
+      "pool": "0xa97f2805d4991c75f8a2c01a70af623da2ddf5d6df1ce8be7bfd8c5b37e44747",
+      "token": "0xe1dfb3706a0bd2c3f9616a117934ef17d0d2dc1e",
+      "createdAt": "2026-10-01T14:25:31Z",
+      "priceUsd": 0.000118141433744594,
+      "volume24hUsd": 5.2265342249,
+      "liquidityUsd": 116340.2668,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    }
+  ]
+}
