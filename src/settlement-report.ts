@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { ENDPOINT_MANIFEST } from './endpoint-manifest.js';
 import { buildUsageBreakdown, type RequestActivity } from './usage-breakdown.js';
 import { canonicalRoute } from './telemetry.js';
@@ -39,6 +40,40 @@ function parseLine(line: string): Row | null {
   } catch { return null; }
 }
 
+/** Array entries are exports separated by newlines, not fragments of one line. */
+function* logRows(input: string | readonly string[]): Generator<Row | null> {
+  const chunks = typeof input === 'string' ? [input] : input;
+  for (let index = 0; index < chunks.length; index++) {
+    const chunk = chunks[index];
+    let start = 0;
+    while (start < chunk.length) {
+      const newline = chunk.indexOf('\n', start);
+      let end = newline === -1 ? chunk.length : newline;
+      // Match split(/\r?\n/) even when the CR precedes the newline between exports.
+      if ((newline !== -1 || index < chunks.length - 1) && chunk[end - 1] === '\r') end--;
+      const line = chunk.slice(start, end);
+      if (line.trim()) yield parseLine(line);
+      if (newline === -1) break;
+      start = newline + 1;
+    }
+  }
+}
+
+/** Copy only fields needed after request deduplication; never retain raw metadata. */
+function reportRow(row: Row): Row {
+  return {
+    schemaVersion: row.schemaVersion, t: row.t, route: row.route, path: row.path, status: row.status,
+    paymentStage: row.paymentStage, paymentSubmitted: row.paymentSubmitted,
+    terminal: row.terminal, abortReason: row.abortReason, paymentPhase: row.paymentPhase,
+    paymentReason: row.paymentReason, paymentHeader: row.paymentHeader, protocolVersion: row.protocolVersion,
+    facilitatorVerifyCalls: row.facilitatorVerifyCalls, facilitatorSettleCalls: row.facilitatorSettleCalls,
+    facilitatorVerifyMs: row.facilitatorVerifyMs, facilitatorSettleMs: row.facilitatorSettleMs,
+    settlementConfirmed: row.settlementConfirmed, settlementTransaction: row.settlementTransaction,
+    settlementAmount: row.settlementAmount, settlementAsset: row.settlementAsset,
+    settlementNetwork: row.settlementNetwork, verifiedPayer: row.verifiedPayer,
+  };
+}
+
 const paidRoutes = new Set<string>(ENDPOINT_MANIFEST.map(endpoint => endpoint.path));
 function validCore(row: Row, scope: 'inspection' | 'usage'): boolean {
   const client = row.client as Row | null;
@@ -73,6 +108,14 @@ function usdc(units: bigint): string {
 
 /** Shared validation and deduplication for private application-log reports. */
 export function summarizePaymentLogs(input: string | readonly string[], additionalOperatorWallets: readonly string[] = [], scope: 'inspection' | 'usage' = 'inspection') {
+  return summarizePaymentRows(logRows(input), additionalOperatorWallets, scope);
+}
+
+/**
+ * One pass over parsed JSON rows; null represents an unparseable nonblank log line.
+ * Deduplication still requires state per unique request/receipt, but retains no export text.
+ */
+export function summarizePaymentRows(input: Iterable<Row | null>, additionalOperatorWallets: readonly string[] = [], scope: 'inspection' | 'usage' = 'inspection') {
   if (additionalOperatorWallets.length > 128) throw new Error('At most 128 additional operator wallets can be excluded.');
   const operatorWallets = new Set(KNOWN_OPERATOR_WALLETS);
   for (const value of additionalOperatorWallets) {
@@ -81,50 +124,44 @@ export function summarizePaymentLogs(input: string | readonly string[], addition
     operatorWallets.add(normalized);
   }
 
-  const text: string = typeof input === 'string' ? input : input.join('\n');
-  const requestGroups = new Map<string, { row: Row; fingerprints: Set<string>; records: number; relevant: boolean }>();
-  const rows: Row[] = [];
+  const requestGroups = new Map<string, { row: Row | null; fingerprint: string; conflicting: boolean; records: number; relevant: boolean }>();
   let totalLines = 0;
   let ignoredLines = 0;
+  let matchingRecords = 0;
   let duplicateRequestIds = 0;
   let conflictingRequestIds = 0;
   let conflictingRequestRecords = 0;
-  for (const line of text.split(/\r?\n/)) {
-    if (!line.trim()) continue;
+  for (const row of input) {
     totalLines++;
-    const row = parseLine(line);
     if (!row) { ignoredLines++; continue; }
     if (typeof row.requestId !== 'string' || !/^[\w-]{1,128}$/.test(row.requestId)) continue;
     const id = row.requestId;
-    const fingerprint = JSON.stringify(row);
     const group = requestGroups.get(id);
     if (group) {
       group.records++;
-      group.fingerprints.add(fingerprint);
       group.relevant ||= validCore(row, scope);
-    } else requestGroups.set(id, { row, fingerprints: new Set([fingerprint]), records: 1, relevant: validCore(row, scope) });
-  }
-  for (const group of requestGroups.values()) {
-    if (!group.relevant) continue;
-    if (group.fingerprints.size > 1) {
-      conflictingRequestIds++;
-      conflictingRequestRecords += group.records;
-      continue;
+      if (!group.conflicting && group.fingerprint !== createHash('sha256').update(JSON.stringify(row)).digest('base64')) {
+        group.conflicting = true;
+        group.row = null;
+      }
+    } else {
+      // Hash the full raw record before projection, including fields absent from the report.
+      const fingerprint = createHash('sha256').update(JSON.stringify(row)).digest('base64');
+      const relevant = validCore(row, scope);
+      requestGroups.set(id, { row: relevant ? reportRow(row) : null, fingerprint, conflicting: false, records: 1, relevant });
     }
-    if (!validCore(group.row, scope)) continue;
-    rows.push(group.row);
-    duplicateRequestIds += group.records - 1;
   }
 
-  const times = rows.map(row => Date.parse(row.t as string)).sort((a, b) => a - b);
-  const days = new Set(rows.map(row => new Date(row.t as string).toISOString().slice(0, 10)));
+  let firstRequestAt = Infinity;
+  let lastRequestAt = -Infinity;
+  const days = new Set<string>();
   let quotes = 0;
   let signedSubmissions = 0;
   const failureStages: Record<string, number> = {};
   const failurePhases: Record<string, number> = {};
   const failureReasons: Record<string, number> = {};
   let failures = 0;
-  const receiptGroups = new Map<string, Receipt[]>();
+  const receiptGroups = new Map<string, { receipt: Receipt; records: number; conflicting: boolean }>();
   const unresolved = {
     totalRecords: 0,
     malformedReceiptRecords: 0,
@@ -136,7 +173,22 @@ export function summarizePaymentLogs(input: string | readonly string[], addition
   };
 
   const activity: RequestActivity[] = [];
-  for (const row of rows) {
+  for (const [id, group] of requestGroups) {
+    requestGroups.delete(id);
+    if (!group.relevant) continue;
+    if (group.conflicting) {
+      conflictingRequestIds++;
+      conflictingRequestRecords += group.records;
+      continue;
+    }
+    const row = group.row;
+    if (!row) continue;
+    matchingRecords++;
+    duplicateRequestIds += group.records - 1;
+    const time = Date.parse(row.t as string);
+    firstRequestAt = Math.min(firstRequestAt, time);
+    lastRequestAt = Math.max(lastRequestAt, time);
+    days.add(new Date(time).toISOString().slice(0, 10));
     const validV2 = consistentV2(row);
     const signed = row.paymentSubmitted === true && ['payment-signature', 'both'].includes(String(row.paymentHeader));
 
@@ -200,22 +252,25 @@ export function summarizePaymentLogs(input: string | readonly string[], addition
     const receipt: Receipt = { route, fingerprint, network, payer, amount, observedAt,
       day: new Date(observedAt).toISOString().slice(0, 10),
       delivery, operator: operatorWallets.has(payer) };
-    const group = receiptGroups.get(key) ?? [];
-    group.push(receipt);
-    receiptGroups.set(key, group);
+    const receiptGroup = receiptGroups.get(key);
+    if (receiptGroup) {
+      receiptGroup.records++;
+      receiptGroup.conflicting ||= receiptGroup.receipt.fingerprint !== fingerprint;
+      if (observedAt < receiptGroup.receipt.observedAt) receiptGroup.receipt = receipt;
+    } else receiptGroups.set(key, { receipt, records: 1, conflicting: false });
   }
 
   const accepted: Receipt[] = [];
   let duplicateReceiptRecords = 0;
   for (const group of receiptGroups.values()) {
-    if (new Set(group.map(receipt => receipt.fingerprint)).size > 1) {
+    if (group.conflicting) {
       unresolved.conflictingReceipts++;
-      unresolved.conflictingReceiptRecords += group.length;
-      unresolved.totalRecords += group.length;
+      unresolved.conflictingReceiptRecords += group.records;
+      unresolved.totalRecords += group.records;
       continue;
     }
-    accepted.push(group.reduce((earliest, receipt) => receipt.observedAt < earliest.observedAt ? receipt : earliest));
-    duplicateReceiptRecords += group.length - 1;
+    accepted.push(group.receipt);
+    duplicateReceiptRecords += group.records - 1;
   }
 
   const mainnet = accepted.filter(receipt => receipt.network === 'eip155:8453');
@@ -259,11 +314,11 @@ export function summarizePaymentLogs(input: string | readonly string[], addition
       description: scope === 'inspection' ? 'Supplied application log records for the allowlisted browser inspection client only.' : 'Supplied application log records for all registered paid endpoints; no client label required.',
     },
     window: {
-      firstRequestAt: times.length ? new Date(times[0]).toISOString() : null,
-      lastRequestAt: times.length ? new Date(times[times.length - 1]).toISOString() : null,
+      firstRequestAt: matchingRecords ? new Date(firstRequestAt).toISOString() : null,
+      lastRequestAt: matchingRecords ? new Date(lastRequestAt).toISOString() : null,
       utcDaysObserved: days.size,
     },
-    input: { totalLines, matchingRecords: rows.length, duplicateRequestIds, conflictingRequestIds, conflictingRequestRecords, ignoredLines },
+    input: { totalLines, matchingRecords, duplicateRequestIds, conflictingRequestIds, conflictingRequestRecords, ignoredLines },
     requests: { quotes, signedSubmissions },
     failures: { total: failures, byPaymentStage: sorted(failureStages), byPaymentPhase: sorted(failurePhases), byReason: sorted(failureReasons) },
     settlements: {

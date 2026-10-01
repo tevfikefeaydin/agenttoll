@@ -15,6 +15,10 @@ MAX_BUNDLE = 25 * 1024 * 1024
 LABEL = 'com.agenttoll.managed=autodeploy'
 
 
+class OutputLimitExceeded(RuntimeError):
+    """Only a bounded Docker log window may be retried with a smaller range."""
+
+
 def command(args, data=None, limit=MAX_LOG):
     """Bound container stdout and stderr together; discard other command diagnostics."""
     stderr = subprocess.STDOUT if args[:2] == ['docker', 'logs'] else subprocess.DEVNULL
@@ -46,6 +50,7 @@ def command(args, data=None, limit=MAX_LOG):
         process.kill(); process.wait(); failure.append('timeout')
     reader.join()
     if writer: writer.join()
+    if 'output limit' in failure: raise OutputLimitExceeded('Collection output limit exceeded')
     if process.returncode or failure: raise RuntimeError('Collection command failed or exceeded a bound')
     return b''.join(chunks)
 
@@ -73,51 +78,83 @@ def instant(value):
     return datetime.fromisoformat(value.replace('Z', '+00:00'))
 
 
-def collect(directory, app, run=command, now=None, initial_hours=720):
+def timestamp(value):
+    return value.isoformat(timespec='milliseconds').replace('+00:00', 'Z')
+
+
+def collect(directory, app, run=command, now=None, initial_hours=720, window_minutes=60):
     if not isinstance(initial_hours, int) or not 1 <= initial_hours <= 720:
         raise ValueError('Initial collection window must be 1 to 720 hours')
+    if not isinstance(window_minutes, int) or not 1 <= window_minutes <= 60:
+        raise ValueError('Collection window must be 1 to 60 minutes')
     directory.mkdir(mode=0o700, parents=True, exist_ok=True)
     if directory.is_symlink(): raise ValueError('Archive directory cannot be a symlink')
     os.chmod(directory, 0o700)
     target = directory / 'archive.json'
-    now = now or datetime.now(timezone.utc).isoformat(timespec='milliseconds').replace('+00:00', 'Z')
+    now = now or timestamp(datetime.now(timezone.utc))
     current = instant(now)
     previous = None
     if target.is_symlink(): raise ValueError('Archive cannot be a symlink')
     if target.exists():
         if not target.is_file() or target.stat().st_size > MAX_BUNDLE: raise ValueError('Invalid archive file')
         previous = json.loads(target.read_text(encoding='utf-8'))
-        if not isinstance(previous, dict) or set(previous) != {'version', 'containers', 'bundle'} or previous['version'] != 1:
+        if not isinstance(previous, dict) or set(previous) != {'version', 'containers', 'bundle'} or previous['version'] not in (1, 2):
             raise ValueError('Invalid archive envelope')
         if not isinstance(previous['containers'], list) or len(previous['containers']) > 256 or any(not isinstance(c, str) or not re.fullmatch('[0-9a-f]{64}', c) for c in previous['containers']):
             raise ValueError('Invalid source history')
         if not isinstance(previous['bundle'], dict) or set(previous['bundle']) != {'state', 'report'}: raise ValueError('Invalid archive bundle')
         last = instant(previous['bundle']['state']['collectedAt'])
         if last > current: raise ValueError('Collection clock moved backwards')
-        since = max(current - timedelta(days=30), last - timedelta(minutes=10))
-    else: since = current - timedelta(hours=initial_hours)
+        coverage = previous['bundle']['report'].get('coverage', {})
+        cursor = instant(coverage.get('sourceWindowUntil', previous['bundle']['state']['collectedAt']))
+        if cursor > last: raise ValueError('Source cursor is ahead of collection time')
+        cursor = max(current - timedelta(days=30), cursor)
+        since = max(current - timedelta(days=30), cursor - timedelta(minutes=10))
+    else:
+        cursor = current - timedelta(hours=initial_hours)
+        since = cursor
+    until = min(current, cursor + timedelta(minutes=window_minutes))
     sources = run(['docker', 'ps', '--all', '--no-trunc', '--filter', 'label=' + LABEL, '--format', '{{.ID}}'], limit=32768).decode().split()
     if not sources or len(sources) > 256 or len(set(sources)) != len(sources) or any(not re.fullmatch('[0-9a-f]{64}', c) for c in sources):
         raise ValueError('No managed sources or invalid source list')
-    logs, total = [], 0
     for source in sources:
         metadata = json.loads(run(['docker', 'inspect', source], limit=1024 * 1024))
         if len(metadata) != 1 or metadata[0]['Config'].get('Labels', {}).get('com.agenttoll.managed') != 'autodeploy':
             raise ValueError('Source is not managed by AgentToll')
-        output = run(['docker', 'logs', '--since', since.isoformat(), '--until', now, source], limit=MAX_LOG)
-        total += len(output) + 1
-        if total > MAX_LOG: raise ValueError('Combined log limit exceeded')
-        logs.append(output.decode('utf-8', errors='strict'))
-    request = {'state': previous['bundle']['state'] if previous else None, 'input': '\n'.join(logs), 'now': now}
-    bundle = json.loads(run(['node', '--import', 'tsx', str(app / 'scripts' / 'usage-archive.mjs')],
-                            data=json.dumps(request).encode(), limit=MAX_BUNDLE))
-    if not isinstance(bundle, dict) or set(bundle) != {'state', 'report'} or bundle['state'].get('collectedAt') != now:
+    while True:
+        logs, total = [], 0
+        try:
+            for source in sources:
+                output = run(['docker', 'logs', '--since', timestamp(since), '--until', timestamp(until), source], limit=MAX_LOG)
+                total += len(output) + 1
+                if total > MAX_LOG: raise OutputLimitExceeded('Combined log limit exceeded')
+                logs.append(output.decode('utf-8', errors='strict'))
+            break
+        except OutputLimitExceeded:
+            remaining = (until - cursor).total_seconds()
+            overlap = (cursor - since).total_seconds()
+            # Shrink the larger part of the range. Only already-collected time
+            # may be removed from the start; never skip past the saved cursor.
+            if overlap > 0 and (overlap >= remaining or remaining <= 1):
+                since = cursor - timedelta(seconds=overlap / 2 if overlap > 1 else 0)
+            elif remaining > 1:
+                until = cursor + timedelta(seconds=max(1, remaining / 2))
+            else:
+                raise OutputLimitExceeded('Minimum uncollected log window exceeds the input limit')
+    request = {'input': '\n'.join(logs), 'now': now, 'containers': sources,
+               'sourceWindowSince': timestamp(since), 'sourceWindowUntil': timestamp(until),
+               'collectionBacklogSeconds': max(0, int((current - until).total_seconds()))}
+    result = json.loads(run(['node', '--import', 'tsx', str(app / 'scripts' / 'usage-archive-store.mjs'),
+                             '--directory', str(directory)],
+                            data=json.dumps(request, ensure_ascii=False, separators=(',', ':')).encode(), limit=MAX_BUNDLE))
+    if (not isinstance(result, dict) or set(result) != {'version', 'containers', 'bundle'} or result['version'] != 2
+            or result['containers'] != sources or result['bundle']['state'].get('collectedAt') != now
+            or result['bundle']['report']['coverage'].get('sourceWindowUntil') != timestamp(until)):
         raise ValueError('Invalid archive adapter result')
-    bundle['report']['coverage']['managedContainersObserved'] = len(sources)
-    bundle['report']['coverage']['previousContainersNowMissing'] = len(set(previous['containers']) - set(sources)) if previous else 0
-    bundle['report']['coverage']['sourceWindowSince'] = since.isoformat()
-    result = {'version': 1, 'containers': sources, 'bundle': bundle}
-    atomic_write(target, result)
+    if not target.is_file() or target.is_symlink() or target.stat().st_size > MAX_BUNDLE:
+        raise ValueError('Archive manifest was not committed')
+    if json.loads(target.read_text(encoding='utf-8')) != result:
+        raise ValueError('Archive manifest differs from committed result')
     return result
 
 
@@ -127,7 +164,10 @@ def main():
     parser.add_argument('--app', type=Path, default=Path('/opt/agenttoll/usage/app'))
     parser.add_argument('--initial-hours', type=int, default=720,
                         help='First-run log window (1-720 hours); subsequent runs resume the saved cursor')
+    parser.add_argument('--max-windows', type=int, default=12,
+                        help='At most 1-12 bounded catch-up windows per invocation')
     args = parser.parse_args()
+    if not 1 <= args.max_windows <= 12: raise ValueError('Invalid catch-up window count')
     # Linux host flock releases on every exit, including process crashes.
     import fcntl
     args.directory.mkdir(mode=0o700, parents=True, exist_ok=True)
@@ -136,7 +176,9 @@ def main():
     fd = os.open(lock_path, os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
     with os.fdopen(fd, 'w') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        collect(args.directory, args.app, initial_hours=args.initial_hours)
+        for _ in range(args.max_windows):
+            result = collect(args.directory, args.app, initial_hours=args.initial_hours)
+            if not result['bundle']['report']['coverage']['collectionBacklogSeconds']: break
     print('Private usage archive updated; coverage remains best effort.')
 
 if __name__ == '__main__':

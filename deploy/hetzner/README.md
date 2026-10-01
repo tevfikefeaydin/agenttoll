@@ -90,6 +90,10 @@ run checks unsigned API responses, source availability and snapshot age, using t
 current release and no paying wallet. It has an 85-second host deadline; private
 reports are replaced atomically with mode 0600.
 
+On hosts with the private usage collector, enable the optional `--usage-archive`
+check using the drop-in in [USAGE-ARCHIVE.md](USAGE-ARCHIVE.md#monitor-collection-health).
+It checks collection freshness, backlog and capacity independently of API health.
+
 A source fallback may preserve availability while coverage remains degraded.
 A green readiness check does not prove complete provider data or real settlement.
 See [OPERATIONS.md](../../OPERATIONS.md) and the

@@ -2,6 +2,7 @@ import json
 import subprocess
 import tempfile
 import unittest
+from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import patch
 
@@ -44,6 +45,51 @@ class MonitorTests(unittest.TestCase):
             with self.subTest(output=output[:30]), tempfile.TemporaryDirectory() as directory:
                 with patch.object(monitor.subprocess, 'run', return_value=subprocess.CompletedProcess([], 0, output, 'secret')):
                     self.assertRaises(ValueError, monitor.collect, self.state(directory))
+
+    def test_stale_usage_archive_fails_monitor_even_when_api_and_data_are_available(self):
+        with tempfile.TemporaryDirectory() as directory:
+            archive = Path(directory) / 'archive.json'
+            archive.write_text(json.dumps({'version': 2, 'bundle': {'state': {
+                'collectedAt': '2026-09-28T09:16:37.288Z', 'entryCount': 28344},
+                'report': {'coverage': {'collectionBacklogSeconds': 0}}}}))
+            evidence = {'ok': True, 'degraded': False, 'api': {'ok': True}, 'data': {'ok': True}}
+            with patch.object(monitor.subprocess, 'run', return_value=subprocess.CompletedProcess([], 0,
+                    'AGENTTOLL_MONITOR ' + json.dumps(evidence), '')):
+                result = monitor.collect(self.state(directory), usage_path=archive,
+                                         now=datetime(2026, 10, 1, tzinfo=timezone.utc))
+            self.assertFalse(result['ok'])
+            self.assertTrue(result['api']['ok'])
+            self.assertEqual(result['usage']['status'], 'stale')
+
+    def test_usage_health_rejects_future_or_missing_times_and_reports_backlog(self):
+        with tempfile.TemporaryDirectory() as directory:
+            p = Path(directory) / 'archive.json'
+            now = datetime(2026, 10, 1, tzinfo=timezone.utc)
+            self.assertEqual(monitor.usage_status(p, now)['status'], 'missing')
+            for stamp in [None, '2026-10-02T00:00:00.000Z']:
+                p.write_text(json.dumps({'version': 2, 'bundle': {'state': {'collectedAt': stamp},
+                    'report': {'coverage': {}}}}))
+                result = monitor.usage_status(p, now)
+                self.assertFalse(result['ok'])
+                self.assertEqual(result['status'], 'invalid')
+            p.write_text(json.dumps({'version': 2, 'bundle': {'state': {'collectedAt': '2026-09-30T23:59:00.000Z'},
+                'report': {'coverage': {'collectionBacklogSeconds': 3600}}, 'secret': 'do-not-copy'}}))
+            result = monitor.usage_status(p, now)
+            self.assertEqual(result['status'], 'catching_up')
+            self.assertFalse(result['ok'])
+            self.assertNotIn('do-not-copy', json.dumps(result))
+
+    def test_recent_collection_cannot_hide_a_stale_source_cursor(self):
+        with tempfile.TemporaryDirectory() as directory:
+            p = Path(directory) / 'archive.json'
+            p.write_text(json.dumps({'version': 2, 'bundle': {
+                'state': {'collectedAt': '2026-10-01T11:46:00.000Z'},
+                'report': {'coverage': {'sourceWindowUntil': '2026-10-01T11:32:00.000Z',
+                                        'collectionBacklogSeconds': 840}}}}))
+            result = monitor.usage_status(p, datetime(2026, 10, 1, 12, tzinfo=timezone.utc))
+            self.assertFalse(result['ok'])
+            self.assertEqual(result['status'], 'catching_up')
+            self.assertEqual(result['sourceLagSeconds'], 1680)
 
 
 if __name__ == '__main__':

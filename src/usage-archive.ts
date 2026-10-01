@@ -4,14 +4,14 @@ import { canonicalRoute } from './telemetry.js';
 import { ENDPOINT_MANIFEST } from './endpoint-manifest.js';
 import { paymentPhases, paymentReasons } from './payment-telemetry.js';
 
-type Row = Record<string, unknown>;
-type Entry = { id: string; digest: string; firstSeen: string; conflict: boolean; row: Row };
+export type Row = Record<string, unknown>;
+export type Entry = { id: string; digest: string; firstSeen: string; conflict: boolean; row: Row };
 export type UsageArchive = { version: 1; startedAt: string; collectedAt: string; entries: Entry[] };
 export const ARCHIVE_LIMITS = { retentionDays: 30, maxEntries: 50_000, maxBytes: 20 * 1024 * 1024, maxLineBytes: 65_536 } as const;
 const DAY = 86_400_000;
 const hash = (s: string) => createHash('sha256').update(s).digest('hex');
 const digestPattern = /^[a-f0-9]{64}$/;
-const date = (v: unknown): v is string => typeof v === 'string' &&
+export const archiveDate = (v: unknown): v is string => typeof v === 'string' &&
  /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{1,9})?Z$/.test(v) && Number.isFinite(Date.parse(v)) &&
  new Date(v).toISOString().slice(0, 19) === v.slice(0, 19);
 const object = (v: unknown): v is Row => !!v && typeof v === 'object' && !Array.isArray(v);
@@ -35,40 +35,48 @@ function sanitize(row: Row, id: string): Row {
  for (const key of ['status', 'facilitatorVerifyCalls', 'facilitatorSettleCalls', 'facilitatorVerifyMs', 'facilitatorSettleMs']) {
   if (key in row) output[key] = Number.isSafeInteger(row[key]) && Number(row[key]) >= 0 ? row[key] : null;
  }
- if ('t' in row) output.t = date(row.t) ? row.t : null;
+ if ('t' in row) output.t = archiveDate(row.t) ? row.t : null;
  const route = canonicalRoute(typeof (row.route ?? row.path) === 'string' ? String(row.route ?? row.path) : '');
  output.route = routes.has(route) ? route : '[invalid]';
  return output;
 }
-function validate(value: unknown): asserts value is UsageArchive {
+export function validateArchiveEntry(entry: unknown, collectedAt: string): asserts entry is Entry {
+ if (!object(entry) || Object.keys(entry).sort().join() !== 'conflict,digest,firstSeen,id,row' ||
+  typeof entry.id !== 'string' || !digestPattern.test(entry.id) || typeof entry.digest !== 'string' || !digestPattern.test(entry.digest) ||
+  !archiveDate(entry.firstSeen) || Date.parse(entry.firstSeen) > Date.parse(collectedAt) || typeof entry.conflict !== 'boolean' || !object(entry.row) ||
+  JSON.stringify(sanitize(entry.row, entry.id)) !== JSON.stringify(entry.row)) throw new Error('Invalid archive entry');
+}
+export function validateUsageArchive(value: unknown): asserts value is UsageArchive {
  if (!object(value) || Object.keys(value).sort().join() !== 'collectedAt,entries,startedAt,version' || value.version !== 1 ||
-  !date(value.startedAt) || !date(value.collectedAt) || Date.parse(value.startedAt) > Date.parse(value.collectedAt) ||
-  !Array.isArray(value.entries) || value.entries.length > ARCHIVE_LIMITS.maxEntries || Buffer.byteLength(JSON.stringify(value)) > ARCHIVE_LIMITS.maxBytes) throw new Error('Invalid archive state');
+  !archiveDate(value.startedAt) || !archiveDate(value.collectedAt) || Date.parse(value.startedAt) > Date.parse(value.collectedAt) ||
+  !Array.isArray(value.entries) || value.entries.length > ARCHIVE_LIMITS.maxEntries) throw new Error('Invalid archive state');
+ let bytes = Buffer.byteLength(JSON.stringify({ ...value, entries: [] }));
  const ids = new Set<string>();
  for (const entry of value.entries) {
-  if (!object(entry) || Object.keys(entry).sort().join() !== 'conflict,digest,firstSeen,id,row' ||
-   typeof entry.id !== 'string' || !digestPattern.test(entry.id) || ids.has(entry.id) || typeof entry.digest !== 'string' || !digestPattern.test(entry.digest) ||
-   !date(entry.firstSeen) || Date.parse(entry.firstSeen) > Date.parse(value.collectedAt) || typeof entry.conflict !== 'boolean' || !object(entry.row) ||
-   JSON.stringify(sanitize(entry.row, entry.id)) !== JSON.stringify(entry.row)) throw new Error('Invalid archive entry');
+  validateArchiveEntry(entry, value.collectedAt);
+  if (ids.has(entry.id)) throw new Error('Invalid archive entry');
+  bytes += Buffer.byteLength(JSON.stringify(entry)) + (ids.size ? 1 : 0);
+  if (bytes > ARCHIVE_LIMITS.maxBytes) throw new Error('Invalid archive state');
   ids.add(entry.id);
  }
 }
-/** Pure update; caller commits state and report together only after collection succeeds. */
-export function updateUsageArchive(previous: unknown, input: string, now: string) {
- if (!date(now) || Buffer.byteLength(input) > ARCHIVE_LIMITS.maxBytes) throw new Error('Invalid time or oversized archive input');
- if (previous !== null) validate(previous);
- const old = previous as UsageArchive | null;
+/** Shared merge rules; the caller owns this map and enforces storage bounds. */
+export function updateArchiveEntries(entries: Map<string, Entry>, input: string, now: string, maxEntries: number) {
+ if (!archiveDate(now) || Buffer.byteLength(input) > ARCHIVE_LIMITS.maxBytes) throw new Error('Invalid time or oversized archive input');
  const ms = Date.parse(now), cutoff = ms - ARCHIVE_LIMITS.retentionDays * DAY;
- if (old && Date.parse(old.collectedAt) > ms) throw new Error('Collection clock moved backwards');
- const entries = new Map<string, Entry>((old?.entries ?? []).filter(e => Date.parse(e.firstSeen) >= cutoff).map(e => [e.id, structuredClone(e)]));
  let ignoredLines = 0;
- for (const line of input.split(/\r?\n/)) {
+ // Avoid a second array containing the entire collection's lines.
+ for (let start = 0; start < input.length;) {
+  const newline = input.indexOf('\n', start);
+  const end = newline < 0 ? input.length : newline;
+  const line = input.slice(start, end).replace(/\r$/, '');
+  start = end + 1;
   if (!line.trim()) continue;
   if (Buffer.byteLength(line) > ARCHIVE_LIMITS.maxLineBytes) throw new Error('Oversized log line');
   let row: unknown;
   try { row = JSON.parse(line); if (object(row) && typeof row.message === 'string') row = JSON.parse(row.message); } catch { ignoredLines++; continue; }
   if (!object(row) || typeof row.requestId !== 'string' || !/^[\w-]{1,128}$/.test(row.requestId)) { ignoredLines++; continue; }
-  if (date(row.t) && (Date.parse(row.t) < cutoff || Date.parse(row.t) > ms)) { ignoredLines++; continue; }
+  if (archiveDate(row.t) && (Date.parse(row.t) < cutoff || Date.parse(row.t) > ms)) { ignoredLines++; continue; }
   const id = hash(row.requestId), digest = hash(JSON.stringify(row)), safe = sanitize(row, id);
   const existing = entries.get(id);
   // Routine successful probes are not paid-route evidence. Keep a conflicting
@@ -81,11 +89,28 @@ export function updateUsageArchive(previous: unknown, input: string, now: string
    // Preserve a relevant representative even if the first variant was malformed.
    if (!summarizeUsageLogs(JSON.stringify(existing.row)).input.matchingRecords && summarizeUsageLogs(JSON.stringify(safe)).input.matchingRecords) existing.row = safe;
   } else entries.set(id, { id, digest, firstSeen: now, conflict: false, row: safe });
-  if (entries.size > ARCHIVE_LIMITS.maxEntries) throw new Error('Archive entry limit exceeded');
+  if (entries.size > maxEntries) throw new Error('Archive entry limit exceeded');
  }
+ return ignoredLines;
+}
+export function* archiveRows(entries: Iterable<Entry>): Generator<Row> {
+ for (const entry of entries) {
+  yield entry.row;
+  if (entry.conflict) yield { requestId: entry.id, archiveConflict: true };
+ }
+}
+/** Pure update; caller commits state and report together only after collection succeeds. */
+export function updateUsageArchive(previous: unknown, input: string, now: string) {
+ if (!archiveDate(now) || Buffer.byteLength(input) > ARCHIVE_LIMITS.maxBytes) throw new Error('Invalid time or oversized archive input');
+ if (previous !== null) validateUsageArchive(previous);
+ const old = previous as UsageArchive | null;
+ const ms = Date.parse(now), cutoff = ms - ARCHIVE_LIMITS.retentionDays * DAY;
+ if (old && Date.parse(old.collectedAt) > ms) throw new Error('Collection clock moved backwards');
+ const entries = new Map<string, Entry>((old?.entries ?? []).filter(e => Date.parse(e.firstSeen) >= cutoff).map(e => [e.id, structuredClone(e)]));
+ const ignoredLines = updateArchiveEntries(entries, input, now, ARCHIVE_LIMITS.maxEntries);
  const state: UsageArchive = { version: 1, startedAt: old?.startedAt ?? now, collectedAt: now, entries: [...entries.values()] };
  if (Buffer.byteLength(JSON.stringify(state)) > ARCHIVE_LIMITS.maxBytes) throw new Error('Archive byte limit exceeded');
- const records = state.entries.flatMap(e => e.conflict ? [JSON.stringify(e.row), JSON.stringify({ requestId: e.id, archiveConflict: true })] : [JSON.stringify(e.row)]);
+ const records = [...archiveRows(state.entries)].map(row => JSON.stringify(row));
  const summary = summarizeUsageLogs(records);
  const report = { ...summary, coverage: {
   complete: false, retainedSince: summary.window.firstRequestAt, collectionStartedAt: state.startedAt, collectedAt: now,

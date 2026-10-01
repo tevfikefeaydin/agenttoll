@@ -151,9 +151,13 @@ fallback. These errors are non-retryable until the caller corrects the request.
 
 The installable five-minute collector is documented in
 [deploy/hetzner/USAGE-ARCHIVE.md](deploy/hetzner/USAGE-ARCHIVE.md). It is not enabled
-by the application build or deployment. It atomically stores one private bundle
-of allowlisted records and aggregate daily/weekly reports across deployments.
-Always inspect coverage and collection timestamps before interpreting counts.
+by the application build or deployment. It atomically commits a private manifest
+referencing bounded segments of allowlisted records and one global daily/weekly
+report across deployments. Reports deduplicate across all retained segments.
+Always inspect coverage, collection timestamps, source backlog and capacity
+before interpreting counts. Enable the monitor's optional `--usage-archive`
+check on collector hosts so a stalled archive fails monitoring even if the API
+is healthy. See the archive guide for migration, limits and rollback.
 It does not measure visitors, unique people, provider costs or profit.
 
 The existing daily payment schedules remain payment-enabled. Manual keep-warm/scout workflow dispatch defaults to `dry-run`; `quote-only` performs unsigned inspection; `pay` enables the existing behavior. Preview jobs receive no wallet secret, and only a paying scout job commits snapshot data. Local invocations without a preview flag retain their previous payment behavior.

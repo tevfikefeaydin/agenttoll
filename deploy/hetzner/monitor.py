@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Hourly read-only API/data checks, outside the application request process."""
+import argparse
 import json
+import math
 import os
 import re
 import subprocess
@@ -22,7 +24,42 @@ console.log('AGENTTOLL_MONITOR ' + JSON.stringify({ ok: api.ok && data.ok, degra
 '''
 
 
-def collect(state_path=STATE):
+def usage_status(path, now=None):
+    """Expose only collection health; never copy usage records or identities."""
+    current = now or datetime.now(timezone.utc)
+    target = Path(path)
+    try:
+        if target.is_symlink(): raise ValueError('Invalid archive')
+        if not target.exists(): return {'ok': False, 'status': 'missing'}
+        if not target.is_file() or target.stat().st_size > 25 * 1024 * 1024:
+            raise ValueError('Invalid archive')
+        value = json.loads(target.read_text(encoding='utf-8'))
+        if value['version'] not in (1, 2): raise ValueError('Invalid archive version')
+        state, coverage = value['bundle']['state'], value['bundle']['report']['coverage']
+        def instant(stamp):
+            if not isinstance(stamp, str) or not re.fullmatch(r'\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{1,6})?Z', stamp):
+                raise ValueError('Invalid archive timestamp')
+            return datetime.fromisoformat(stamp.replace('Z', '+00:00'))
+        collected = instant(state['collectedAt'])
+        age = (current - collected).total_seconds()
+        cursor = instant(coverage.get('sourceWindowUntil', state['collectedAt']))
+        backlog = coverage.get('collectionBacklogSeconds', 0)
+        if (age < 0 or cursor > collected or isinstance(backlog, bool) or
+                not isinstance(backlog, (float, int)) or not math.isfinite(backlog) or backlog < 0):
+            raise ValueError('Invalid collection health')
+        backlog = max(backlog, (collected - cursor).total_seconds())
+        source_lag = age + backlog
+        capacity = coverage.get('capacityWarning', False)
+        if not isinstance(capacity, bool): raise ValueError('Invalid capacity health')
+        status = 'stale' if age > 900 else 'catching_up' if source_lag > 900 else 'capacity_warning' if capacity else 'current'
+        return {'ok': status == 'current', 'status': status,
+                'collectedAt': state['collectedAt'], 'ageSeconds': int(age),
+                'collectionBacklogSeconds': int(backlog), 'sourceLagSeconds': int(source_lag), 'capacityWarning': capacity}
+    except (OSError, ValueError, KeyError, TypeError, OverflowError):
+        return {'ok': False, 'status': 'invalid'}
+
+
+def collect(state_path=STATE, usage_path=None, now=None):
     state = json.loads(Path(state_path).read_text(encoding='utf-8'))
     container = state.get('container', '')
     revision = state.get('sha', '')
@@ -45,12 +82,19 @@ def collect(state_path=STATE):
             raise ValueError('Invalid component result')
     if result['ok'] != (result['api']['ok'] and result['data']['ok']):
         raise ValueError('Inconsistent monitor result')
-    return dict(result, schemaVersion=1, checkedAt=datetime.now(timezone.utc).isoformat(), sourceRevision=revision, container=container)
+    if usage_path is not None:
+        result['usage'] = usage_status(usage_path, now)
+        result['ok'] = result['ok'] and result['usage']['ok']
+        result['degraded'] = result['degraded'] or not result['usage']['ok']
+    return dict(result, schemaVersion=1, checkedAt=(now or datetime.now(timezone.utc)).isoformat(), sourceRevision=revision, container=container)
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--usage-archive', type=Path, help='Also require a current private usage archive')
+    args = parser.parse_args()
     try:
-        report = collect()
+        report = collect(usage_path=args.usage_archive)
     except Exception:
         # Never copy subprocess stderr, provider exception text or credentials.
         report = {'schemaVersion': 1, 'ok': False, 'degraded': True,
