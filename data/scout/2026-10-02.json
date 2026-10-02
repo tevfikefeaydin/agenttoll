@@ -1,0 +1,106 @@
+{
+  "date": "2026-10-02",
+  "at": "2026-10-02T13:58:06.141Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x2c0487d868543d7948091c2b1497ed856768016ce0fdea02fc48df22b987ec8b",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 0,
+    "caution": 2,
+    "insufficientData": 2,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "DOTF / WETH 0.3%",
+      "pool": "0xb14098f367d5139a85cca400026419c7ecd71bcd4c4831cb365f9312e8e88144",
+      "token": "0x0f0d8e87e0071ba476481cc42f9da2a5b2fa5c74",
+      "createdAt": "2026-10-02T13:32:07Z",
+      "priceUsd": 5.91785776994919e-8,
+      "volume24hUsd": 5460.6604435339,
+      "liquidityUsd": 59720731.2043,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "owner-powers"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "CEECIL / WETH",
+      "pool": "0xc452ce1bc67fdd3e5197cfa57b52ecb58ea9a9ad",
+      "token": "0xbf21136d287c3ad156db220d5cb35120e723bce1",
+      "createdAt": "2026-10-02T13:33:45Z",
+      "priceUsd": 0.00000602342908320657,
+      "volume24hUsd": 4777.8709211612,
+      "liquidityUsd": 91987.5641,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "GOIF / WETH 0.3%",
+      "pool": "0x76d7993ef45c3f25a448992b2251eefc06d2af5d718c05f0b117f015a25b1825",
+      "token": "0x37d5db135f32dd44f7160f2c1439817ab2a66a57",
+      "createdAt": "2026-10-02T13:36:27Z",
+      "priceUsd": 0.0935546102009922,
+      "volume24hUsd": 2302.5663593435,
+      "liquidityUsd": 67495.6784,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "DOTF / WETH 0.3%",
+      "pool": "0xb877ec3d9957c8b0738b19074d34a1458e619a58b42f67208fd23460abee1723",
+      "token": "0x05172bbda23240a8865a560d0860af484c294258",
+      "createdAt": "2026-10-02T13:56:09Z",
+      "priceUsd": 0.0403854472228304,
+      "volume24hUsd": 2302.2010452666,
+      "liquidityUsd": 67235.8531887062,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    }
+  ]
+}
