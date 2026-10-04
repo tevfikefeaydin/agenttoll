@@ -1,0 +1,108 @@
+{
+  "date": "2026-10-04",
+  "at": "2026-10-04T13:18:56.303Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0xe8780dff3fb0ce7902317a2dd4ff92c4c7592067d83e5ba0df1b3a77f5a62bf9",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 1,
+    "caution": 1,
+    "insufficientData": 2,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "SARP / WETH 0.3%",
+      "pool": "0x4dc36ee381f6e54e30d8a0d7e71fe9821f32dd96b49319b04bd18bfb30cd445d",
+      "token": "0x3fd3fa91767bbfa7da485be83b2d90f2afd97a08",
+      "createdAt": "2026-10-04T12:47:55Z",
+      "priceUsd": 7.48751257761142e-8,
+      "volume24hUsd": 6572.4360104533,
+      "liquidityUsd": 115724938.0987,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "GOIF / WETH 0.3%",
+      "pool": "0x5439117c1cd71d6e4c53065237b4cefe35c312dbb52cc63331ba0da4ade2d6e5",
+      "token": "0x29e9880bd08609907abc76f168c99dea1c45e2b5",
+      "createdAt": "2026-10-04T12:51:57Z",
+      "priceUsd": 5.08956321634065e-8,
+      "volume24hUsd": 5673.0827768899,
+      "liquidityUsd": 152431459.9119,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "ATFS / WETH 0.3%",
+      "pool": "0x89c22245c5ee32388dac8041bbba235a6c4647f06222d48c9bd7d7a8a022f405",
+      "token": "0x362c24122dd1b5e0cf8ac41a6a1c557ad37013d0",
+      "createdAt": "2026-10-04T12:45:47Z",
+      "priceUsd": 5.89651753381198e-8,
+      "volume24hUsd": 5493.1508690747,
+      "liquidityUsd": 110857763.0361,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "owner-powers"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "TOSHI / WETH",
+      "pool": "0xc5b5ddae27b66b12e416bac5edfcf1b9c3a8e3a5",
+      "token": "0xa4489220b8b5f5e1b90bda3f3d6e1082de64d3d5",
+      "createdAt": "2026-10-04T12:59:45Z",
+      "priceUsd": 0.00000609041054062164,
+      "volume24hUsd": 3187.9644268641,
+      "liquidityUsd": 87292.5046,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "verified"
+        ],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "verified",
+          "owner-powers",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    }
+  ]
+}
