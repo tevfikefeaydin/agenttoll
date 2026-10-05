@@ -1,0 +1,108 @@
+{
+  "date": "2026-10-05",
+  "at": "2026-10-05T16:12:03.511Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0xf7b7c2cca2dd4fb4a83b0c29203481fcb6ed093837e199a4c3d4f4e061e79fb7",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 1,
+    "caution": 0,
+    "insufficientData": 3,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "VEYDRIFT / ETH",
+      "pool": "0xeb80b88d33e793fc29dd8596f6ab2a9a5564c7a15ec23f82b465f263c2599b59",
+      "token": "0x3fa0fdaa81cf5d8b008be31536207a8b3aa32239",
+      "createdAt": "2026-10-05T15:52:33Z",
+      "priceUsd": 0.000304055230791503,
+      "volume24hUsd": 26925.6800652931,
+      "liquidityUsd": 21574.6383,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "verified"
+        ],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "owner-powers",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "GOIF / WETH 0.3%",
+      "pool": "0x6b6528695ec0d74124f6a71ecbc384e0dc1767afc22abd0a17e26d0c5cd31298",
+      "token": "0x3543760c7a0044695bcf628e1fe0b155c7ebba5e",
+      "createdAt": "2026-10-05T16:01:11Z",
+      "priceUsd": 0.0939662910194978,
+      "volume24hUsd": 2539.6206689491,
+      "liquidityUsd": 67267.5105,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "Institutional Oil Fund / WETH 0.3%",
+      "pool": "0x6350826b8bf4b2abf4b3a13c8786b705ea4dd2764f547b2236e22bc4bf112846",
+      "token": "0x244a459b37a3de47b73bc7dcc15563c477d22167",
+      "createdAt": "2026-10-05T15:49:13Z",
+      "priceUsd": 0.0504473936216073,
+      "volume24hUsd": 2301.3747575501,
+      "liquidityUsd": 67021.7079,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake"
+        ]
+      }
+    },
+    {
+      "name": "SARP / WETH 0.3%",
+      "pool": "0x212571cf0336dd7f480f0f6c29d7ef47c3b2df12ff5505ee0a584a74ec569914",
+      "token": "0x366e022fb55403c9334e59dbaf968ad2b82db32b",
+      "createdAt": "2026-10-05T16:05:27Z",
+      "priceUsd": 0.0938634231425884,
+      "volume24hUsd": 2298.1070451056,
+      "liquidityUsd": 67268.5287,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    }
+  ]
+}
