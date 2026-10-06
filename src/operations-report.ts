@@ -1,5 +1,6 @@
 import { canonicalRoute } from './telemetry.js';
 import { paymentPhases, paymentReasons } from './payment-telemetry.js';
+import { paymentDiagnosticSummary } from './payment-diagnostic.js';
 
 type Row = Record<string, unknown>;
 const counterNames = ['upstreamCalls', 'cacheHits', 'cacheMisses', 'coalescedLoads'] as const;
@@ -69,6 +70,7 @@ export function summarizeRequests(text: string) {
     headers: {} as Record<string, number>, protocols: {} as Record<string, number>,
     facilitatorVerifyCalls: 0, facilitatorSettleCalls: 0, facilitatorVerifyMs: 0, facilitatorSettleMs: 0 };
   const times: number[] = [];
+  const paymentDiagnostics = paymentDiagnosticSummary();
   for (const row of rows) {
     const status = String(row.status);
     statuses[status] = (statuses[status] ?? 0) + 1;
@@ -78,6 +80,7 @@ export function summarizeRequests(text: string) {
     times.push(Date.parse(row.t as string));
     for (const name of counterNames) counters[name] += (row[name] as number | undefined) ?? 0;
     if (row.schemaVersion === 2) {
+      paymentDiagnostics.add(row, route);
       diagnostics.recorded++;
       if (row.terminal === 'abort') diagnostics.aborted++;
       for (const [name, value] of [['phases', row.paymentPhase], ['reasons', row.paymentReason], ['headers', row.paymentHeader], ['protocols', row.protocolVersion]] as const) {
@@ -102,6 +105,7 @@ export function summarizeRequests(text: string) {
     requests: rows.length, duplicates, ignoredLines, statuses, serverErrors,
     serverErrorRate: rows.length ? serverErrors / rows.length : null,
     payment, diagnostics, latencyMs: latency(rows.map(row => row.ms as number)), ...counters,
+    paymentDiagnostics: paymentDiagnostics.result(),
     routes: [...routeRows].map(([route, group]) => ({ route, requests: group.length,
       serverErrors: group.filter(row => Number(row.status) >= 500).length,
       latencyMs: latency(group.map(row => row.ms as number)),

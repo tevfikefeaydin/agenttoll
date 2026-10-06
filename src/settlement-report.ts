@@ -4,6 +4,7 @@ import { buildUsageBreakdown, type RequestActivity } from './usage-breakdown.js'
 import { canonicalRoute } from './telemetry.js';
 import { KNOWN_OPERATOR_WALLETS } from './operator-wallets.js';
 import { paymentPhases, paymentReasons } from './payment-telemetry.js';
+import { paymentDiagnosticSummary, sanitizePaymentDiagnostic } from './payment-diagnostic.js';
 
 type Row = Record<string, unknown>;
 export type Receipt = {
@@ -62,10 +63,11 @@ function* logRows(input: string | readonly string[]): Generator<Row | null> {
 /** Copy only fields needed after request deduplication; never retain raw metadata. */
 function reportRow(row: Row): Row {
   return {
-    schemaVersion: row.schemaVersion, t: row.t, route: row.route, path: row.path, status: row.status,
+    schemaVersion: row.schemaVersion, t: row.t, route: row.route, path: row.path, method: row.method, status: row.status,
     paymentStage: row.paymentStage, paymentSubmitted: row.paymentSubmitted,
     terminal: row.terminal, abortReason: row.abortReason, paymentPhase: row.paymentPhase,
     paymentReason: row.paymentReason, paymentHeader: row.paymentHeader, protocolVersion: row.protocolVersion,
+    paymentDiagnostic: sanitizePaymentDiagnostic(row.paymentDiagnostic),
     facilitatorVerifyCalls: row.facilitatorVerifyCalls, facilitatorSettleCalls: row.facilitatorSettleCalls,
     facilitatorVerifyMs: row.facilitatorVerifyMs, facilitatorSettleMs: row.facilitatorSettleMs,
     settlementConfirmed: row.settlementConfirmed, settlementTransaction: row.settlementTransaction,
@@ -161,6 +163,7 @@ export function summarizePaymentRows(input: Iterable<Row | null>, additionalOper
   const failurePhases: Record<string, number> = {};
   const failureReasons: Record<string, number> = {};
   let failures = 0;
+  const paymentDiagnostics = paymentDiagnosticSummary();
   const receiptGroups = new Map<string, { receipt: Receipt; records: number; conflicting: boolean }>();
   const unresolved = {
     totalRecords: 0,
@@ -195,6 +198,7 @@ export function summarizePaymentRows(input: Iterable<Row | null>, additionalOper
     const claimsSettlement = row.paymentStage === 'settled' || row.settlementConfirmed === true ||
       ['settlementTransaction', 'settlementAmount', 'settlementAsset', 'settlementNetwork'].some(key => row[key] !== undefined && row[key] !== null);
     if (!validV2 && !claimsSettlement) continue;
+    if (validV2) paymentDiagnostics.add(row, canonicalRoute(String(row.route ?? row.path ?? '')));
     if (validV2 && row.paymentStage === 'quote' && row.paymentSubmitted === false && row.status === 402 && row.paymentHeader === 'none') quotes++;
     if (validV2 && signed) signedSubmissions++;
     if (validV2) activity.push({ route: canonicalRoute(String(row.route ?? row.path ?? '')),
@@ -321,6 +325,7 @@ export function summarizePaymentRows(input: Iterable<Row | null>, additionalOper
     input: { totalLines, matchingRecords, duplicateRequestIds, conflictingRequestIds, conflictingRequestRecords, ignoredLines },
     requests: { quotes, signedSubmissions },
     failures: { total: failures, byPaymentStage: sorted(failureStages), byPaymentPhase: sorted(failurePhases), byReason: sorted(failureReasons) },
+    paymentDiagnostics: paymentDiagnostics.result(),
     settlements: {
       network: 'eip155:8453',
       confirmedUnique: mainnet.length,

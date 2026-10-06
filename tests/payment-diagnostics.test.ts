@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import http from 'node:http';
 import { sanitizedClient } from '../src/payment-telemetry.js';
 import { installPaymentDiagnosticFilter } from '../src/telemetry.js';
+import { explainPaymentDiagnostic } from '../src/payment-diagnostic.js';
 
 test('payment diagnostics use real middleware with offline facilitator fixtures', async (t) => {
   Object.assign(process.env, { DOTENV_CONFIG_PATH: 'agenttoll-audit-absent.env', ADDRESS: '0x' + '11'.repeat(20),
@@ -35,6 +36,9 @@ test('payment diagnostics use real middleware with offline facilitator fixtures'
       if (mode === 'timeout-verify') await new Promise(resolve => setTimeout(resolve, 400));
       if (mode === 'verify-decline') return Response.json({ isValid: false, invalidReason: 'invalid_exact_evm_payload_signature', payer: claimed }, { status: 400 });
       if (mode === 'sensitive-decline') return Response.json({ isValid: false, invalidReason: secret, invalidMessage: secret, payer: claimed }, { status: 400 });
+      if (mode === 'current-sdk-decline') return Response.json({ isValid: false, invalidReason: 'invalid_exact_evm_signature', invalidMessage: secret }, { status: 400 });
+      if (mode === 'missing-reason') return Response.json({ isValid: false });
+      if (mode === 'provider-unauthorized') return Response.json({ message: secret }, { status: 401 });
       return Response.json({ isValid: true, payer: mode === 'invalid-identity' ? secret : payer }, mode === 'extension-response' ? {
         headers: { 'EXTENSION-RESPONSES': Buffer.from(JSON.stringify({ [secret]: { reason: { signature: secret }, code: secret } })).toString('base64') },
       } : undefined);
@@ -121,9 +125,11 @@ test('payment diagnostics use real middleware with offline facilitator fixtures'
     for (const header of [Buffer.from('{"private":"' + secret).toString('base64'), encode(null)]) {
       const { res, record } = await request(header);
       assert.equal(res.status, 402); assert.equal(record.paymentPhase, 'parse'); assert.equal(record.paymentReason, 'malformed_payment');
+      assert.ok(['header_decode_failed', 'payload_not_object'].includes(record.paymentDiagnostic.code));
     }
     const { record } = await request(encode({ ...payload, accepted: { ...payload.accepted, amount: '999' } }));
     assert.equal(record.paymentPhase, 'match'); assert.equal(record.paymentReason, 'requirements_mismatch');
+    assert.deepEqual(record.paymentDiagnostic, { version: 1, code: 'requirements_mismatch', mismatchFields: ['amount'] });
     assert.equal(verifyCalls, before);
   });
   await t.test('legacy header and v1 payload receive explicit upgrade guidance', async () => {
@@ -168,10 +174,33 @@ test('payment diagnostics use real middleware with offline facilitator fixtures'
       assert.equal(record.paymentPhase, phase); assert.equal(record.paymentReason, reason);
       assert.equal(record.settlementTransaction, null);
       if (phase === 'verify') assert.equal(record.verifiedPayer, null);
+      if (fixture === 'sensitive-decline') assert.deepEqual(record.paymentDiagnostic,
+        { version: 1, code: 'facilitator_declined', providerCode: 'unrecognized', providerHttpStatus: 400 });
       if (fixture === 'settle-unknown') { assert.equal(res.status, 502); assert.equal(body.retryable, false); assert.equal(body.paymentOutcome, 'unknown'); }
       else assert.equal(res.status, 402);
     });
   }
+  await t.test('new SDK reasons, missing reasons and server authentication failures remain distinguishable', async () => {
+    const before = settleCalls;
+    mode = 'current-sdk-decline';
+    const known = await request();
+    assert.equal(known.res.status, 402);
+    assert.equal(known.record.paymentReason, 'verification_declined'); // Existing response contract stays stable.
+    assert.deepEqual(known.record.paymentDiagnostic, { version: 1, code: 'facilitator_declined',
+      providerCode: 'invalid_exact_evm_signature', providerHttpStatus: 400 });
+    mode = 'missing-reason';
+    const missing = await request();
+    assert.equal(missing.res.status, 402);
+    assert.equal(missing.record.paymentDiagnostic.providerCode, 'missing');
+    assert.equal(missing.record.paymentDiagnostic.providerHttpStatus, undefined); // SDK discards successful-response HTTP metadata.
+    mode = 'provider-unauthorized';
+    const auth = await request();
+    assert.equal(auth.res.status, 502);
+    assert.deepEqual(auth.record.paymentDiagnostic, { version: 1, code: 'facilitator_http_error', providerHttpStatus: 401 });
+    assert.equal(explainPaymentDiagnostic(auth.record.paymentReason, auth.record.paymentDiagnostic).reviewArea, 'server_configuration');
+    assert.equal(settleCalls, before);
+    assert.doesNotMatch(JSON.stringify([known, missing, auth, consoleOutput]), new RegExp(secret));
+  });
   await t.test('signed invalid input is rejected before verification or settlement', async () => {
     mode = 'healthy'; const before = settleCalls, beforeVerify = verifyCalls;
     const { res, record } = await request(encode(payload), '/api/gas?gasLimit=' + secret);

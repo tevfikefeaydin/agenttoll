@@ -40,6 +40,7 @@ import { cached } from "./services/cache.js";
 import { baseRpc } from "./services/sources.js";
 import { canonicalRoute, installPaymentDiagnosticFilter } from "./telemetry.js";
 import { declineReason, inspectPayment, paymentSnapshot, paymentTelemetry, publicPayer, publicTransaction, sanitizedClient, settledRequirements } from "./payment-telemetry.js";
+import { facilitatorExceptionDiagnostic, providerDiagnostic, requirementsDiagnostic } from './payment-diagnostic.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const config = readConfig();
@@ -76,6 +77,7 @@ async function facilitatorCall<T>(load: () => Promise<T>, phase?: 'verify' | 'se
       const response = result as { isValid?: boolean; success?: boolean; invalidReason?: string; errorReason?: string; payer?: string; transaction?: string; network?: string; amount?: string };
       if (settling ? response.success === true : response.isValid === true) {
         payment.paymentReason = null;
+        delete payment.paymentDiagnostic;
         // Only successful, SDK-validated facilitator results establish public identity.
         if (!settling) payment.verifiedPayer = publicPayer(response.payer);
         if (settling) {
@@ -84,7 +86,11 @@ async function facilitatorCall<T>(load: () => Promise<T>, phase?: 'verify' | 'se
           const facts = payment.settlementTransaction ? settledRequirements(requirements, response.network, response.amount) : null;
           if (facts) Object.assign(payment, facts);
         }
-      } else payment.paymentReason = declineReason(settling ? response.errorReason : response.invalidReason, settling);
+      } else {
+        const reason = settling ? response.errorReason : response.invalidReason;
+        payment.paymentReason = declineReason(reason, settling);
+        payment.paymentDiagnostic = providerDiagnostic(reason);
+      }
     }
     return result;
   } catch (error) {
@@ -92,7 +98,10 @@ async function facilitatorCall<T>(load: () => Promise<T>, phase?: 'verify' | 'se
     // Only transport/protocol failures should become sanitized upstream errors.
     if (error instanceof VerifyError || error instanceof SettleError) {
       const reason = declineReason(error instanceof VerifyError ? error.invalidReason : error.errorReason, settling);
-      if (payment) payment.paymentReason = reason;
+      if (payment) {
+        payment.paymentReason = reason;
+        payment.paymentDiagnostic = providerDiagnostic(error instanceof VerifyError ? error.invalidReason : error.errorReason, error.statusCode);
+      }
       // SDK error paths may echo messages. Forward only fixed, allowlisted reasons.
       if (error instanceof VerifyError) throw new VerifyError(error.statusCode, { isValid: false, invalidReason: reason });
       throw new SettleError(error.statusCode, { success: false, errorReason: reason, transaction: '', network: CHAIN });
@@ -102,6 +111,8 @@ async function facilitatorCall<T>(load: () => Promise<T>, phase?: 'verify' | 'se
     const safe = new DOMException(timeout ? 'Facilitator deadline exceeded' : 'Facilitator unavailable', timeout ? 'TimeoutError' : 'Error');
     if (context) context.facilitatorFailure = safe;
     if (payment) payment.paymentReason = signal.aborted && signal.reason?.name === 'AbortError' ? 'client_disconnected' : timeout ? 'request_timeout' : 'facilitator_unavailable';
+    if (payment) payment.paymentDiagnostic = payment.paymentReason === 'client_disconnected' ?
+      { version: 1, code: 'client_disconnected' } : facilitatorExceptionDiagnostic(error);
     throw safe;
   } finally {
     if (payment && started !== undefined) {
@@ -194,6 +205,9 @@ app.use((req, res, next) => {
     else if (paymentStage === 'quote') payment.paymentReason = 'payment_required';
     else if (paymentStage === 'rejected' && !payment.paymentReason) payment.paymentReason = 'payment_invalid';
     else if (payment.paymentPhase === 'handler' && status >= 400) payment.paymentReason = 'handler_failed';
+    if (abortReason || context.signal.aborted) payment.paymentDiagnostic = { version: 1,
+      code: payment.paymentReason === 'client_disconnected' ? 'client_disconnected' : 'request_deadline' };
+    else if (payment.paymentReason === 'handler_failed') payment.paymentDiagnostic = { version: 1, code: 'handler_failed' };
     const route = canonicalRoute(pathname);
     const log = status >= 500 ? console.error : console.log;
     log(JSON.stringify({ schemaVersion: 2, t: new Date().toISOString(), requestId: context.requestId,
@@ -318,14 +332,20 @@ resourceServer.findMatchingRequirements = (...args) => {
   const payment = requestContext.getStore()?.payment;
   if (payment) payment.paymentPhase = 'match';
   const result = findRequirements(...args);
-  if (payment && !result) payment.paymentReason = 'requirements_mismatch';
+  if (payment && !result) {
+    payment.paymentReason = 'requirements_mismatch';
+    payment.paymentDiagnostic = requirementsDiagnostic(args[0], args[1]);
+  }
   return result;
 };
 const validateExtensions = resourceServer.validateExtensions.bind(resourceServer);
 resourceServer.validateExtensions = (...args) => {
   const result = validateExtensions(...args);
   const payment = requestContext.getStore()?.payment;
-  if (payment && !result.valid) payment.paymentReason = 'extension_mismatch';
+  if (payment && !result.valid) {
+    payment.paymentReason = 'extension_mismatch';
+    payment.paymentDiagnostic = { version: 1, code: 'extension_mismatch' };
+  }
   return result;
 };
 const paymentServer = new x402HTTPResourceServer(resourceServer,
@@ -374,6 +394,7 @@ app.use(async (req, res, next) => {
     const payment = requestContext.getStore()?.payment;
     if (payment && !payment.paymentReason) payment.paymentReason = cause instanceof Error &&
       ['TimeoutError', 'FacilitatorTimeoutError'].includes(cause.name) ? 'request_timeout' : 'facilitator_unavailable';
+    if (payment && !payment.paymentDiagnostic) payment.paymentDiagnostic = facilitatorExceptionDiagnostic(cause);
     next(cause);
   }
 });

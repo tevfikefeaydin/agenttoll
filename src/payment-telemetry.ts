@@ -1,4 +1,5 @@
 import { decodePaymentSignatureHeader } from '@x402/core/http';
+import { sanitizePaymentDiagnostic, type PaymentDiagnostic } from './payment-diagnostic.js';
 
 export const paymentPhases = ['none', 'initialize', 'parse', 'match', 'verify', 'handler', 'settle'] as const;
 export const paymentReasons = ['payment_required', 'malformed_payment', 'payment_invalid', 'unsupported_version', 'requirements_mismatch',
@@ -13,6 +14,7 @@ export interface PaymentTelemetry {
   protocolVersion: 'none' | 'v1' | 'v2' | 'unknown';
   paymentPhase: typeof paymentPhases[number];
   paymentReason: PaymentReason | null;
+  paymentDiagnostic?: PaymentDiagnostic;
   facilitatorVerifyCalls: number;
   facilitatorSettleCalls: number;
   facilitatorVerifyMs: number;
@@ -52,18 +54,22 @@ export function settledRequirements(value: unknown, receiptNetwork: unknown, rec
 /** Parse with the same decoder as the SDK, but never print decoder exceptions. */
 export function inspectPayment(signature: string | undefined, legacy: string | undefined, telemetry: PaymentTelemetry): PaymentReason | null {
   telemetry.paymentPhase = 'parse';
-  if (!signature) return legacy ? 'unsupported_version' : null;
+  const reject = (reason: PaymentReason, code: PaymentDiagnostic['code']) => {
+    telemetry.paymentDiagnostic = { version: 1, code };
+    return reason;
+  };
+  if (!signature) return legacy ? reject('unsupported_version', 'legacy_header') : null;
   try {
-    if (signature.length > 16_384) return 'malformed_payment';
+    if (signature.length > 16_384) return reject('malformed_payment', 'header_too_large');
     const payload = decodePaymentSignatureHeader(signature);
-    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return 'malformed_payment';
+    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return reject('malformed_payment', 'payload_not_object');
     const version: unknown = payload.x402Version;
     telemetry.protocolVersion = version === 2 ? 'v2' : version === 1 ? 'v1' : 'unknown';
-    if (version !== 2) return 'unsupported_version';
-    if (!payload.accepted || typeof payload.accepted !== 'object' || Array.isArray(payload.accepted) ||
-      !payload.payload || typeof payload.payload !== 'object' || Array.isArray(payload.payload)) return 'malformed_payment';
+    if (version !== 2) return reject('unsupported_version', 'unsupported_version');
+    if (!payload.accepted || typeof payload.accepted !== 'object' || Array.isArray(payload.accepted)) return reject('malformed_payment', 'accepted_not_object');
+    if (!payload.payload || typeof payload.payload !== 'object' || Array.isArray(payload.payload)) return reject('malformed_payment', 'authorization_not_object');
     return null;
-  } catch { return 'malformed_payment'; }
+  } catch { return reject('malformed_payment', 'header_decode_failed'); }
 }
 
 /** Client metadata is self-reported, never identity. Unknown products and free text are omitted. */
@@ -78,10 +84,11 @@ export function sanitizedClient(explicit?: string, userAgent?: string) {
 
 /** Include elapsed time up to disconnect even when the facilitator is still pending. */
 export function paymentSnapshot(payment: PaymentTelemetry) {
-  const { activeFacilitator, settlementConfirmed: _confirmed, ...snapshot } = payment;
+  const { activeFacilitator, settlementConfirmed: _confirmed, paymentDiagnostic, ...snapshot } = payment;
   if (activeFacilitator) {
     const key = activeFacilitator.phase === 'verify' ? 'facilitatorVerifyMs' : 'facilitatorSettleMs';
     snapshot[key] += Math.max(0, Date.now() - activeFacilitator.started);
   }
-  return snapshot;
+  const diagnostic = sanitizePaymentDiagnostic(paymentDiagnostic);
+  return { ...snapshot, ...(diagnostic ? { paymentDiagnostic: diagnostic } : {}) };
 }

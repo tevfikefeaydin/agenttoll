@@ -3,6 +3,7 @@ import { summarizeUsageLogs } from './usage-report.js';
 import { canonicalRoute } from './telemetry.js';
 import { ENDPOINT_MANIFEST } from './endpoint-manifest.js';
 import { paymentPhases, paymentReasons } from './payment-telemetry.js';
+import { sanitizePaymentDiagnostic } from './payment-diagnostic.js';
 
 export type Row = Record<string, unknown>;
 export type Entry = { id: string; digest: string; firstSeen: string; conflict: boolean; row: Row };
@@ -38,6 +39,7 @@ function sanitize(row: Row, id: string): Row {
  if ('t' in row) output.t = archiveDate(row.t) ? row.t : null;
  const route = canonicalRoute(typeof (row.route ?? row.path) === 'string' ? String(row.route ?? row.path) : '');
  output.route = routes.has(route) ? route : '[invalid]';
+ if ('paymentDiagnostic' in row) output.paymentDiagnostic = sanitizePaymentDiagnostic(row.paymentDiagnostic);
  return output;
 }
 export function validateArchiveEntry(entry: unknown, collectedAt: string): asserts entry is Entry {

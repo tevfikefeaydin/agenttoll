@@ -47,6 +47,26 @@ function collect(root: string, input = '', now = NOW, containers = [CID]) {
 const manifest = (root: string) => JSON.parse(readFileSync(path.join(root, 'archive.json'), 'utf8'));
 const request = (input = '', now = NOW, extra = {}) => ({ input, now, containers: [CID],
   sourceWindowSince: '2026-10-01T11:50:00+00:00', sourceWindowUntil: now, collectionBacklogSeconds: 0, ...extra });
+
+test('segmented archive preserves optional diagnostic details across process restart and overlap', t => {
+  const root = directory(t);
+  collect(root, lines([receipt('historical-success')]));
+  const diagnostic = { version: 1, code: 'facilitator_declined', providerCode: 'invalid_exact_evm_signature', providerHttpStatus: 400 };
+  const rejected = quote('diagnostic-rejection', { paymentHeader: 'payment-signature', paymentSubmitted: true,
+    protocolVersion: 'v2', paymentPhase: 'verify', paymentReason: 'verification_declined', paymentStage: 'rejected',
+    facilitatorVerifyCalls: 1, paymentDiagnostic: { ...diagnostic, privateResponse: 'DO-NOT-PERSIST' } });
+  const input = lines([rejected]);
+  const updated = collect(root, input, LATER);
+  const restarted = collect(root, input, LATER);
+  assert.equal(restarted.bundle.report.settlements.confirmedUnique, 1);
+  assert.equal(restarted.bundle.report.settlements.usdc.total, '0.001000');
+  assert.equal(restarted.bundle.report.paymentDiagnostics.total, 1);
+  assert.equal(restarted.bundle.report.paymentDiagnostics.withDetails, 1);
+  assert.deepEqual(restarted.bundle.report.paymentDiagnostics, updated.bundle.report.paymentDiagnostics);
+  const persisted = entries(root);
+  assert.deepEqual(persisted.find((e: any) => e.row.paymentDiagnostic)?.row.paymentDiagnostic, diagnostic);
+  assert.doesNotMatch(JSON.stringify([restarted, persisted]), /DO-NOT-PERSIST|privateResponse/);
+});
 function entries(root: string, saved = manifest(root)) {
   return saved.bundle.state.segments.flatMap((segment: { file: string }) => JSON.parse(readFileSync(path.join(root, segment.file), 'utf8')));
 }

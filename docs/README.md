@@ -4,6 +4,7 @@
 
 - [Setup, API usage and examples](../README.md)
 - [Monitoring, diagnostics, release checks and rollback](../OPERATIONS.md)
+- [Private payment failure details and investigation guidance](payment-diagnostics.md)
 - [Security and payment boundaries](../SECURITY.md)
 - [Hetzner deployment and monitoring](../deploy/hetzner/README.md)
 - [Automatic deployment and recovery](../deploy/hetzner/AUTODEPLOY.md)
