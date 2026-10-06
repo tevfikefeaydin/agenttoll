@@ -1,6 +1,9 @@
 """Loopback transport regressions; payment headers are invalid test markers."""
 import base64
 import json
+import os
+import shutil
+import subprocess
 import socket
 import ssl
 import tempfile
@@ -27,26 +30,6 @@ from examples.bounded_payment import (
 TOKEN = "0x" + "1" * 40
 MARKER = "offline-invalid-payment-marker"
 
-# Public, disposable TLS fixture for localhost/127.0.0.1, valid until 2126.
-# This key is solely for the loopback TLS server, never an EVM account.
-TLS_KEY = """-----BEGIN PRIVATE KEY-----
-MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg4/AqcCQJnuDvm4Hh
-tVVoPmxfdTC0k7BH0p/K/My5x4ehRANCAAQUZZQVX2Du/rNK0l2u8MbCsKl5modH
-kjfAcdwaROD5G5CU4kkjKp24RBNpcCc/A9jLfR41/vgA+nA3O+lBp2HB
------END PRIVATE KEY-----
-"""
-TLS_CERT = """-----BEGIN CERTIFICATE-----
-MIIBmzCCAUGgAwIBAgIUIXVfqXyolVDz2OGKb3gWoeHtmjgwCgYIKoZIzj0EAwIw
-FDESMBAGA1UEAwwJbG9jYWxob3N0MCAXDTI2MDkzMDIxNDgxNVoYDzIxMjYwOTA2
-MjE0ODE1WjAUMRIwEAYDVQQDDAlsb2NhbGhvc3QwWTATBgcqhkjOPQIBBggqhkjO
-PQMBBwNCAAQUZZQVX2Du/rNK0l2u8MbCsKl5modHkjfAcdwaROD5G5CU4kkjKp24
-RBNpcCc/A9jLfR41/vgA+nA3O+lBp2HBo28wbTAdBgNVHQ4EFgQUeRNWzHrh0Bsm
-j8I4WOv3ZfBXkMIwHwYDVR0jBBgwFoAUeRNWzHrh0Bsmj8I4WOv3ZfBXkMIwDwYD
-VR0TAQH/BAUwAwEB/zAaBgNVHREEEzARhwR/AAABgglsb2NhbGhvc3QwCgYIKoZI
-zj0EAwIDSAAwRQIgXPYJhdywtKkFwbiWCJ+995k+Thq9zxlgY3cwXYzLTFMCIQDi
-ZYbZAZ4xdXqTtNQhOPNOvcMWLwzi7PH15WVmh7ciQQ==
------END CERTIFICATE-----
-"""
 
 
 class TransportTests(unittest.TestCase):
@@ -56,8 +39,20 @@ class TransportTests(unittest.TestCase):
         cls.addClassCleanup(fixture.cleanup)
         cls.cert = Path(fixture.name) / "localhost.pem"
         key = Path(fixture.name) / "localhost.key"
-        cls.cert.write_text(TLS_CERT, encoding="ascii")
-        key.write_text(TLS_KEY, encoding="ascii")
+        # Generate a disposable loopback certificate; no private key is checked in.
+        openssl = shutil.which("openssl")
+        if not openssl and os.name == "nt":
+            git = shutil.which("git")
+            candidate = Path(git).resolve().parents[1] / "usr/bin/openssl.exe" if git else None
+            if candidate and candidate.is_file():
+                openssl = str(candidate)
+        if not openssl:
+            raise RuntimeError("OpenSSL is required for the offline TLS transport tests")
+        subprocess.run([openssl, "req", "-x509", "-newkey", "rsa:2048", "-nodes",
+                        "-keyout", str(key), "-out", str(cls.cert), "-days", "1",
+                        "-subj", "/CN=localhost",
+                        "-addext", "subjectAltName=DNS:localhost,IP:127.0.0.1"],
+                       check=True, capture_output=True, timeout=30)
         cls.tls = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
         cls.tls.load_cert_chain(cls.cert, key)
 

@@ -42,7 +42,11 @@ already transmitted; its amount remains reserved. Responses are buffered with a
 4 MiB limit.
 
 Offline regression tests install only the small client requirements and stub the
-CrewAI host class while exercising real EVM signatures and the actual tool callback:
+CrewAI host class while exercising real EVM signatures and the actual tool callback.
+
+The TLS transport tests also need OpenSSL to generate a temporary localhost
+certificate. On Windows they can use the copy bundled with Git for Windows.
+Test keys are generated per run and removed with the temporary directory.
 
 ```sh
 .venv/bin/pip install -r examples/requirements-payment.txt

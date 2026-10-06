@@ -54,7 +54,7 @@ jobs:
         run: node scripts/publish-snapshot.mjs --publish "$RUNNER_TEMP/stats-capture"
       - name: Retain capture even when publication fails
         if: always() && github.ref == 'refs/heads/main'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: stats-capture-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/stats-capture

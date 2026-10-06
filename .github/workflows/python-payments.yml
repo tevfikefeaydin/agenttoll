@@ -26,7 +26,18 @@ jobs:
       - name: Install pinned payment client dependencies
         run: |
           python3 -m venv "$RUNNER_TEMP/agenttoll-python-tests"
+          "$RUNNER_TEMP/agenttoll-python-tests/bin/pip" install --upgrade 'pip==26.2.1'
           "$RUNNER_TEMP/agenttoll-python-tests/bin/pip" install -r examples/requirements-payment.txt
       - name: Offline quote, signing, budget and deadline regressions
         run: |
           "$RUNNER_TEMP/agenttoll-python-tests/bin/python" -m unittest discover -s tests/python -p 'test_*.py' -v
+      - name: Audit Python client dependencies privately
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/agenttoll-python-tests/bin/pip" install 'pip-audit==2.10.1'
+          if ! "$RUNNER_TEMP/agenttoll-python-tests/bin/python" -m pip_audit \
+            --progress-spinner=off >"$RUNNER_TEMP/python-dependency-audit.log" 2>&1; then
+            echo '::error::Python dependency audit failed. Repeat the audit privately before publishing a fix.'
+            exit 1
+          fi

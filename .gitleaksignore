@@ -1,0 +1,5 @@
+# These two immutable historical findings are the same disposable localhost
+# TLS test fixture. Current tests generate a fresh key per run. No path or
+# future commit is excluded; never add production credentials to this list.
+e2c82ccbcc87ab20e8fa8beee417a895898f7d8d:tests/python/test_payment_transport.py:private-key:32
+b287b7eb583bb62634d769bfc75c9f9ba6d5341d:tests/python/test_payment_transport.py:private-key:32

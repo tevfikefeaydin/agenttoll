@@ -32,3 +32,16 @@ tests/.stats-snapshot-*/
 /growth*-audit.json
 /docs/audit/
 /docs/research/*-evidence.json
+
+# Local credentials, key stores and private scan output.
+*.pem
+*.key
+*.p12
+*.pfx
+.npmrc
+.ssh/
+.aws/
+*keystore*.json
+*gitleaks-report*.json
+secret-scan.json
+tracking-state.json

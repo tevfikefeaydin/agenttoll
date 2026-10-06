@@ -1,0 +1,17 @@
+title = "AgentToll public-source secret scanning"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "generic-api-key"
+
+[[rules.allowlists]]
+description = "Public 20-byte token addresses in token fields"
+regexTarget = "match"
+regexes = ['''(?i)^(?:token|benchmarktoken|data-token)["']?\s*[:=]\s*["']0x[0-9a-f]{40}["']$''']
+
+[[rules.allowlists]]
+description = "Two adjacent SDK error-code literals, not credentials"
+regexTarget = "match"
+regexes = ['''^permit2_token_mismatch', 'invalid_permit2_signature'$''']

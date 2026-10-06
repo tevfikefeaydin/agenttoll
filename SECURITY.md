@@ -2,7 +2,7 @@
 
 ## Reporting a vulnerability
 
-Use this repository's private GitHub Security Advisory reporting flow. If it is unavailable, open an issue titled "security" without exploit details or secrets so maintainers can arrange a private report. We aim to respond within 72 hours.
+Use this repository's [private vulnerability reporting form](https://github.com/tevfikefeaydin/agenttoll/security/advisories/new). Do not include credentials, raw payment records or exploit details in public issues, pull requests or workflow logs. We aim to respond within 72 hours.
 
 ## Payment and credentials
 
@@ -34,6 +34,16 @@ customer records in private operator storage. Publish summaries only after
 checking them for credentials and unnecessary personal or infrastructure data.
 Use a GitHub noreply address for human commits and a bot identity for automation.
 Deleting a file from the current branch does not erase earlier commits or copies.
+
+The secret-scanning workflow checks reachable Git history with a pinned,
+checksum-verified Gitleaks binary. Findings stay in the runner's temporary
+directory and are never uploaded as public artifacts or printed in logs.
+GitHub push protection and a private scan before pushing provide earlier checks;
+a workflow that runs after a push cannot undo a disclosure.
+The narrow scanner exceptions cover public token addresses, fixed SDK error
+names and two immutable historical localhost TLS test fixtures. Current TLS
+tests generate their own temporary key with OpenSSL. Entire directories and
+future commits are not excluded.
 
 Automated safety checks are observations, not a guarantee that a token is safe. Absent provider fields cannot pass a check. Address-to-name results require forward verification. Wallet activity has bounded pagination, overlap and deduplication; radar coverage is explicitly partial.
 
