@@ -1,0 +1,43 @@
+{
+  "date": "2026-10-06",
+  "at": "2026-10-06T14:17:33.154Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0xeacac7f304d8de9f5b0c9e9cbbae55743f9ab1c6dbe93cc6b53b1aaea00f0f26",
+  "summary": {
+    "found": 1,
+    "checked": 1,
+    "unchecked": 0,
+    "highRisk": 0,
+    "caution": 1,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "CLAUS / USDC",
+      "pool": "0x29270ad10835e4ec62a129f3a5a0f216fdeb5f10",
+      "token": "0xb49e16557bbb95ad6e3fca5768e994ab39367b07",
+      "createdAt": "2026-10-06T10:44:41Z",
+      "priceUsd": 0.0000502951748865665,
+      "volume24hUsd": 90930421.0493471,
+      "liquidityUsd": 1151704.062,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "owner-powers"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    }
+  ]
+}
