@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-08",
+  "at": "2026-10-08T14:41:54.531Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x1a0cab15aeaf16a1fb20a6e876c5f9a763d0cbce77e8e289962583efc8071e06",
+  "summary": {
+    "found": 0,
+    "checked": 0,
+    "unchecked": 0,
+    "highRisk": 0,
+    "caution": 0,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": []
+}
