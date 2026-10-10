@@ -1,0 +1,107 @@
+{
+  "date": "2026-10-10",
+  "at": "2026-10-10T13:52:17.183Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0xa7bffd381bd1406d14448c5ad3aa46fcc86711397c4f7a681bc39a305920f634",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 0,
+    "caution": 1,
+    "insufficientData": 3,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "USDP / WETH 0.3%",
+      "pool": "0x529a39c88b84f655c171e7859bdf7eb3cf214ac8d44af338673a732161d128ce",
+      "token": "0x15a4736b9878838203f889292da2b2c111ce13cc",
+      "createdAt": "2026-10-10T13:06:47Z",
+      "priceUsd": 5.54684320619614e-8,
+      "volume24hUsd": 61586.5485386854,
+      "liquidityUsd": 238902079.8077,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "USDP / WETH 0.3%",
+      "pool": "0x742816fde74351ab90bd565b5c36b86c59af5c1b45fbcfe753977d79d3ec1012",
+      "token": "0x4244c188db793e8d77e456993e7b856b4b05b2ce",
+      "createdAt": "2026-10-10T13:42:09Z",
+      "priceUsd": 0.214162078129155,
+      "volume24hUsd": 38196.2485248821,
+      "liquidityUsd": 42604.3747,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "USDP / WETH 0.3%",
+      "pool": "0xaa301fa35cdb0e55923d3ec34e5c7a6004a583f909784a75ebf66ecb318d8f6a",
+      "token": "0x3af98893e028f793231e359eb4e48ea541a11dd1",
+      "createdAt": "2026-10-10T13:32:57Z",
+      "priceUsd": 0.165636791554265,
+      "volume24hUsd": 30066.2266894402,
+      "liquidityUsd": 72024.0768,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "owner-powers"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "SARP / WETH 0.3%",
+      "pool": "0x66f5f2ca0727e12c0498073aed962ffbaaa196461559f3e05c927f6459d0d16e",
+      "token": "0x0c54685871a0ec76dd0b23fe0052d292cdfce230",
+      "createdAt": "2026-10-10T13:42:15Z",
+      "priceUsd": 0.00102335872156076,
+      "volume24hUsd": 6998.2200590336,
+      "liquidityUsd": 68066.7696,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    }
+  ]
+}
