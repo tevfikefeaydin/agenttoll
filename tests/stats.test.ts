@@ -239,3 +239,29 @@ test("a failed parallel lane cannot count later blocks across a missing range", 
   assert.equal(result.partial, true);
   assert.match(result.note ?? "", /Blocks after 100 were not scanned/);
 });
+
+for (const failSecondHalf of [false, true]) {
+  test(`historical fallback splits 429/403 failures without losing a range (failure=${failSecondHalf})`, async (t) => {
+    const ranges: number[][] = [];
+    t.mock.method(console, "warn", () => {});
+    t.mock.method(globalThis, "fetch", async (input: string | URL | Request, init?: RequestInit) => {
+      const host = new URL(String(input)).host;
+      if (host === "mainnet.base.org") return json({}, 429);
+      if (host === "base-rpc.publicnode.com") return json({}, 403);
+      assert.equal(host, "base.gateway.tenderly.co");
+      const query = JSON.parse(String(init?.body)).params[0];
+      const from = Number(query.fromBlock), to = Number(query.toBlock);
+      ranges.push([from, to]);
+      assert.ok(to - from < 1_000);
+      if (failSecondHalf && from === 1_101) return json({}, 503);
+      return json({ result: [{ data: "0x3e8", blockNumber: query.fromBlock,
+        topics: ["0x" + "0".repeat(64), "0x" + payer.slice(2).padStart(64, "0"), "0x" + hosted.slice(2).padStart(64, "0")] }] });
+    });
+    if (failSecondHalf) await assert.rejects(scanTollLogs(hosted, 101, 2100, "base"));
+    else {
+      const logs = await scanTollLogs(hosted, 101, 2100, "base");
+      assert.deepEqual(logs.map(log => log.block), [101, 1101]);
+    }
+    assert.deepEqual(ranges, [[101, 1100], [1101, 2100]]);
+  });
+}

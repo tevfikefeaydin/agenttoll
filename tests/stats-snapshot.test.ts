@@ -152,7 +152,7 @@ test("a persistent log outage leaves the old snapshot intact after bounded retri
   const run = runSnapshot(t, previous, { failLogs: true });
   assert.notEqual(run.status, 0);
   assert.equal(run.content, run.input);
-  assert.equal(run.requests.filter(r => r.method === "eth_getLogs").length, 8); // 4 attempts, 2 providers.
+  assert.equal(run.requests.filter(r => r.method === "eth_getLogs").length, 12); // 4 attempts, 2 providers.
   assert.deepEqual(run.outputFiles, ["stats.json"]);
 });
 
@@ -175,6 +175,6 @@ test("a provider rejecting even one block fails with bounded retries and preserv
   const run = runSnapshot(t, previous, { rangeLimit: 0 });
   assert.notEqual(run.status, 0);
   assert.equal(run.content, run.input);
-  assert.ok(run.requests.filter(r => r.method === "eth_getLogs").length <= 16);
+  assert.ok(run.requests.filter(r => r.method === "eth_getLogs").length <= 24);
   assert.deepEqual(run.outputFiles, ["stats.json"]);
 });

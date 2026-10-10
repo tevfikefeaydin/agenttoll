@@ -53,9 +53,10 @@ let firstBlock = Infinity;
 let lastBlock = -1;
 
 for (let from = start; from <= target.block; from += LOG_CHUNK) {
+  if (from > start) await new Promise(resolve => setTimeout(resolve, 250));
   const to = Math.min(from + LOG_CHUNK - 1, target.block);
   let tolls;
-  // Never promote a partial scan. Both providers are read-only and retries
+  // Never promote a partial scan. All providers are read-only and retries
   // are bounded; a failure leaves the committed baseline untouched.
   for (let attempt = 1; ; attempt++) {
     try {
@@ -63,7 +64,7 @@ for (let from = start; from <= target.block; from += LOG_CHUNK) {
       break;
     } catch (error) {
       if (attempt >= 4) throw new Error(`blocks ${from}-${to}: ${error.message}`);
-      await new Promise(resolve => setTimeout(resolve, 500 * attempt));
+      await new Promise(resolve => setTimeout(resolve, 1_000 * 2 ** (attempt - 1)));
     }
   }
   for (const toll of tolls) {

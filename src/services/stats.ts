@@ -14,7 +14,7 @@ export type { StatsNetwork } from "./stats-baseline.js";
 //      since. Slower, but it only depends on a public RPC, and Blockscout has
 //      now gone down (500s, then timeouts) three times in a month.
 const NETWORKS = {
-  base: { blockscout: "https://base.blockscout.com/api/v2", usdc: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", rpcs: ["https://mainnet.base.org", "https://base-rpc.publicnode.com"] },
+  base: { blockscout: "https://base.blockscout.com/api/v2", usdc: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", rpcs: ["https://mainnet.base.org", "https://base-rpc.publicnode.com", "https://base.gateway.tenderly.co"] },
   "base-sepolia": { blockscout: "https://base-sepolia.blockscout.com/api/v2", usdc: "0x036CbD53842c5426634e7929541eC2318f3dCF7e", rpcs: ["https://sepolia.base.org"] },
 } as const;
 
@@ -118,15 +118,8 @@ const RAW_BASELINE =
 
 // keccak("Transfer(address,address,uint256)")
 const TRANSFER_TOPIC = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
-// Public RPCs that actually answer eth_getLogs over a useful range: most cap at
-// 10–50 blocks or gate archive reads behind a token. base.org cut its own
-// ceiling to 2,000 blocks and answers HTTP 413 above it, which took this reading
-// down entirely until the chunk size followed; publicnode holds the same range
-// and is the second opinion, though only a shallow one: it answers 403 beyond
-// roughly half a day back, so it covers the newest chunks and nothing older.
-// drpc used to have that slot and no longer earns it — its free tier stops at
-// 50 blocks, short of even one chunk. Nothing else free reads Base logs this
-// far back at all, so base.org failing is the case worth degrading well for.
+// Providers have independent historical-access and range limits. Tenderly is
+// a third public fallback and accepts at most 1,000 blocks per log request.
 const CHUNK = 2_000; // initial range; HTTP 413 responses are bisected per provider
 const LANES = 3; // measured: three concurrent getLogs are clean, six draw 429s
 const MAX_CHUNKS = 90; // ~4 days of catching up on a stale baseline
@@ -160,6 +153,17 @@ async function logsRpc<T>(network: StatsNetwork, method: string, params: unknown
         // successful half is never combined with a retry of the whole range.
         const read = async (requestParams: unknown[]): Promise<unknown> => {
           signal?.throwIfAborted();
+          if (method === "eth_getLogs" && new URL(url).host === "base.gateway.tenderly.co") {
+            const query = requestParams[0] as { fromBlock: string; toBlock: string };
+            const from = Number(query.fromBlock), to = Number(query.toBlock);
+            if (Number.isSafeInteger(from) && Number.isSafeInteger(to) && to - from >= 1_000) {
+              const middle = from + Math.floor((to - from) / 2);
+              const left = await read([{ ...query, toBlock: hex(middle) }]);
+              const right = await read([{ ...query, fromBlock: hex(middle + 1) }]);
+              if (!Array.isArray(left) || !Array.isArray(right)) throw new Error("Invalid RPC log result");
+              return [...left, ...right];
+            }
+          }
           const res = await fetchWithTimeout(url, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
