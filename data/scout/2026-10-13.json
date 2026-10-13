@@ -1,0 +1,44 @@
+{
+  "date": "2026-10-13",
+  "at": "2026-10-13T15:09:22.036Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x477de835710115ff36ac51a21596ede3d62485e80c2b387cfd24d772b498bcc1",
+  "summary": {
+    "found": 1,
+    "checked": 1,
+    "unchecked": 0,
+    "highRisk": 1,
+    "caution": 0,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "Paper / USDC",
+      "pool": "0x2269a6af13b05e10578792a9445ed6a293bbbf1e",
+      "token": "0x2c19047a49c5184bc7b755dc5157d2d558b85b07",
+      "createdAt": "2026-10-13T07:00:45Z",
+      "priceUsd": 0.00000285423898155573,
+      "volume24hUsd": 58799183.6506772,
+      "liquidityUsd": 485395.108,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "liquidity"
+        ],
+        "warnings": [
+          "owner-powers"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "deployer"
+        ]
+      }
+    }
+  ]
+}
