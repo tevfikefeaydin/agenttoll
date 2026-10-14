@@ -1,0 +1,110 @@
+{
+  "date": "2026-10-14",
+  "at": "2026-10-14T12:56:46.997Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0xfa42ef8bb4cb2e8351c2511eef535bca7111eddeb32ebe5c1ab660572a0af987",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 1,
+    "caution": 0,
+    "insufficientData": 3,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "ANSEM / WETH",
+      "pool": "0xfa9073563b2a12f91c043a0e3105fda6b91452f9",
+      "token": "0xf1f87663afb4e2706179406a39143a9be1ccaaf3",
+      "createdAt": "2026-10-14T12:30:59Z",
+      "priceUsd": 0.00000606279421744448,
+      "volume24hUsd": 10798.4050543755,
+      "liquidityUsd": 90838.1264,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "verified"
+        ],
+        "warnings": [],
+        "unchecked": [
+          "verified",
+          "owner-powers",
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "IOF / WETH 0.3%",
+      "pool": "0xfb9ce37143520f95f95c2d088b8294eaafdf2837c3ce3e6b2aafb5fbde767e16",
+      "token": "0x4301c6f98d4993a5f3229480e913db71fd56133c",
+      "createdAt": "2026-10-14T12:34:37Z",
+      "priceUsd": 0.00645746396689888,
+      "volume24hUsd": 3548.6189195492,
+      "liquidityUsd": 181007.8048,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "IOF / WETH 0.3%",
+      "pool": "0xb05b37f900a083ec0e20eba54737aa042e904391a8ce2b5b7e474b2087042b33",
+      "token": "0xb2829b56fa9c5d21339db98b7a2e2a7e353e3465",
+      "createdAt": "2026-10-14T12:45:19Z",
+      "priceUsd": 0.00578486785771261,
+      "volume24hUsd": 3035.8111903619,
+      "liquidityUsd": 181330.1534,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "verified",
+          "owner-powers",
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "CEECIL / WETH",
+      "pool": "0x4e28ec9cb87ad0083d9894c7db78328856bf0182",
+      "token": "0x745e9cc941fc741118fff02e0414d87f19846d0e",
+      "createdAt": "2026-10-14T12:39:33Z",
+      "priceUsd": 0.00000433801130405457,
+      "volume24hUsd": 2082.1790221976,
+      "liquidityUsd": 79285.2929,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    }
+  ]
+}
