@@ -1,0 +1,111 @@
+{
+  "date": "2026-10-15",
+  "at": "2026-10-15T12:43:44.034Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x5c8b80234ce5d762e137d5a068bc944412e0142cad338f63333cb8843cba8772",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 0,
+    "caution": 3,
+    "insufficientData": 1,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "ORBXon / WETH",
+      "pool": "0x90079daf9bdb5312f3e6eb96488466cb02090d8a",
+      "token": "0xe5d50a559e5c7b23a77a1519ebbe92551a2823eb",
+      "createdAt": "2026-10-15T12:09:15Z",
+      "priceUsd": 1.26942114318442e-10,
+      "volume24hUsd": 3363.4187089199,
+      "liquidityUsd": 16901.6378,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "creator-stake"
+        ],
+        "unchecked": [
+          "owner-powers",
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "CEECIL / WETH",
+      "pool": "0x5fcc889d7d55bc16b82994bef1c5ab615b655d4c",
+      "token": "0x00c7e3029a809041ec741af565ac3eda2549fb85",
+      "createdAt": "2026-10-15T12:28:45Z",
+      "priceUsd": 0.00000898908172849678,
+      "volume24hUsd": 2317.5855597277,
+      "liquidityUsd": 74865.4442,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "owner-powers",
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "TXO / WETH",
+      "pool": "0x21f4db3307ede09aed8d55e1075972e0ba60dddb0d3433df816149e7a6f98780",
+      "token": "0x6506be0ee51750471dc0a9d0d67a1dd3eacc5133",
+      "createdAt": "2026-10-15T12:35:01Z",
+      "priceUsd": 0.000191756025127507,
+      "volume24hUsd": 38.9561380877,
+      "liquidityUsd": 185361.1996,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "verified",
+          "owner-powers",
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "STANDARD / WETH 0.3%",
+      "pool": "0x2e64ec49bf582f4d678dcbca57ca3575214a91d5",
+      "token": "0x6b155c76750d26c2a3acaa910331f2e09b2f6ffc",
+      "createdAt": "2026-10-15T12:21:59Z",
+      "priceUsd": 0.191206526191724,
+      "volume24hUsd": 0.4517324453,
+      "liquidityUsd": 95316453.2123,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "owner-powers",
+          "creator-stake"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    }
+  ]
+}
