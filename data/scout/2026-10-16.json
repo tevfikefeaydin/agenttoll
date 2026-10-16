@@ -1,0 +1,112 @@
+{
+  "date": "2026-10-16",
+  "at": "2026-10-16T12:33:21.338Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0xacce8eeff6dbf199ad0f4417a599e09941524241e84359573d03fb6c5b1dbcb1",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 1,
+    "caution": 3,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "SI / WETH",
+      "pool": "0xc4e09e573b46ce3c879b27f0252badf2a309ee5a",
+      "token": "0xfabc5ef0a64a9ce6efba31cb172a609c1745f865",
+      "createdAt": "2026-10-16T11:56:07Z",
+      "priceUsd": 0.0000158623419305516,
+      "volume24hUsd": 17701.4679495361,
+      "liquidityUsd": 123423.891,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "verified"
+        ],
+        "warnings": [],
+        "unchecked": [
+          "verified",
+          "owner-powers",
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "CEECIL / WETH",
+      "pool": "0x4d4387f80731b6e71c2f5a1dc68fb8bce5297238",
+      "token": "0xd6d0e24ac34180c6798ce6ecb16e40e020859878",
+      "createdAt": "2026-10-16T12:07:05Z",
+      "priceUsd": 0.00000632539682061707,
+      "volume24hUsd": 5243.1620993186,
+      "liquidityUsd": 84642.2973,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "DOTF / WETH 0.3%",
+      "pool": "0x5c09318f3b24160edfc1408b47d46e4d8c8367070da0a84fcf92d83efd83482d",
+      "token": "0x3f187120a7b91de23b3565c0af7cb905c35a070c",
+      "createdAt": "2026-10-16T11:56:23Z",
+      "priceUsd": 0.00201583355925714,
+      "volume24hUsd": 2313.070471164,
+      "liquidityUsd": 67103.3539,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "owner-powers"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "FTR / WETH 0.3%",
+      "pool": "0xfee1fdbd90337a668b7ebe131116ac564a06ab10",
+      "token": "0xc1fe4497ac81e8b3a0ba521b7abf2b4ecd6718a4",
+      "createdAt": "2026-10-16T12:02:25Z",
+      "priceUsd": 0.00620347407144714,
+      "volume24hUsd": 0.98105202,
+      "liquidityUsd": 4635779.4079,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "owner-powers",
+          "creator-stake"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    }
+  ]
+}
