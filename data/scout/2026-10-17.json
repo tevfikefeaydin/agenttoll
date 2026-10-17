@@ -1,0 +1,112 @@
+{
+  "date": "2026-10-17",
+  "at": "2026-10-17T11:41:14.115Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x300169e5a7e0e8a5654365209114d90edb719ade73a69935dc3207904c7a13f1",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 0,
+    "caution": 4,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "USDP / WETH 0.3%",
+      "pool": "0x8ca233e9572bb210715d3b505f963ae88b866045506749bac061a389424bbba4",
+      "token": "0x80b57f05fd408e1fb8b3bb15fa992f753ba352e9",
+      "createdAt": "2026-10-17T11:01:23Z",
+      "priceUsd": 0.232643818938585,
+      "volume24hUsd": 63557.2339550557,
+      "liquidityUsd": 63095.1521,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "owner-powers"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "USDP / WETH 0.3%",
+      "pool": "0xf3bf15cbaae4407301fa6e69d0871b48da6121a81bc74722dc897075cc317728",
+      "token": "0x4f00c97658902c6be15a1690cf9845f4fbec2acf",
+      "createdAt": "2026-10-17T11:14:23Z",
+      "priceUsd": 0.0000299575736140967,
+      "volume24hUsd": 48575.079824944,
+      "liquidityUsd": 48371.9209,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "owner-powers",
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "ROADSTER / WETH",
+      "pool": "0xbfe5909dd82d6342f84ededdf3db0f76ad559fe8",
+      "token": "0xdcc8440ece800ed04bb0a1ced94ca39b4541ddab",
+      "createdAt": "2026-10-17T11:08:01Z",
+      "priceUsd": 0.0000127245359004906,
+      "volume24hUsd": 17982.30245235,
+      "liquidityUsd": 122037.7302,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "GAMAL / WETH",
+      "pool": "0xf6b4e040a080b5b424e150e9d7cfed6830767f38",
+      "token": "0xf7ddbeecebc04a4b73e85f45eb055bf3dc7e2858",
+      "createdAt": "2026-10-17T11:09:17Z",
+      "priceUsd": 0.00000645779702557603,
+      "volume24hUsd": 6143.21757233,
+      "liquidityUsd": 85269.1945,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    }
+  ]
+}
