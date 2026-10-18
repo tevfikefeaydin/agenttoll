@@ -1,0 +1,113 @@
+{
+  "date": "2026-10-18",
+  "at": "2026-10-18T12:06:57.641Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x970ee3b672ab4eb2f76829b1bd2733b48b6504e9b22dbb9a8d99f6ff1065c8bc",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 0,
+    "caution": 4,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "Paper / USDC",
+      "pool": "0x8dd7fcbe2e3c4c928e746d08919b530de47a4b99",
+      "token": "0x3e199f015ea827f27c2671f8eae516b8944ffb07",
+      "createdAt": "2026-10-18T11:22:49Z",
+      "priceUsd": 0.000100694131373662,
+      "volume24hUsd": 28232226.0959728,
+      "liquidityUsd": 10119787.7354,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "creator-stake"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "TRUMP2028 / WETH",
+      "pool": "0x7e01260a5df9e18d43d71d1e977302015b2ce64f",
+      "token": "0x22cd08fc538266f99a35601879623ca5723d55c8",
+      "createdAt": "2026-10-18T11:29:13Z",
+      "priceUsd": 0.00000938351272446518,
+      "volume24hUsd": 18808.6563956904,
+      "liquidityUsd": 123664.25,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "owner-powers",
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "Monero / WETH 0.3%",
+      "pool": "0xf2f19f21e7be00aec04dbccc49735b9a82959136b0bc32b2ddf78929efd5b1f3",
+      "token": "0xf31804aacd6ac2d52b4a218286accb978463aa08",
+      "createdAt": "2026-10-18T11:16:23Z",
+      "priceUsd": 0.00242107712766997,
+      "volume24hUsd": 5129.8591637143,
+      "liquidityUsd": 49457.0464,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "owner-powers"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "POST / WETH",
+      "pool": "0x75ab0bf4b7338ad3998499fe5460a4165cc5d54f",
+      "token": "0xe02afcde7894c079c070e4ac9f18598773416012",
+      "createdAt": "2026-10-18T12:02:27Z",
+      "priceUsd": 0.00000453727108816771,
+      "volume24hUsd": 1215.660058,
+      "liquidityUsd": 74942.1221,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    }
+  ]
+}
