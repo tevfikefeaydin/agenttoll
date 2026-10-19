@@ -1,0 +1,112 @@
+{
+  "date": "2026-10-19",
+  "at": "2026-10-19T14:46:47.020Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x40bda35c00139d31a2345b00f0fe796cc03df0ec31f527c175433d39a26859b2",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 0,
+    "caution": 3,
+    "insufficientData": 1,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "Uncut / WETH",
+      "pool": "0xc365fe7ee36d8cac19d62a4245071effd18ec49bb59a29abd27407dbca66bf0c",
+      "token": "0xa1661bdd19686aed4fb15a08be948d026746aba3",
+      "createdAt": "2026-10-19T14:42:39Z",
+      "priceUsd": 1.09528858244206e-7,
+      "volume24hUsd": 4526.539478348,
+      "liquidityUsd": 20109.18,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "owner-powers"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "COBIE / WETH",
+      "pool": "0x695a0d719e18c9f4c4c0e470e27e85dd5ab890d0",
+      "token": "0xad8d66dadf607576d5c2baf51fc6a0d25e973523",
+      "createdAt": "2026-10-19T14:31:21Z",
+      "priceUsd": 0.00000431460099088557,
+      "volume24hUsd": 2963.8914089312,
+      "liquidityUsd": 77749.7505,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "URE / ZORA",
+      "pool": "0x55aeaa6e866100e4a25d3681c08e252207671a38737b172b59a260e0ea74f3b0",
+      "token": "0xebb548dd7b189d2e7e0670460bfb77df1ed037bb",
+      "createdAt": "2026-10-19T14:22:11Z",
+      "priceUsd": 0.0000885315966349621,
+      "volume24hUsd": 31.3596077543,
+      "liquidityUsd": 85560.6589,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "ECR / ZORA",
+      "pool": "0x53921d8663b2941611ddbd886c8a0e55208d0c6d959904030c9c48bdda87d696",
+      "token": "0x789fc6553286b564c206944dddef07eb197c3102",
+      "createdAt": "2026-10-19T14:26:17Z",
+      "priceUsd": 0.0000900756470329058,
+      "volume24hUsd": 29.7866163685,
+      "liquidityUsd": 89193.8531,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    }
+  ]
+}
