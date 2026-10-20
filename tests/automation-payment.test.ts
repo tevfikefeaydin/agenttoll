@@ -37,6 +37,7 @@ before(async () => {
   fs.writeFileSync(path.join(fixture, "http-fixture.mjs"), `
     import fs from "node:fs";
     const scenario = JSON.parse(fs.readFileSync("scenario.json", "utf8"));
+    if (scenario.scheduled) Date.now = () => 0;
     const calls = [];
     globalThis.fetch = async (input, init) => {
       const request = new Request(input, init);
@@ -44,6 +45,7 @@ before(async () => {
       calls.push({ url: request.url, signed: Boolean(signature), redirect: init?.redirect ?? request.redirect });
       fs.writeFileSync("calls.json", JSON.stringify(calls));
       if (new URL(request.url).origin !== scenario.origin) throw new Error("Unexpected external HTTP/RPC call blocked by fixture");
+      if (scenario.paused) return Response.json({ code: "ENDPOINT_PAUSED" }, { status: 503 });
       if (scenario.hang) return new Promise(() => {});
       if (!signature) return new Response(null, { status: scenario.redirect ? 302 : 402, headers: {
         "payment-required": Buffer.from(JSON.stringify(scenario.quote)).toString("base64"),
@@ -67,7 +69,7 @@ type Script = "keep-warm" | "snapshot";
 function run(script: Script, options: {
   args?: string[]; env?: Record<string, string>; amount?: string;
   requirement?: Record<string, unknown>; body?: unknown; paidStatus?: number;
-  hang?: boolean; redirect?: boolean; existing?: boolean;
+  hang?: boolean; redirect?: boolean; existing?: boolean; paused?: boolean; scheduled?: boolean;
 } = {}) {
   const cwd = fs.mkdtempSync(path.join(fixture, "run-"));
   const endpoint = script === "keep-warm" ? "/api/price/eth" : "/api/base/scout";
@@ -78,7 +80,7 @@ function run(script: Script, options: {
   Object.assign(env, options.env ?? {});
   const origin = new URL(env.AGENTTOLL_URL ?? API).origin;
   fs.writeFileSync(path.join(cwd, "scenario.json"), JSON.stringify({
-    origin, hang: options.hang, redirect: options.redirect, paidStatus: options.paidStatus,
+    origin, hang: options.hang, redirect: options.redirect, paidStatus: options.paidStatus, paused: options.paused, scheduled: options.scheduled,
     body: options.body === undefined ? scout : options.body,
     quote: {
       x402Version: 2, resource: { url: origin + endpoint, mimeType: "application/json" },
@@ -97,7 +99,7 @@ function run(script: Script, options: {
   const result = spawnSync(process.execPath, [
     "--import", pathToFileURL(path.join(fixture, "http-fixture.mjs")).href,
     path.join(fixture, `${script}.mjs`),
-    ...(script === "keep-warm" ? ["--path=/api/price/eth"] : []), ...(options.args ?? []),
+    ...(script === "keep-warm" && !options.scheduled ? ["--path=/api/price/eth"] : []), ...(options.args ?? []),
   ], { cwd, env, encoding: "utf8", timeout: 8000 });
   assert.ifError(result.error);
   const calls: { url: string; signed: boolean; redirect: string }[] = fs.existsSync(path.join(cwd, "calls.json"))
@@ -291,4 +293,17 @@ test("snapshot: an existing snapshot is skipped without a wallet or HTTP", () =>
   assert.equal(result.status, 0, result.messages);
   assert.deepEqual(result.calls, []);
   assert.equal(fs.readFileSync(path.join(result.data, `${date}.json`), "utf8"), "already captured\n");
+});
+
+
+test("keep-warm: scheduled pauses skip without signing or spending; manual repairs still fail", () => {
+  for (const scheduled of [true, false]) {
+    const result = run("keep-warm", { paused: true, scheduled, env: { AGENT_PRIVATE_KEY: key } });
+    assert.equal(result.status, scheduled ? 0 : 1, result.messages);
+    assert.equal(result.calls.length, 1);
+    assert.equal(result.calls[0].signed, false);
+    assert.equal(result.json.at(-1)?.tx, null);
+    assert.equal(result.json.at(-1)?.budget?.spentUsdc, "0.000000");
+    assert.equal(Boolean(result.json.at(-1)?.skipped), scheduled);
+  }
 });

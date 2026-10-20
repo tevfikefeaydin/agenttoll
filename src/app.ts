@@ -49,6 +49,10 @@ export const NETWORK = config.network;
 export const PORT = config.port;
 const CHAIN = config.chain;
 const PUBLIC_BASE = config.publicUrl;
+const pausedEndpoints = new Set((process.env.PAUSED_ENDPOINTS ?? '').split(',').map(value => value.trim()).filter(Boolean));
+for (const paused of pausedEndpoints) {
+  if (!ENDPOINTS.some(endpoint => endpoint.path === paused)) throw new Error('PAUSED_ENDPOINTS contains an unknown catalogue path');
+}
 installPaymentDiagnosticFilter(() => Boolean(requestContext.getStore()?.payment));
 const facilitatorHttp = new HTTPFacilitatorClient({
   ...(config.useCdp ? cdpFacilitator : { url: config.facilitatorUrl }),
@@ -182,7 +186,7 @@ app.use((req, res, next) => {
       body = decodePaymentRequiredHeader(requiredHeader);
     }
     if (body && typeof body === "object" && "code" in body && typeof body.code === "string" &&
-      ['BAD_REQUEST', 'NOT_FOUND', 'PAYLOAD_TOO_LARGE', 'REQUEST_TIMEOUT', 'UPSTREAM_UNAVAILABLE', 'NOT_READY', 'OVERLOADED', 'RATE_LIMITED', 'PAYMENT_UPGRADE_REQUIRED', 'MALFORMED_PAYMENT'].includes(body.code)) responseCode = body.code;
+      ['BAD_REQUEST', 'NOT_FOUND', 'PAYLOAD_TOO_LARGE', 'REQUEST_TIMEOUT', 'UPSTREAM_UNAVAILABLE', 'NOT_READY', 'OVERLOADED', 'RATE_LIMITED', 'PAYMENT_UPGRADE_REQUIRED', 'MALFORMED_PAYMENT', 'ENDPOINT_PAUSED'].includes(body.code)) responseCode = body.code;
     return originalJson(body);
   };
   const started = Date.now();
@@ -317,7 +321,18 @@ app.use((req, res, next) => {
 // Match with Express itself so preflight and paid handlers agree on URL decoding.
 for (const endpoint of ENDPOINTS) {
   app.get(endpoint.route.slice(4), (req, res, next) => {
-    try { validateEndpointInput(endpoint, req.params, req.query); res.locals.validatedPaidRoute = true; next(); }
+    try {
+      validateEndpointInput(endpoint, req.params, req.query);
+      if (pausedEndpoints.has(endpoint.path)) {
+        res.setHeader('Retry-After', '3600');
+        res.setHeader('Cache-Control', 'no-store');
+        res.status(503).json({ error: 'This endpoint is temporarily unavailable. No payment was processed.',
+          code: 'ENDPOINT_PAUSED', retryable: true, retryAfter: 3600, requestId: res.getHeader('X-Request-Id') });
+        return;
+      }
+      res.locals.validatedPaidRoute = true;
+      next();
+    }
     catch (error) { next(error); }
   });
 }
@@ -452,6 +467,7 @@ app.get("/api/demo", (_req, res) => res.json({
 }));
 const CATALOG_ENDPOINTS = [
   ...ENDPOINTS.map(e => ({ path: e.path, method: "GET", price: e.price, description: e.description, tool: e.tool,
+    available: !pausedEndpoints.has(e.path),
     parameters: { path: e.discovery.pathParamsSchema ?? null, query: e.discovery.inputSchema } })),
   ...FREE_ENDPOINTS.map(e => ({ ...e, method: "GET", price: "free" })),
 ];
@@ -461,7 +477,7 @@ app.get("/api/catalog", (_req, res) => res.json({ service: "agenttoll",
 app.get("/.well-known/x402", (_req, res) => res.json({ x402Version: 2, name: "agenttoll",
   network: NETWORK, dataNetwork: config.dataNetwork, payTo: PAY_TO,
   openapi: `${PUBLIC_BASE}/openapi.json`, llms: `${PUBLIC_BASE}/llms.txt`, mcp: "https://www.npmjs.com/package/agenttoll-mcp",
-  resources: ENDPOINTS.map(e => ({ resource: `${PUBLIC_BASE}${e.path}`, price: e.price, description: e.description })) }));
+  resources: ENDPOINTS.filter(e => !pausedEndpoints.has(e.path)).map(e => ({ resource: `${PUBLIC_BASE}${e.path}`, price: e.price, description: e.description })) }));
 app.get("/.well-known/agent-card.json", (_req, res) => res.json({ name: "AgentToll",
   description: "HTTP and MCP data service: Base market data, verified Basenames, safety checks and versioned radar history, paid with USDC via x402.",
   url: PUBLIC_BASE, provider: { organization: "AgentToll", url: PUBLIC_BASE }, version: "1.0.0",
@@ -471,7 +487,7 @@ app.get("/.well-known/agent-card.json", (_req, res) => res.json({ name: "AgentTo
       openapi: `${PUBLIC_BASE}/openapi.json`, discovery: `${PUBLIC_BASE}/.well-known/x402` },
     mcp: { type: "stdio", package: "agenttoll-mcp", install: "npx agenttoll-mcp", registryUrl: "https://www.npmjs.com/package/agenttoll-mcp" },
   },
-  skills: CATALOG_ENDPOINTS.map(e => ({ id: e.path, name: e.description.split(":")[0].slice(0, 60), description: e.description, price: e.price, url: `${PUBLIC_BASE}${e.path}` })),
+  skills: CATALOG_ENDPOINTS.filter(e => !pausedEndpoints.has(e.path)).map(e => ({ id: e.path, name: e.description.split(":")[0].slice(0, 60), description: e.description, price: e.price, url: `${PUBLIC_BASE}${e.path}` })),
   trust: { openSource: "https://github.com/tevfikefeaydin/agenttoll", onchainStats: `${PUBLIC_BASE}/api/stats`,
     trackRecord: "https://github.com/tevfikefeaydin/agenttoll/tree/main/data/scout",
     note: "Statistics are scoped to the configured payment network and receiving address. Immutable git revisions identify radar snapshots; payment receipts do not bind snapshot content." },

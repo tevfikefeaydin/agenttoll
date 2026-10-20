@@ -9,7 +9,8 @@ export async function checkService(options: { baseUrl?: string; network?: string
   const client = createPaymentClient(network, undefined, { ...options, totalBudgetUsdc: '0', timeoutMs });
   const budget = client.getPaymentBudget();
   const signal = AbortSignal.any([AbortSignal.timeout(60_000), ...(options.signal ? [options.signal] : [])]);
-  const checks: { path: string; ok: boolean; status: number | null; ms: number; error?: string }[] = [];
+  const checks: { path: string; ok: boolean; status: number | null; ms: number; error?: string; paused?: boolean }[] = [];
+  const paused = new Set<string>();
   for (const path of ['/api/health', '/api/ready', '/api/catalog']) {
     const started = Date.now();
     let status: number | null = null;
@@ -27,6 +28,9 @@ export async function checkService(options: { baseUrl?: string; network?: string
         : body.ok === true && body.network === network && body.dataNetwork === 'base' &&
           (path !== '/api/ready' || (body.checks?.facilitator === true && body.checks?.baseRpc === true));
       if (!valid) throw new Error();
+      if (path === '/api/catalog') {
+        for (const entry of body.endpoints) if (entry.available === false) paused.add(entry.path);
+      }
       checks.push({ path, ok: true, status, ms: Date.now() - started });
     } catch {
       checks.push({ path, ok: false, status, ms: Date.now() - started, error: signal.aborted ? 'CHECK_DEADLINE' : 'INVALID_OR_UNAVAILABLE_RESPONSE' });
@@ -41,6 +45,16 @@ export async function checkService(options: { baseUrl?: string; network?: string
       return encodeURIComponent(params?.[name] ?? '');
     }) + (query.size ? '?' + query : '');
     try {
+      if (paused.has(endpoint.path)) {
+        const deadline = AbortSignal.any([signal, AbortSignal.timeout(timeoutMs)]);
+        const response = await withSignal(fetch(new URL(path, budget.apiOrigin), {
+          method: 'GET', redirect: 'manual', signal: deadline, headers: { 'User-Agent': 'AgentToll-ReadOnly-Monitor/1' },
+        }), deadline);
+        const body = await withSignal(response.json(), deadline);
+        if (response.status !== 503 || body.code !== 'ENDPOINT_PAUSED' || response.headers.has('payment-required') || response.headers.has('payment-response')) throw new Error();
+        checks.push({ path: endpoint.path, ok: true, paused: true, status: 503, ms: Date.now() - started });
+        continue;
+      }
       await client.getPaymentQuote(path, { signal, headers: { 'User-Agent': 'AgentToll-ReadOnly-Monitor/1' } });
       checks.push({ path: endpoint.path, ok: true, status: 402, ms: Date.now() - started });
     } catch {
@@ -48,7 +62,7 @@ export async function checkService(options: { baseUrl?: string; network?: string
         error: signal.aborted ? 'CHECK_DEADLINE' : 'INVALID_OR_UNAVAILABLE_QUOTE' });
     }
   }
-  return { ok: checks.every(check => check.ok), checkedAt: new Date().toISOString(), origin: budget.apiOrigin,
+  return { ok: checks.every(check => check.ok), degraded: paused.size > 0, checkedAt: new Date().toISOString(), origin: budget.apiOrigin,
     scope: 'Liveness, readiness, catalog and unsigned quotes only; paid data and settlement are not exercised.',
     checks, budget };
 }

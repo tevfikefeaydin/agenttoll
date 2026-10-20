@@ -78,6 +78,13 @@ try {
 
   const started = Date.now();
   const res = await client.fetchWithPayment(client.url, { method: "GET" });
+  // A scheduled turn must not treat an operator-paused endpoint as a failed
+  // payment. Explicit repair runs still fail so they cannot claim a settlement.
+  if (!asked && res.status === 503 && (await res.clone().json().catch(() => null))?.code === 'ENDPOINT_PAUSED') {
+    console.log(JSON.stringify({ ok: true, skipped: true, reason: 'endpoint_paused',
+      status: res.status, path, tx: null, budget: client.getPaymentBudget() }));
+    process.exit(0);
+  }
   const receipt = res.headers.get("payment-response");
   const tx = receipt
     ? (decodePaymentResponseHeader(receipt)?.transaction ?? null)

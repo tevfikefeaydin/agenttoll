@@ -138,6 +138,7 @@ The default is http://localhost:4021 with Base Sepolia payments. ADDRESS is mand
 | PUBLIC_URL | Public service URL for discovery; defaults locally to http://localhost:PORT and uses the Vercel host on Vercel |
 | PORT | Local port, default 4021 |
 | REQUEST_TIMEOUT_MS | Total request deadline, default 25000; allowed 100–120000 |
+| PAUSED_ENDPOINTS | Optional comma-separated catalogue paths; return 503 before payment, mark available:false in the catalog and omit from active discovery. Scheduled warming skips paused routes; manual repair runs still fail until restored. |
 | TRUST_PROXY | false, 1–5 trusted hops, or explicit IP/CIDR entries; locally false by default, one hop on Vercel |
 | FACILITATOR_URL | Default https://x402.org/facilitator; the default on mainnet selects CDP |
 | CDP_API_KEY_ID / CDP_API_KEY_SECRET | Both required when using the default mainnet CDP facilitator |
