@@ -1,0 +1,114 @@
+{
+  "date": "2026-10-20",
+  "at": "2026-10-20T12:48:33.421Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x0e4c19891cd44aee2935ae7bb3d0f68abf9e7ba8807cc9da79702aba296621dd",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 0,
+    "caution": 1,
+    "insufficientData": 3,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "AOP / WETH 0.3%",
+      "pool": "0x2df6919e3f1b81ffe3a6f08764e2f47a7faebae13860723e6e05b362035ef967",
+      "token": "0xfa9a363ffa307b5a634267e2f54b756a987cc69b",
+      "createdAt": "2026-10-20T12:30:29Z",
+      "priceUsd": 0.00490046862963766,
+      "volume24hUsd": 27461.2968996046,
+      "liquidityUsd": 49688.0224,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "verified",
+          "owner-powers",
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "openhuman / WETH",
+      "pool": "0x70fdb2392fd0d43f4b5d51814c22f9eebee9fb51",
+      "token": "0x060c9d8a99815326485dcf1956563cf5fc2e5618",
+      "createdAt": "2026-10-20T12:23:19Z",
+      "priceUsd": 0.00000597002225773379,
+      "volume24hUsd": 4542.3356214945,
+      "liquidityUsd": 80591.546,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "owner-powers",
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "NFDO / ZORA",
+      "pool": "0x7855c3037204e7055b337ced5240752531d7f219cd747f3b5175e8fe40a97183",
+      "token": "0xb2ad34d7ea6efc42cada2fdebc3ad8bb0b2461db",
+      "createdAt": "2026-10-20T12:31:29Z",
+      "priceUsd": 0.000169920618931998,
+      "volume24hUsd": 36.5180924564,
+      "liquidityUsd": 164251.7451,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "verified",
+          "owner-powers",
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "NFDO / ZORA",
+      "pool": "0xf37736c76c9547e2df6081d6f07278a835da8d4f548a06a5cc8c4c1a7e34b3e5",
+      "token": "0x0bb245f92d104b98016de4715b04d1333de4d5f6",
+      "createdAt": "2026-10-20T12:16:33Z",
+      "priceUsd": 0.0000988329200670308,
+      "volume24hUsd": 35.0576024289,
+      "liquidityUsd": 95606.1165,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "verified",
+          "owner-powers",
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    }
+  ]
+}
