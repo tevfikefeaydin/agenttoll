@@ -4,6 +4,7 @@ import https from 'node:https';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { ENDPOINTS } from '../../dist/endpoints.js';
+import { activeCatalogueEndpoints } from '../../dist/endpoint-availability.js';
 
 const targetIp = process.argv[2] || undefined;
 const reportFile = process.argv[3];
@@ -78,26 +79,46 @@ await check('Video range request', async () => {
   return { status: response.status, totalBytes: local.length };
 });
 
+let activeEndpoints;
+await check('Catalogue availability and paused responses', async () => {
+  const response = await request('/api/catalog');
+  assert(response.status === 200, `HTTP ${response.status}`);
+  security(response);
+  const active = activeCatalogueEndpoints(JSON.parse(response.body));
+  for (const endpoint of ENDPOINTS.filter(endpoint => !active.includes(endpoint))) {
+    const path = endpoint.path.replace(/\{(\w+)\}/g, (_, name) => encodeURIComponent(endpoint.discovery.pathParams?.[name] ?? ''));
+    const paused = await request(path);
+    security(paused);
+    assert(paused.status === 503 && JSON.parse(paused.body).code === 'ENDPOINT_PAUSED', 'Paused route did not reject before payment');
+    assert(!paused.headers['payment-required'] && !paused.headers['payment-response'], 'Paused route advertised payment');
+  }
+  activeEndpoints = active;
+  return { status: response.status, activeEndpoints: active.length, pausedEndpoints: ENDPOINTS.length - active.length };
+});
+
 for (const path of ['/.well-known/x402', '/.well-known/agent-card.json']) {
   await check(path, async () => {
     const response = await request(path);
     assert(response.status === 200, `HTTP ${response.status}`);
     security(response);
     const value = JSON.parse(response.body);
+    assert(activeEndpoints, 'Availability catalogue verification failed');
     assert((value.payTo ?? value.identity?.payTo)?.toLowerCase() === '0xe55359021a6a22d8385b827405991c56075f56f8', 'Wrong receiver');
     assert((value.openapi ?? value.interfaces?.http?.openapi) === 'https://agenttoll.app/openapi.json', 'Wrong canonical URL');
     assert(value.dataNetwork === 'base', 'Wrong data network');
     if (path === '/.well-known/x402') {
       assert(value.network === 'base' && value.x402Version === 2, 'Wrong discovery payment network');
-      assert(value.resources?.length === ENDPOINTS.length && ENDPOINTS.every(endpoint =>
+      assert(value.resources?.length === activeEndpoints.length && activeEndpoints.every(endpoint =>
         value.resources.some(resource => resource.resource === `https://agenttoll.app${endpoint.path}` && resource.price === endpoint.price)),
       'Wrong discovery resources');
     } else {
       assert(value.url === 'https://agenttoll.app' && value.interfaces?.http?.baseUrl === 'https://agenttoll.app', 'Wrong agent-card origin');
       assert(value.interfaces.http.payment.network === 'eip155:8453' && value.interfaces.http.payment.asset === 'USDC', 'Wrong agent-card payment identity');
       assert(value.interfaces.http.discovery === 'https://agenttoll.app/.well-known/x402', 'Wrong discovery URL');
-      assert(ENDPOINTS.every(endpoint => value.skills?.some(skill => skill.id === endpoint.path &&
+      assert(activeEndpoints.every(endpoint => value.skills?.some(skill => skill.id === endpoint.path &&
         skill.url === `https://agenttoll.app${endpoint.path}` && skill.price === endpoint.price)), 'Wrong agent-card resources');
+      assert(ENDPOINTS.filter(endpoint => !activeEndpoints.includes(endpoint)).every(endpoint =>
+        !value.skills?.some(skill => skill.id === endpoint.path)), 'Agent card advertises a paused route');
     }
     return { status: response.status };
   });
