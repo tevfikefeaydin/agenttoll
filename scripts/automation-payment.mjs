@@ -54,18 +54,18 @@ export function automationPayment(requestPath, mode) {
   return { ...client, mode, path: requestPath, url: url.href };
 }
 
-export async function previewAutomation(client) {
+export async function previewAutomation(client, write = console.log) {
   if (client.mode === "pay") return false;
   const quote = client.mode === "quote-only" ? await client.getPaymentQuote(client.path) : undefined;
-  console.log(JSON.stringify({
+  write(JSON.stringify({
     ok: true, mode: client.mode, path: client.path, url: client.url,
     ...(quote ? { quote } : {}), budget: client.getPaymentBudget(),
   }));
   return true;
 }
 
-export function automationFailure(error, client, context = {}) {
-  console.error(JSON.stringify({
+export function automationFailure(error, client, context = {}, write = console.error) {
+  write(JSON.stringify({
     ok: false, ...context,
     error: String(error instanceof Error ? error.message : error).slice(0, 300),
     ...(client ? { mode: client.mode, path: client.path, budget: client.getPaymentBudget() } : {}),

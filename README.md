@@ -143,6 +143,16 @@ The default is http://localhost:4021 with Base Sepolia payments. ADDRESS is mand
 | FACILITATOR_URL | Default https://x402.org/facilitator; the default on mainnet selects CDP |
 | CDP_API_KEY_ID / CDP_API_KEY_SECRET | Both required when using the default mainnet CDP facilitator |
 | BLOCKSCOUT_API_KEY | Optional upstream quota credential |
+| ADDRESS_ACTIVITY_PROVIDER | Address activity only: `blockscout` (default) or `ankr`. Ankr uses the Base indexed transaction API, including zero-value calls and reverted transactions. |
+| ANKR_API_KEY | Required for Ankr address activity. Store in private runtime configuration; never commit a real token. |
+
+Ankr address-watch cursors are opaque and provider-bound. Existing Blockscout
+cursors restart their original time window on Ankr, retaining recent deduplication;
+`coverage.replayPossible` warns that migration can replay older transactions.
+Drain `hasMore` pages and deduplicate by transaction hash. Each call reads at most
+50 indexed confirmed transactions. This feed does not include pending transactions,
+internal calls or token-transfer logs. Enable the provider only after verifying its
+Base access and pagination, then remove the address-watch route from `PAUSED_ENDPOINTS`.
 
 URL settings require HTTPS except on localhost. Configure PUBLIC_URL and TRUST_PROXY for the actual deployment. The per-instance rate limits are 60 free API/discovery requests and 600 paid-route requests per minute per IP; unsigned quotes and signed retries both count. They are not a shared multi-instance rate limiter.
 

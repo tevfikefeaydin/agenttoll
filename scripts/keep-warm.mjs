@@ -25,6 +25,12 @@ import { decodePaymentResponseHeader } from "@x402/fetch";
 import { ENDPOINTS } from "../dist/endpoints.js";
 import { automationOptions, automationPayment, previewAutomation, automationFailure } from "./automation-payment.mjs";
 
+// Actions logs are public. Keep results/costs, but never print wallet addresses,
+// transaction hashes, signed payload identifiers or a hex private key.
+const publicLine = (line) => line.replace(/0x[0-9a-fA-F]{40,}/g, '[redacted]');
+const writePublic = (line) => console.log(publicLine(line));
+const writePublicError = (line) => console.error(publicLine(line));
+
 // Which endpoints get warmed is the catalogue's business; how each one is
 // called cheaply is this file's. A route's price is fixed, so nothing here
 // changes what we pay — only how much work the call asks an upstream to do.
@@ -74,33 +80,35 @@ try {
   if (!endpoint) throw new Error(`No such endpoint: ${asked}`);
   const path = concrete(endpoint);
   client = automationPayment(path, options.mode);
-  if (await previewAutomation(client)) process.exit(0);
+  if (await previewAutomation(client, writePublic)) process.exit(0);
 
   const started = Date.now();
   const res = await client.fetchWithPayment(client.url, { method: "GET" });
   // A scheduled turn must not treat an operator-paused endpoint as a failed
   // payment. Explicit repair runs still fail so they cannot claim a settlement.
   if (!asked && res.status === 503 && (await res.clone().json().catch(() => null))?.code === 'ENDPOINT_PAUSED') {
-    console.log(JSON.stringify({ ok: true, skipped: true, reason: 'endpoint_paused',
-      status: res.status, path, tx: null, budget: client.getPaymentBudget() }));
+    writePublic(JSON.stringify({ ok: true, skipped: true, reason: 'endpoint_paused',
+      status: res.status, path: endpoint.path, tx: null, budget: client.getPaymentBudget() }));
     process.exit(0);
   }
   const receipt = res.headers.get("payment-response");
   const tx = receipt
     ? (decodePaymentResponseHeader(receipt)?.transaction ?? null)
     : null;
-  console.log(
+  const transactionConfirmed = typeof tx === 'string' && /^0x[0-9a-fA-F]{64}$/.test(tx) && !/^0x0{64}$/.test(tx);
+  const ok = res.ok && transactionConfirmed;
+  writePublic(
     JSON.stringify({
-      ok: res.ok,
-      path,
+      ok,
+      path: endpoint.path,
       status: res.status,
       ms: Date.now() - started,
       tx,
-      wallet: client.address,
+      transactionConfirmed,
       budget: client.getPaymentBudget(),
     }),
   );
-  process.exit(res.ok ? 0 : 1);
+  process.exit(ok ? 0 : 1);
 } catch (err) {
-  automationFailure(err, client);
+  automationFailure(err, client, {}, writePublicError);
 }

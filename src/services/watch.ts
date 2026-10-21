@@ -4,6 +4,7 @@ import { getPrice } from "./prices.js";
 import { getNewTokenRadar } from "./radar.js";
 import { blockscoutFetch } from "./sources.js";
 import { deflateRawSync, inflateRawSync } from "node:zlib";
+import { activityProvider, activityPageToken, ankrActivityPage, type ActivityTx as Tx } from "./activity-provider.js";
 
 // Stateless "what changed since I last asked" endpoints. The agent keeps the
 // cursor, so the server stores nothing and every reply is verifiable.
@@ -23,11 +24,14 @@ export function parseSince(since?: string): number {
 
 interface PagePosition { block_number: number; index: number; items_count: number }
 interface ActivityCursor {
-  v: 1;
+  v: 1 | 2;
+  provider?: "ankr";
+  until?: number | null;
+  boundary?: PagePosition | null;
   address: string;
   floor: number;
   watermark: number;
-  next: PagePosition | null;
+  next: PagePosition | string | null;
   seen: [string, number][];
   replayPossible: boolean;
 }
@@ -49,39 +53,53 @@ function pagePosition(value: unknown): PagePosition | null {
 }
 
 function readCursor(address: string, since?: string): ActivityCursor {
-  if (!since?.startsWith("w1.")) {
+  const provider = activityProvider();
+  if (!since?.startsWith("w1.") && !since?.startsWith("w2.")) {
     if (since && since.length > MAX_CURSOR_LENGTH) badRequest("Invalid 'since' cursor");
     const floor = parseSince(since);
-    return { v: 1, address, floor, watermark: floor, next: null, seen: [], replayPossible: false };
+    return { v: provider === 'ankr' ? 2 : 1, ...(provider === 'ankr' ? { provider, until: null, boundary: null } : {}),
+      address, floor, watermark: floor, next: null, seen: [], replayPossible: false };
   }
   try {
-    if (since.length > MAX_CURSOR_LENGTH || !/^w1\.[A-Za-z0-9_-]+$/.test(since)) throw new Error();
+    if (since.length > MAX_CURSOR_LENGTH || !/^w[12]\.[A-Za-z0-9_-]+$/.test(since)) throw new Error();
     const value = JSON.parse(inflateRawSync(Buffer.from(since.slice(3), "base64url"), { maxOutputLength: 16_000 }).toString()) as ActivityCursor;
-    if (value.v !== 1 || value.address !== address || !validTime(value.floor) || !validTime(value.watermark)
+    if (value.v !== Number(since[1]) || value.address !== address || !validTime(value.floor) || !validTime(value.watermark)
       || value.floor > value.watermark || typeof value.replayPossible !== "boolean"
       || !Array.isArray(value.seen) || value.seen.length > MAX_SEEN
       || !value.seen.every((item) => Array.isArray(item) && item.length === 2 && /^0x[0-9a-f]{64}$/.test(item[0]) && validTime(item[1]))) throw new Error();
-    return { ...value, next: pagePosition(value.next) };
+    // Copy only known fields; never echo arbitrary fields embedded in a cursor.
+    const common = { address, floor: value.floor, watermark: value.watermark, seen: value.seen, replayPossible: value.replayPossible };
+    if (value.v === 1) {
+      const next = pagePosition(value.next);
+      if (provider === 'blockscout') return { ...common, v: 1, next };
+      // Provider cursors cannot be translated. Restart the same lower-bounded
+      // window, retaining deduplication and explicitly allowing migration replay.
+      return { ...common, v: 2, provider: 'ankr', next: null, until: null, boundary: null, replayPossible: true };
+    }
+    if (provider !== 'ankr' || value.provider !== 'ankr') throw new Error();
+    const next = activityPageToken(value.next);
+    const boundary = pagePosition(value.boundary);
+    if (next ? !validTime(value.until) || value.until < value.floor || !boundary : value.until != null || boundary !== null) throw new Error();
+    return { ...common, v: 2, provider: 'ankr', next, until: value.until, boundary };
   } catch {
-    badRequest("Invalid 'since' cursor — use the unmodified cursor for this address");
+    badRequest("Invalid 'since' cursor — use the unmodified cursor for this address and provider");
   }
 }
 
-const writeCursor = (value: ActivityCursor) => `w1.${deflateRawSync(JSON.stringify(value)).toString("base64url")}`;
+function writeCursor(value: ActivityCursor): string {
+  for (;;) {
+    const encoded = `w${value.v}.${deflateRawSync(JSON.stringify(value)).toString("base64url")}`;
+    if (encoded.length <= MAX_CURSOR_LENGTH) return encoded;
+    if (value.seen.length < 2) throw new Error('Activity cursor exceeds supported size');
+    // Bounded client URLs even for incompressible provider tokens/hash sets.
+    // Keep both the newest and oldest page boundary while dropping middle hashes.
+    value.seen.splice(Math.floor(value.seen.length / 2), 1);
+    value.replayPossible = true;
+  }
+}
 
 export function validateActivityCursor(address: string, since?: string): void {
   readCursor(address.toLowerCase(), since);
-}
-
-interface Tx {
-  hash: string;
-  timestamp: string;
-  value: string;
-  method: string | null;
-  from: { hash: string } | null;
-  to: { hash: string } | null;
-  block_number?: number | null;
-  position?: number | null;
 }
 
 /** New activity for a Base address since a cursor: transfers in/out, newest first. */
@@ -89,11 +107,16 @@ export async function getAddressActivity(address: string, since?: string) {
   if (!/^0x[0-9a-fA-F]{40}$/.test(address)) badRequest("Invalid address — expected 0x + 40 hex chars");
   const addr = address.toLowerCase();
   const state = readCursor(addr, since);
-  const query = state.next ? `?${new URLSearchParams(Object.entries(state.next).map(([k, v]) => [k, String(v)]))}` : "";
+  const legacyNext = state.v === 1 ? state.next as PagePosition | null : null;
+  const query = legacyNext ? `?${new URLSearchParams(Object.entries(legacyNext).map(([k, v]) => [k, String(v)]))}` : "";
+  const until = state.until ?? Math.max(state.floor, Date.now());
 
   // One provider page per call bounds work. A continuation always retains the
   // original lower boundary until every indexed page in that window is read.
-  const page = await cached(`activity:base:${addr}:${query}`, 20_000, async () => {
+  const page = state.v === 2
+    ? await cached(`activity:ankr:base:${addr}:${state.floor}:${state.next ? until : ''}:${state.next ?? ''}`, 20_000,
+      async () => ({ ...await ankrActivityPage(addr, state.next as string | null, state.floor, until), until }))
+    : await cached(`activity:base:${addr}:${query}`, 20_000, async () => {
     const res = await blockscoutFetch(`${BLOCKSCOUT}/addresses/${addr}/transactions${query}`, {
       headers: { Accept: "application/json" },
     });
@@ -103,7 +126,7 @@ export async function getAddressActivity(address: string, since?: string) {
   });
 
   // Pending transactions have no stable chain position/timestamp. They remain
-  // outside this confirmed-transaction feed until Blockscout indexes them.
+  // outside this confirmed-transaction feed until the provider indexes them.
   const confirmed = page.items.filter((tx) => tx.timestamp != null);
   if (confirmed.some((tx) => !/^0x[0-9a-fA-F]{64}$/.test(tx.hash) || !validTime(Date.parse(tx.timestamp)))) {
     throw new Error("Invalid confirmed transaction in activity source");
@@ -122,9 +145,18 @@ export async function getAddressActivity(address: string, since?: string) {
   }
   const crossedFloor = confirmed.some((tx) => Date.parse(tx.timestamp) < state.floor);
   const next = crossedFloor ? null : page.next;
-  if (next && state.next && (next.block_number > state.next.block_number
-    || (next.block_number === state.next.block_number && next.index >= state.next.index))) {
+  if (typeof next === 'object' && next && legacyNext && (next.block_number > legacyNext.block_number
+    || (next.block_number === legacyNext.block_number && next.index >= legacyNext.index))) {
     throw new Error("Activity pagination did not advance");
+  }
+  if (state.v === 2) {
+    const oldest = confirmed.at(-1);
+    if (state.boundary && oldest && ((oldest.block_number ?? 0) > state.boundary.block_number
+      || ((oldest.block_number ?? 0) === state.boundary.block_number && (oldest.position ?? 0) >= state.boundary.index))) {
+      throw new Error('Activity pagination did not advance');
+    }
+    state.boundary = next && oldest ? { block_number: oldest.block_number!, index: oldest.position!, items_count: confirmed.length } : null;
+    state.until = next && 'until' in page ? page.until : null;
   }
   const hasMore = next !== null;
   if (!state.watermark) state.watermark = Date.now();
@@ -151,13 +183,14 @@ export async function getAddressActivity(address: string, since?: string) {
       transactionIndex: t.position ?? null,
     }));
 
+  const cursor = writeCursor(state);
   return {
     chain: "base",
     address: addr,
     since: since ?? null,
     count: events.length,
     events,
-    cursor: writeCursor(state),
+    cursor,
     hasMore,
     partial: hasMore,
     coverage: {

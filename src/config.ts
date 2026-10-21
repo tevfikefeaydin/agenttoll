@@ -1,4 +1,5 @@
 import { isIP } from 'node:net';
+import { activityProvider } from './services/activity-provider.js';
 
 export type PaymentNetwork = 'base' | 'base-sepolia';
 
@@ -19,6 +20,7 @@ function integer(name: string, value: string | undefined, fallback: number, min:
 }
 
 export function readConfig(env: NodeJS.ProcessEnv = process.env) {
+  activityProvider(env);
   const payTo = env.ADDRESS?.trim();
   if (!payTo || !/^0x[0-9a-fA-F]{40}$/.test(payTo) || /^0x0{40}$/i.test(payTo)) {
     throw new Error('ADDRESS must be your nonzero receiving wallet address (0x + 40 hex characters)');

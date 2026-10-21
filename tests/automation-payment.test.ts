@@ -243,6 +243,12 @@ for (const script of ["keep-warm", "snapshot"] as const) {
     assert.equal(result.calls.filter(call => call.signed).length, 1);
     assert.equal(result.json.at(-1)?.budget?.spentUsdc, script === "keep-warm" ? "0.001000" : "0.008000");
     assert.equal(result.json.at(-1)?.budget?.remainingUsdc, "0.000000");
+    if (script === 'keep-warm') {
+      assert.equal(result.json.at(-1)?.transactionConfirmed, true);
+      assert.equal(result.json.at(-1)?.tx, '[redacted]');
+      assert.equal(result.json.at(-1)?.wallet, undefined);
+      assert.doesNotMatch(result.messages, /0x[0-9a-fA-F]{40,}/);
+    }
     if (script === "snapshot") {
       const snapshot = JSON.parse(fs.readFileSync(path.join(result.data, `${date}.json`), "utf8"));
       assert.deepEqual(snapshot.pools, []);
