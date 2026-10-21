@@ -1,0 +1,115 @@
+{
+  "date": "2026-10-21",
+  "at": "2026-10-21T13:01:27.877Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x14d11b27cc20a3e1ad9cdcbedd006aaf6a39eea96bd3385f7385e3873ffa87a9",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 0,
+    "caution": 4,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "USOE / WETH 0.3%",
+      "pool": "0x2ae8d1d9db9b462f5b6f54c966e53995c790f97b01c50d5f290be352875b0713",
+      "token": "0xf91525b47e98e97f1b8e5558fde818b05fdf30a4",
+      "createdAt": "2026-10-21T12:50:11Z",
+      "priceUsd": 0.0949044161238163,
+      "volume24hUsd": 670696.112698737,
+      "liquidityUsd": 69565.6428,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "owner-powers"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "WWR / WETH 0.3%",
+      "pool": "0xac5f4ee8f4df419dc1524682112493a74165850666967908e28533f0939aaeb9",
+      "token": "0x3b47b47651c1131b8594d8e8b3786abe9e196d4c",
+      "createdAt": "2026-10-21T12:45:05Z",
+      "priceUsd": 0.00498029221382563,
+      "volume24hUsd": 17838.7662789038,
+      "liquidityUsd": 50249.3053,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "owner-powers"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "USDP / WETH 0.3%",
+      "pool": "0xee4477c2b8bf72f5014c73cec508859337d612cded7238f2e36a398514582afd",
+      "token": "0xd2eef9c09d1bda764ac19f7b333aabe8fd309046",
+      "createdAt": "2026-10-21T12:41:41Z",
+      "priceUsd": 0.00492228128186402,
+      "volume24hUsd": 15462.3580198893,
+      "liquidityUsd": 50235.0037,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "owner-powers"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "WOFI / WETH 0.3%",
+      "pool": "0x2ea317d4fc7bf118793296c723c6ff8b44692dbdafad3ff54d3a61e9413cd6e2",
+      "token": "0x58a0c3c0528462315856599cc9768c99a8814ad9",
+      "createdAt": "2026-10-21T12:46:53Z",
+      "priceUsd": 0.00492177553002429,
+      "volume24hUsd": 15273.9973314718,
+      "liquidityUsd": 50022.6983,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "owner-powers"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    }
+  ]
+}
