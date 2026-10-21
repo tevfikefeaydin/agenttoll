@@ -2,6 +2,7 @@ import { cached, fetchWithTimeout } from "./cache.js";
 import { badRequest } from "./errors.js";
 import { launcherOf } from "./fresh.js";
 import { baseRpc, blockscoutFetch } from "./sources.js";
+import { addressRisk, ownerInterface, poolEvidence, InvalidSafetySource as InvalidSource } from "./safety-evidence.js";
 
 /**
  * Automated safety checks for a Base token.
@@ -67,8 +68,6 @@ interface SourceStatus {
   durationMs: number;
   issues: string[];
 }
-
-class InvalidSource extends Error {}
 
 async function observe<T>(load: (issues: string[]) => Promise<T | null>) {
   const start = Date.now();
@@ -150,7 +149,7 @@ async function fromGoPlus(address: string, issues: string[]): Promise<GoPlusToke
     if (value !== null) target[key] = value;
     else if (rawValue !== undefined) issues.push(path);
   };
-  for (const key of ["is_honeypot", "cannot_buy", "cannot_sell_all", "is_open_source", ...OWNER_POWERS.map(({ key }) => key)]) {
+  for (const key of ["is_honeypot", "cannot_buy", "cannot_sell_all", "is_open_source", "is_proxy", ...OWNER_POWERS.map(({ key }) => key)]) {
     set(output, key, input[key], (v) => flag(v) === null ? null : flag(v) ? "1" : "0");
   }
   for (const key of ["buy_tax", "sell_tax", "creator_percent"]) {
@@ -286,7 +285,8 @@ function buildChecks(gp: GoPlusToken | null, hp: HoneypotResult | null): Check[]
   const powers = OWNER_POWERS.filter(({ key }) => flag(gp?.[key]) === true).map(({ label }) => label);
   const missingPowers = OWNER_POWERS.filter(({ key }) => flag(gp?.[key]) === null).map(({ key }) => String(key));
   checks.push(makeCheck("owner-powers", powers.length ? "warn" : "pass",
-    powers.length ? `Owner can: ${powers.join(", ")}` : missingPowers.length ? "Some contract permissions could not be read" : "No dangerous owner privileges found",
+    powers.length ? `Owner can: ${powers.join(", ")}` : missingPowers.length ?
+      `Some contract permissions could not be read${flag(gp?.is_proxy) === true ? "; GoPlus identifies a proxy, whose permissions may depend on its implementation" : ""}` : "No dangerous owner privileges found",
     providers(!!gp, false), missingPowers));
 
   // GoPlus supplies the top ten holders. A shorter list needs a holder count
@@ -560,14 +560,20 @@ export async function getTokenSafety(address: string) {
       throw new Error("Both safety sources are unavailable right now — please retry");
     }
 
-    // Blockscout is the only source that carries a scam flag, and also the
-    // least reliable thing this endpoint touches: while it was down, and for
-    // any token too new for it to have indexed, the deployer check went
-    // "unchecked" on every call — 76% of the tokens in our own snapshots.
-    // GoPlus has already told us who the creator is, and everything after
-    // that is plain RPC, so fall back to it rather than giving up. Age is
-    // skipped there: it is the one part that still needs an explorer, and we
-    // would only be waiting out the same timeout twice.
+    const tokenChecks = buildChecks(gp, hp);
+    const creatorAddress = deployerFromBlockscout?.address ?? gp?.creator_address?.toLowerCase();
+    // Free, bounded supplemental sources run alongside the existing RPC fallback.
+    // Market size and ABI names are context only, never substitutes for LP locks
+    // or permission analysis. Address-risk coverage requires explicit fields.
+    const extra = Promise.all([
+      flaggedScam === null ? observe((issues) => addressRisk(addr, issues)) : null,
+      flaggedScam === null && creatorAddress ? observe((issues) => addressRisk(creatorAddress, issues)) : null,
+      tokenChecks.some(c => c.id === "owner-powers" && !c.complete) ? observe((issues) => ownerInterface(addr, issues)) : null,
+      tokenChecks.some(c => c.id === "liquidity" && !c.complete) ? observe((issues) => poolEvidence(addr, issues)) : null,
+    ]);
+
+    // Once GoPlus supplies the creator address, activity can be read from RPC
+    // without waiting on the same unavailable explorer for account age.
     let deployer = deployerFromBlockscout;
     let deployerFailed = depResult.source.status === "unavailable" || depResult.source.status === "invalid";
     let deployerSource = deployer ? "blockscout+rpc" : null;
@@ -603,15 +609,55 @@ export async function getTokenSafety(address: string) {
       }
     }
 
+    const [tokenRiskResult, creatorRiskResult, ownerResult, poolResult] = await extra;
+    const extras = [
+      ["goplus-address:token", tokenRiskResult], ["goplus-address:creator", creatorRiskResult],
+      ["sourcify", ownerResult], ["dexscreener-pools", poolResult],
+    ] as const;
+    for (const [name, result] of extras) if (result) sourceStatus[name] = result.source;
+    const ownerCheck = tokenChecks.find(c => c.id === "owner-powers")!;
+    if (ownerResult?.value) {
+      const evidence = ownerResult.value;
+      ownerCheck.sources.push("sourcify");
+      ownerCheck.detail += `. Sourcify's verified interface${evidence.isProxy === true ? " (proxy" + (evidence.implementationInspected ? " and resolved implementation)" : ")") : ""}` +
+        (evidence.methods.length ? ` lists: ${evidence.methods.join(", ")}` : " has no recognized permission-related method names") +
+        ". Interface names do not establish who can call them, their behavior, or the absence of other privileges; permission coverage remains incomplete";
+    }
+    const liquidityCheck = tokenChecks.find(c => c.id === "liquidity")!;
+    if (poolResult?.value) {
+      const evidence = poolResult.value;
+      liquidityCheck.sources.push("dexscreener-pools");
+      liquidityCheck.detail += `. DEX Screener returned ${evidence.observedPools} matching Base pools` +
+        (evidence.reportedLiquidityUsd === null ? "" : `, with $${evidence.reportedLiquidityUsd.toLocaleString("en-US", { maximumFractionDigits: 2 })} reported across ${evidence.poolsWithLiquidity} pools`) +
+        ". These are provider-listed pools, not a complete market inventory. Pool value does not establish LP ownership or lock status";
+    }
     const depCheck = deployerCheck(deployer, deployerFailed, flaggedScam);
+    const tokenRisk = tokenRiskResult?.value;
+    const creatorRisk = creatorRiskResult?.value;
+    const riskMatchesCreator = !!deployer && deployer.address === creatorAddress;
+    for (const [subject, risk] of [["token contract", tokenRisk], ["reported creator", creatorRisk]] as const) {
+      if (!risk) continue;
+      if (risk.riskFlags.length) {
+        depCheck.status = "fail";
+        depCheck.detail += `. GoPlus reports risk indicators for the ${subject}: ${risk.riskFlags.join(", ")}. These are provider findings, not independently verified conclusions`;
+      } else if (risk.reviewFlags.length) {
+        if (depCheck.status !== "fail") depCheck.status = "warn";
+        depCheck.detail += `. GoPlus context flags for the ${subject}: ${risk.reviewFlags.join(", ")}. These call for review and do not by themselves establish fraud`;
+        if (risk.reviewFlags.includes("honeypot_related_address")) depCheck.detail += "; an address association does not establish that this token blocks sales";
+      } else if (risk.complete) {
+        depCheck.detail += `. GoPlus reports no listed address-risk indicators for the ${subject}; this is not a guarantee of safety`;
+      }
+    }
     const missingDeployer = !deployer ? ["deployer"] : [
       ...(deployer.isContract === null ? ["contract-code"] : []),
       ...(deployer.isContract !== true && deployer.txCount === null ? ["transaction-count"] : []),
-      ...(deployer.flaggedScam === null ? ["scam-flag"] : []),
+      ...(flaggedScam === null && !tokenRisk?.complete ? ["scam-flag"] : []),
+      ...(flaggedScam === null && (!creatorRisk?.complete || !riskMatchesCreator) ? ["creator-address-risk"] : []),
     ];
     const deployerSources = [...(deployerSource ? [deployerSource] : []),
-      ...(flaggedScam !== null && deployerSource !== "blockscout+rpc" ? ["blockscout+rpc"] : [])];
-    const checks = [...buildChecks(gp, hp), makeCheck("deployer", depCheck.status, depCheck.detail, deployerSources, missingDeployer)];
+      ...(flaggedScam !== null && deployerSource !== "blockscout+rpc" ? ["blockscout+rpc"] : []),
+      ...(tokenRisk ? ["goplus-address:token"] : []), ...(creatorRisk ? ["goplus-address:creator"] : [])];
+    const checks = [...tokenChecks, makeCheck("deployer", depCheck.status, depCheck.detail, deployerSources, missingDeployer)];
     const failed = checks.filter((c) => c.status === "fail");
     const warned = checks.filter((c) => c.status === "warn");
     const incomplete = checks.filter((c) => !c.complete);
@@ -621,6 +667,7 @@ export async function getTokenSafety(address: string) {
     if (hp) sources.push("honeypot.is");
     if (deployerSource) sources.push(deployerSource);
     if (flaggedScam !== null && deployerSource !== "blockscout+rpc") sources.push("blockscout+rpc");
+    for (const [name, result] of extras) if (result?.value) sources.push(name);
 
     return {
       chain: "base",
@@ -649,6 +696,14 @@ export async function getTokenSafety(address: string) {
       listedOnCex: flag(gp?.is_in_cex?.listed) ? (gp?.is_in_cex?.cex_list ?? []) : [],
       sources,
       sourceStatus,
+      supplementalEvidence: {
+        // flaggedScam retains the explorer's original meaning. Different provider
+        // assessments live here with their subjects and coverage explicitly named.
+        tokenAddressRisk: tokenRisk ?? null,
+        creatorAddressRisk: creatorRisk ?? null,
+        ownerInterface: ownerResult?.value ?? null,
+        liquidityPools: poolResult?.value ?? null,
+      },
       disclaimer:
         "Automated checks against public data, not investment advice. Passing every check does not make a token safe.",
       at: new Date().toISOString(),

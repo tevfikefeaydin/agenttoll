@@ -24,7 +24,8 @@ const evidenceLabels: Record<string, string> = {
   owner_change_balance: 'ability to change holder balances', 'top-liquidity-provider-list': 'largest liquidity providers',
   'liquidity-share-total': 'total liquidity ownership coverage', 'liquidity-provider-count': 'liquidity provider count',
   'top-holder-list': 'largest token holders', 'holder-share-total': 'total holder coverage',
-  'creator-percent': 'creator’s share of supply', 'scam-flag': 'explorer scam assessment',
+  'creator-percent': 'creator’s share of supply', 'scam-flag': 'contract address risk assessment',
+  'creator-address-risk': 'creator address risk assessment',
   'open-source': 'published contract source', 'buy-tax': 'buy tax', 'sell-tax': 'sell tax',
 };
 export function evidenceLabel(value: string) {

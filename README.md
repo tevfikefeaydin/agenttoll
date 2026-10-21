@@ -88,6 +88,8 @@ API GET/HEAD requests use URL parameters and payment headers, and reject request
 
 Safety responses preserve unknown checks and provider coverage. A missing owner flag or tax is not a pass. clear requires the necessary evidence; a detected failure can still produce high-risk when other checks are unknown. Passing automated checks does not guarantee safety. Portfolio and radar responses also need their partial/coverage fields to be interpreted correctly.
 
+Free supplemental safety sources provide address-risk screening, verified interface context and observed pool liquidity. Interface names and market value do not complete missing permission or liquidity-ownership checks. See [safety evidence and limits](docs/safety-evidence.md).
+
 Portfolio indexer scans stop after three pages or when the indexed tail falls below the $1 source read floor. Lowering `minValue` changes the display filter, not this source scan bound. Any unread provider pages mark the response partial; totals and unpriced counts describe observed holdings only, and the number of unseen tokens remains unknown. Sentiment responses preserve the provider's observation timestamp separately from their fetch time, including when served from cache.
 
 Address-to-Basename results are forward-resolved back to the original address. Fresh pools cover Uniswap v4; token attribution can be null, ages are estimates from block height, and funded records observed liquidity events rather than a USD liquidity valuation.

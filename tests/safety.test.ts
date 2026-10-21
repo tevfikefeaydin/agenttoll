@@ -33,12 +33,16 @@ function cleanHoneypot(): Record<string, unknown> {
 async function safety(t: TestContext, fixture: {
   gp?: unknown; hp?: unknown; gpEnvelope?: unknown;
   code?: unknown; scam?: unknown; creator?: unknown;
+  explorerDown?: boolean; tokenRisk?: unknown; creatorRisk?: unknown; ownerAbi?: unknown; pools?: unknown;
 } = {}) {
   const address = `0x${(nextToken++).toString(16).padStart(40, "0")}`;
   const gp = fixture.gp === undefined ? cleanGoPlus() : fixture.gp;
   const hp = fixture.hp === undefined ? cleanHoneypot() : fixture.hp;
   t.mock.method(globalThis, "fetch", async (input: string | URL | Request, init?: RequestInit) => {
     const url = String(input);
+    if (url.includes("/address_security/")) return Response.json({ code: 1, result: url.includes(CREATOR) ? fixture.creatorRisk : fixture.tokenRisk });
+    if (url.startsWith("https://sourcify.dev/")) return Response.json({ chainId: "8453", address, runtimeMatch: "exact_match", abi: fixture.ownerAbi, proxyResolution: { isProxy: false } });
+    if (url.startsWith("https://api.dexscreener.com/")) return Response.json(fixture.pools ?? []);
     if (url.startsWith("https://api.gopluslabs.io/")) {
       return gp === false ? new Response("Unavailable", { status: 503 }) :
         Response.json(fixture.gpEnvelope ?? { code: 1, result: { [address]: gp } });
@@ -47,6 +51,7 @@ async function safety(t: TestContext, fixture: {
       return hp === false ? new Response("Unavailable", { status: 503 }) : Response.json(hp);
     }
     if (url.startsWith("https://base.blockscout.com/api/v2/addresses/")) {
+      if (fixture.explorerDown) return new Response("private-explorer-error", { status: 503 });
       return Response.json({ creator_address_hash: "creator" in fixture ? fixture.creator : CREATOR, is_scam: fixture.scam ?? false });
     }
     if (["https://mainnet.base.org", "https://base-rpc.publicnode.com", "https://base.meowrpc.com"].includes(url)) {
@@ -80,6 +85,62 @@ test("partial provider data cannot produce a clear verdict", async (t) => {
     assert.ok(result.unchecked.includes(id), `${id} must remain unchecked`);
     assert.equal(check(result, id).status, "unknown");
   }
+});
+
+const addressRiskFixture = () => Object.fromEntries([
+  "cybercrime", "money_laundering", "financial_crime", "phishing_activities", "stealing_attack", "blackmail_activities",
+  "malicious_mining_activities", "fake_token", "honeypot_related_address", "gas_abuse", "darkweb_transactions", "reinit",
+  "fake_kyc", "blacklist_doubt", "fake_standard_interface", "sanctioned", "mixer", "number_of_malicious_contracts_created",
+].map(key => [key, "0"]));
+
+test("free address screening completes the deployer fallback without inventing an explorer result", async t => {
+  const result = await safety(t, { explorerDown: true, tokenRisk: addressRiskFixture(), creatorRisk: addressRiskFixture() });
+  assert.equal(check(result, "deployer").complete, true);
+  assert.equal(result.coverage.completedChecks, 8);
+  assert.equal(result.deployer?.flaggedScam, null);
+  assert.equal(result.supplementalEvidence.creatorAddressRisk?.complete, true);
+  assert.ok(check(result, "deployer").sources.includes("goplus-address:creator"));
+  assert.ok(!JSON.stringify(result).includes("private-explorer-error"));
+});
+
+test("token risk alone cannot complete the fallback creator assessment", async t => {
+  const result = await safety(t, { explorerDown: true, tokenRisk: addressRiskFixture(), creatorRisk: {} });
+  assert.equal(check(result, "deployer").complete, false);
+  assert.ok(check(result, "deployer").missing.includes("creator-address-risk"));
+});
+
+test("a positive creator allegation survives missing risk fields", async t => {
+  const result = await safety(t, { explorerDown: true, tokenRisk: addressRiskFixture(), creatorRisk: { phishing_activities: "1" } });
+  assert.equal(check(result, "deployer").status, "fail");
+  assert.equal(check(result, "deployer").complete, false);
+  assert.equal(result.verdict, "high-risk");
+  assert.match(check(result, "deployer").detail, /provider findings/);
+});
+
+test("context-only flags request review without claiming fraud", async t => {
+  const result = await safety(t, { explorerDown: true, tokenRisk: addressRiskFixture(), creatorRisk: { ...addressRiskFixture(), mixer: "1" } });
+  assert.equal(check(result, "deployer").status, "warn");
+  assert.match(check(result, "deployer").detail, /do not by themselves establish fraud/);
+});
+
+test("an address association is not a positive honeypot simulation or proof of a scam", async t => {
+  const result = await safety(t, { explorerDown: true,
+    tokenRisk: { ...addressRiskFixture(), honeypot_related_address: "1" }, creatorRisk: addressRiskFixture() });
+  assert.equal(check(result, "honeypot").status, "pass");
+  assert.equal(check(result, "deployer").status, "warn");
+  assert.equal(result.verdict, "caution");
+  assert.match(check(result, "deployer").detail, /does not establish that this token blocks sales/);
+});
+
+test("verified ABI names never fill unknown permissions or remove an existing warning", async t => {
+  const gp = cleanGoPlus(); delete gp.transfer_pausable; gp.is_mintable = "1"; gp.is_proxy = "1";
+  const result = await safety(t, { gp, ownerAbi: [{ type: "function", name: "pause" }] });
+  const owner = check(result, "owner-powers");
+  assert.equal(owner.complete, false);
+  assert.equal(owner.status, "warn");
+  assert.ok(owner.missing.includes("transfer_pausable"));
+  assert.ok(owner.sources.includes("sourcify"));
+  assert.match(owner.detail, /permission coverage remains incomplete/);
 });
 
 test("fully measured clean data still passes with source and check coverage", async (t) => {
