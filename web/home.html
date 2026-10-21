@@ -3,20 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AgentToll — Inspect Base tokens, keep the evidence</title>
-<meta name="description" content="Inspect Base tokens with eight automated risk checks. See a free recorded report, review the USDC price on Base, and keep dated evidence in your browser.">
+<title>AgentToll — Your gateway to Base</title>
+<meta name="description" content="Explore Base with onchain data for people and AI agents. Discover tokens, inspect risk evidence, and pay per request in USDC. Start with a free recorded example.">
 
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="AgentToll">
-<meta property="og:title" content="AgentToll — Inspect Base tokens, keep the evidence">
-<meta property="og:description" content="Inspect Base tokens with eight automated risk checks. See a free recorded report, review the USDC price on Base, and keep dated evidence in your browser.">
+<meta property="og:title" content="AgentToll — Your gateway to Base">
+<meta property="og:description" content="Explore Base with onchain data for people and AI agents. Discover tokens, inspect risk evidence, and pay per request in USDC. Start with a free recorded example.">
 <meta property="og:url" content="https://agenttoll.app/">
 <meta property="og:image" content="https://agenttoll.app/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="AgentToll — Inspect Base tokens, keep the evidence">
-<meta name="twitter:description" content="Inspect Base tokens with eight automated risk checks. See a free recorded report, review the USDC price on Base, and keep dated evidence in your browser.">
+<meta name="twitter:title" content="AgentToll — Your gateway to Base">
+<meta name="twitter:description" content="Explore Base with onchain data for people and AI agents. Discover tokens, inspect risk evidence, and pay per request in USDC. Start with a free recorded example.">
 <meta name="twitter:image" content="https://agenttoll.app/og.png">
 <link rel="canonical" href="https://agenttoll.app/">
 <link rel="icon" href="/icon.png" type="image/png">
@@ -48,53 +48,46 @@
 }
 </script>
 <link rel="stylesheet" href="/home.css">
+  <link rel="stylesheet" href="/site.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 
-<nav id="nav" aria-label="Main">
-  <div class="wrap nav-in">
-    <a class="logo" href="/">
-      <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <rect width="512" height="512" rx="112" fill="#0052FF"/>
-        <rect x="132" y="150" width="34" height="228" rx="17" fill="#fff"/>
-        <rect x="346" y="150" width="34" height="228" rx="17" fill="#fff"/>
-        <rect x="132" y="150" width="248" height="34" rx="17" fill="#fff"/>
-        <circle cx="256" cy="330" r="52" fill="#fff"/>
-        <circle cx="256" cy="330" r="34" fill="#0052FF"/>
-        <circle cx="256" cy="330" r="14" fill="#fff"/>
-      </svg>
-      AgentToll
-    </a>
-    <div class="nav-links">
-      <a href="#pricing">Pricing</a>
-      <a href="/research.html">My research</a>
-      <a href="#try">API</a>
-    </div>
-  </div>
-</nav>
+@@SITE_HEADER@@
 
 <main id="main" tabindex="-1">
-<header class="hero">
-  <div class="wrap hero-in">
-    <div class="hero-copy">
-      <h1>See the evidence behind a Base token.</h1>
-      <p class="lede">Review trading risks, owner permissions and gaps in the data.
-        Eight automated checks in one readable report, with dates and sources you can revisit.</p>
-      <div class="cta">
-        <a class="btn btn-primary" href="/inspect.html">Inspect a token</a>
-        <a class="btn btn-ghost" href="/inspect.html#example-report">View free example</a>
-      </div>
-      <p class="hero-price"><strong>@@INSPECTION_PRICE@@ USDC</strong> per inspection on Base.<br>See the price before approving payment.</p>
-      <p class="hero-note">The recorded example is free. No wallet or account needed.</p>
+<header class="welcome">
+  <div class="welcome-media" aria-hidden="true">
+    <img id="hero-still" src="/hero-poster.jpg" width="1280" height="714" alt="" fetchpriority="high">
+    <video id="hero-video" muted loop playsinline preload="none" poster="/hero-poster.jpg" hidden tabindex="-1"><source src="/hero.mp4" type="video/mp4"></video>
+  </div>
+  <div class="wrap welcome-inner">
+    <div class="welcome-copy">
+      <p class="welcome-intro">Onchain data for people &amp; AI agents</p>
+      <h1>Your gateway<br>to Base.</h1>
+      <p class="welcome-lead">Discover tokens, review the evidence and explore onchain activity. Use the tools in your browser, or connect your AI agent.</p>
+      <div class="cta"><a class="btn btn-primary" href="#tools">Explore the tools</a><a class="btn btn-ghost" href="/inspect.html#example-report">View free example</a></div>
+      <p class="welcome-note">Start without a wallet. Pay only when you choose a priced request.</p>
     </div>
-    <figure class="home-preview" aria-label="Recorded token report preview">
-      <figcaption>Recorded example <span>Captured @@EXAMPLE_TIME@@</span></figcaption>
-      @@EXAMPLE_PREVIEW@@
-      <a class="preview-link" href="/inspect.html#example-report">Read all eight checks in the free example <span aria-hidden="true">↗</span></a>
-    </figure>
+    <div class="welcome-bottom"><p>Built on Base <span>USDC payments</span><span>No account required</span></p><button id="hero-motion" class="motion-button" type="button" hidden>Pause animation</button></div>
   </div>
 </header>
+
+<section class="band tools-section" id="tools" aria-labelledby="tools-heading">
+  <div class="wrap">
+    <div class="section-intro"><h2 id="tools-heading">Where would you like to start?</h2><p class="sub">Follow a new token, look into one you know, or build with the API. You see the price before any paid request.</p></div>
+    <div class="tool-grid">
+      <a class="tool-card" href="/research.html#discover"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="14" cy="14" r="8"/><path d="m20 20 7 7M14 9v10M9 14h10"/></svg><h3>Discover on Base</h3><p>Explore selected pools. Save a candidate to your research and decide what to inspect next.</p><span>Open discovery <b aria-hidden="true">↗</b></span></a>
+      <a class="tool-card" href="/inspect.html"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M8 4h12l5 5v19H8zM19 4v6h6M12 16h9M12 21h6"/></svg><h3>Inspect a token</h3><p>Eight risk checks, their sources and the evidence still missing. A report you can read and revisit.</p><span>Open token inspector <b aria-hidden="true">↗</b></span></a>
+      <a class="tool-card" href="#try"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="m10 8-7 8 7 8M22 8l7 8-7 8M19 5l-6 22"/></svg><h3>Connect your agent</h3><p>Access 21 data endpoints through HTTP or MCP. Start with free quotes and set your payment budget.</p><span>Explore the API <b aria-hidden="true">↗</b></span></a>
+    </div>
+  </div>
+</section>
+
+<section class="band" aria-labelledby="example-heading"><div class="wrap example-feature">
+  <div><p class="feature-label">A closer look</p><h2 id="example-heading">Evidence you can actually read.</h2><p class="sub">Each inspection brings the checks, sources and observation times together. Missing data stays visible, so you can see where a report ends and further research begins.</p><p class="example-price">@@INSPECTION_PRICE@@ USDC per inspection on Base. The recorded example is free.</p><a class="text-link" href="/inspect.html#example-report">Explore the full recorded report</a></div>
+  <figure class="home-preview" aria-label="Recorded token report preview"><figcaption>Recorded example <span>Captured @@EXAMPLE_TIME@@</span></figcaption>@@EXAMPLE_PREVIEW@@<a class="preview-link" href="/inspect.html#example-report">Read all eight checks in the free example <span aria-hidden="true">↗</span></a></figure>
+</div></section>
 
 <section class="band" aria-labelledby="workflow-heading">
   <div class="wrap">
@@ -307,7 +300,7 @@ curl -i <span class="s">"https://agenttoll.app/api/watch/radar"</span>
 }</pre>
       </div>
       <div class="card">
-        <div class="ico">🧰</div>
+
         <h3>23 tools, start with a free quote</h3>
         <p>Use <code>agenttoll-mcp@0.14.0</code> or newer. If you installed 0.13.0 or
           earlier, update your MCP configuration and restart it to receive the free
@@ -335,24 +328,24 @@ curl -i <span class="s">"https://agenttoll.app/api/watch/radar"</span>
   <div class="wrap">
     <h2>Know what the data can tell you.</h2>
     <div class="grid g3">
-      <div class="card"><div class="ico">⛓️</div>
+      <div class="card">
         <h3>Transfers read from the chain</h3>
         <p id="toll-counter" role="status">Onchain transfer statistics are available through /api/stats.</p>
         <p><code>/api/stats</code> counts qualifying small USDC transfers to our address on Base,
           and excludes known operator wallets from the external count. Transfers can include
           tests and unsolicited payments; they do not establish API sales or unique customers.</p></div>
-      <div class="card"><div class="ico">🔒</div>
+      <div class="card">
         <h3>Research stays in your browser</h3>
         <p>No account or API key is needed. Saved research stays in this browser; clearing its storage removes that local history. The watch API returns a cursor for your agent to keep.</p></div>
-      <div class="card"><div class="ico">🧾</div>
+      <div class="card">
         <h3>Data errors before settlement aren't billed</h3>
         <p>Settlement starts after the data handler succeeds. A connection loss or timeout
           after signing can leave the payment outcome unknown; check your receipt and wallet
           before retrying.</p></div>
-      <div class="card"><div class="ico">🔁</div>
+      <div class="card">
         <h3>Several sources per endpoint</h3>
         <p>Responses name the sources used. Some evidence can be missing, delayed or inconsistent across providers. Inspect the coverage and observation dates alongside any finding.</p></div>
-      <div class="card"><div class="ico">📖</div>
+      <div class="card">
         <h3>Open source, MIT</h3>
         <p>The whole tollbooth is on GitHub. Fork it and run your own — the payment rail is
           the interesting part, and it's yours too.</p></div>

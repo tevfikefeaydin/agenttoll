@@ -220,6 +220,7 @@ const video = document.getElementById("hero-video");
 const still = document.getElementById("hero-still");
 const saveData = navigator.connection?.saveData;
 const slow = /2g/.test(navigator.connection?.effectiveType ?? "");
+const motionButton = document.getElementById("hero-motion");
 
 if (
   video &&
@@ -234,6 +235,7 @@ if (
     "playing",
     () => {
       video.classList.add("ready");
+      if (motionButton) { motionButton.hidden = false; motionButton.textContent = "Pause animation"; }
       // Drop the still once the clip is actually painting, to save memory.
       setTimeout(() => still && still.remove(), 900);
     },
@@ -241,5 +243,19 @@ if (
   );
   video.play().catch(() => {
     video.hidden = true; // autoplay refused — the poster stays
+  });
+}
+
+if (video && motionButton) {
+  motionButton.addEventListener("click", () => {
+    if (!video.paused) { video.pause(); motionButton.textContent = "Play animation"; }
+    else video.play().then(() => { motionButton.textContent = "Pause animation"; }).catch(() => { motionButton.textContent = "Play animation"; });
+  });
+  // Respect a preference change after the page has loaded, too.
+  matchMedia("(prefers-reduced-motion: reduce)").addEventListener?.("change", event => {
+    if (event.matches) { video.pause(); motionButton.textContent = "Play animation"; }
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) { video.pause(); motionButton.textContent = "Play animation"; }
   });
 }

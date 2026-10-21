@@ -27,13 +27,31 @@ let remaining: { purpose: Purpose; paths: string[] } | undefined;
 let previewAbort: AbortController | undefined;
 let previewSequence = 0;
 let previewBusy = false;
+let exampleLoading = false;
+let activeTab = 'watchlist';
 const receiptUrls: string[] = [];
-const statusNames: Record<string, string> = { pass: 'Checked', warn: 'Review', fail: 'Risk flag', unknown: 'Not available' };
+const statusNames: Record<string, string> = { pass: 'Checked', warn: 'Review', fail: 'Risk flag', unknown: 'Incomplete' };
 const originNames = { inspection: 'Saved inspection', example: 'Recorded example', shared: 'Shared snapshot · unverified' };
 const short = (address: string) => address.slice(0, 8) + '…' + address.slice(-6);
 
-function message(text: string, error = false) {
-  const box = el('research-status'); box.textContent = text; box.dataset.tone = error ? 'err' : 'ok'; box.hidden = !text;
+function message(text: string, error = false, loading = false) {
+  const box = el('research-status');
+  const destination = document.querySelector(`[data-feedback="${activeTab}"]`);
+  if (destination && box.parentElement !== destination) destination.append(box);
+  box.textContent = text; box.dataset.tone = error ? 'err' : loading ? 'wait' : 'ok'; box.hidden = !text;
+}
+function inputError(id: string, error: unknown) {
+  const input = el(id); input.setAttribute('aria-invalid', 'true');
+  message((error as Error).message, true); input.focus();
+}
+for (const id of ['watch-address', 'compare-addresses', 'wallet-address']) {
+  el(id).addEventListener('input', () => el(id).removeAttribute('aria-invalid'));
+}
+function revealSaved() {
+  if (payments.busy) return;
+  selectTab('watchlist', true);
+  el('saved-content').focus({ preventScroll: true });
+  el('saved-content').scrollIntoView({ behavior: 'instant', block: 'start' });
 }
 function storageMessage(warnings: string[]) {
   const box = el('storage-status'); box.textContent = warnings.join(' '); box.hidden = !warnings.length;
@@ -109,6 +127,10 @@ function renderSaved() {
   el('history-controls').hidden = !reports.length;
   el<HTMLSelectElement>('history-choice').innerHTML = reports.map(r => `<option value="${esc(r.id)}"${r.id === selectedReportId ? ' selected' : ''}>${esc(reportTime(r.data.at))} · ${originNames[r.origin]}</option>`).join('');
   el('saved-origin').textContent = saved ? originNames[saved.origin] + (saved.origin === 'shared' ? '. Supplied by a sender; its contents have not been authenticated.' : '. This is a dated observation, not a live monitor.') : 'No report has been saved for this token.';
+  el('saved-observation').textContent = saved ? 'Observed ' + reportTime(saved.data.at) : '';
+  el('saved-coverage').textContent = summary ? `${summary.completed} of 8 checks complete` : '';
+  el('saved-coverage').dataset.coverage = summary?.completed === 8 ? 'complete' : 'partial';
+  el('saved-observation').parentElement!.hidden = !saved;
   for (const id of ['saved-copy-link', 'saved-image']) el<HTMLButtonElement>(id).disabled = !saved || payments.busy;
   el('saved-report').innerHTML = saved ? renderTokenReport(saved.data, activeToken) : '<div class="empty-state"><h2>Ready for a first look.</h2><p>Open the inspector to review the price and request this token’s first report.</p></div>';
   const changes = el('report-changes');
@@ -144,21 +166,27 @@ function addComparison(token: string) {
   compareTokens = [...new Set(existing)];
   el<HTMLTextAreaElement>('compare-addresses').value = compareTokens.join('\n');
   invalidatePurchase(); remaining = undefined;
-  renderComparison(); selectTab('compare');
+  renderComparison(); selectTab('compare', true);
 }
 
-function selectTab(tab: string) {
+function selectTab(tab: string, navigate = false) {
   if (!['watchlist', 'discover', 'compare', 'wallet'].includes(tab)) return;
   if (payments.busy && !previewBusy) return;
   invalidatePurchase(); syncControls();
+  activeTab = tab;
+  if (navigate) {
+    message('');
+    if (location.hash !== '#' + tab) history.pushState(null, '', '#' + tab);
+  }
   for (const button of document.querySelectorAll<HTMLButtonElement>('[data-tab]')) {
     const selected = button.dataset.tab === tab;
     button.setAttribute('aria-selected', String(selected)); button.tabIndex = selected ? 0 : -1;
     el('panel-' + button.dataset.tab).hidden = !selected;
+    if (selected && navigate) button.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'instant' });
   }
 }
 for (const button of document.querySelectorAll<HTMLButtonElement>('[data-tab]')) {
-  button.addEventListener('click', () => selectTab(button.dataset.tab!));
+  button.addEventListener('click', () => selectTab(button.dataset.tab!, true));
   button.addEventListener('keydown', event => {
     const tabs = [...document.querySelectorAll<HTMLButtonElement>('[data-tab]')];
     let index = tabs.indexOf(button);
@@ -167,17 +195,19 @@ for (const button of document.querySelectorAll<HTMLButtonElement>('[data-tab]'))
     else if (event.key === 'Home') index = 0;
     else if (event.key === 'End') index = tabs.length - 1;
     else return;
-    event.preventDefault(); selectTab(tabs[index].dataset.tab!); tabs[index].focus();
+    event.preventDefault(); selectTab(tabs[index].dataset.tab!, true); tabs[index].focus();
   });
 }
 el('watch-form').addEventListener('submit', event => {
   event.preventDefault();
-  try { const token = normalizeToken(el<HTMLInputElement>('watch-address').value); const saved = persist(addWatch(library, token)); activeToken = token; selectedReportId = undefined; el<HTMLInputElement>('watch-address').value = ''; renderLibrary(); message(saved ? 'Token saved to your watchlist.' : 'Token added for this visit. Browser storage could not be updated.'); } catch (error) { message((error as Error).message, true); }
+  let token: string;
+  try { token = normalizeToken(el<HTMLInputElement>('watch-address').value); } catch (error) { inputError('watch-address', error); return; }
+  try { const saved = persist(addWatch(library, token)); activeToken = token; selectedReportId = undefined; el<HTMLInputElement>('watch-address').value = ''; renderLibrary(); message(saved ? 'Token saved to your watchlist.' : 'Token added for this visit. Browser storage could not be updated.'); } catch (error) { message((error as Error).message, true); }
 });
 el('watch-items').addEventListener('click', event => {
   const button = (event.target as HTMLElement).closest<HTMLButtonElement>('button'); if (!button) return;
   try {
-    if (button.dataset.open) { activeToken = button.dataset.open; selectedReportId = undefined; renderLibrary(); }
+    if (button.dataset.open) { activeToken = button.dataset.open; selectedReportId = undefined; renderLibrary(); revealSaved(); }
     else if (button.dataset.compare) addComparison(button.dataset.compare);
     else if (button.dataset.unfollow) { persist(removeWatch(library, button.dataset.unfollow)); renderLibrary(); message('Token unfollowed. Its saved reports remain in history.'); }
     else if (button.dataset.follow) { persist(addWatch(library, button.dataset.follow)); renderLibrary(); }
@@ -195,7 +225,9 @@ el('confirm-clear').addEventListener('click', () => {
   catch { message('This browser could not clear its storage. Use your browser’s site-data settings.', true); }
 });
 el('load-example').addEventListener('click', async () => {
-  const button = el<HTMLButtonElement>('load-example'); button.disabled = true;
+  if (exampleLoading || payments.busy) return;
+  exampleLoading = true; syncControls();
+  message('Opening the recorded example. No wallet or payment needed.', false, true);
   try {
     const response = await fetch('/token-example.json', { signal: AbortSignal.timeout(12_000) });
     if (!response.ok) throw new Error('The recorded example could not be loaded. Try again.');
@@ -203,9 +235,9 @@ el('load-example').addEventListener('click', async () => {
     if (example.kind !== 'recorded-example') throw new Error('The recorded example format was not recognized.');
     const summary = summarizeReport(example.data);
     const saved = persist(addWatch(saveReport(library, example.data, 'example'), summary.token));
-    activeToken = summary.token; selectedReportId = library.reports.find(r => r.token === summary.token && r.origin === 'example')?.id; renderLibrary();
+    activeToken = summary.token; selectedReportId = library.reports.find(r => r.token === summary.token && r.origin === 'example')?.id; renderLibrary(); revealSaved();
     message(saved ? 'Recorded example saved. Its capture time stays visible.' : 'Example opened for this visit. Browser storage could not be updated.');
-  } catch (error) { message((error as Error).message, true); } finally { button.disabled = false; }
+  } catch (error) { message((error as Error).message, true); } finally { exampleLoading = false; syncControls(); }
 });
 el('saved-add-compare').addEventListener('click', () => { try { if (activeToken) addComparison(activeToken); } catch (error) { message((error as Error).message, true); } });
 async function copyLink(data: unknown) {
@@ -216,10 +248,11 @@ async function copyLink(data: unknown) {
 el('saved-copy-link').addEventListener('click', () => { const r = currentReport(); if (r) void copyLink(r.data).catch(e => message(e.message, true)); });
 el('saved-image').addEventListener('click', () => { const r = currentReport(); if (r) void downloadReportCard(r.data, r.origin).catch(e => message(e.message, true)); });
 
-el('compare-form').addEventListener('submit', event => { event.preventDefault(); try { compareTokens = tokensFromInput(); renderComparison(); message('Comparison uses your saved observations. Dates and missing evidence are shown for each token.'); } catch (error) { message((error as Error).message, true); } });
+el('compare-form').addEventListener('submit', event => { event.preventDefault(); try { compareTokens = tokensFromInput(); } catch (error) { inputError('compare-addresses', error); return; } renderComparison(); message('Comparison uses your saved observations. Dates and missing evidence are shown for each token.'); });
 el('compare-addresses').addEventListener('input', () => { invalidatePurchase(); remaining = undefined; syncControls(); });
 el('compare-prices').addEventListener('click', () => {
-  try { compareTokens = tokensFromInput(); renderComparison(); const paths = remaining?.purpose === 'compare' ? remaining.paths : compareTokens.map(t => '/api/base/safety/' + t); void preview(paths, 'compare'); } catch (error) { message((error as Error).message, true); }
+  try { compareTokens = tokensFromInput(); } catch (error) { inputError('compare-addresses', error); return; }
+  renderComparison(); const paths = remaining?.purpose === 'compare' ? remaining.paths : compareTokens.map(t => '/api/base/safety/' + t); void preview(paths, 'compare');
 });
 
 const number = (value: number | null, currency = false) => value === null ? 'Not available' : currency ? value.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }) : value.toLocaleString('en-US', { maximumFractionDigits: 6 });
@@ -245,7 +278,7 @@ el('research-digest').addEventListener('click', event => {
   const button = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-digest-open]');
   if (!button || !library.watchlist.some(w => w.token === button.dataset.digestOpen)) return;
   activeToken = button.dataset.digestOpen; selectedReportId = undefined; renderLibrary();
-  el('saved-content').scrollIntoView({ behavior: 'instant', block: 'start' });
+  revealSaved();
 });
 el('discovery-price').addEventListener('click', () => { remaining = undefined; void preview([DISCOVERY_PATH], 'discovery'); });
 el('discovery-results').addEventListener('click', event => {
@@ -284,7 +317,7 @@ function renderWalletSelection() {
   el('wallet-selected-count').textContent = `${walletTokens.size} of 5 tokens selected.`;
   el('wallet-risk-results').innerHTML = walletTokens.size ? comparisonHtml([...walletTokens]) : '';
 }
-el('wallet-form').addEventListener('submit', event => { event.preventDefault(); try { const wallet = normalizeToken(el<HTMLInputElement>('wallet-address').value); remaining = undefined; void preview(['/api/base/portfolio/' + wallet + '?minValue=0&limit=50'], 'portfolio'); } catch (error) { message((error as Error).message, true); } });
+el('wallet-form').addEventListener('submit', event => { event.preventDefault(); let wallet: string; try { wallet = normalizeToken(el<HTMLInputElement>('wallet-address').value); } catch (error) { inputError('wallet-address', error); return; } remaining = undefined; void preview(['/api/base/portfolio/' + wallet + '?minValue=0&limit=50'], 'portfolio'); });
 el('wallet-address').addEventListener('input', () => { invalidatePurchase(); remaining = undefined; portfolio = undefined; walletTokens.clear(); el('wallet-results').hidden = true; syncControls(); });
 el('wallet-holdings').addEventListener('change', event => {
   const input = event.target as HTMLInputElement;
@@ -304,6 +337,8 @@ function invalidatePurchase() {
 }
 function syncControls() {
   for (const control of document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLButtonElement>('main input, main textarea, main button')) control.disabled = payments.busy;
+  el<HTMLButtonElement>('load-example').disabled ||= exampleLoading;
+  el('load-example').textContent = exampleLoading ? 'Opening example…' : 'Explore free example';
   for (const id of ['compare-prices', 'wallet-inspect-prices', 'discovery-price', 'purchase-button']) el<HTMLButtonElement>(id).disabled = payments.busy || payments.blocked || previewBusy;
   el<HTMLButtonElement>('wallet-inspect-prices').disabled ||= !walletTokens.size;
   el<HTMLButtonElement>('purchase-button').disabled ||= !pending;
@@ -317,7 +352,7 @@ function syncControls() {
 async function preview(paths: string[], purpose: Purpose) {
   if (payments.busy || payments.blocked) { message('Check your wallet and receipts before starting another payment.', true); return; }
   invalidatePurchase(); const sequence = previewSequence; const controller = new AbortController(); previewAbort = controller; previewBusy = true; syncControls();
-  message('Checking prices. Your wallet will not be prompted.');
+  message('Checking prices. Your wallet will not be prompted.', false, true);
   try {
     const quote = await payments.quote(paths, controller.signal);
     if (sequence !== previewSequence) return;
@@ -385,5 +420,5 @@ window.addEventListener('storage', event => {
 window.addEventListener('beforeunload', event => { if (payments.busy) { event.preventDefault(); event.returnValue = ''; } });
 window.addEventListener('pagehide', () => receiptUrls.forEach(url => URL.revokeObjectURL(url)));
 storageMessage(loaded.warnings); renderLibrary(); renderComparison(); syncControls();
-selectTab(location.hash.slice(1));
-window.addEventListener('hashchange', () => selectTab(location.hash.slice(1)));
+selectTab(location.hash.slice(1) || 'watchlist');
+window.addEventListener('hashchange', () => selectTab(location.hash.slice(1) || 'watchlist'));

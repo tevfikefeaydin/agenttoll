@@ -9,8 +9,12 @@ const check = process.argv.includes('--check');
 // The deployed CSP permits inline styles. Keep source CSS shared while shipping
 // it inside each generated page, matching the existing site's security policy.
 function inlineStyles(html) {
-  return html.replace(/<link rel="stylesheet" href="\/(inspect|research|home)\.css">/g, (_tag, name) =>
+  return html.replace(/<link rel="stylesheet" href="\/(inspect|research|home|site)\.css">/g, (_tag, name) =>
     '<style>\n' + readFileSync(new URL('../web/' + name + '.css', import.meta.url), 'utf8') + '</style>');
+}
+function siteHeader(page) {
+  const links = [['home', '/#tools', 'Explore'], ['inspect', '/inspect.html', 'Inspect'], ['research', '/research.html', 'My research'], ['api', '/#try', 'API']];
+  return `<header class="site-header"><nav class="site-navigation" aria-label="Main"><a class="site-brand" href="/" aria-label="AgentToll home"><svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#0052FF"/><path d="M149 378V167h214v211" fill="none" stroke="white" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/><circle cx="256" cy="330" r="42" fill="none" stroke="white" stroke-width="18"/><circle cx="256" cy="330" r="14" fill="white"/></svg>AgentToll</a><div class="site-links">${links.map(([key, href, label]) => `<a href="${href}"${key === 'home' ? ' class="site-explore"' : ''}${page === key && key !== 'home' ? ' aria-current="page"' : ''}>${label}</a>`).join('')}</div></nav></header>`;
 }
 function output(name, content) {
   const path = new URL('../public/' + name, import.meta.url);
@@ -29,6 +33,7 @@ if (example.kind !== 'recorded-example' || !Number.isFinite(Date.parse(example.c
 const endpoint = ENDPOINT_MANIFEST.find(endpoint => endpoint.path === '/api/base/safety/{address}');
 if (!endpoint) throw new Error('The token inspection endpoint is missing.');
 const html = readFileSync(new URL('../web/inspect.html', import.meta.url), 'utf8')
+  .replace('@@SITE_HEADER@@', () => siteHeader('inspect'))
   .replace('@@EXAMPLE_REPORT@@', () => renderTokenReport(example.data))
   .replace('@@EXAMPLE_TIME@@', () => escapeHtml(reportTime(example.capturedAt)))
   .replace('@@SAMPLE_TOKEN@@', () => escapeHtml(example.data.token))
@@ -36,6 +41,7 @@ const html = readFileSync(new URL('../web/inspect.html', import.meta.url), 'utf8
 if (/@@[A-Z_]+@@/.test(html)) throw new Error('Unresolved inspection page template field.');
 output('inspect.html', inlineStyles(html));
 const homeFields = {
+  SITE_HEADER: siteHeader('home'),
   EXAMPLE_PREVIEW: renderTokenReport(example.data, undefined, { summaryOnly: true }),
   EXAMPLE_TIME: escapeHtml(reportTime(example.capturedAt)),
 };
@@ -51,6 +57,6 @@ const home = readFileSync(new URL('../web/home.html', import.meta.url), 'utf8')
   });
 output('index.html', inlineStyles(home));
 for (const name of ['research.html', 'shared-report.html']) {
-  output(name, inlineStyles(readFileSync(new URL('../web/' + name, import.meta.url), 'utf8')));
+  output(name, inlineStyles(readFileSync(new URL('../web/' + name, import.meta.url), 'utf8').replace('@@SITE_HEADER@@', () => siteHeader(name === 'research.html' ? 'research' : 'shared'))));
 }
 console.log(check ? 'Browser bundles and recorded example agree with their sources.' : 'Built browser bundles and token inspection page.');
