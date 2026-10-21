@@ -19,6 +19,7 @@
       <p class="eyebrow">Base / Token inspection</p>
       <h1 id="page-heading">Inspect a <br><span>Base token.</span></h1>
       <p class="lead">Inspect a Base token for trading risks, owner permissions and gaps in the evidence. Eight checks, one readable report.</p>
+      <div class="example-entry"><a id="free-example-link" class="button secondary" href="#example-report">View free example</a><p>A recorded report. No wallet or payment needed.</p></div>
       <p class="steps"><span>01 Paste address</span><span>02 See price</span><span>03 Get report</span></p>
       <form id="inspect-form" class="input-panel" novalidate>
         <label for="token-address">Base token contract address</label>
@@ -44,7 +45,7 @@
       <noscript><p>The example report is available below. Enable JavaScript to request a price and pay with a browser wallet.</p></noscript>
       <div class="side-footer"><p>Start with the free example.</p><p class="small-note">The report shown here is a dated capture of real provider data. New inspections use the latest available data; cached results can be up to five minutes old.</p><p class="small-note">Building an agent? <a href="/#mcp">Use the API or MCP →</a></p></div>
     </section>
-    <section class="report-column" aria-label="Token inspection report">
+    <section id="example-report" class="report-column" aria-label="Token inspection report" tabindex="-1">
       <div class="report-label-row"><div><p id="report-label" class="report-label">Recorded example</p><p id="example-note" class="example-note">Free to explore · Captured @@EXAMPLE_TIME@@</p></div><button id="example-button" type="button" class="text-button" hidden>Back to free example</button></div>
       <div id="report" tabindex="-1">@@EXAMPLE_REPORT@@</div>
       <div class="report-download"><a id="report-download" href="/token-example.json" download="agenttoll-recorded-example.json">Download example data</a></div>

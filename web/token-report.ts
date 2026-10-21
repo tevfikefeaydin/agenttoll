@@ -10,7 +10,17 @@ const checkTitles: Record<string, string> = {
   'owner-powers': 'Owner permissions', 'concentration': 'Holder concentration', 'liquidity': 'Liquidity ownership',
   'creator-stake': 'Creator holdings', 'deployer': 'Who deployed it',
 };
-const statusNames: Record<string, string> = { pass: 'Checked', warn: 'Review', fail: 'Risk flag', unknown: 'Not available' };
+const statusNames: Record<string, string> = { pass: 'Checked', warn: 'Review', fail: 'Risk flag', unknown: 'Incomplete' };
+const incompleteSummaries: Record<string, string> = {
+  'honeypot': 'There is not enough consistent evidence to confirm normal buying and selling.',
+  'taxes': 'One or both trading tax rates could not be confirmed.',
+  'verified': 'Published contract code could not be consistently verified.',
+  'owner-powers': 'Some permissions are unconfirmed, including whether an administrator can change how the token works.',
+  'concentration': 'The available holder data does not fully show who controls the supply.',
+  'liquidity': 'Who can withdraw liquidity, and whether it is locked, is not fully verified.',
+  'creator-stake': 'The creator’s share of the token supply could not be confirmed.',
+  'deployer': 'The creator’s activity or address-risk history is not fully verified.',
+};
 
 /** Format an already validated decimal string without floating-point rounding. */
 export function displayUsdc(value: string) { return value.includes('.') ? value.replace(/0+$/, '').replace(/\.$/, '') : value; }
@@ -81,10 +91,10 @@ export function renderTokenReport(value: unknown, expectedToken?: string): strin
     <div class="report-time"><span>Checked</span><time>${escapeHtml(reportTime(data.at))}</time></div></header>
     <div class="report-verdict"><span class="verdict-mark" aria-hidden="true">${flags ? '!' : completed < checks.length || warnings ? '?' : '✓'}</span><div><h3>${heading}</h3><p>${summary}</p></div></div>
     <dl class="report-numbers"><div><dt>Evidence coverage</dt><dd>${completed} of ${checks.length} checks complete</dd></div><div><dt>Risk flags / warnings</dt><dd>${flags} / ${warnings}</dd></div><div><dt>Reported holders</dt><dd>${holders}</dd></div></dl>
+    <p class="coverage-note">Coverage shows how much evidence was available, not a safety score.</p>
     <div class="report-checks">${checks.map(c => `<details class="report-check" data-status="${c.status}"${c.status !== 'pass' ? ' open' : ''}>
       <summary><span>${c.title}</span><span class="check-status">${statusNames[c.status]}</span></summary>
-      <div class="check-detail"><p>${escapeHtml(c.detail)}</p>${c.missing.length ? `<p class="missing-evidence">Missing: ${escapeHtml(c.missing.map(evidenceLabel).join(', '))}</p>` : ''}${c.conflicts.length ? `<p class="missing-evidence">Sources disagree: ${escapeHtml(c.conflicts.map(evidenceLabel).join(', '))}</p>` : ''}
-      <p class="check-source">${c.sources.length ? 'Sources: ' + escapeHtml(c.sources.join(', ')) : 'No source evidence available'}</p></div></details>`).join('')}</div>
+      <div class="check-detail">${!c.complete ? `<p class="coverage-summary">${escapeHtml(c.conflicts.length ? 'Sources disagree on this check. Review their findings before relying on it.' : incompleteSummaries[c.id])}</p>` : ''}${c.complete || c.status === 'warn' || c.status === 'fail' ? `<p>${escapeHtml(c.detail)}</p>` : ''}${!c.complete ? `<details class="evidence-details"><summary>Evidence details</summary>${c.status === 'unknown' ? `<p>${escapeHtml(c.detail)}</p>` : ''}${c.missing.length ? `<p class="missing-evidence">Still missing:</p><ul class="missing-evidence">${c.missing.map(field => `<li>${escapeHtml(evidenceLabel(field))}</li>`).join('')}</ul>` : ''}${c.conflicts.length ? `<p class="missing-evidence">Sources disagree: ${escapeHtml(c.conflicts.map(evidenceLabel).join(', '))}</p>` : ''}` : ''}<p class="check-source">${c.sources.length ? 'Sources: ' + escapeHtml(c.sources.join(', ')) : 'No source evidence available'}</p>${!c.complete ? '</details>' : ''}</div></details>`).join('')}</div>
     <footer class="report-footer"><p>Automated checks can miss risks. Passing a check does not make a token safe.</p>
       <details><summary>Sources and observation times</summary><ul>${Object.entries(sourceStatus).map(([source, raw]) => { const s = record(raw); return `<li>${escapeHtml(source)}: ${escapeHtml(text(s.status, 'unavailable'))} — fetched ${escapeHtml(reportTime(s.fetchedAt))}</li>`; }).join('') || `<li>${escapeHtml(sources.join(', ') || 'Not available')}; individual source times unavailable.</li>`}</ul><p>Fetch times describe when data was retrieved. They do not prove when the provider last observed it. Cached reports retain their original check time.</p></details></footer>
   </article>`;

@@ -20,6 +20,7 @@ test('inspection example is free, invalidates quotes, and recovers from a failed
   const control = (id: string) => { if (!controls.has(id)) controls.set(id, new Control()); return controls.get(id)!; };
   const token = '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913';
   control('sample-token').dataset.token = token;
+  control('report').innerHTML = '<article>Recorded evidence</article>';
   const origin = 'https://agenttoll.app';
   const recipient = '0xe55359021a6a22d8385b827405991c56075f56f8';
   const requests: string[] = [];
@@ -39,6 +40,11 @@ test('inspection example is free, invalidates quotes, and recovers from a failed
   const idle = async () => { for (let i = 0; i < 50 && control('quote-button').disabled; i++) await new Promise(resolve => setTimeout(resolve, 5)); assert.equal(control('quote-button').disabled, false); };
   try {
     await import('../web/inspect.js');
+    await control('free-example-link').dispatch('click');
+    assert.equal(control('report').innerHTML, '<article>Recorded evidence</article>');
+    assert.equal(control('report-label').textContent, 'Recorded example');
+    assert.equal(requests.length, 0);
+    assert.equal(walletCalls, 0);
     await control('sample-token').dispatch('click');
     assert.equal(control('token-address').value, token);
     assert.equal(requests.length, 0);
@@ -47,6 +53,14 @@ test('inspection example is free, invalidates quotes, and recovers from a failed
     assert.equal(control('price-box').hidden, false);
     assert.match(control('quote-network').textContent, /Base/);
     assert.match(control('payment-preparation').textContent, /0\.003 USDC/);
+    const requestCount = requests.length;
+    control('report').innerHTML = '<article>Previously delivered report</article>';
+    await control('free-example-link').dispatch('click');
+    assert.equal(control('report').innerHTML, '<article>Recorded evidence</article>');
+    assert.equal(control('report-download').textContent, 'Download example data');
+    assert.equal(control('price-box').hidden, false);
+    assert.equal(requests.length, requestCount);
+    assert.equal(walletCalls, 0);
     await control('sample-token').dispatch('click');
     assert.equal(control('price-box').hidden, true);
     await control('pay-button').dispatch('click');

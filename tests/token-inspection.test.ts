@@ -77,3 +77,25 @@ test('missing evidence is explained without exposing provider field names', () =
   assert.match(html, /liquidity provider 1: lock status/);
   assert.doesNotMatch(html, /is_mintable|owner_change_balance|lp_holders/);
 });
+
+test('incomplete checks explain the gap before a collapsed evidence list without changing coverage', () => {
+  const data = report();
+  Object.assign(data.checks[5], { complete: false, status: 'unknown', detail: 'Pool size is known, ownership is not.', missing: ['top-liquidity-provider-list'] });
+  const html = renderTokenReport(data, token);
+  assert.match(html, /7 of 8 checks complete/);
+  assert.match(html, /Coverage shows how much evidence was available, not a safety score/);
+  assert.match(html, /Who can withdraw liquidity, and whether it is locked, is not fully verified/);
+  assert.match(html, /<details class="evidence-details"><summary>Evidence details<\/summary>/);
+  assert.doesNotMatch(html, /class="evidence-details" open/);
+});
+
+test('risk findings and source disagreement remain visible before collapsed technical evidence', () => {
+  const data = report();
+  Object.assign(data.checks[3], { complete: false, status: 'warn', detail: 'A source reports that the owner can mint.', missing: ['hidden_owner'], conflicts: ['minting'] });
+  const html = renderTokenReport(data, token);
+  const start = html.indexOf('Some permissions');
+  assert.equal(start, -1); // Disagreement gets its own visible explanation.
+  assert.match(html, /Sources disagree on this check/);
+  assert.match(html, /<p>A source reports that the owner can mint\.<\/p>\s*<details class="evidence-details">/);
+  assert.match(html, /data-verdict="caution"/);
+});

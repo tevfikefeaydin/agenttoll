@@ -11,6 +11,7 @@ const quoteButton = element<HTMLButtonElement>('quote-button');
 const payButton = element<HTMLButtonElement>('pay-button');
 const retryButton = element<HTMLButtonElement>('retry-button');
 const exampleButton = element<HTMLButtonElement>('example-button');
+const exampleLink = element<HTMLAnchorElement>('free-example-link');
 const sampleButton = element<HTMLButtonElement>('sample-token');
 const priceBox = element('price-box');
 const status = element('inspection-status');
@@ -139,6 +140,7 @@ payButton.addEventListener('click', async () => {
   paying = true;
   research.setBusy(true);
   input.disabled = quoteButton.disabled = payButton.disabled = exampleButton.disabled = sampleButton.disabled = true;
+  exampleLink.setAttribute('aria-disabled', 'true');
   try {
     const outcome = await pay(terms.path, show, { quote: terms.quote, recipient: terms.recipient, client: CLIENT, showRaw: false });
     if (outcome.status === 'delivered') {
@@ -169,6 +171,7 @@ payButton.addEventListener('click', async () => {
     paying = false;
     research.setBusy(false);
     input.disabled = exampleButton.disabled = false;
+    exampleLink.removeAttribute('aria-disabled');
     quoteButton.disabled = authorizationPossible;
     sampleButton.disabled = authorizationPossible;
     payButton.disabled = false;
@@ -184,7 +187,7 @@ retryButton.addEventListener('click', () => {
   void checkPrice();
 });
 
-exampleButton.addEventListener('click', () => {
+function showExample() {
   if (paying) return;
   report.innerHTML = exampleHtml;
   research.example();
@@ -195,6 +198,15 @@ exampleButton.addEventListener('click', () => {
   download.href = '/token-example.json';
   download.download = 'agenttoll-recorded-example.json';
   download.textContent = 'Download example data';
+}
+
+exampleButton.addEventListener('click', showExample);
+exampleLink.addEventListener('click', event => {
+  if (paying) { event.preventDefault(); return; }
+  showExample();
+  // The native anchor still works without JavaScript and brings the dated
+  // example label into view. Restoring first also handles a delivered report.
+  element('example-report').focus({ preventScroll: true });
 });
 
 quoteButton.disabled = false;
