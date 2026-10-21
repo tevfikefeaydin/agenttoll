@@ -44,6 +44,25 @@ test('missing checks cannot produce an all-clear report', () => {
   assert.match(html, /0 of 8 checks complete/);
 });
 
+test('homepage summaries retain risk, missing-evidence coverage and escaped token identity', () => {
+  const data = report();
+  data.name = '<img src=x onerror=alert(1)>';
+  Object.assign(data.checks[0], { status: 'fail', complete: false, missing: ['simulation'] });
+  Object.assign(data.checks[5], { status: 'unknown', complete: false });
+  const summary = renderTokenReport(data, token, { summaryOnly: true });
+  assert.match(summary, /data-verdict="high-risk"/);
+  assert.match(summary, /Risk flags found/);
+  assert.match(summary, /6 of 8 checks complete/);
+  assert.match(summary, /not a safety score/);
+  assert.match(summary, /15 Sept 2026, 12:00 UTC/);
+  assert.match(summary, /&lt;img/);
+  assert.doesNotMatch(summary, /<img|<details|class="report-checks"/);
+  assert.match(renderTokenReport(data, token), /class="report-checks"/);
+  assert.throws(() => renderTokenReport(data, '0x' + '1'.repeat(40), { summaryOnly: true }));
+  data.checks = [];
+  assert.match(renderTokenReport(data, token, { summaryOnly: true }), /0 of 8 checks complete/);
+});
+
 test('token and provider text is escaped before rendering', () => {
   const data = report();
   data.name = '<img src=x onerror=alert(1)>';

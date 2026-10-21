@@ -9,7 +9,7 @@ const check = process.argv.includes('--check');
 // The deployed CSP permits inline styles. Keep source CSS shared while shipping
 // it inside each generated page, matching the existing site's security policy.
 function inlineStyles(html) {
-  return html.replace(/<link rel="stylesheet" href="\/(inspect|research)\.css">/g, (_tag, name) =>
+  return html.replace(/<link rel="stylesheet" href="\/(inspect|research|home)\.css">/g, (_tag, name) =>
     '<style>\n' + readFileSync(new URL('../web/' + name + '.css', import.meta.url), 'utf8') + '</style>');
 }
 function output(name, content) {
@@ -35,6 +35,21 @@ const html = readFileSync(new URL('../web/inspect.html', import.meta.url), 'utf8
   .replace('@@PRICE@@', () => escapeHtml(endpoint.price.replace(/^\$/, '')));
 if (/@@[A-Z_]+@@/.test(html)) throw new Error('Unresolved inspection page template field.');
 output('inspect.html', inlineStyles(html));
+const homeFields = {
+  EXAMPLE_PREVIEW: renderTokenReport(example.data, undefined, { summaryOnly: true }),
+  EXAMPLE_TIME: escapeHtml(reportTime(example.capturedAt)),
+};
+for (const [name, path] of Object.entries({ INSPECTION_PRICE: '/api/base/safety/{address}', DISCOVERY_PRICE: '/api/base/radar', FRESH_PRICE: '/api/base/fresh' })) {
+  const entry = ENDPOINT_MANIFEST.find(endpoint => endpoint.path === path);
+  if (!entry) throw new Error(`Homepage endpoint is missing: ${path}`);
+  homeFields[name] = escapeHtml(entry.price.replace(/^\$/, ''));
+}
+const home = readFileSync(new URL('../web/home.html', import.meta.url), 'utf8')
+  .replace(/@@([A-Z_]+)@@/g, (_match, name) => {
+    if (!Object.hasOwn(homeFields, name)) throw new Error(`Unresolved homepage field: ${name}`);
+    return homeFields[name];
+  });
+output('index.html', inlineStyles(home));
 for (const name of ['research.html', 'shared-report.html']) {
   output(name, inlineStyles(readFileSync(new URL('../web/' + name, import.meta.url), 'utf8')));
 }

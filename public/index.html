@@ -3,20 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AgentToll — Base-native data for AI agents</title>
-<meta name="description" content="See a token before the indexers do: Base pools read straight off the chain seconds after they exist, with safety verdicts and a git-committed track record. From $0.001 a call in USDC via x402. No API keys.">
+<title>AgentToll — Inspect Base tokens, keep the evidence</title>
+<meta name="description" content="Inspect Base tokens with eight automated risk checks. See a free recorded report, review the USDC price on Base, and keep dated evidence in your browser.">
 
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="AgentToll">
-<meta property="og:title" content="AgentToll — Pay-per-call APIs for AI agents">
-<meta property="og:description" content="See a token before the indexers do: Base pools read straight off the chain seconds after they exist, with safety verdicts and a git-committed track record. From $0.001 a call in USDC via x402. No API keys.">
+<meta property="og:title" content="AgentToll — Inspect Base tokens, keep the evidence">
+<meta property="og:description" content="Inspect Base tokens with eight automated risk checks. See a free recorded report, review the USDC price on Base, and keep dated evidence in your browser.">
 <meta property="og:url" content="https://agenttoll.app/">
 <meta property="og:image" content="https://agenttoll.app/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="AgentToll — Pay-per-call APIs for AI agents">
-<meta name="twitter:description" content="Pools read off Base seconds after they exist, safety verdicts on the token, and a track record committed to public git. One request, one micropayment, one response.">
+<meta name="twitter:title" content="AgentToll — Inspect Base tokens, keep the evidence">
+<meta name="twitter:description" content="Inspect Base tokens with eight automated risk checks. See a free recorded report, review the USDC price on Base, and keep dated evidence in your browser.">
 <meta name="twitter:image" content="https://agenttoll.app/og.png">
 <link rel="canonical" href="https://agenttoll.app/">
 <link rel="icon" href="/icon.png" type="image/png">
@@ -26,7 +26,7 @@
   "@type": "Service",
   "name": "AgentToll",
   "url": "https://agenttoll.app/",
-  "description": "Base-native onchain data for AI agents, paid per call in USDC via the x402 protocol. Fresh pool detection, token safety checks, wallet portfolios, and a git-committed track record. No API keys, no accounts.",
+  "description": "Base token inspections and onchain data, paid per call in USDC via x402. Review risk checks, missing evidence and dated reports in the browser, or connect an AI agent. No accounts or API keys required.",
   "serviceType": "Pay-per-call API for AI agents",
   "areaServed": "Worldwide",
   "provider": {
@@ -48,219 +48,203 @@
 }
 </script>
 <style>
-  :root {
-    --blue: #0052FF;
-    --blue-lit: #3D7BFF;
-    --blue-soft: #7BA6FF;
-    --bg: #070B14;
-    --surface: #0E1524;
-    --surface-2: #131C2E;
-    --text: #EAF0FA;
-    --muted: #8A97AF;
-    --line: rgba(138, 151, 175, 0.16);
-    --mono: "Cascadia Code", Consolas, "SF Mono", ui-monospace, monospace;
-    --sans: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", sans-serif;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  [hidden] { display: none !important; }
-  html { scroll-behavior: smooth; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--sans);
-    line-height: 1.65;
-    -webkit-font-smoothing: antialiased;
-    overflow-x: hidden;
-  }
-  a { color: var(--blue-soft); text-decoration: none; transition: color .18s ease; }
-  a:hover { color: var(--text); }
-  .wrap { width: min(1120px, 100% - 44px); margin-inline: auto; }
-
-  /* ---------- nav ---------- */
-  nav {
-    position: sticky; top: 0; z-index: 50;
-    background: rgba(7, 11, 20, 0.72);
-    backdrop-filter: blur(14px);
-    border-bottom: 1px solid transparent;
-    transition: border-color .25s ease, background .25s ease;
-  }
-  nav.scrolled { border-bottom-color: var(--line); background: rgba(7, 11, 20, 0.92); }
-  .nav-in { display: flex; align-items: center; gap: 14px; padding: 15px 0; }
-  .logo { display: flex; align-items: center; gap: 11px; font-weight: 700; letter-spacing: -.02em; font-size: 1.06rem; color: var(--text); }
-  .logo svg { width: 30px; height: 30px; border-radius: 8px; }
-  .nav-links { margin-left: auto; display: flex; align-items: center; gap: 26px; font-size: .92rem; }
-  .nav-links a { color: var(--muted); }
-  .nav-links a:hover { color: var(--text); }
-  .btn {
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 10px 20px; border-radius: 999px; font-weight: 600; font-size: .93rem;
-    border: 1px solid transparent; transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
-  }
-  .btn-primary { background: var(--blue); color: #fff; box-shadow: 0 6px 26px rgba(0, 82, 255, .38); }
-  .btn-primary:hover { background: #1a66ff; color: #fff; transform: translateY(-1px); box-shadow: 0 10px 32px rgba(0, 82, 255, .5); }
-  .btn-ghost { border-color: var(--line); color: var(--text); background: rgba(255,255,255,.02); }
-  .btn-ghost:hover { border-color: var(--blue-lit); color: #fff; transform: translateY(-1px); }
-  @media (max-width: 720px) { .nav-links a.hide-sm { display: none; } }
-
-  /* ---------- hero ---------- */
-  .hero { position: relative; min-height: 88vh; display: flex; align-items: center; overflow: hidden; }
-  .hero-media { position: absolute; inset: 0; z-index: 0; }
-  .hero-media video, .hero-media img {
-    position: absolute; inset: 0;
-    width: 100%; height: 100%; object-fit: cover;
-    /* keep the gate on the right, text sits on the clean left */
-    object-position: 65% center;
-  }
-  .hero-media video { opacity: 0; transition: opacity .9s ease; }
-  .hero-media video.ready { opacity: 1; }
-  .hero-media::after {
-    content: ""; position: absolute; inset: 0;
-    background:
-      linear-gradient(90deg, var(--bg) 8%, rgba(7,11,20,.86) 38%, rgba(7,11,20,.35) 70%, rgba(7,11,20,.6) 100%),
-      linear-gradient(180deg, rgba(7,11,20,.7) 0%, transparent 22%, transparent 62%, var(--bg) 100%);
-  }
-  .hero-in { position: relative; z-index: 1; padding: 92px 0 96px; }
-  .eyebrow {
-    display: inline-flex; align-items: center; gap: 9px;
-    padding: 7px 15px; border-radius: 999px; font-size: .82rem; font-weight: 500;
-    background: rgba(0, 82, 255, .12); border: 1px solid rgba(61, 123, 255, .32); color: var(--blue-soft);
-    margin-bottom: 26px;
-  }
-  .dot { width: 7px; height: 7px; border-radius: 50%; background: #2ee07a; box-shadow: 0 0 10px #2ee07a; }
-  h1 {
-    font-size: clamp(2.3rem, 6vw, 4.1rem); line-height: 1.05; letter-spacing: -.035em;
-    font-weight: 700; max-width: 15ch;
-  }
-  h1 em {
-    font-style: normal;
-    background: linear-gradient(100deg, var(--blue-lit), #9FC0FF 60%, var(--blue-lit));
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-  }
-  .lede { margin-top: 22px; font-size: clamp(1.02rem, 2vw, 1.16rem); color: var(--muted); max-width: 56ch; }
-  .cta { margin-top: 34px; display: flex; gap: 13px; flex-wrap: wrap; }
-  .hero-meta { margin-top: 40px; display: flex; gap: 12px; flex-wrap: wrap; font-size: .84rem; color: var(--muted); }
-  .chip { padding: 6px 14px; border: 1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,.02); }
-  .chip strong { color: var(--text); font-variant-numeric: tabular-nums; }
-
-  /* ---------- sections ---------- */
-  section.band { padding: 92px 0; border-top: 1px solid var(--line); }
-  .kicker { color: var(--blue-lit); font-size: .8rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
-  h2 { font-size: clamp(1.6rem, 3.4vw, 2.25rem); letter-spacing: -.025em; margin: 12px 0 16px; line-height: 1.2; }
-  .sub { color: var(--muted); max-width: 62ch; font-size: 1.02rem; }
-
-  .grid { display: grid; gap: 18px; margin-top: 42px; }
-  .g3 { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
-  .card {
-    background: linear-gradient(160deg, var(--surface) 0%, rgba(14,21,36,.55) 100%);
-    border: 1px solid var(--line); border-radius: 18px; padding: 26px;
-    transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
-  }
-  .card:hover { transform: translateY(-3px); border-color: rgba(61,123,255,.42); box-shadow: 0 14px 40px rgba(0,0,0,.4); }
-  .card .ico {
-    width: 40px; height: 40px; border-radius: 11px; display: grid; place-items: center;
-    background: rgba(0,82,255,.14); border: 1px solid rgba(61,123,255,.3);
-    font-size: 1.15rem; margin-bottom: 15px;
-  }
-  .card h3 { font-size: 1.04rem; margin-bottom: 7px; letter-spacing: -.01em; }
-  .card p { color: var(--muted); font-size: .93rem; }
-
-  .steps { counter-reset: s; }
-  .step-n {
-    width: 30px; height: 30px; border-radius: 9px; background: var(--blue); color: #fff;
-    display: grid; place-items: center; font-weight: 700; font-size: .87rem; margin-bottom: 14px;
-  }
-
-  /* ---------- table ---------- */
-  .table-wrap { margin-top: 38px; border: 1px solid var(--line); border-radius: 18px; overflow: hidden; background: var(--surface); }
-  .scroll-x { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; font-size: .93rem; min-width: 560px; }
-  th, td { text-align: left; padding: 14px 20px; border-bottom: 1px solid var(--line); }
-  thead th { color: var(--muted); font-weight: 600; font-size: .74rem; letter-spacing: .1em; text-transform: uppercase; background: rgba(255,255,255,.015); }
-  tbody tr:last-child td { border-bottom: none; }
-  tbody tr { transition: background .15s ease; }
-  tbody tr:hover { background: rgba(61,123,255,.05); }
-  td code { font-family: var(--mono); font-size: .87em; color: var(--text); background: rgba(255,255,255,.04); border: 1px solid var(--line); border-radius: 6px; padding: 3px 8px; white-space: nowrap; }
-  .price { color: var(--blue-soft); font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
-  .price.free { color: #2ee07a; }
-
-  /* ---------- code ---------- */
-  pre {
-    background: #060A11; border: 1px solid var(--line); border-radius: 16px;
-    padding: 22px 24px; overflow-x: auto; font-family: var(--mono);
-    font-size: .87rem; line-height: 1.7; margin-top: 22px;
-  }
-  pre .c { color: #55617A; } pre .k { color: var(--blue-lit); } pre .s { color: #7BD88F; } pre .y { color: #E8C46B; }
-  .two { display: grid; gap: 22px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); align-items: start; }
-
-  /* ---------- footer ---------- */
-  footer { border-top: 1px solid var(--line); padding: 46px 0 60px; color: var(--muted); font-size: .9rem; }
-  .foot { display: flex; justify-content: space-between; gap: 18px; flex-wrap: wrap; align-items: center; }
-  .foot-links { display: flex; gap: 20px; flex-wrap: wrap; }
-
-  /* ---------- live demo ---------- */
-  .demo {
-    margin-top: 34px; border: 1px solid var(--line); border-radius: 20px;
-    background: linear-gradient(160deg, var(--surface) 0%, rgba(14,21,36,.5) 100%);
-    padding: 26px;
-  }
-  .demo-head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: baseline; margin-bottom: 20px; }
-  .demo-title { font-weight: 600; }
-  .demo-title code { font-family: var(--mono); font-size: .88em; color: var(--blue-soft); }
-  .demo-note { color: var(--muted); font-size: .84rem; }
-  .demo-actions { display: flex; gap: 11px; flex-wrap: wrap; }
-  .demo-actions .btn:disabled { opacity: .55; cursor: progress; }
-  #demo-out {
-    margin-top: 20px; padding: 18px 20px; border-radius: 14px;
-    background: #060A11; border: 1px solid var(--line); font-size: .9rem;
-  }
-  #demo-out[data-tone="ok"] { border-color: rgba(46,224,122,.34); }
-  #demo-out[data-tone="err"] { border-color: rgba(255,107,107,.34); }
-  #demo-out .line { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
-  #demo-out .tag { font-family: var(--mono); font-size: .78rem; padding: 3px 9px; border-radius: 6px; }
-  #demo-out .tag.warn { background: rgba(232,196,107,.14); color: #E8C46B; }
-  #demo-out .tag.good { background: rgba(46,224,122,.14); color: #2EE07A; }
-  #demo-out .kv { display: flex; justify-content: space-between; gap: 16px; padding: 7px 0; border-top: 1px solid var(--line); font-family: var(--mono); font-size: .86rem; }
-  #demo-out .kv span { color: var(--muted); }
-  #demo-out .kv b { color: var(--text); font-weight: 500; }
-  #demo-out .dim { color: var(--muted); }
-  #demo-out p.dim { margin-top: 13px; font-size: .87rem; font-family: var(--sans); }
-  #demo-out .bad { color: #FF8080; }
-  #demo-out pre.mini { margin: 12px 0 0; padding: 14px 16px; font-size: .82rem; border-radius: 11px; }
-  .demo-foot { margin-top: 16px; color: var(--muted); font-size: .85rem; max-width: 62ch; }
-  .run-link { margin-top: 22px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; font-size: .92rem; }
-  .run-link a { color: var(--blue-lit); font-weight: 600; text-decoration: none; border-bottom: 1px solid currentColor; padding-bottom: 1px; }
-  .run-link a:hover { color: #fff; }
-  .run-link span { color: var(--muted); }
-
-  /* ---------- small screens ---------- */
-  @media (max-width: 720px) {
-    .wrap { width: min(1120px, 100% - 36px); }
-    section.band { padding: 62px 0; }
-    .hero-in { padding: 64px 0 68px; }
-    .hero { min-height: auto; }
-    .grid { margin-top: 30px; }
-    .card { padding: 22px; }
-    pre { padding: 18px 16px; font-size: .8rem; border-radius: 13px; }
-    .cta { gap: 10px; }
-    .cta .btn { flex: 1 1 100%; justify-content: center; }
-    th, td { padding: 12px 14px; }
-  }
-
-  /* ---------- reveal ----------
-     Fail-open: content is visible by default. The hidden state only applies
-     once JS has marked the document, so a blocked or broken script can never
-     leave the page blank. */
-  .js-anim .rv { opacity: 0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
-  .js-anim .rv.in { opacity: 1; transform: none; }
-  @media (prefers-reduced-motion: reduce) {
-    .js-anim .rv { opacity: 1; transform: none; transition: none; }
-    html { scroll-behavior: auto; }
-  }
+:root {
+  --blue: #0052ff;
+  --blue-lit: #3d7bff;
+  --blue-soft: #9ab9ff;
+  --bg: #070b14;
+  --surface: #0e1524;
+  --surface-2: #131c2e;
+  --text: #eaf0fa;
+  --muted: #a4b1c8;
+  --line: #28344b;
+  --mono: "Cascadia Code", Consolas, "SF Mono", ui-monospace, monospace;
+  --sans: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { scroll-behavior: smooth; scroll-padding-top: 90px; }
+body { background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.65; -webkit-font-smoothing: antialiased; }
+a { color: var(--blue-soft); text-underline-offset: 4px; }
+a:hover { color: #fff; }
+button { font: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid #b9cfff; outline-offset: 5px; }
+#main:focus { outline: none; }
+.wrap { width: min(1120px, 100% - 48px); margin-inline: auto; }
+.skip-link { position: fixed; top: -100px; left: 20px; z-index: 100; background: var(--surface); padding: 12px 20px; }
+.skip-link:focus { top: 10px; }
+nav { position: sticky; top: 0; z-index: 50; background: rgba(7,11,20,.96); border-bottom: 1px solid var(--line); }
+.nav-in { display: flex; align-items: center; justify-content: space-between; gap: 18px; min-height: 76px; }
+.logo { display: inline-flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 700; color: var(--text); text-decoration: none; min-height: 44px; }
+.logo svg { width: 30px; height: 30px; border-radius: 8px; }
+.nav-links { display: flex; align-items: center; gap: 26px; font-size: 15px; }
+.nav-links a { display: inline-flex; align-items: center; min-height: 44px; text-decoration: none; color: var(--muted); }
+.nav-links a:hover { color: var(--text); }
+.btn { display: inline-flex; justify-content: center; align-items: center; gap: 8px; min-height: 48px; padding: 11px 22px; border: 1px solid transparent; border-radius: 8px; font-weight: 600; font-size: 16px; text-decoration: none; text-align: center; }
+.btn-primary { background: var(--blue); color: #fff; }
+.btn-primary:hover { background: #1a66ff; color: #fff; }
+.btn-ghost { background: var(--surface-2); border-color: #526581; color: var(--text); }
+.btn-ghost:hover { border-color: var(--blue-soft); background: #1b2940; }
+.hero-in { display: grid; grid-template-columns: 1.13fr 1fr; gap: 64px; align-items: center; padding: 72px 0 80px; }
+.hero-copy { min-width: 0; }
+h1 { font-size: clamp(38px, 4.3vw, 60px); line-height: 1.07; letter-spacing: -.04em; font-weight: 700; max-width: 16ch; text-wrap: balance; }
+.lede { margin-top: 24px; font-size: 18px; line-height: 1.7; color: var(--muted); max-width: 46ch; }
+.cta { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 30px; }
+.hero-price { margin-top: 22px; font-size: 14px; color: var(--muted); }
+.hero-price strong { color: var(--text); font-weight: 600; }
+.hero-note { margin-top: 12px; font-size: 14px; color: var(--muted); max-width: 45ch; }
+.home-preview { min-width: 0; border: 1px solid #435575; border-radius: 16px; background: var(--surface); overflow: hidden; }
+.home-preview figcaption { padding: 15px 22px; background: var(--surface-2); border-bottom: 1px solid var(--line); font-size: 14px; font-weight: 600; }
+.home-preview figcaption span { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; font-weight: 400; }
+.report-header { padding: 22px; }
+.report-network { font-size: 13px; color: var(--muted); }
+.report-header h2 { font-size: 26px; margin: 2px 0 8px; }
+.report-header h2 span { margin-left: 6px; font-size: 14px; color: var(--muted); font-weight: 400; }
+.token-address { display: block; font-family: var(--mono); font-size: 11px; overflow-wrap: anywhere; }
+.report-time { display: flex; flex-wrap: wrap; gap: 5px 10px; margin-top: 14px; font-size: 12px; color: var(--muted); }
+.report-verdict { display: flex; gap: 12px; padding: 18px 22px; background: #332a18; color: #ffcf77; border-block: 1px solid #5c4824; }
+.report-verdict h3 { font-size: 16px; font-weight: 600; }
+.report-verdict p { font-size: 14px; margin-top: 4px; }
+.verdict-mark { display: grid; flex: 0 0 28px; height: 28px; place-items: center; border: 1px solid currentColor; border-radius: 50%; font-weight: 600; }
+.token-report[data-verdict="high-risk"] .report-verdict { color: #ffb1ae; background: #3b1c26; border-color: #79404a; }
+.token-report[data-verdict="clear"] .report-verdict { color: #a5dfbd; background: #142f27; border-color: #315b4d; }
+.report-numbers { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 20px 22px 12px; font-size: 14px; }
+.report-numbers > div:first-child { grid-column: 1 / -1; }
+.report-numbers dt { font-size: 12px; color: var(--muted); }
+.report-numbers dd { font-weight: 600; margin-top: 3px; }
+.coverage-note { padding: 0 22px 20px; color: var(--muted); font-size: 14px; }
+.preview-link { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 16px 22px; border-top: 1px solid var(--line); min-height: 52px; font-size: 14px; }
+.preview-link span { font-size: 20px; text-decoration: none; }
+section.band { padding: 72px 0; border-top: 1px solid var(--line); }
+h2 { font-size: clamp(26px, 3vw, 36px); letter-spacing: -.025em; margin: 0 0 18px; line-height: 1.2; max-width: 30ch; }
+h3 { font-size: 18px; line-height: 1.4; }
+.sub { color: var(--muted); max-width: 65ch; font-size: 16px; }
+.section-intro { max-width: 760px; }
+.research-steps { list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 36px; margin-top: 36px; }
+.research-steps li { border-top: 1px solid var(--line); padding-top: 22px; }
+.step-n { display: grid; place-items: center; width: 30px; height: 30px; border: 1px solid #526581; border-radius: 50%; margin-bottom: 16px; color: var(--blue-soft); font-size: 14px; }
+.research-steps p { color: var(--muted); margin-top: 12px; font-size: 15px; }
+.research-steps a { display: inline-flex; align-items: center; min-height: 44px; margin-top: 10px; font-size: 15px; }
+.workflow-note { color: var(--muted); font-size: 14px; margin-top: 24px; max-width: 75ch; }
+.product-pricing { margin-top: 30px; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface); }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+caption { text-align: left; padding: 16px 20px; font-size: 14px; color: var(--muted); border-bottom: 1px solid var(--line); }
+th, td { text-align: left; padding: 15px 20px; border-bottom: 1px solid var(--line); vertical-align: top; }
+thead th { font-size: 13px; font-weight: 400; color: var(--muted); background: var(--surface-2); }
+tbody th { font-weight: 600; }
+tbody tr:last-child > * { border-bottom: 0; }
+.product-table td:last-child { color: var(--muted); }
+.product-table th[scope="row"] { width: 27%; }
+.product-table a { display: inline-flex; align-items: center; min-height: 44px; }
+.product-table th, .product-table td { vertical-align: middle; }
+.price { color: var(--blue-soft); font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.price span { font-size: 12px; font-weight: 400; }
+.price.free { color: #a5dfbd; }
+.pricing-note { font-size: 14px; color: var(--muted); max-width: 72ch; margin-top: 22px; }
+.text-link { display: inline-flex; align-items: center; min-height: 44px; margin-top: 10px; font-size: 15px; }
+.developer-links { display: flex; flex-wrap: wrap; gap: 10px 28px; margin-top: 18px; font-size: 15px; }
+.developer-links a { display: inline-flex; align-items: center; min-height: 44px; }
+.demo { margin-top: 26px; padding: 26px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.demo-head { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px 20px; margin-bottom: 18px; }
+.demo-title { font-weight: 600; overflow-wrap: anywhere; }
+.demo-note, .demo-foot { font-size: 14px; color: var(--muted); }
+.demo-foot { margin-top: 18px; max-width: 70ch; }
+.demo-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.demo-actions .btn:disabled { opacity: .55; cursor: progress; }
+#demo-out { margin-top: 20px; padding: 18px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); font-size: 14px; overflow-wrap: anywhere; }
+#demo-out[data-tone="err"] { border-color: #cf6971; }
+#demo-out[data-tone="ok"] { border-color: #4f9b79; }
+#demo-out .line { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 14px; }
+#demo-out .tag { padding: 3px 9px; font-family: var(--mono); border-radius: 4px; }
+#demo-out .tag.warn { color: #ffcf77; background: #332a18; }
+#demo-out .tag.good { color: #a5dfbd; background: #142f27; }
+#demo-out .kv { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-top: 1px solid var(--line); }
+#demo-out .kv b { font-weight: 600; }
+#demo-out .kv span, #demo-out .dim { color: var(--muted); }
+#demo-out p.dim { margin-top: 14px; }
+#demo-out .bad { color: #ffb1ae; }
+#demo-out pre.mini { font-size: 12px; margin-top: 14px; }
+.run-link { display: flex; gap: 8px 16px; flex-wrap: wrap; align-items: baseline; margin-top: 22px; font-size: 14px; }
+.run-link a { padding-block: 10px; }
+.run-link span { color: var(--muted); max-width: 68ch; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start; }
+.two > * { min-width: 0; }
+pre { border: 1px solid var(--line); border-radius: 8px; background: #060a11; padding: 22px; overflow-x: auto; font-family: var(--mono); font-size: 13px; line-height: 1.8; margin-top: 24px; }
+pre .c { color: var(--muted); } pre .k { color: var(--blue-soft); } pre .s { color: #a5dfbd; } pre .y { color: #ffcf77; }
+code { font-family: var(--mono); font-size: .9em; overflow-wrap: anywhere; }
+.grid { display: grid; gap: 22px; margin-top: 34px; }
+.g3 { grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)); }
+.card { border-top: 1px solid var(--line); padding: 24px 0; min-width: 0; }
+.card h3 { margin-bottom: 10px; }
+.card p { font-size: 15px; color: var(--muted); max-width: 65ch; }
+.card p + p { margin-top: 14px; }
+.ico { font-size: 22px; margin-bottom: 14px; }
+.catalog-details { margin-top: 26px; }
+.catalog-details > summary { cursor: pointer; padding: 16px 20px; border: 1px solid var(--line); border-radius: 8px; font-size: 16px; color: var(--blue-soft); background: var(--surface); }
+.table-wrap { margin-top: 16px; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.scroll-x { overflow-x: auto; }
+.scroll-x table { min-width: 760px; }
+td code { white-space: nowrap; }
+footer { border-top: 1px solid var(--line); padding: 38px 0; color: var(--muted); font-size: 14px; }
+.foot { display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+.foot-links { display: flex; gap: 4px 22px; flex-wrap: wrap; }
+.foot-links a { display: inline-flex; align-items: center; min-height: 44px; }
+@media (max-width: 960px) {
+  .hero-in { gap: 32px; padding: 50px 0; }
+  h1 { font-size: 42px; }
+  .cta .btn { width: 100%; }
+  .research-steps { gap: 24px; }
+}
+@media (max-width: 720px) {
+  .wrap { width: calc(100% - 40px); }
+  .nav-in { min-height: 66px; gap: 12px; }
+  .logo { font-size: 15px; gap: 7px; }
+  .logo svg { width: 26px; height: 26px; }
+  .nav-links { gap: 14px; font-size: 13px; }
+  .hero-in { display: flex; flex-direction: column; align-items: stretch; gap: 34px; padding: 36px 0 44px; }
+  h1 { font-size: clamp(36px, 8.5vw, 46px); max-width: 17ch; }
+  .lede { font-size: 16px; line-height: 1.65; margin-top: 18px; }
+  .cta { margin-top: 24px; gap: 10px; }
+  .hero-price { margin-top: 18px; }
+  .hero-note { margin-top: 8px; }
+  section.band { padding: 44px 0; }
+  .research-steps { grid-template-columns: 1fr; gap: 20px; margin-top: 26px; }
+  .research-steps li { padding-top: 18px; }
+  .research-steps .step-n { float: left; margin: 0 14px 0 0; }
+  .research-steps p, .research-steps a { margin-left: 44px; }
+  .two { grid-template-columns: 1fr; gap: 0; }
+  .product-table { font-size: 14px; }
+  .product-table th, .product-table td { padding: 12px; }
+  .product-table th[scope="row"] { width: auto; }
+  .product-table thead th:last-child { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .product-table tbody { display: block; }
+  .product-table thead { display: block; }
+  .product-table tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; }
+  .product-table tbody tr { padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+  .product-table tbody tr:last-child { border: 0; }
+  .product-table tbody th, .product-table tbody td { border: 0; }
+  .product-table tbody td:last-child { grid-column: 1 / -1; padding: 0 12px; }
+  .product-table .price { display: flex; flex-wrap: wrap; align-items: center; justify-content: end; gap: 4px; }
+  .product-table a { min-height: 44px; }
+  .demo { padding: 18px; }
+  .demo-actions .btn { width: 100%; }
+  pre { padding: 16px; font-size: 12px; }
+}
+@media (max-width: 370px) {
+  .nav-links { gap: 10px; font-size: 12px; }
+  .wrap { width: calc(100% - 32px); }
+  .logo { font-size: 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
 </style>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 
-<nav id="nav">
+<nav id="nav" aria-label="Main">
   <div class="wrap nav-in">
     <a class="logo" href="/">
       <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -275,101 +259,109 @@
       AgentToll
     </a>
     <div class="nav-links">
-      <a href="/inspect.html">Inspect a token</a>
+      <a href="#pricing">Pricing</a>
       <a href="/research.html">My research</a>
-      <a href="#endpoints" class="hide-sm">Endpoints</a>
-      <a href="#watch" class="hide-sm">Watch</a>
-      <a href="#mcp" class="hide-sm">MCP</a>
-      <a href="https://github.com/tevfikefeaydin/agenttoll">GitHub</a>
+      <a href="#try">API</a>
     </div>
   </div>
 </nav>
 
+<main id="main" tabindex="-1">
 <header class="hero">
-  <div class="hero-media">
-    <img id="hero-still" src="/hero-poster.jpg" alt="" aria-hidden="true">
-    <video id="hero-video" muted loop playsinline preload="none" poster="/hero-poster.jpg"
-           aria-hidden="true" hidden>
-      <source src="/hero.mp4" type="video/mp4">
-    </video>
-  </div>
   <div class="wrap hero-in">
-    <span class="eyebrow"><span class="dot"></span> Live on Base mainnet</span>
-    <h1>Discover. Inspect. <em>Keep the evidence.</em></h1>
-    <p class="lede">Research new Base tokens, review eight risk checks and compare what
-      changed since your last saved inspection. Use the browser or connect your agent.
-      See the USDC price before each purchase. No accounts. No API keys.</p>
-    <div class="cta">
-      <a class="btn btn-primary" href="/research.html#discover">Discover Base tokens</a>
-      <a class="btn btn-ghost" href="/inspect.html">Inspect a token you know</a>
-      <a class="btn btn-ghost" href="#endpoints">See the 21 endpoints</a>
+    <div class="hero-copy">
+      <h1>See the evidence behind a Base token.</h1>
+      <p class="lede">Review trading risks, owner permissions and gaps in the data.
+        Eight automated checks in one readable report, with dates and sources you can revisit.</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="/inspect.html">Inspect a token</a>
+        <a class="btn btn-ghost" href="/inspect.html#example-report">View free example</a>
+      </div>
+      <p class="hero-price"><strong>0.003 USDC</strong> per inspection on Base.<br>See the price before approving payment.</p>
+      <p class="hero-note">The recorded example is free. No wallet or account needed.</p>
     </div>
-    <div class="hero-meta">
-      <span class="chip" id="toll-counter">reading the chain…</span>
-      <span class="chip">From <strong>$0.001</strong> a call</span>
-      <span class="chip">Open source · MIT</span>
-      <span class="chip">agenttoll.base.eth</span>
-    </div>
+    <figure class="home-preview" aria-label="Recorded token report preview">
+      <figcaption>Recorded example <span>Captured 15 Sept 2026, 11:40 UTC</span></figcaption>
+      <article class="token-report" data-verdict="caution">
+    <header class="report-header"><div><p class="report-network">Base token</p><h2>USD Coin <span>USDC</span></h2>
+    <a class="token-address" href="https://basescan.org/token/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913" target="_blank" rel="noopener noreferrer">0x833589fcd6edb6e08f4c7c32d4f71b54bda02913</a></div>
+    <div class="report-time"><span>Checked</span><time>15 Sept 2026, 11:40 UTC</time></div></header>
+    <div class="report-verdict"><span class="verdict-mark" aria-hidden="true">?</span><div><h3>Review the warnings</h3><p>Some findings need a closer look. Review the details below.</p></div></div>
+    <dl class="report-numbers"><div><dt>Evidence coverage</dt><dd>5 of 8 checks complete</dd></div><div><dt>Risk flags / warnings</dt><dd>0 / 1</dd></div><div><dt>Reported holders</dt><dd>10,514,949</dd></div></dl>
+    <p class="coverage-note">Coverage shows how much evidence was available, not a safety score.</p></article>
+      <a class="preview-link" href="/inspect.html#example-report">Read all eight checks in the free example <span aria-hidden="true">↗</span></a>
+    </figure>
   </div>
 </header>
 
-<section class="band">
+<section class="band" aria-labelledby="workflow-heading">
   <div class="wrap">
-    <p class="kicker rv">What is this</p>
-    <h2 class="rv">From a new pool to a dated research trail</h2>
-    <p class="sub rv">Start with discovery, inspect a token, then save the evidence for your
-      next visit. Agents use the same pay-per-call API through HTTP or MCP. Every purchase
-      has its own quote; a listing is not a safety assessment.</p>
-    <div class="grid g3">
-      <div class="card rv"><div class="ico">⚡</div>
-        <h3>1. Discover a candidate</h3>
-        <p>Browse selected Base pools above a liquidity floor, with observation dates and
-          coverage limits. Agents can also read Uniswap v4 creation events through
-          <code>/api/base/fresh</code>. Token attribution can be unavailable.</p></div>
-      <div class="card rv"><div class="ico">🕵️</div>
-        <h3>2. Inspect the evidence</h3>
-        <p>Review trading restrictions, taxes, owner permissions, holder concentration and
-          deployer evidence. Missing or conflicting provider data stays visible.
-          Passing automated checks does not guarantee safety.</p></div>
-      <div class="card rv"><div class="ico">📒</div>
-        <h3>3. Revisit what changed</h3>
-        <p>Keep dated inspections in your browser and compare later observations.
-          Evidence loss remains a warning. Add a calendar reminder when you want to
-          return; inspections always require a new explicit purchase.</p></div>
+    <div class="section-intro"><h2 id="workflow-heading">From a token address to a research trail.</h2>
+      <p class="sub">Already have a token in mind? Go straight to inspection. Discovery helps when you want to find a starting point.</p></div>
+    <ol class="research-steps">
+      <li><span class="step-n" aria-hidden="true">1</span><h3>Discover a candidate</h3>
+        <p>Browse selected Base pools with liquidity and observation dates. A listing is a starting point for research, not a safety assessment.</p>
+        <a href="/research.html#discover">Explore discovery</a></li>
+      <li><span class="step-n" aria-hidden="true">2</span><h3>Inspect the evidence</h3>
+        <p>Check a token’s trading restrictions, taxes, permissions and more. Missing data and risk warnings remain visible in the report.</p>
+        <a href="/inspect.html">Open token inspector</a></li>
+      <li><span class="step-n" aria-hidden="true">3</span><h3>Save and revisit</h3>
+        <p>Keep dated reports in this browser and compare observations later. Saving is free; each new inspection is a separate purchase.</p>
+        <a href="/research.html">Open my research</a></li>
+    </ol>
+    <p class="workflow-note">Discovery and inspection are separate purchases. Automated checks can miss risks; a completed check does not guarantee safety.</p>
+  </div>
+</section>
+
+<section class="band" id="pricing" aria-labelledby="pricing-heading">
+  <div class="wrap">
+    <div class="section-intro"><h2 id="pricing-heading">Know the price before you pay.</h2>
+      <p class="sub">Pay for each request in USDC on Base. No subscription or account. Your wallet approval is required for a paid browser request.</p></div>
+    <div class="product-pricing">
+      <table class="product-table">
+        <caption>Browser tools · prices in USDC on Base</caption>
+        <thead><tr><th scope="col">Use</th><th scope="col">Per request</th><th scope="col">What you get</th></tr></thead>
+        <tbody>
+          <tr><th scope="row"><a href="/inspect.html#example-report">Recorded example</a></th><td class="price">Free</td><td>A dated report to explore before buying.</td></tr>
+          <tr><th scope="row"><a href="/inspect.html">Token inspection</a></th><td class="price">0.003 <span>USDC</span></td><td>Eight checks, sources, warnings and evidence gaps.</td></tr>
+          <tr><th scope="row"><a href="/research.html#discover">Token discovery</a></th><td class="price">0.003 <span>USDC</span></td><td>Selected Base pools. Inspections purchased separately.</td></tr>
+          <tr><th scope="row"><a href="/research.html">Saved research</a></th><td class="price">Free</td><td>Save and compare reports you already have in this browser.</td></tr>
+        </tbody>
+      </table>
     </div>
+    <p class="pricing-note">Price previews are free. Reports may use cached data and keep their original observation time. Nothing runs or charges automatically in your browser.</p>
+    <a class="text-link" href="#endpoints">See prices for all 21 API endpoints</a>
   </div>
 </section>
 
 <section class="band" id="try">
   <div class="wrap">
-    <p class="kicker rv">Try it</p>
-    <h2 class="rv">No wallet needed to look</h2>
-    <p class="sub rv">The 402 response <em>is</em> the product: a price quote any agent can
-      read and pay programmatically. Run this and you'll see one.</p>
-    <div class="demo rv">
+    <h2>Connect your agent to the same data.</h2>
+    <p class="sub">Use HTTP or MCP to request onchain data. Start with a free price quote; enable payments only when you are ready. This demo quotes fresh-pool data, a separate API product.</p>
+    <div class="developer-links"><a href="/openapi.json">OpenAPI reference</a><a href="#mcp">MCP setup</a><a href="https://github.com/tevfikefeaydin/agenttoll">Source on GitHub</a></div>
+    <div class="demo">
       <div class="demo-head">
         <span class="demo-title">Live demo · <code>GET /api/base/fresh</code></span>
-        <span class="demo-note">pools born on Base in the last 10 minutes</span>
+        <span class="demo-note">Fresh-pool API · 0.004 USDC per request</span>
       </div>
       <div class="demo-actions">
-        <button id="demo-quote" class="btn btn-primary" type="button">Get the live 402 quote</button>
-        <button id="demo-pay" class="btn btn-ghost" type="button" hidden>Pay $0.004 with your wallet →</button>
+        <button id="demo-quote" class="btn btn-primary" type="button">Check fresh-pool price</button>
+        <button id="demo-pay" class="btn btn-ghost" type="button" hidden>Pay 0.004 USDC with your wallet</button>
         <button id="demo-acknowledge" class="btn btn-ghost" type="button" aria-describedby="demo-out" hidden>I’ve checked my wallet and receipt</button>
       </div>
       <div id="demo-out" role="status" aria-live="polite" aria-atomic="true" hidden></div>
-      <p class="demo-foot">The quote needs nothing at all. Paying is optional and needs a
-        browser wallet holding a cent of USDC on Base — the same signature your agent would
-        make, just done by hand.</p>
+      <p class="demo-foot">Checking this quote is free. A paid request needs a browser wallet with at least 0.004 USDC on Base and your approval.</p>
     </div>
 
-    <p class="run-link rv">
+    <p class="run-link">
       <a href="/run">Watch a full run that was already paid for →</a>
       <span>A pool eight seconds old, a verdict on its token, and both settlement
         transactions linked so you can check them.</span>
     </p>
 
+    <noscript><p class="demo-foot">Enable JavaScript to request a live API quote. You can still read the prices and open the free recorded report.</p></noscript>
     <div class="two" style="margin-top:34px;">
-      <div class="rv">
+      <div>
 <pre><span class="c"># free — status, catalog, and a sample of every shape</span>
 curl https://agenttoll.app/api/health
 curl https://agenttoll.app/api/catalog
@@ -384,7 +376,7 @@ curl -i https://agenttoll.app/api/base/fresh
   + the request and response schema,
     so no second fetch is needed</span></pre>
       </div>
-      <div class="rv">
+      <div>
 <pre><span class="c">// In the cloned repository: npm install &amp;&amp; npm run build</span>
 <span class="k">import</span> { createPaymentClient }
   <span class="k">from</span> <span class="s">"./dist/payment-policy.js"</span>;
@@ -404,19 +396,20 @@ console.log(<span class="k">await</span> client.getPaymentQuote(
 
 <section class="band" id="endpoints">
   <div class="wrap">
-    <p class="kicker rv">Catalog</p>
-    <h2 class="rv">Twenty-one endpoints, priced per call</h2>
-    <p class="sub rv">Base onchain data first — gas, any token by contract address, wallet
+    <h2 >Twenty-one endpoints, priced per call</h2>
+    <p class="sub">Base onchain data first — gas, any token by contract address, wallet
       portfolios, address analytics, DEX pools and a spam-filtered new-token radar — plus
       market and Turkish-lira feeds.</p>
-    <div class="table-wrap rv">
-      <div class="scroll-x">
+    <details class="catalog-details"><summary>View 21 paid endpoints and free routes</summary>
+    <div class="table-wrap">
+      <div class="scroll-x" tabindex="0" role="region" aria-label="API endpoint prices; scroll horizontally on small screens">
       <table>
-        <thead><tr><th>Endpoint</th><th>What you get</th><th>Price</th></tr></thead>
+        <caption>API prices per call, paid in USDC on Base</caption>
+        <thead><tr><th scope="col">Endpoint</th><th scope="col">What you get</th><th scope="col">USDC per call</th></tr></thead>
         <tbody>
           <tr><td><code>GET /api/base/safety/:address</code></td><td>Token safety checks: honeypot simulation, taxes, owner privileges, holder concentration, liquidity risk, deployer history</td><td class="price">$0.003</td></tr>
           <tr><td><code>GET /api/base/scout</code></td><td>Radar + safety in one call: today's new pools, each with a verdict already attached</td><td class="price">$0.008</td></tr>
-          <tr><td><code>GET /api/base/fresh</code></td><td>Pools read straight off Base seconds after they exist, before indexers see them</td><td class="price">$0.004</td></tr>
+          <tr><td><code>GET /api/base/fresh</code></td><td>Recent pool-creation events observed on Base; token attribution may be unavailable</td><td class="price">$0.004</td></tr>
           <tr><td><code>GET /api/base/radar/history</code></td><td>A past day's snapshot, exactly as committed to public git the day it was taken</td><td class="price">$0.002</td></tr>
           <tr><td><code>GET /api/base/scorecard</code></td><td>The radar's track record: verdicts then vs prices now, per cohort</td><td class="price">$0.005</td></tr>
           <tr><td><code>GET /api/base/portfolio/:address</code></td><td>Observed Base holdings valued in USD, largest first, with coverage limits</td><td class="price">$0.003</td></tr>
@@ -444,7 +437,8 @@ console.log(<span class="k">await</span> client.getPaymentQuote(
       </table>
       </div>
     </div>
-    <p class="sub rv" style="margin-top:20px; font-size:.9rem;">Selected responses are cached;
+    </details>
+    <p class="sub" style="margin-top:20px; font-size:.9rem;">Selected responses are cached;
       lifetimes vary by source. Handler failures before settlement are not billed.
       If a signed request times out or its response is lost, inspect the receipt and
       wallet before retrying: settlement may already have happened.</p>
@@ -453,14 +447,13 @@ console.log(<span class="k">await</span> client.getPaymentQuote(
 
 <section class="band" id="watch">
   <div class="wrap">
-    <p class="kicker rv">Watch endpoints</p>
-    <h2 class="rv">Ask only for what changed</h2>
-    <p class="sub rv">A snapshot is useful once. Agents that run on a schedule want the diff.
+    <h2 >Ask only for what changed</h2>
+    <p class="sub">A snapshot is useful once. Agents that run on a schedule want the diff.
       Address and radar watches return a <strong>cursor</strong>; send it back as
       <code>?since=</code>. Drain address pages while <code>hasMore</code> is true and
       deduplicate transaction hashes. Radar coverage is partial; the price watch
       checks a threshold and has no cursor.</p>
-    <div class="rv">
+    <div >
 <pre><span class="c"># inspect the quote — no wallet or payment</span>
 curl -i <span class="s">"https://agenttoll.app/api/watch/radar"</span>
 <span class="y">HTTP/1.1 402 Payment Required</span>
@@ -476,18 +469,17 @@ curl -i <span class="s">"https://agenttoll.app/api/watch/radar"</span>
 
 <section class="band">
   <div class="wrap">
-    <p class="kicker rv">How it works</p>
-    <h2 class="rv">One request, one micropayment, one response</h2>
+    <h2 >One request, one micropayment, one response</h2>
     <div class="grid g3 steps">
-      <div class="card rv"><div class="step-n">1</div>
+      <div class="card"><div class="step-n">1</div>
         <h3>Request</h3>
         <p>Your agent calls an endpoint. The server replies <code>402 Payment Required</code>
           with a machine-readable price quote.</p></div>
-      <div class="card rv"><div class="step-n">2</div>
+      <div class="card"><div class="step-n">2</div>
         <h3>Pay inline</h3>
         <p>The agent signs a USDC authorization for the quoted amount — no gas on the client,
           no account, no API key.</p></div>
-      <div class="card rv"><div class="step-n">3</div>
+      <div class="card"><div class="step-n">3</div>
         <h3>Get the data</h3>
         <p>The request retries with the payment header. Settlement lands on Base and the data
           comes back in the same round trip.</p></div>
@@ -497,13 +489,12 @@ curl -i <span class="s">"https://agenttoll.app/api/watch/radar"</span>
 
 <section class="band" id="mcp">
   <div class="wrap">
-    <p class="kicker rv">MCP</p>
-    <h2 class="rv">Plug it straight into Claude</h2>
-    <p class="sub rv">AgentToll ships an MCP server. Add it to Claude Desktop or Claude Code
+    <h2 >Plug it straight into Claude</h2>
+    <p class="sub">AgentToll ships an MCP server. Add it to Claude Desktop or Claude Code
       and use 21 data tools plus two free quote and budget tools. Start without a wallet;
       add a dedicated wallet and a finite session budget when you want to pay.</p>
     <div class="two">
-      <div class="rv">
+      <div >
 <pre>{
   <span class="s">"mcpServers"</span>: {
     <span class="s">"agenttoll"</span>: {
@@ -513,7 +504,7 @@ curl -i <span class="s">"https://agenttoll.app/api/watch/radar"</span>
   }
 }</pre>
       </div>
-      <div class="card rv">
+      <div class="card">
         <div class="ico">🧰</div>
         <h3>23 tools, start with a free quote</h3>
         <p>Use <code>agenttoll-mcp@0.14.0</code> or newer. If you installed 0.13.0 or
@@ -540,29 +531,26 @@ curl -i <span class="s">"https://agenttoll.app/api/watch/radar"</span>
 
 <section class="band">
   <div class="wrap">
-    <p class="kicker rv">Transparency</p>
-    <h2 class="rv">Numbers we can't fake, data we can't leak</h2>
+    <h2>Know what the data can tell you.</h2>
     <div class="grid g3">
-      <div class="card rv"><div class="ico">⛓️</div>
+      <div class="card"><div class="ico">⛓️</div>
         <h3>Transfers read from the chain</h3>
-        <p><code>/api/stats</code> counts the actual USDC transfers to our address on Base,
+        <p id="toll-counter" role="status">Onchain transfer statistics are available through /api/stats.</p>
+        <p><code>/api/stats</code> counts qualifying small USDC transfers to our address on Base,
           and excludes known operator wallets from the external count. Transfers can include
           tests and unsolicited payments; they do not establish API sales or unique customers.</p></div>
-      <div class="card rv"><div class="ico">🔒</div>
-        <h3>No account setup</h3>
-        <p>No accounts, no API keys, no sessions. Even the watch endpoints keep the cursor on
-          your side, not ours.</p></div>
-      <div class="card rv"><div class="ico">🧾</div>
+      <div class="card"><div class="ico">🔒</div>
+        <h3>Research stays in your browser</h3>
+        <p>No account or API key is needed. Saved research stays in this browser; clearing its storage removes that local history. The watch API returns a cursor for your agent to keep.</p></div>
+      <div class="card"><div class="ico">🧾</div>
         <h3>Data errors before settlement aren't billed</h3>
         <p>Settlement starts after the data handler succeeds. A connection loss or timeout
           after signing can leave the payment outcome unknown; check your receipt and wallet
           before retrying.</p></div>
-      <div class="card rv"><div class="ico">🔁</div>
+      <div class="card"><div class="ico">🔁</div>
         <h3>Several sources per endpoint</h3>
-        <p>Prices fall through CoinGecko → Binance → Coinbase, Base tokens through
-          GeckoTerminal → DexScreener, and RPC calls across three providers. The response
-          names the source that answered.</p></div>
-      <div class="card rv"><div class="ico">📖</div>
+        <p>Responses name the sources used. Some evidence can be missing, delayed or inconsistent across providers. Inspect the coverage and observation dates alongside any finding.</p></div>
+      <div class="card"><div class="ico">📖</div>
         <h3>Open source, MIT</h3>
         <p>The whole tollbooth is on GitHub. Fork it and run your own — the payment rail is
           the interesting part, and it's yours too.</p></div>
@@ -570,6 +558,7 @@ curl -i <span class="s">"https://agenttoll.app/api/watch/radar"</span>
   </div>
 </section>
 
+</main>
 <footer>
   <div class="wrap foot">
     <span>© 2026 AgentToll · agenttoll.base.eth — built in public on Base.</span>

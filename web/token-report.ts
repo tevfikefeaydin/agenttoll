@@ -58,7 +58,7 @@ export function reportTime(value: unknown): string {
   return Number.isFinite(date.getTime()) ? date.toLocaleString('en-GB', { timeZone: 'UTC', day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + ' UTC' : 'Time unavailable';
 }
 
-export function renderTokenReport(value: unknown, expectedToken?: string): string {
+export function renderTokenReport(value: unknown, expectedToken?: string, options: { summaryOnly?: boolean } = {}): string {
   const data = record(value);
   if (data.chain !== 'base' || typeof data.token !== 'string') throw new Error('The response is not a Base token report. Keep your receipt before retrying.');
   const token = inspectionEndpoint(data.token).split('/').at(-1)!;
@@ -85,13 +85,15 @@ export function renderTokenReport(value: unknown, expectedToken?: string): strin
   const holders = typeof data.holderCount === 'number' && Number.isSafeInteger(data.holderCount) && data.holderCount >= 0 ? data.holderCount.toLocaleString('en-US') : 'Not available';
   const sourceStatus = record(data.sourceStatus);
   const sources = strings(data.sources);
-  return `<article class="token-report" data-verdict="${verdict}">
+  const overview = `<article class="token-report" data-verdict="${verdict}">
     <header class="report-header"><div><p class="report-network">Base token</p><h2>${escapeHtml(name)}${symbol && symbol !== name ? ` <span>${escapeHtml(symbol)}</span>` : ''}</h2>
     <a class="token-address" href="https://basescan.org/token/${token}" target="_blank" rel="noopener noreferrer">${token}</a></div>
     <div class="report-time"><span>Checked</span><time>${escapeHtml(reportTime(data.at))}</time></div></header>
     <div class="report-verdict"><span class="verdict-mark" aria-hidden="true">${flags ? '!' : completed < checks.length || warnings ? '?' : '✓'}</span><div><h3>${heading}</h3><p>${summary}</p></div></div>
     <dl class="report-numbers"><div><dt>Evidence coverage</dt><dd>${completed} of ${checks.length} checks complete</dd></div><div><dt>Risk flags / warnings</dt><dd>${flags} / ${warnings}</dd></div><div><dt>Reported holders</dt><dd>${holders}</dd></div></dl>
-    <p class="coverage-note">Coverage shows how much evidence was available, not a safety score.</p>
+    <p class="coverage-note">Coverage shows how much evidence was available, not a safety score.</p>`;
+  if (options.summaryOnly) return overview + '</article>';
+  return overview + `
     <div class="report-checks">${checks.map(c => `<details class="report-check" data-status="${c.status}"${c.status !== 'pass' ? ' open' : ''}>
       <summary><span>${c.title}</span><span class="check-status">${statusNames[c.status]}</span></summary>
       <div class="check-detail">${!c.complete ? `<p class="coverage-summary">${escapeHtml(c.conflicts.length ? 'Sources disagree on this check. Review their findings before relying on it.' : incompleteSummaries[c.id])}</p>` : ''}${c.complete || c.status === 'warn' || c.status === 'fail' ? `<p>${escapeHtml(c.detail)}</p>` : ''}${!c.complete ? `<details class="evidence-details"><summary>Evidence details</summary>${c.status === 'unknown' ? `<p>${escapeHtml(c.detail)}</p>` : ''}${c.missing.length ? `<p class="missing-evidence">Still missing:</p><ul class="missing-evidence">${c.missing.map(field => `<li>${escapeHtml(evidenceLabel(field))}</li>`).join('')}</ul>` : ''}${c.conflicts.length ? `<p class="missing-evidence">Sources disagree: ${escapeHtml(c.conflicts.map(evidenceLabel).join(', '))}</p>` : ''}` : ''}<p class="check-source">${c.sources.length ? 'Sources: ' + escapeHtml(c.sources.join(', ')) : 'No source evidence available'}</p>${!c.complete ? '</details>' : ''}</div></details>`).join('')}</div>
