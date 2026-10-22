@@ -1,0 +1,113 @@
+{
+  "date": "2026-10-22",
+  "at": "2026-10-22T13:03:00.657Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0xe29b413ece716b5fe745427d3a7ab2e0af53211adacab206906fa68cc15f4289",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 0,
+    "caution": 4,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "NODF / WETH 0.3%",
+      "pool": "0x5c31cae5635dc7b32167254468847f6585e97f071c3a4cc18c2159e6a575b6ab",
+      "token": "0xa4f5e826196db07003819248221ac73bd9a58aa7",
+      "createdAt": "2026-10-22T12:34:59Z",
+      "priceUsd": 0.49948180036475,
+      "volume24hUsd": 216631.710325197,
+      "liquidityUsd": 206830.9981,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "owner-powers"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "ADP / WETH 0.3%",
+      "pool": "0x668a17e848e5371cdb0eb19c505b8e7ce19d3dce420efcc6e68e3c6f3ff1416d",
+      "token": "0xe454636f6086e4351ae5be4918eae60423ada3ec",
+      "createdAt": "2026-10-22T12:34:17Z",
+      "priceUsd": 0.16635889309098,
+      "volume24hUsd": 127607.057847263,
+      "liquidityUsd": 51714.2274,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "owner-powers"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "NODF / WETH 0.3%",
+      "pool": "0xa20141898d4500afa376903997b593b9c85b2dbe8b61c2c24472fb47cbdacb01",
+      "token": "0x31bf6840e7913150099b20e80cbe5a11e6e2e9b1",
+      "createdAt": "2026-10-22T12:53:55Z",
+      "priceUsd": 0.00489931029809011,
+      "volume24hUsd": 21708.562136741,
+      "liquidityUsd": 49509.5842,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "owner-powers"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "openhuman / WETH",
+      "pool": "0xeb2e0bc0cc7ee89b3325327c7b47279fe693fd42",
+      "token": "0x1dfa1f1fbed3af78e6a588d162bc34bc58b94b30",
+      "createdAt": "2026-10-22T12:38:21Z",
+      "priceUsd": 0.0000056944200382507,
+      "volume24hUsd": 4089.3951358677,
+      "liquidityUsd": 80159.6166,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "owner-powers",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    }
+  ]
+}
