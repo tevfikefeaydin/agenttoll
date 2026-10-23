@@ -1,0 +1,110 @@
+{
+  "date": "2026-10-23",
+  "at": "2026-10-23T12:42:01.340Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0xd10bac5790dadf7f1c93ff0e762aeb75db26f1c7223fad7fa0c76aac5fe90909",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 0,
+    "caution": 1,
+    "insufficientData": 3,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "DSP / WETH 0.3%",
+      "pool": "0x87731e54f97afc4f81b3e9957d4b56177cd1d43e66b0b436d2576d6080ecb0eb",
+      "token": "0xe084e64aa64f8749110a31f92f66435559838104",
+      "createdAt": "2026-10-23T11:54:07Z",
+      "priceUsd": 0.0292756394498446,
+      "volume24hUsd": 28182.451514424,
+      "liquidityUsd": 66363.9593,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "verified",
+          "owner-powers",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "BIRB / WETH 0.05%",
+      "pool": "0xfe0b794d24411de8a3fc1704d4d3b6acc7c5b78c",
+      "token": "0x3ce0ec8f359cc62d81c66940e7e76e0ccd62810c",
+      "createdAt": "2026-10-23T12:23:13Z",
+      "priceUsd": 0.0506145092066854,
+      "volume24hUsd": 3396.8770686406,
+      "liquidityUsd": 25308389.7769,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "owner-powers",
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "openhuman / WETH",
+      "pool": "0x36174f4cdd07db4febbb5dc4fc9f2341dac3dc9d",
+      "token": "0xb7b98831523fc32c6b317d174ea0b5dbd3634850",
+      "createdAt": "2026-10-23T12:31:57Z",
+      "priceUsd": 0.00000869905023949002,
+      "volume24hUsd": 1411.3356422963,
+      "liquidityUsd": 75127.1947,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "owner-powers",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "NOFD / ZORA",
+      "pool": "0x86a6c7800e5793d4881e1591d0279003e0ede796692d0469124266e3ea20d863",
+      "token": "0xdb6c8029529679818a89890e9ed4c16413734199",
+      "createdAt": "2026-10-23T12:12:59Z",
+      "priceUsd": 0.000409642377441852,
+      "volume24hUsd": 40.6338653396,
+      "liquidityUsd": 406153.2772,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "verified",
+          "owner-powers",
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    }
+  ]
+}
