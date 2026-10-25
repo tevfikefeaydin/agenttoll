@@ -1,0 +1,40 @@
+{
+  "date": "2026-10-25",
+  "at": "2026-10-25T12:38:51.718Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x691e01bfe1e25d24090edf94af5ec7ec9f7768fd20452c025e9abe0d42c83545",
+  "summary": {
+    "found": 1,
+    "checked": 1,
+    "unchecked": 0,
+    "highRisk": 1,
+    "caution": 0,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "Agent / USDC",
+      "pool": "0xa670afb91c8e5922dfc8cba4feb428fcce13a540",
+      "token": "0xd6568903cd917d104dcd6a7036d1925ece518b07",
+      "createdAt": "2026-10-25T07:31:01Z",
+      "priceUsd": 0.0000199704942645031,
+      "volume24hUsd": 31620402.4302966,
+      "liquidityUsd": 2175061.5521,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "liquidity"
+        ],
+        "warnings": [],
+        "unchecked": [
+          "honeypot"
+        ]
+      }
+    }
+  ]
+}
