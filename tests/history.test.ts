@@ -314,3 +314,95 @@ test('equal-liquidity pairs keep an available price in either response order', a
     assert.equal(result.tokens[0].priceChangePct, 100);
   }
 });
+
+
+test("transient primary and fallback gateway failures recover with one retry", async (t) => {
+  t.mock.method(Date, "now", () => Date.parse("2091-01-01T00:00:00Z"));
+  let primary = 0, fallback = 0;
+  t.mock.method(globalThis, "fetch", async (input: string | URL | Request) => {
+    const url = String(input);
+    if (url.includes("api.github.com")) return json({ sha: "a1".repeat(20) });
+    if (url.endsWith("index.json")) return json({ dates: ["2026-09-07"] });
+    if (url.includes("dexscreener")) return ++primary === 1 ? json({}, 503) : json([]);
+    if (url.includes("geckoterminal")) return ++fallback === 1 ? json({}, 502) : json({ data: [{
+      id: `base_${token(201)}`, type: "pool",
+      attributes: { address: token(201), base_token_price_usd: "2", reserve_in_usd: "1000" },
+      relationships: { base_token: { data: { id: `base_${token(101)}`, type: "token" } } },
+    }] });
+    return json({ date: "2026-09-07", pools: [pool(101)] });
+  });
+  const result = await getScorecard("1");
+  assert.equal(primary, 2); assert.equal(fallback, 2);
+  assert.equal(result.coverage.priceBatchesFailed, 0);
+  assert.equal(result.coverage.fallbackPriceBatchesFailed, 0);
+  assert.equal(result.tokens[0].outcome, "priced");
+});
+
+test("failed price batches refresh after one minute while healthy results keep their TTL", async (t) => {
+  let now = Date.parse("2092-01-01T00:00:00Z"), healthy = false, primary = 0;
+  t.mock.method(Date, "now", () => now);
+  t.mock.method(globalThis, "fetch", async (input: string | URL | Request) => {
+    const url = String(input);
+    if (url.includes("api.github.com")) return json({ sha: "a2".repeat(20) });
+    if (url.endsWith("index.json")) return json({ dates: ["2026-09-07"] });
+    if (url.includes("dexscreener")) {
+      primary++;
+      return healthy ? json([{ baseToken: { address: token(102) }, priceUsd: "2", liquidity: { usd: 1000 } }]) : json({}, 503);
+    }
+    if (url.includes("geckoterminal")) return json({ data: [] });
+    return json({ date: "2026-09-07", pools: [pool(102)] });
+  });
+  assert.equal((await getScorecard("1")).tokens[0].outcome, "unavailable");
+  assert.equal(primary, 2); // Bounded even during a persistent outage.
+  healthy = true; now += 59_000;
+  assert.equal((await getScorecard("1")).tokens[0].outcome, "unavailable");
+  assert.equal(primary, 2);
+  now += 1_001;
+  assert.equal((await getScorecard("1")).tokens[0].outcome, "priced");
+  assert.equal(primary, 3);
+  now += 61_000;
+  assert.equal((await getScorecard("1")).tokens[0].outcome, "priced");
+  assert.equal(primary, 3);
+});
+
+test("access denials, rate limits and Retry-After do not trigger an immediate retry", async (t) => {
+  let now = Date.parse("2093-01-01T00:00:00Z"), primary = 0;
+  let response = () => json({}, 403);
+  t.mock.method(Date, "now", () => now);
+  t.mock.method(globalThis, "fetch", async (input: string | URL | Request) => {
+    const url = String(input);
+    if (url.includes("api.github.com")) return json({ sha: "a3".repeat(20) });
+    if (url.endsWith("index.json")) return json({ dates: ["2026-09-07"] });
+    if (url.includes("dexscreener")) { primary++; return response(); }
+    if (url.includes("geckoterminal")) return json({ data: [] });
+    return json({ date: "2026-09-07", pools: [pool(103)] });
+  });
+  for (const next of [() => json({}, 403), () => json({}, 429), () => new Response("{}", { status: 503, headers: { "Retry-After": "120" } })]) {
+    response = next; const before = primary;
+    assert.equal((await getScorecard("1")).coverage.priceBatchesFailed, 1);
+    assert.equal(primary - before, 1);
+    now += 61_000;
+  }
+});
+
+test("caller cancellation during retry backoff prevents another upstream request", async (t) => {
+  const { requestContext } = await import("../src/request-context.js");
+  const controller = new AbortController();
+  t.mock.method(Date, "now", () => Date.parse("2094-01-01T00:00:00Z"));
+  let primary = 0;
+  t.mock.method(globalThis, "fetch", async (input: string | URL | Request) => {
+    const url = String(input);
+    if (url.includes("api.github.com")) return json({ sha: "a4".repeat(20) });
+    if (url.endsWith("index.json")) return json({ dates: ["2026-09-07"] });
+    if (url.includes("dexscreener")) {
+      primary++;
+      setTimeout(() => controller.abort(new Error("caller cancelled")), 10);
+      return json({}, 503);
+    }
+    return json({ date: "2026-09-07", pools: [pool(104)] });
+  });
+  await requestContext.run({ requestId: "backoff-cancel", signal: controller.signal, upstreamCalls: 0, cacheHits: 0, cacheMisses: 0, coalescedLoads: 0 }, async () => {
+    await assert.rejects(getScorecard("1"), /caller cancelled/);
+  });
+  assert.equal(primary, 1);
+});

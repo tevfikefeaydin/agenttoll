@@ -1,3 +1,4 @@
+import { setTimeout as delay } from "node:timers/promises";
 import { cached, fetchWithTimeout } from "./cache.js";
 import { badRequest } from "./errors.js";
 import { optionalInt, validateSnapshotDate } from "./params.js";
@@ -109,6 +110,23 @@ const liquidity = (value: unknown): number | null => {
   return Number.isFinite(n) && n >= 0 ? n : null;
 };
 
+// Retry only transient transport/gateway failures once. Rate limits, access
+// denials and explicit Retry-After responses defer to the next cached refresh.
+// Both attempts and the backoff remain cancellable by the caller's deadline.
+async function fetchPriceBatch(url: string, timeoutMs: number) {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      const response = await fetchWithTimeout(url, {}, timeoutMs);
+      if (attempt || ![502, 503, 504].includes(response.status) || response.headers.has("retry-after")) return response;
+      await response.body?.cancel();
+    } catch (error) {
+      requestContext.getStore()?.signal.throwIfAborted();
+      if (attempt || !(error instanceof TypeError || (error instanceof Error && error.name === "TimeoutError"))) throw error;
+    }
+    await delay(250, undefined, { signal: requestContext.getStore()?.signal });
+  }
+}
+
 async function currentPrices(tokens: string[], snapshotPools: SnapshotPool[]) {
   const out = new Map<string, CurrentPrice>();
   let failedBatches = 0;
@@ -124,7 +142,7 @@ async function currentPrices(tokens: string[], snapshotPools: SnapshotPool[]) {
       liquidity?: { usd?: number };
     }[];
     try {
-      const res = await fetchWithTimeout(`https://api.dexscreener.com/tokens/v1/base/${batch.join(",")}`);
+      const res = await fetchPriceBatch(`https://api.dexscreener.com/tokens/v1/base/${batch.join(",")}`, 4000);
       if (!res.ok) throw new Error(`Price source returned ${res.status}`);
       pairs = await res.json();
       if (!Array.isArray(pairs)) throw new Error("Invalid price source response");
@@ -153,14 +171,14 @@ async function currentPrices(tokens: string[], snapshotPools: SnapshotPool[]) {
   const pools = [...new Set(snapshotPools.filter(p => typeof p.token === "string" && missing.has(p.token.toLowerCase()))
     .map(p => typeof p.pool === "string" ? p.pool.toLowerCase() : "").filter(p => /^0x(?:[0-9a-f]{40}|[0-9a-f]{64})$/.test(p)))];
   // At most four parallel public requests (30 IDs each), even for oversized
-  // historical files. No retry; the shared fetch also honors the caller's deadline.
+  // historical files. A transient failure gets at most one bounded retry.
   const bounded = pools.slice(0, 120);
   let fallbackBatchesFailed = 0;
   const obj = (v: unknown): Record<string, unknown> | null => v !== null && typeof v === "object" && !Array.isArray(v) ? v as Record<string, unknown> : null;
   await Promise.all(Array.from({ length: Math.ceil(bounded.length / 30) }, async (_, i) => {
     const batch = bounded.slice(i * 30, i * 30 + 30);
     try {
-      const res = await fetchWithTimeout(`https://api.geckoterminal.com/api/v2/networks/base/pools/multi/${batch.join(",")}`, {}, 4000);
+      const res = await fetchPriceBatch(`https://api.geckoterminal.com/api/v2/networks/base/pools/multi/${batch.join(",")}`, 4000);
       if (!res.ok) throw new Error(`Pool source returned ${res.status}`);
       const data = obj(await res.json())?.data;
       if (!Array.isArray(data)) throw new Error("Invalid pool source response");
@@ -324,5 +342,7 @@ export async function getScorecard(daysRaw?: string) {
         "A track record, not investment advice. Cohort medians over small counts are noisy — read the per-token rows.",
       at: new Date().toISOString(),
     };
-  });
+  }, result => result.coverage.missingSnapshotDates.length > 0 ||
+    result.coverage.priceBatchesFailed > 0 || result.coverage.fallbackPriceBatchesFailed > 0
+    ? 60_000 : 1_800_000);
 }

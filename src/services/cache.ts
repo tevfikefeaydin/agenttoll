@@ -10,6 +10,7 @@ export async function cached<T>(
   key: string,
   ttlMs: number,
   fn: () => Promise<T>,
+  ttlForValue?: (value: T) => number,
 ): Promise<T> {
   const hit = store.get(key);
   const context = requestContext.getStore();
@@ -27,7 +28,7 @@ export async function cached<T>(
       context?.signal.throwIfAborted();
       // The original reader owns its upstream request. If it disconnects,
       // independent readers retry with their own still-live request context.
-      if (loading.signal?.aborted) return cached(key, ttlMs, fn);
+      if (loading.signal?.aborted) return cached(key, ttlMs, fn, ttlForValue);
       throw error;
     }
   }
@@ -39,7 +40,8 @@ export async function cached<T>(
     if (store.size >= MAX_ENTRIES) {
       for (const k of Array.from(store.keys()).slice(0, MAX_ENTRIES / 3)) store.delete(k);
     }
-    store.set(key, { value, expires: Date.now() + ttlMs });
+    const lifetime = ttlForValue ? ttlForValue(value) : ttlMs;
+    store.set(key, { value, expires: Date.now() + lifetime });
     return value;
   }).finally(() => { pending.delete(key); });
   pending.set(key, { promise, signal: context?.signal });
