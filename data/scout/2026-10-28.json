@@ -1,0 +1,105 @@
+{
+  "date": "2026-10-28",
+  "at": "2026-10-28T14:08:06.099Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0xe4a2db0c4afce3bfa4b4d48872a33c7f03fef41dc573540fe025e8c00477bb5c",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 0,
+    "caution": 2,
+    "insufficientData": 2,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "GROVE / WETH 0.05%",
+      "pool": "0xb5d47c42d130ef99e135854e9637f9105974bf7a",
+      "token": "0x1bade864afaf55b65d4a1afea72aed4bec3736e9",
+      "createdAt": "2026-10-28T13:41:45Z",
+      "priceUsd": 0.0142260799964183,
+      "volume24hUsd": 20549.8668745108,
+      "liquidityUsd": 71139240.3207,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "owner-powers",
+          "creator-stake"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "SIFI / WETH",
+      "pool": "0x1ac8b47262154cf57039aa1b970265f4064aefd9",
+      "token": "0xa9fc4c3ee1a093f4581ab3a572db7443492fc224",
+      "createdAt": "2026-10-28T13:41:59Z",
+      "priceUsd": 0.00000527329986995848,
+      "volume24hUsd": 4180.9415236523,
+      "liquidityUsd": 78463.5833,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "USAD / WETH",
+      "pool": "0x17a13ca878e68cf8c20c3c634670acf040f25b2a4a5e302fd23a2da0ca54404e",
+      "token": "0x82231da2b4ade8564a1c13533c55f98278d220b2",
+      "createdAt": "2026-10-28T13:40:31Z",
+      "priceUsd": 0.000137636277418562,
+      "volume24hUsd": 187.9886552164,
+      "liquidityUsd": 136519.0707,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "USDA / WETH",
+      "pool": "0xe1791110f9b9c912fb3278eb01da5d97df9942385b78ecc2f07ad83e18185842",
+      "token": "0x4ab8e4ba1ba33f14126396251a560d5c90c7f1c4",
+      "createdAt": "2026-10-28T13:36:23Z",
+      "priceUsd": 0.000126561778637191,
+      "volume24hUsd": 182.4468827308,
+      "liquidityUsd": 125334.0684,
+      "safety": {
+        "verdict": "insufficient-data",
+        "failed": [],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    }
+  ]
+}
