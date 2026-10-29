@@ -1,0 +1,111 @@
+{
+  "date": "2026-10-29",
+  "at": "2026-10-29T14:29:55.638Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x2b9d22993a66e10b51273c5f561677e51d1629cbc9f5333521dbb43c92cfe592",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 1,
+    "caution": 3,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "GEOT / WETH",
+      "pool": "0xf09c1eef82fe89481d6cfa8588d3d8e37b3cbf6b",
+      "token": "0x7fb15016a9fb46b7591d147956a81559d76cd3a3",
+      "createdAt": "2026-10-29T14:05:17Z",
+      "priceUsd": 0.00000678109598566826,
+      "volume24hUsd": 4286.9759286429,
+      "liquidityUsd": 78696.5273,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "creator-stake",
+          "deployer"
+        ],
+        "unchecked": [
+          "owner-powers",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "RSGP / USDC",
+      "pool": "0x9def8de15968de7ce2042fd9dc7b417f7f22e99c",
+      "token": "0x99a07f7223612f9ea1aa453476883a6029dc2505",
+      "createdAt": "2026-10-29T13:57:07Z",
+      "priceUsd": 0.0250322093021162,
+      "volume24hUsd": 2446.8937832841,
+      "liquidityUsd": 18835.5241,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "verified",
+          "liquidity"
+        ],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "owner-powers",
+          "concentration",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "USPR / ZORA",
+      "pool": "0xb3f132227ccf5464c9daff7d69669faef23086dc662122d87edc4912e190cdfc",
+      "token": "0x6ce82d70cbcfe060f3865e987e2da46c5e22adf6",
+      "createdAt": "2026-10-29T13:49:07Z",
+      "priceUsd": 0.000157022178145513,
+      "volume24hUsd": 30.2393469601,
+      "liquidityUsd": 155914.7795,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "GEOT / ZORA",
+      "pool": "0x30f3950a3364f83fa6fb50264ea8f343676a2a878f0acf4f3d0170627c00ff99",
+      "token": "0x9e3619b9a25c80786a98bdcb5c4327a7e9af5919",
+      "createdAt": "2026-10-29T13:58:15Z",
+      "priceUsd": 0.0000895218246075304,
+      "volume24hUsd": 21.1790675819,
+      "liquidityUsd": 88815.4202,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    }
+  ]
+}
