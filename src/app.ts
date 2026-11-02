@@ -8,7 +8,7 @@ import { HTTPFacilitatorClient, type FacilitatorClient } from "@x402/core/server
 import { decodePaymentRequiredHeader } from "@x402/core/http";
 import { SettleError, VerifyError } from "@x402/core/types";
 import { ExactEvmScheme } from "@x402/evm/exact/server";
-import { facilitator as cdpFacilitator } from "@coinbase/x402";
+import { facilitator as cdpFacilitator } from "./cdp-facilitator.js";
 import { declareDiscoveryExtension } from "@x402/extensions/bazaar";
 import { getPrice } from "./services/prices.js";
 import { getGas } from "./services/gas.js";

@@ -38,15 +38,15 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@coinbase/x402": "^2.1.0",
-    "@x402/core": "^2.21.0",
-    "@x402/evm": "^2.21.0",
-    "@x402/express": "^2.21.0",
-    "@x402/extensions": "^2.21.0",
-    "@x402/fetch": "^2.21.0",
+    "@x402/core": "^2.29.0",
+    "@x402/evm": "^2.29.0",
+    "@x402/express": "^2.29.0",
+    "@x402/extensions": "^2.29.0",
+    "@x402/fetch": "^2.29.0",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "viem": "^2.55.10"
+    "viem": "^2.55.10",
+    "jose": "^6.1.0"
   },
   "devDependencies": {
     "@langchain/core": "^1.2.9",
@@ -60,10 +60,5 @@
   },
   "engines": {
     "node": ">=22"
-  },
-  "overrides": {
-    "@coinbase/cdp-sdk": {
-      "axios": "^1.20.0"
-    }
   }
 }

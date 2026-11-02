@@ -58,7 +58,7 @@ export function createAgentTollServer(options: PaymentClientOptions & { privateK
   ) {
     const endpoint = ENDPOINT_MANIFEST.find(entry => entry.tool === name)!;
     // Every callback receives a call function bound to this MCP request's cancellation signal.
-    return server.registerTool(name, {
+    return server.registerTool<z.ZodRawShape, z.ZodObject<Shape>>(name, {
       description: `${description} Costs ${endpoint.price} in USDC via x402.`,
       inputSchema: z.object(schema),
     }, (args, extra) => callback(args, (path, query) => callEndpoint(extra.signal, path, query)));

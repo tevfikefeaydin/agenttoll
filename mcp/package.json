@@ -31,10 +31,10 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
-    "@x402/evm": "^2.21.0",
-    "@x402/fetch": "^2.21.0",
+    "@x402/evm": "^2.29.0",
+    "@x402/fetch": "^2.29.0",
     "viem": "^2.21.0",
-    "zod": "^3.23.0"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
