@@ -16,7 +16,7 @@ import "dotenv/config";
 import fs from "node:fs";
 import path from "node:path";
 import { decodePaymentResponseHeader } from "@x402/fetch";
-import { automationOptions, automationPayment, previewAutomation, automationFailure } from "./automation-payment.mjs";
+import { automationOptions, automationPayment, previewAutomation, automationFailure, paymentRejection } from "./automation-payment.mjs";
 
 const DIR = path.join(process.cwd(), "data", "scout");
 const date = new Date().toISOString().slice(0, 10);
@@ -54,7 +54,10 @@ try {
   if (await previewAutomation(client)) process.exit(0);
 
   const res = await client.fetchWithPayment(client.url, { method: "GET" });
-  if (!res.ok) throw new Error(`scout -> HTTP ${res.status}`);
+  if (!res.ok) {
+    const rejection = paymentRejection(res);
+    throw new Error(`scout -> HTTP ${res.status}${rejection ? ` (payment rejected: ${rejection})` : ""}`);
+  }
   const scout = await res.json();
   validateScout(scout);
   const receipt = res.headers.get("payment-response");

@@ -51,6 +51,9 @@ before(async () => {
         "payment-required": Buffer.from(JSON.stringify(scenario.quote)).toString("base64"),
         ...(scenario.redirect ? { location: "https://untrusted.example/api/base/scout" } : {}),
       } });
+      if (scenario.rejection) return new Response("{}", { status: 402, headers: {
+        "payment-required": Buffer.from(JSON.stringify({ ...scenario.quote, error: scenario.rejection })).toString("base64"),
+      } });
       return Response.json(scenario.body, { status: scenario.paidStatus ?? 200, headers: {
         "payment-response": Buffer.from(JSON.stringify({ success: true, transaction: "0x" + "a".repeat(64), network: "eip155:8453", payer: "0x" + "b".repeat(40) })).toString("base64"),
       } });
@@ -69,7 +72,7 @@ type Script = "keep-warm" | "snapshot";
 function run(script: Script, options: {
   args?: string[]; env?: Record<string, string>; amount?: string;
   requirement?: Record<string, unknown>; body?: unknown; paidStatus?: number;
-  hang?: boolean; redirect?: boolean; existing?: boolean; paused?: boolean; scheduled?: boolean;
+  hang?: boolean; redirect?: boolean; existing?: boolean; paused?: boolean; scheduled?: boolean; rejection?: string;
 } = {}) {
   const cwd = fs.mkdtempSync(path.join(fixture, "run-"));
   const endpoint = script === "keep-warm" ? "/api/price/eth" : "/api/base/scout";
@@ -80,7 +83,7 @@ function run(script: Script, options: {
   Object.assign(env, options.env ?? {});
   const origin = new URL(env.AGENTTOLL_URL ?? API).origin;
   fs.writeFileSync(path.join(cwd, "scenario.json"), JSON.stringify({
-    origin, hang: options.hang, redirect: options.redirect, paidStatus: options.paidStatus, paused: options.paused, scheduled: options.scheduled,
+    origin, hang: options.hang, redirect: options.redirect, paidStatus: options.paidStatus, paused: options.paused, scheduled: options.scheduled, rejection: options.rejection,
     body: options.body === undefined ? scout : options.body,
     quote: {
       x402Version: 2, resource: { url: origin + endpoint, mimeType: "application/json" },
@@ -234,6 +237,18 @@ for (const script of ["keep-warm", "snapshot"] as const) {
     assert.equal(result.json.at(-1)?.budget?.reservedUsdc, script === "keep-warm" ? "0.001000" : "0.008000");
     assert.equal(result.json.at(-1)?.budget?.spentUsdc, "0.000000");
     assert.equal(fs.existsSync(result.data), false);
+  });
+
+  test(`${script}: a signed payment the server rejects reports the allowlisted reason`, () => {
+    const result = run(script, { env: { AGENT_PRIVATE_KEY: key }, rejection: "insufficient_funds" });
+    assert.equal(result.status, 1, result.messages);
+    assert.equal(result.calls.filter(call => call.signed).length, 1);
+    assert.match(result.messages, /insufficient_funds/);
+    assert.equal(fs.existsSync(result.data), false);
+    // Anything that is not a short code (e.g. an echoed message or address) is dropped.
+    const noisy = run(script, { env: { AGENT_PRIVATE_KEY: key }, rejection: "payer 0x" + "b".repeat(40) + " lacks funds" });
+    assert.equal(noisy.status, 1, noisy.messages);
+    assert.doesNotMatch(noisy.messages, /lacks funds/);
   });
 
   test(`${script}: a normal fixture pays exactly once within the one-call budget`, () => {
