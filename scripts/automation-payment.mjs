@@ -1,5 +1,6 @@
 import { payingFetch } from "../dist/pay.js";
 import { createPaymentClient, HOSTED_URL, registeredEndpoint } from "../dist/payment-policy.js";
+import { decodePaymentRequiredHeader } from "@x402/core/http";
 
 /** Parse before any wallet or HTTP work; a misspelled preview flag must not pay. */
 export function automationOptions({ allowPath = false } = {}) {
@@ -71,4 +72,19 @@ export function automationFailure(error, client, context = {}, write = console.e
     ...(client ? { mode: client.mode, path: client.path, budget: client.getPaymentBudget() } : {}),
   }));
   process.exitCode = 1;
+}
+
+/**
+ * Why the server refused a signed retry (e.g. "insufficient_funds"), taken from
+ * the allowlisted reason the API forwards in the 402 PAYMENT-REQUIRED header.
+ * Only short snake_case codes are returned, so nothing sensitive reaches logs.
+ */
+export function paymentRejection(res) {
+  if (res.status !== 402) return undefined;
+  try {
+    const reason = decodePaymentRequiredHeader(res.headers.get("payment-required") ?? "")?.error;
+    return typeof reason === "string" && /^[a-z0-9_]{1,80}$/.test(reason) ? reason : undefined;
+  } catch {
+    return undefined;
+  }
 }

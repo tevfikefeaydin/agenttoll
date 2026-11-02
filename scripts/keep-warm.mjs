@@ -23,7 +23,7 @@
 import "dotenv/config";
 import { decodePaymentResponseHeader } from "@x402/fetch";
 import { ENDPOINTS } from "../dist/endpoints.js";
-import { automationOptions, automationPayment, previewAutomation, automationFailure } from "./automation-payment.mjs";
+import { automationOptions, automationPayment, previewAutomation, automationFailure, paymentRejection } from "./automation-payment.mjs";
 
 // Actions logs are public. Keep results/costs, but never print wallet addresses,
 // transaction hashes, signed payload identifiers or a hex private key.
@@ -105,6 +105,7 @@ try {
       ms: Date.now() - started,
       tx,
       transactionConfirmed,
+      ...(paymentRejection(res) ? { paymentRejection: paymentRejection(res) } : {}),
       budget: client.getPaymentBudget(),
     }),
   );
