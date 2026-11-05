@@ -1,0 +1,84 @@
+{
+  "date": "2026-11-05",
+  "at": "2026-11-05T15:38:44.529Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x41c17ff7700eb0a125b719320aa477cdb2828b9c4836ade4cd5519c6c3d20046",
+  "summary": {
+    "found": 3,
+    "checked": 3,
+    "unchecked": 0,
+    "highRisk": 3,
+    "caution": 0,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "Anthropic / USDC",
+      "pool": "0xdb680e077064a4da7d6e1c6197ac651c7254c06f",
+      "token": "0x191d779ca90f2b626633b822581f2f7da61e1796",
+      "createdAt": "2026-11-05T14:03:03Z",
+      "priceUsd": 0.000101231175543951,
+      "volume24hUsd": 51820011.085708,
+      "liquidityUsd": 10171270.23,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "liquidity"
+        ],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes"
+        ]
+      }
+    },
+    {
+      "name": "DENIM / VIRTUAL 0.3%",
+      "pool": "0xe52a6b46fde07fc4974a53aed7bf2fa23971b8ce",
+      "token": "0x393c21383c3398e6002b66380ca805a71e8f6fa6",
+      "createdAt": "2026-11-04T19:20:01Z",
+      "priceUsd": 0.0131902742863065,
+      "volume24hUsd": 23030750.997689,
+      "liquidityUsd": 8435840.9268,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "deployer"
+        ],
+        "warnings": [
+          "owner-powers",
+          "creator-stake"
+        ],
+        "unchecked": [
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "HBAR / VIRTUAL 0.3%",
+      "pool": "0x57a47e9baabd8040498d18f6adffabd511e6b449",
+      "token": "0x5943aeae79bc0b257f339923fcb9b00ec66da5e8",
+      "createdAt": "2026-11-05T09:19:07Z",
+      "priceUsd": 0.104972413786624,
+      "volume24hUsd": 14683799.1846232,
+      "liquidityUsd": 95491863.8592,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "deployer"
+        ],
+        "warnings": [
+          "owner-powers"
+        ],
+        "unchecked": [
+          "liquidity"
+        ]
+      }
+    }
+  ]
+}
