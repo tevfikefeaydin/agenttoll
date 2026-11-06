@@ -1,0 +1,62 @@
+{
+  "date": "2026-11-06",
+  "at": "2026-11-06T15:12:23.662Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x061e85ba66d7ab4a7559bacb8d17ff9abac809dd433610e5191c902ad1fc9aff",
+  "summary": {
+    "found": 2,
+    "checked": 2,
+    "unchecked": 0,
+    "highRisk": 2,
+    "caution": 0,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "OOPS / VIRTUAL 0.3%",
+      "pool": "0x83b78a78e99e179ed38aa230ff5a3383c76e40ab",
+      "token": "0xb935d6662c855c463002e1596786e851cf81fe5a",
+      "createdAt": "2026-11-06T09:34:46Z",
+      "priceUsd": 0.0000037764401453906,
+      "volume24hUsd": 60320145.4176976,
+      "liquidityUsd": 354430175.8665,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "deployer"
+        ],
+        "warnings": [
+          "owner-powers",
+          "creator-stake"
+        ],
+        "unchecked": [
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "Anthropic / USDC",
+      "pool": "0x5628061d9f3e5935f3cc0f072dab2c64cc5d29cd",
+      "token": "0xf6d41cbb39a6540a93e0d29a50b4eb720444e754",
+      "createdAt": "2026-11-06T12:44:31Z",
+      "priceUsd": 0.000102438753611691,
+      "volume24hUsd": 52182712.4060478,
+      "liquidityUsd": 10366903.5208,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "liquidity"
+        ],
+        "warnings": [],
+        "unchecked": [
+          "honeypot"
+        ]
+      }
+    }
+  ]
+}
