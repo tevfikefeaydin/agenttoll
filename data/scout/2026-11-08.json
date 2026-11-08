@@ -1,0 +1,44 @@
+{
+  "date": "2026-11-08",
+  "at": "2026-11-08T14:23:02.387Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x6b363cb176e7891e6b4f1d29206f53eedf43b51d85e24b1df5563eb9bef80551",
+  "summary": {
+    "found": 1,
+    "checked": 1,
+    "unchecked": 0,
+    "highRisk": 1,
+    "caution": 0,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "Anthropic / USDC 0.01%",
+      "pool": "0xc218a86430a195872a242941316f5671cc1b9a38",
+      "token": "0x0a3467b932af82503718c292cefe1336eda80d01",
+      "createdAt": "2026-11-08T13:46:56Z",
+      "priceUsd": 0.000101697919890431,
+      "volume24hUsd": 14579465.8785618,
+      "liquidityUsd": 10295492.4669,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "concentration",
+          "liquidity"
+        ],
+        "warnings": [
+          "creator-stake"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes"
+        ]
+      }
+    }
+  ]
+}
