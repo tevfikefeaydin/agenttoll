@@ -1,8 +1,8 @@
 # agenttoll-mcp
 
-Version 0.14.0 exposes 21 paid AgentToll tools and two free payment-inspection tools. The hosted API uses real USDC on Base mainnet. Base data always comes from mainnet, even when a self-hosted instance accepts Base Sepolia payments.
+Version 0.14.1 exposes 21 paid AgentToll tools and two free payment-inspection tools. The hosted API uses real USDC on Base mainnet. Base data always comes from mainnet, even when a self-hosted instance accepts Base Sepolia payments.
 
-Upgrade to **0.14.0 or later** for quote-only startup, session budgets, registered price and recipient checks, and cancellation/timeout protection. The previously published 0.13.0 archive does not contain those protections, even though later source changes reused that version. Restart your MCP client after updating its package reference.
+Upgrade to **0.14.0 or later** for quote-only startup, session budgets, registered price and recipient checks, and cancellation/timeout protection. The previously published 0.13.0 archive does not contain those protections, even though later source changes reused that version. Version 0.14.1 has the same tools as 0.14.0 and only updates dependencies (zod 4, current x402 client), which clears the zod advisory `npm audit` reports for 0.14.0. Restart your MCP client after updating its package reference.
 
 ## Start without a wallet
 
@@ -11,7 +11,7 @@ Upgrade to **0.14.0 or later** for quote-only startup, session budgets, register
   "mcpServers": {
     "agenttoll": {
       "command": "npx",
-      "args": ["-y", "agenttoll-mcp@0.14.0"]
+      "args": ["-y", "agenttoll-mcp@0.14.1"]
     }
   }
 }

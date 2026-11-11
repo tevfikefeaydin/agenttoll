@@ -206,14 +206,14 @@ The [CrewAI Python example](examples/PYTHON.md) uses a separate bounded client w
 
 ## MCP
 
-The MCP package is version 0.14.0, with 21 paid tools and two free tools. Start without AGENT_PRIVATE_KEY for quote-only mode:
+The MCP package is version 0.14.1, with 21 paid tools and two free tools. Start without AGENT_PRIVATE_KEY for quote-only mode:
 
 ```json
 {
   "mcpServers": {
     "agenttoll": {
       "command": "npx",
-      "args": ["-y", "agenttoll-mcp@0.14.0"]
+      "args": ["-y", "agenttoll-mcp@0.14.1"]
     }
   }
 }
@@ -223,7 +223,7 @@ The free tools are get_payment_budget and get_payment_quote. Paid tools are get_
 
 Add AGENT_PRIVATE_KEY to enable payments, and AGENTTOLL_BUDGET_USDC to choose a session limit. MCP defaults to the hosted mainnet origin and requires AGENTTOLL_RECIPIENT for a custom origin. get_payment_quote accepts registered endpoint paths, never arbitrary URLs. Tool cancellation propagates to payment HTTP requests. See [mcp/README.md](mcp/README.md) for all prices and configuration.
 
-Upgrade installations of 0.13.0 or earlier by changing the package argument to `agenttoll-mcp@0.14.0` and restarting the MCP process. Those older published packages do not provide the free quote/budget tools or the documented cumulative budget, trusted-recipient and cancellation controls. A process already running old code does not update itself.
+Upgrade installations of 0.13.0 or earlier by changing the package argument to `agenttoll-mcp@0.14.1` and restarting the MCP process. Version 0.14.1 has the same tools as 0.14.0 and only updates dependencies, which clears the zod advisory `npm audit` reports for 0.14.0. Those older published packages do not provide the free quote/budget tools or the documented cumulative budget, trusted-recipient and cancellation controls. A process already running old code does not update itself.
 
 The HTTP service uses **x402 v2**. Send the signed retry as `PAYMENT-SIGNATURE`, not legacy `X-PAYMENT`; read the quote from `PAYMENT-REQUIRED` and receipt from `PAYMENT-RESPONSE`. Use a v2 client rather than merely renaming a v1 payload's header. A rejected legacy request receives explicit migration guidance. Keep address-watch cursors opaque and pass them unchanged; only the initial `since` value may be an ISO timestamp.
 
