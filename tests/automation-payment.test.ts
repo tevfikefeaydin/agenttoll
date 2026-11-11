@@ -51,7 +51,10 @@ before(async () => {
         "payment-required": Buffer.from(JSON.stringify(scenario.quote)).toString("base64"),
         ...(scenario.redirect ? { location: "https://untrusted.example/api/base/scout" } : {}),
       } });
-      if (scenario.rejection) return new Response("{}", { status: 402, headers: {
+      // The API reports a verification decline in PAYMENT-REQUIRED and a settlement decline in PAYMENT-RESPONSE.
+      if (scenario.rejection) return new Response("{}", { status: 402, headers: scenario.rejectionStage === "settle" ? {
+        "payment-response": Buffer.from(JSON.stringify({ success: false, errorReason: scenario.rejection, errorMessage: scenario.rejection, network: "eip155:8453", transaction: "" })).toString("base64"),
+      } : {
         "payment-required": Buffer.from(JSON.stringify({ ...scenario.quote, error: scenario.rejection })).toString("base64"),
       } });
       return Response.json(scenario.body, { status: scenario.paidStatus ?? 200, headers: {
@@ -72,7 +75,7 @@ type Script = "keep-warm" | "snapshot";
 function run(script: Script, options: {
   args?: string[]; env?: Record<string, string>; amount?: string;
   requirement?: Record<string, unknown>; body?: unknown; paidStatus?: number;
-  hang?: boolean; redirect?: boolean; existing?: boolean; paused?: boolean; scheduled?: boolean; rejection?: string;
+  hang?: boolean; redirect?: boolean; existing?: boolean; paused?: boolean; scheduled?: boolean; rejection?: string; rejectionStage?: "verify" | "settle";
 } = {}) {
   const cwd = fs.mkdtempSync(path.join(fixture, "run-"));
   const endpoint = script === "keep-warm" ? "/api/price/eth" : "/api/base/scout";
@@ -83,7 +86,7 @@ function run(script: Script, options: {
   Object.assign(env, options.env ?? {});
   const origin = new URL(env.AGENTTOLL_URL ?? API).origin;
   fs.writeFileSync(path.join(cwd, "scenario.json"), JSON.stringify({
-    origin, hang: options.hang, redirect: options.redirect, paidStatus: options.paidStatus, paused: options.paused, scheduled: options.scheduled, rejection: options.rejection,
+    origin, hang: options.hang, redirect: options.redirect, paidStatus: options.paidStatus, paused: options.paused, scheduled: options.scheduled, rejection: options.rejection, rejectionStage: options.rejectionStage,
     body: options.body === undefined ? scout : options.body,
     quote: {
       x402Version: 2, resource: { url: origin + endpoint, mimeType: "application/json" },
@@ -240,15 +243,17 @@ for (const script of ["keep-warm", "snapshot"] as const) {
   });
 
   test(`${script}: a signed payment the server rejects reports the allowlisted reason`, () => {
-    const result = run(script, { env: { AGENT_PRIVATE_KEY: key }, rejection: "insufficient_funds" });
-    assert.equal(result.status, 1, result.messages);
-    assert.equal(result.calls.filter(call => call.signed).length, 1);
-    assert.match(result.messages, /insufficient_funds/);
-    assert.equal(fs.existsSync(result.data), false);
-    // Anything that is not a short code (e.g. an echoed message or address) is dropped.
-    const noisy = run(script, { env: { AGENT_PRIVATE_KEY: key }, rejection: "payer 0x" + "b".repeat(40) + " lacks funds" });
-    assert.equal(noisy.status, 1, noisy.messages);
-    assert.doesNotMatch(noisy.messages, /lacks funds/);
+    for (const rejectionStage of ["verify", "settle"] as const) {
+      const result = run(script, { env: { AGENT_PRIVATE_KEY: key }, rejection: "insufficient_funds", rejectionStage });
+      assert.equal(result.status, 1, result.messages);
+      assert.equal(result.calls.filter(call => call.signed).length, 1);
+      assert.match(result.messages, /insufficient_funds/, rejectionStage);
+      assert.equal(fs.existsSync(result.data), false);
+      // Anything that is not a short code (e.g. an echoed message or address) is dropped.
+      const noisy = run(script, { env: { AGENT_PRIVATE_KEY: key }, rejection: "payer 0x" + "b".repeat(40) + " lacks funds", rejectionStage });
+      assert.equal(noisy.status, 1, noisy.messages);
+      assert.doesNotMatch(noisy.messages, /lacks funds/);
+    }
   });
 
   test(`${script}: a normal fixture pays exactly once within the one-call budget`, () => {
