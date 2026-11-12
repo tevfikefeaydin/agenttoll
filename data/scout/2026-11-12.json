@@ -1,0 +1,64 @@
+{
+  "date": "2026-11-12",
+  "at": "2026-11-12T16:03:56.387Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x1002ece2835915b8d5b9cff4bf11c65b61c76e64c33e5cc474581e0e767305fc",
+  "summary": {
+    "found": 2,
+    "checked": 2,
+    "unchecked": 0,
+    "highRisk": 2,
+    "caution": 0,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "PONS / WPRL",
+      "pool": "0xc4a328359592211d4e415915c6c6f4e8807f6b16",
+      "token": "0x304b826a47a5e6cb2766ad9069f670651c9f847d",
+      "createdAt": "2026-11-12T09:59:55Z",
+      "priceUsd": 0.134467687529168,
+      "volume24hUsd": 362555444.229641,
+      "liquidityUsd": 24737344.1667,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "concentration"
+        ],
+        "warnings": [
+          "owner-powers",
+          "creator-stake"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "Claude / USDC 0.01%",
+      "pool": "0xaf2533edc39790340b8084f990bca5e2aaf2e24b",
+      "token": "0xab35c8ec5e51e31a350aba8fbfc9ca132bc05b07",
+      "createdAt": "2026-11-12T12:33:03Z",
+      "priceUsd": 0.000101757756687249,
+      "volume24hUsd": 33019654.5365563,
+      "liquidityUsd": 10244800.943,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "liquidity"
+        ],
+        "warnings": [],
+        "unchecked": [
+          "honeypot"
+        ]
+      }
+    }
+  ]
+}
