@@ -1,0 +1,88 @@
+{
+  "date": "2026-11-13",
+  "at": "2026-11-13T15:31:12.448Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x487306f03397fa7862fd68372d4a0d5474349b88708c78c4f727b5319a5d587c",
+  "summary": {
+    "found": 3,
+    "checked": 3,
+    "unchecked": 0,
+    "highRisk": 3,
+    "caution": 0,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "PEPE / WPRL",
+      "pool": "0xa1959b58462319dc20f619d78a013fbef4576ef4",
+      "token": "0x48dfac2a2d860e7424c7024b9836ed0219870c4c",
+      "createdAt": "2026-11-13T08:44:03Z",
+      "priceUsd": 0.0000046714263908617,
+      "volume24hUsd": 93988230.4082457,
+      "liquidityUsd": 140319695.5367,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "concentration"
+        ],
+        "warnings": [
+          "owner-powers",
+          "creator-stake"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "Claude / USDC 0.01%",
+      "pool": "0x26ba56f5dda11ee3e1804595bea47cc25fe88f47",
+      "token": "0x06f9d7c1408872341e3d2c3445698d3d243ddb07",
+      "createdAt": "2026-11-13T12:30:59Z",
+      "priceUsd": 0.000102285697480982,
+      "volume24hUsd": 40064568.9447113,
+      "liquidityUsd": 10291428.6592,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "liquidity"
+        ],
+        "warnings": [],
+        "unchecked": [
+          "honeypot"
+        ]
+      }
+    },
+    {
+      "name": "XAUt / WPRL",
+      "pool": "0x312e595f49f5bfe4a5145b271b1ca446d642edeb",
+      "token": "0xe35813aea5ea16d1622e26511919b9e81d061973",
+      "createdAt": "2026-11-13T08:26:36Z",
+      "priceUsd": 5560.49335372241,
+      "volume24hUsd": 30003951.1243173,
+      "liquidityUsd": 86476988.1086,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "concentration"
+        ],
+        "warnings": [
+          "owner-powers",
+          "creator-stake"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "liquidity"
+        ]
+      }
+    }
+  ]
+}
