@@ -1,0 +1,106 @@
+{
+  "date": "2026-11-15",
+  "at": "2026-11-15T14:51:39.633Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x72e5c857005295b9548ebdaf0355c0d8edb1bc8e0e5a064b56873ffd0d475e5f",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 1,
+    "caution": 3,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "VOUCH / ETH",
+      "pool": "0x56ceb7fa5282617824ca4d36c010448d26a45a236a74e4b556985b5ecbd835f3",
+      "token": "0xe9dc6278c7a015791a9fa2b9e6110553545ecccc",
+      "createdAt": "2026-11-15T14:43:09Z",
+      "priceUsd": 0.0000135800871822163,
+      "volume24hUsd": 6541.5936298993,
+      "liquidityUsd": 24440.6467,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "BRAVE / WETH",
+      "pool": "0x133b898266b9c36b6dbc0ed19b2b86f7e3cdc5a9",
+      "token": "0x977785a9bf1d818b639ee06fe958fa7e8859bbf4",
+      "createdAt": "2026-11-15T14:29:09Z",
+      "priceUsd": 0.00000421368786603752,
+      "volume24hUsd": 2813.701803,
+      "liquidityUsd": 59738.7384,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "liquidity"
+        ],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration"
+        ]
+      }
+    },
+    {
+      "name": "SPCX / WETH",
+      "pool": "0x50fd0288bd2438b0c2d7a571ac823beaa6ba899d",
+      "token": "0xb8241092c30f2db5e50a09304e1a52ecec954933",
+      "createdAt": "2026-11-15T14:42:26Z",
+      "priceUsd": 0.00000153098491174412,
+      "volume24hUsd": 841.1631417325,
+      "liquidityUsd": 15514.0392,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "BASECAT / WETH",
+      "pool": "0x24c9e06b6deb7c8b170247b7fdbf71243a25de3120148b7cd0b656aabc22700c",
+      "token": "0xa1aec9b3fc44da4111135e9e6d96742a23b63ba3",
+      "createdAt": "2026-11-15T14:42:37Z",
+      "priceUsd": 1.01486390868032e-7,
+      "volume24hUsd": 43.3555138252,
+      "liquidityUsd": 17725.3739799921,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "owner-powers"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    }
+  ]
+}
