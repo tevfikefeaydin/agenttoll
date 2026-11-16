@@ -1,0 +1,65 @@
+{
+  "date": "2026-11-16",
+  "at": "2026-11-16T17:10:35.769Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x2a49e69289afd8ef3d8dc0db1885234cc9d5ce3b9c471794b8607bfb54fe2e11",
+  "summary": {
+    "found": 2,
+    "checked": 2,
+    "unchecked": 0,
+    "highRisk": 2,
+    "caution": 0,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "Anthropic / USDC 0.01%",
+      "pool": "0x9d2dfa4e372d0519683f55752701c32ab92253ea",
+      "token": "0x5c8f65019960920b7bac9af1241f0b2c47e75a70",
+      "createdAt": "2026-11-16T09:10:59Z",
+      "priceUsd": 0.000101833904707289,
+      "volume24hUsd": 54779210.248056,
+      "liquidityUsd": 10241205.8966,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "liquidity"
+        ],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes"
+        ]
+      }
+    },
+    {
+      "name": "WIN / WPRL",
+      "pool": "0xe54d91f5733d9d0a839e02456161ac6a6291c1ec",
+      "token": "0x716f5c9a768888c592f497842405cf80196c1b96",
+      "createdAt": "2026-11-16T07:34:33Z",
+      "priceUsd": 0.00000502136149885438,
+      "volume24hUsd": 19618485.2205063,
+      "liquidityUsd": 38870887.3994,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "concentration"
+        ],
+        "warnings": [
+          "owner-powers",
+          "creator-stake"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "liquidity"
+        ]
+      }
+    }
+  ]
+}
