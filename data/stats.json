@@ -4,15 +4,15 @@
   "schemaVersion": 1,
   "fromBlock": 49340000,
   "countingPolicy": "usdc-transfer-1-50000-v1",
-  "block": 58226912,
-  "blockHash": "0x0e544e86c3ddb9b02619d3e387f39b227ac767c38cf52aa0b90e2b43d6be3199",
-  "at": "2026-11-16T13:59:58.898Z",
+  "block": 58678175,
+  "blockHash": "0x6f6af765a800cd9f0684cf1c96b898c45aaf0fc547deeda2af5037290c6ff4ed",
+  "at": "2026-11-17T14:54:42.856Z",
   "firstTollAt": "2026-07-31T13:49:17.000Z",
-  "lastTollAt": "2026-11-16T09:52:17.000Z",
+  "lastTollAt": "2026-11-16T17:10:36.000Z",
   "payers": {
     "0x29d7837a1c19890d2ab123999e9cf8bfe40985b0": {
-      "calls": 224,
-      "usdcUnits": "1111000"
+      "calls": 226,
+      "usdcUnits": "1120000"
     },
     "0x51063e78f02f028ddce8f722e24800ed433e435f": {
       "calls": 42,
