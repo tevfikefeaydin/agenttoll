@@ -1,0 +1,41 @@
+{
+  "date": "2026-11-17",
+  "at": "2026-11-17T16:57:26.293Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0xe0da6ce12b37e48c58d3ce0378e0e0c485987d81a65d264cfeaf0ca6dbd633a8",
+  "summary": {
+    "found": 1,
+    "checked": 1,
+    "unchecked": 0,
+    "highRisk": 1,
+    "caution": 0,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "Claude / USDC 0.01%",
+      "pool": "0x9c82dd1a4b82b4794623f52bfc74585eaeb76877",
+      "token": "0xd962f48c071ad5db617b5cb3c48e22e3fa61bda5",
+      "createdAt": "2026-11-17T10:56:06Z",
+      "priceUsd": 0.00010288864892564,
+      "volume24hUsd": 27650471.119322,
+      "liquidityUsd": 10409012.1466,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "liquidity"
+        ],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes"
+        ]
+      }
+    }
+  ]
+}
