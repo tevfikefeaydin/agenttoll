@@ -1,0 +1,40 @@
+{
+  "date": "2026-11-18",
+  "at": "2026-11-18T16:34:11.271Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0xa63f2cab97d6b52517545a62069ef5c61e5140872213c52718c0bffb982c0faf",
+  "summary": {
+    "found": 1,
+    "checked": 1,
+    "unchecked": 0,
+    "highRisk": 1,
+    "caution": 0,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "OpenAI / USDC 0.01%",
+      "pool": "0x70a5013a482255e8889fbaca460b7eddd2ee9e1b",
+      "token": "0x2f17878f8bc40656c4ef39c7688b39e183d37b07",
+      "createdAt": "2026-11-18T02:13:55Z",
+      "priceUsd": 0.0000540259397159705,
+      "volume24hUsd": 36345004.741422,
+      "liquidityUsd": 5487303.8789,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "liquidity"
+        ],
+        "warnings": [],
+        "unchecked": [
+          "honeypot"
+        ]
+      }
+    }
+  ]
+}
