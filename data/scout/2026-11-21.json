@@ -1,0 +1,116 @@
+{
+  "date": "2026-11-21",
+  "at": "2026-11-21T15:27:33.312Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x221e29984f0e3fa72289dc7128df1257e78b0f02f201fae42fcc4aaeb6d9ece3",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 0,
+    "caution": 4,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "NOTF / WETH 0.3%",
+      "pool": "0x8d73b0789cfbc5f83d8d1aafec9453d1c500827d465f9a6f46f2bda3d24e37ee",
+      "token": "0x3102fb4a30be4acb12602b74592e5f7828a527d3",
+      "createdAt": "2026-11-21T15:20:17Z",
+      "priceUsd": 0.00997419173416681,
+      "volume24hUsd": 360461.842851,
+      "liquidityUsd": 202182.5637,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "owner-powers"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "National Oil Truts Fund / WETH",
+      "pool": "0x8ce302175d7c40666c84eba536adde78884c593cea5521b27111e08a65c569fe",
+      "token": "0x411d4de44c6607dd2fb98a792159b99053ed3985",
+      "createdAt": "2026-11-21T14:49:28Z",
+      "priceUsd": 0.771195238531542,
+      "volume24hUsd": 220005.886151861,
+      "liquidityUsd": 1157132653.4781,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "owner-powers"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "Antropic / WETH",
+      "pool": "0x9ececde937b489d53bf90db0a9b3f8e1b86ffcc718a2cd645d1c112de937b8a9",
+      "token": "0x3c266393e34dcd08e45fb4bbade5acab12563fd6",
+      "createdAt": "2026-11-21T14:49:27Z",
+      "priceUsd": 0.000997555716878728,
+      "volume24hUsd": 48397.6463362393,
+      "liquidityUsd": 1496269.2309,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "owner-powers"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity",
+          "creator-stake",
+          "deployer"
+        ]
+      }
+    },
+    {
+      "name": "U S O E / WETH",
+      "pool": "0x291ebfa4afdafcbbec61bb7cdaf00f0459ab742ad3f5383559c09fea31d9899c",
+      "token": "0x30d9fce8e21d6dd01a16b13995b1383c927b54b8",
+      "createdAt": "2026-11-21T14:49:11Z",
+      "priceUsd": 0.025314045994105,
+      "volume24hUsd": 39920.8699283083,
+      "liquidityUsd": 37971236.1051,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "owner-powers",
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    }
+  ]
+}
