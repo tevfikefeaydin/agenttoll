@@ -1,0 +1,40 @@
+{
+  "date": "2026-11-22",
+  "at": "2026-11-22T15:29:00.497Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x6149d3c775ddafd240ad2a3161317eefec25771f05547d6398207b917cfac6ca",
+  "summary": {
+    "found": 1,
+    "checked": 1,
+    "unchecked": 0,
+    "highRisk": 1,
+    "caution": 0,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "Base / USDC 0.01%",
+      "pool": "0x195cb1e1d69770f2a2724e5150fd2529686dd3b7",
+      "token": "0x5eaa448471337907e1ad83fcc4640a157da04b07",
+      "createdAt": "2026-11-22T05:37:25Z",
+      "priceUsd": 0.000101848431198572,
+      "volume24hUsd": 52117122.0846464,
+      "liquidityUsd": 10274482.6971,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "liquidity"
+        ],
+        "warnings": [],
+        "unchecked": [
+          "honeypot"
+        ]
+      }
+    }
+  ]
+}
