@@ -1,0 +1,40 @@
+{
+  "date": "2026-11-23",
+  "at": "2026-11-23T19:21:02.726Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0xd473352bebf66ad8c5caa4fbfa90aebb5d8b7ce8c7680a9d91b9cc469f5d3f70",
+  "summary": {
+    "found": 1,
+    "checked": 1,
+    "unchecked": 0,
+    "highRisk": 1,
+    "caution": 0,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "ANT / USDC 0.01%",
+      "pool": "0xc43445d75c71603323d1bcc6d6854724384a69d6",
+      "token": "0x4417fc0bb14c7691d0daf9d16a3bb1d22c6cdbcb",
+      "createdAt": "2026-11-23T07:29:37Z",
+      "priceUsd": 0.000101651384613259,
+      "volume24hUsd": 32897736.3090801,
+      "liquidityUsd": 10253886.3776,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "liquidity"
+        ],
+        "warnings": [],
+        "unchecked": [
+          "honeypot"
+        ]
+      }
+    }
+  ]
+}
