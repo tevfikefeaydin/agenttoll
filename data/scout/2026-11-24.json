@@ -1,0 +1,64 @@
+{
+  "date": "2026-11-24",
+  "at": "2026-11-24T18:58:06.812Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0xb1a80cadc08927c9da87c0d1d76bbd499e4467aad30de5b40e75e48e6712e06b",
+  "summary": {
+    "found": 2,
+    "checked": 2,
+    "unchecked": 0,
+    "highRisk": 2,
+    "caution": 0,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "NVDA / USDC 0.01%",
+      "pool": "0xd886c36ec256e81f9a5f9426578064f31f389846",
+      "token": "0xadd15df5707bd6f3c02598f4d37b6340b05d773b",
+      "createdAt": "2026-11-24T11:01:06Z",
+      "priceUsd": 0.00010221467997984,
+      "volume24hUsd": 41549703.1840507,
+      "liquidityUsd": 10160510.5536,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "liquidity"
+        ],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "taxes"
+        ]
+      }
+    },
+    {
+      "name": "ANT / USDC 0.01%",
+      "pool": "0x2fe1287f9d5332a980ca8bf82647e830dd2b8e81",
+      "token": "0xda8046c2cfe28e18718b2cc03fa081b004e0bc4c",
+      "createdAt": "2026-11-24T14:13:06Z",
+      "priceUsd": 0.000102215159836608,
+      "volume24hUsd": 20663886.0461217,
+      "liquidityUsd": 10232224.0083,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "concentration",
+          "liquidity"
+        ],
+        "warnings": [
+          "creator-stake"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes"
+        ]
+      }
+    }
+  ]
+}
