@@ -1,0 +1,108 @@
+{
+  "date": "2026-11-25",
+  "at": "2026-11-25T18:02:23.359Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0xfe185b70da3c5aee8d8374911be621e6b99f3be3187c8eb0bdf969fb8fb41445",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 1,
+    "caution": 3,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "LOCUS / WETH",
+      "pool": "0x3ccb308c802e9681f935b58d488c2201580af158",
+      "token": "0x17c7f532150430c297eb5d2b4bbdc0968e2445ab",
+      "createdAt": "2026-11-25T17:45:54Z",
+      "priceUsd": 0.0000045662884546416,
+      "volume24hUsd": 2219.083957,
+      "liquidityUsd": 54759.3453,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "liquidity"
+        ],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "concentration"
+        ]
+      }
+    },
+    {
+      "name": "GOTF / WETH",
+      "pool": "0x38fc3350f7e363777f15900a8b303691df62aac87598b95a72e1c25844a40011",
+      "token": "0x6f9160079bef212fbdb1d44c963b560781d845f9",
+      "createdAt": "2026-11-25T17:53:58Z",
+      "priceUsd": 0.00240122840929231,
+      "volume24hUsd": 384.6755480964,
+      "liquidityUsd": 2363484.7291,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "USOIL / WETH",
+      "pool": "0x0a607c444c377b098a77d4d3550fbba9228608a69906600a30ae1bacfa036c33",
+      "token": "0xc68933726044d2806a74f52713e632368510df1c",
+      "createdAt": "2026-11-25T17:50:53Z",
+      "priceUsd": 0.00242654558058056,
+      "volume24hUsd": 382.1989780934,
+      "liquidityUsd": 4819389.406,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "USNR / WETH",
+      "pool": "0x20e11ef79c38af8818674ab05313d1a23248add01cce0512c208534cfcb0e305",
+      "token": "0x4eb854bd36771ae7490354554d185eb6f74d18f8",
+      "createdAt": "2026-11-25T17:48:32Z",
+      "priceUsd": 0.00242813901369595,
+      "volume24hUsd": 366.4580448957,
+      "liquidityUsd": 2398272.1066,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    }
+  ]
+}
