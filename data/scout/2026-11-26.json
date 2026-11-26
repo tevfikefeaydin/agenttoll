@@ -1,0 +1,101 @@
+{
+  "date": "2026-11-26",
+  "at": "2026-11-26T17:48:11.019Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x58426e3f7441e07deb86bf6e6110329e444a245205e56c8175eb0daf8ed2abc2",
+  "summary": {
+    "found": 4,
+    "checked": 3,
+    "unchecked": 1,
+    "highRisk": 2,
+    "caution": 1,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "JESSE / ETH",
+      "pool": "0x1cd0d00a130269aacd98f5a764c6ae42bca427aefd34c74b3ac02ff4b563bc34",
+      "token": "0xc56f9e24c50f918e71345b617a56b8bbf5c87201",
+      "createdAt": "2026-11-26T17:31:13Z",
+      "priceUsd": 0.000101465870492892,
+      "volume24hUsd": 161112.002448119,
+      "liquidityUsd": 36329.1645,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "concentration",
+          "deployer"
+        ],
+        "warnings": [],
+        "unchecked": [
+          "honeypot",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "JESSE / ETH 0.01%",
+      "pool": "0x5b1aa09e94084679e4c71bd9711bb71d2ebb8d66da4c247c904b848b5fac94f4",
+      "token": "0xb200000000000000000000b35393a98c96bfea45",
+      "createdAt": "2026-11-26T17:28:51Z",
+      "priceUsd": 0.0000500355209641843,
+      "volume24hUsd": 127650.553728509,
+      "liquidityUsd": 40745.5537,
+      "safety": null
+    },
+    {
+      "name": "JESSE / ETH 0.01%",
+      "pool": "0x173b2780e7a38753f16a61c53ffc708dc5b42e2cac1d5f978be1aeba951825ba",
+      "token": "0x81557e1340c34e6ccf2aae3f090596a225797dd8",
+      "createdAt": "2026-11-26T17:36:53Z",
+      "priceUsd": 0.0000676955581308812,
+      "volume24hUsd": 93318.7385329177,
+      "liquidityUsd": 32812.676,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "verified",
+          "concentration"
+        ],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "owner-powers",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "UBR / WETH 0.3%",
+      "pool": "0x4db213502f3fe342a94c02f8ab46404e3ae7091f84c498ff0d821776d3904536",
+      "token": "0x946c3194ee5607fe67cbe5bd678e2ff763a8bb67",
+      "createdAt": "2026-11-26T17:45:23Z",
+      "priceUsd": 0.276254927176648,
+      "volume24hUsd": 65890.3153670969,
+      "liquidityUsd": 153332.1434,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "verified",
+          "owner-powers",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    }
+  ]
+}
