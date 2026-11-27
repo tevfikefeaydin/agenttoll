@@ -1,0 +1,40 @@
+{
+  "date": "2026-11-27",
+  "at": "2026-11-27T17:32:20.116Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x04193ce6c6a3349ce917ea98577dba92f2650bb0f559f0d830207cca47dea461",
+  "summary": {
+    "found": 1,
+    "checked": 1,
+    "unchecked": 0,
+    "highRisk": 1,
+    "caution": 0,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "SpaceX / USDC 0.01%",
+      "pool": "0x7aedde5c8fe7d178d726f4bdc44e2eaafb7c1006",
+      "token": "0x7d1a562e81c7d8b7889bcc6ec694432ca1b02b07",
+      "createdAt": "2026-11-27T05:27:25Z",
+      "priceUsd": 0.000101763767012513,
+      "volume24hUsd": 24963760.4220893,
+      "liquidityUsd": 10322085.8029,
+      "safety": {
+        "verdict": "high-risk",
+        "failed": [
+          "liquidity"
+        ],
+        "warnings": [],
+        "unchecked": [
+          "honeypot"
+        ]
+      }
+    }
+  ]
+}
