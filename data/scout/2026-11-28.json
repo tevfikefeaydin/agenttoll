@@ -1,0 +1,113 @@
+{
+  "date": "2026-11-28",
+  "at": "2026-11-28T16:16:53.605Z",
+  "source": "scout",
+  "params": {
+    "minLiquidity": 15000,
+    "pools": 4
+  },
+  "settlement": "0x0a4cbe9754958cbe2ed57c094566c451c7b70eca65cd6e3c8c1660e2852304f4",
+  "summary": {
+    "found": 4,
+    "checked": 4,
+    "unchecked": 0,
+    "highRisk": 0,
+    "caution": 4,
+    "insufficientData": 0,
+    "clear": 0
+  },
+  "pools": [
+    {
+      "name": "UBR / WETH",
+      "pool": "0xc53b640a752d2220ba5371029a3cb5946f60a4bc773be908d590d1aac12b227d",
+      "token": "0x32e804570a025055bc1a8bc1c658a5efb48bb85d",
+      "createdAt": "2026-11-28T16:10:30Z",
+      "priceUsd": 1.43672569119015,
+      "volume24hUsd": 1323944.05705795,
+      "liquidityUsd": 2154909340.5338,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "owner-powers",
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "Global Oil Trust Fund / WETH",
+      "pool": "0x656357a40859a9ece7bf7956680754a604c0ce6df629ca106300adef7a15b9ad",
+      "token": "0x37cf64c20b7fe56d0abf331b21e9e888116a0d00",
+      "createdAt": "2026-11-28T16:10:26Z",
+      "priceUsd": 0.0894841360569672,
+      "volume24hUsd": 694479.052140806,
+      "liquidityUsd": 134215136.4603,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "owner-powers",
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "ATX PROJECT / WETH",
+      "pool": "0x5a65d95535ac1e85d79b51e5f51d16d38936e7a2f00bdc0e38aafaac4c3a1d4b",
+      "token": "0x0d53f1a06bf94aaceed887f7a310ba83fbc285c2",
+      "createdAt": "2026-11-28T16:10:03Z",
+      "priceUsd": 0.0488157189114023,
+      "volume24hUsd": 429257.521239684,
+      "liquidityUsd": 73218857.9611,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "owner-powers",
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    },
+    {
+      "name": "United Stat es Oi l Ind ex / WETH",
+      "pool": "0xc33a2df058fb98f0a4eb2522aaa94a0de07cdb333cce492454894ba55ffc2685",
+      "token": "0x0ad171a014d60c3860044959a93b6d10dd52fbe4",
+      "createdAt": "2026-11-28T16:10:11Z",
+      "priceUsd": 0.0884143992191782,
+      "volume24hUsd": 330304.94993222,
+      "liquidityUsd": 132610683.9741,
+      "safety": {
+        "verdict": "caution",
+        "failed": [],
+        "warnings": [
+          "owner-powers",
+          "deployer"
+        ],
+        "unchecked": [
+          "honeypot",
+          "taxes",
+          "concentration",
+          "liquidity"
+        ]
+      }
+    }
+  ]
+}
